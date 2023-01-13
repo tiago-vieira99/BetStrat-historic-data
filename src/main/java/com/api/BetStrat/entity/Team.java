@@ -42,6 +42,12 @@ public class Team implements Serializable {
     @Column(name = "created_date")
     private Date created_date;
 
+    @Column(name = "begin_season")
+    private String beginSeason;
+
+    @Column(name = "end_season")
+    private String endSeason;
+
     @Column(name = "draws_hunter_score")
     private String drawsHunterScore;
 

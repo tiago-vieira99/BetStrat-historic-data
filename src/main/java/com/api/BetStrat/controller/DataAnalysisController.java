@@ -55,8 +55,15 @@ public class DataAnalysisController {
         return ResponseEntity.ok().body(allTeams);
     }
 
+    @PostMapping("/updateTeamScore/{teamName}")
+    public Team updateTeamScore (@PathVariable("teamName") String teamName) {
+        return teamService.updateTeamScore(teamName);
+    }
+
     @PostMapping("/draw-stats-by-team-season")
     public LinkedHashMap<String, DrawSeasonInfo> setDrawStatsByTeamSeason(@Valid @RequestParam  String teamName,
+                                                                          @Valid @RequestParam(value = "begin_season", required = false) String beginSeason,
+                                                                          @Valid @RequestParam(value = "end-season", required = false) String endSeason,
                                                                           @Valid @RequestParam(value = "2016", required = false) Optional<String> url2016,
                                                                           @Valid @RequestParam(value = "2016-17", required = false) Optional<String> url201617,
                                                                           @Valid @RequestParam(value = "2017", required = false) Optional<String> url2017,
@@ -75,7 +82,12 @@ public class DataAnalysisController {
 
         LinkedHashMap<String, DrawSeasonInfo> returnMap = new LinkedHashMap<>();
 
-        Team team = teamService.insertTeam(teamName);
+        Team team = new Team();
+        team.setName(teamName);
+        team.setBeginSeason(beginSeason);
+        team.setEndSeason(endSeason);
+
+        teamService.insertTeam(team);
 
         if (url2016.isPresent()) {
             returnMap.put("2016", insertDrawInfoBySeason(team, "2016", url2016.get()));
