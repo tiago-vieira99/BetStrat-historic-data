@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
+import org.jsoup.nodes.Node;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -40,6 +41,13 @@ public class TeamDFhistoricDataZZ {
             }
         }
 
+        List<Node> competitionNodes = document.getElementsByAttributeValue("name", "compet_id_jogos").get(0).childNodes().stream().filter(n -> n.hasAttr("selected")).collect(Collectors.toList());
+        if (competitionNodes.size() > 0) {
+            String competitionName = competitionNodes.get(0).childNode(0).toString();
+            returnMap.put("competition", competitionName);
+        }
+
+
         noDrawsSequence.add(count);
         if (matches1X2.get(matches1X2.size()-1).childNode(0).childNode(0).toString().contains("E")) {
             noDrawsSequence.add(0);
@@ -53,7 +61,6 @@ public class TeamDFhistoricDataZZ {
 
         returnMap.put("drawRate", drawsRate.substring(0, drawsRate.length()-1));
         returnMap.put("noDrawsSeq", noDrawsSequence.toString());
-//        returnMap.put("profit", potencialProfit(noDrawsSequence));
         returnMap.put("totalDraws", totalDraws);
         returnMap.put("totalMatches", totalMatches);
 
@@ -72,63 +79,11 @@ public class TeamDFhistoricDataZZ {
             sequenceArray.add(Integer.parseInt(s));
         }
 
-        returnMap.put("profit", potencialProfit(sequenceArray));
-
         double stdDev =  Utils.beautifyDoubleValue(calculateSD(sequenceArray));
         returnMap.put("standardDeviaiton", String.valueOf(stdDev));
         returnMap.put("coefficientVariation", String.valueOf(Utils.beautifyDoubleValue(calculateCoeffVariation(stdDev))));
 
         return returnMap;
-    }
-
-    private String potencialProfit (ArrayList<Integer> noDrawsSequence) {
-        int avgOdd = 3;
-        int[] fiboSeq = {1,1,2,3,5,8,13,21,34,55,89,144,233,377,610,987};
-        double initialStake = 0.5;
-
-        int[] teamNoDrawsSeq = noDrawsSequence.stream().mapToInt(i -> i).toArray();
-
-        double totalProfit = 0.0;
-        for (int i = 0; i<teamNoDrawsSeq.length-1; i++) {
-
-            int numJogosNoDraw = teamNoDrawsSeq[i];
-            for (int j = 0; j<numJogosNoDraw;j++) {
-                if (8==j) {
-                    numJogosNoDraw=numJogosNoDraw-j;
-                    for (j = 0; j<numJogosNoDraw;j++) {
-                        //quando chega ao jogo do empate,
-                        if ((j+1 == numJogosNoDraw)) {
-                            //se for a ultima seq da época e o ultimo jogo não é empate, calcula prejuizo
-                            if (teamNoDrawsSeq[i+1] == -1){
-                                totalProfit = totalProfit - (fiboSeq[j]*initialStake);
-                                continue;
-                            }
-                            totalProfit += (initialStake*avgOdd*fiboSeq[j])-initialStake*fiboSeq[j];
-
-                        } else {
-                            totalProfit += (-fiboSeq[j]*initialStake);
-                        }
-
-                    }
-                    break;
-                }
-
-                //quando chega ao jogo do empate,
-                if ((j+1 == numJogosNoDraw)) {
-                    //se for a ultima seq da época e o ultimo jogo não é empate, calcula prejuizo
-                    if (teamNoDrawsSeq[i+1] == -1){
-                        totalProfit = totalProfit - (fiboSeq[j]*initialStake);
-                        continue;
-                    }
-                    totalProfit += (initialStake*avgOdd*fiboSeq[j])-initialStake*fiboSeq[j];
-
-                } else {
-                    totalProfit += (-fiboSeq[j]*initialStake);
-                }
-
-            }
-        }
-        return String.valueOf(totalProfit);
     }
 
     private double calculateSD(ArrayList<Integer> sequence) {

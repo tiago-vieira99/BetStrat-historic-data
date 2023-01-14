@@ -140,7 +140,12 @@ public class DataAnalysisController {
 
     private DrawSeasonInfo insertDrawInfoBySeason (Team team, String season, String url) {
         TeamDFhistoricDataZZ teamDFhistoricDataZZ = new TeamDFhistoricDataZZ();
-        LinkedHashMap<String, Object> scrappedInfo = teamDFhistoricDataZZ.extractDFData(url);
+        LinkedHashMap<String, Object> scrappedInfo = null;
+        try {
+            scrappedInfo = teamDFhistoricDataZZ.extractDFData(url);
+        } catch (Exception e) {
+            return null;
+        }
         DrawSeasonInfo drawSeasonInfo = new DrawSeasonInfo();
         drawSeasonInfo.setTeamId(team);
         drawSeasonInfo.setSeason(season);
@@ -151,6 +156,7 @@ public class DataAnalysisController {
         drawSeasonInfo.setNumMatches(Integer.parseInt((String) scrappedInfo.get("totalMatches")));
         drawSeasonInfo.setStdDeviation((Double) scrappedInfo.get("standardDeviation"));
         drawSeasonInfo.setCoefDeviation((Double) scrappedInfo.get("coefficientVariation"));
+        drawSeasonInfo.setCompetition((String) scrappedInfo.get("competition"));
         return drawSeasonInfoService.insertDrawInfo(drawSeasonInfo);
     }
 

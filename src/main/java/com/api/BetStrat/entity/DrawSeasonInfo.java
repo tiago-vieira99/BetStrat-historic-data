@@ -44,6 +44,9 @@ public class DrawSeasonInfo implements Serializable {
     @Column(name = "season")
     private String season;
 
+    @Column(name = "competition")
+    private String competition;
+
     @Column(name = "url")
     private String url;
 

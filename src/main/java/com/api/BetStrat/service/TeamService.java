@@ -14,7 +14,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional
@@ -42,17 +44,13 @@ public class TeamService {
 
         if (statsByTeam.size() < 3) {
             teamByName.setDrawsHunterScore(TeamAvailabilityScoreEnum.INSUFFICIENT_DATA.getValue());
-            teamRepository.save(teamByName);
-            return teamByName;
         } else {
 
-
-
-
-
-
+            Double minDrawRate = Collections.min(statsByTeam.stream().map(s -> s.getDrawRate()).collect(Collectors.toList()));
+            teamByName.setDrawsHunterScore(minDrawRate.toString());
         }
 
+        teamRepository.save(teamByName);
         return teamByName;
     }
 
