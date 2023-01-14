@@ -6,7 +6,7 @@ import com.api.BetStrat.exception.StandardError;
 import com.api.BetStrat.repository.TeamRepository;
 import com.api.BetStrat.service.DrawSeasonInfoService;
 import com.api.BetStrat.service.TeamService;
-import com.api.BetStrat.util.TeamDFhistoricDataZZ;
+import com.api.BetStrat.util.TeamDFhistoricData;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
@@ -139,21 +139,31 @@ public class DataAnalysisController {
     }
 
     private DrawSeasonInfo insertDrawInfoBySeason (Team team, String season, String url) {
-        TeamDFhistoricDataZZ teamDFhistoricDataZZ = new TeamDFhistoricDataZZ();
+        TeamDFhistoricData teamDFhistoricData = new TeamDFhistoricData();
         LinkedHashMap<String, Object> scrappedInfo = null;
+        DrawSeasonInfo drawSeasonInfo = new DrawSeasonInfo();
         try {
-            scrappedInfo = teamDFhistoricDataZZ.extractDFData(url);
+            if (url.contains("team_matches")) {
+                scrappedInfo = teamDFhistoricData.extractDFDataFromZZ(url);
+                drawSeasonInfo.setDrawRate(Double.parseDouble((String) scrappedInfo.get("drawRate")));
+                drawSeasonInfo.setNumDraws(Integer.parseInt((String) scrappedInfo.get("totalDraws")));
+                drawSeasonInfo.setNumMatches(Integer.parseInt((String) scrappedInfo.get("totalMatches")));
+            } else {
+                scrappedInfo = teamDFhistoricData.extractDFDataFromFC(url);
+                drawSeasonInfo.setDrawRate((Double) scrappedInfo.get("drawRate"));
+                drawSeasonInfo.setNumDraws((Integer) scrappedInfo.get("totalDraws"));
+                drawSeasonInfo.setNumMatches((Integer) scrappedInfo.get("totalMatches"));
+            }
+
         } catch (Exception e) {
             return null;
         }
-        DrawSeasonInfo drawSeasonInfo = new DrawSeasonInfo();
+
         drawSeasonInfo.setTeamId(team);
         drawSeasonInfo.setSeason(season);
         drawSeasonInfo.setUrl(url);
-        drawSeasonInfo.setDrawRate(Double.parseDouble((String) scrappedInfo.get("drawRate")));
+
         drawSeasonInfo.setNoDrawsSequence((String) scrappedInfo.get("noDrawsSeq"));
-        drawSeasonInfo.setNumDraws(Integer.parseInt((String) scrappedInfo.get("totalDraws")));
-        drawSeasonInfo.setNumMatches(Integer.parseInt((String) scrappedInfo.get("totalMatches")));
         drawSeasonInfo.setStdDeviation((Double) scrappedInfo.get("standardDeviation"));
         drawSeasonInfo.setCoefDeviation((Double) scrappedInfo.get("coefficientVariation"));
         drawSeasonInfo.setCompetition((String) scrappedInfo.get("competition"));
