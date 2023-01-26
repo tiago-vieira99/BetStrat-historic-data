@@ -51,6 +51,9 @@ public class Team implements Serializable {
     @Column(name = "draws_hunter_score")
     private String drawsHunterScore;
 
+    @Column(name = "margin_wins_score")
+    private String marginWinsScore;
+
     @SneakyThrows
     @Override
     public String toString() {

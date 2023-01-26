@@ -111,7 +111,7 @@ public class TeamDFhistoricData {
         //possible to get season too
         String selectedCompetition = document.getElementsByAttribute("selected").get(1).childNode(0).toString();
 
-        returnMap.put("competition", selectedCompetition.substring(0, selectedCompetition.indexOf('-')));
+        returnMap.put("competition", selectedCompetition);
         returnMap.put("drawRate", Utils.beautifyDoubleValue(100*totalDraws/totalMatches));
         returnMap.put("noDrawsSeq", noDrawsSequence.toString());
         returnMap.put("totalDraws", totalDraws);
