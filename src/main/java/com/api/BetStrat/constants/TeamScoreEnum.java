@@ -1,6 +1,6 @@
 package com.api.BetStrat.constants;
 
-public enum TeamAvailabilityScoreEnum {
+public enum TeamScoreEnum {
 
     INSUFFICIENT_DATA("INSUFFICIENT_DATA"),
     INAPT("INAPT"),
@@ -10,7 +10,7 @@ public enum TeamAvailabilityScoreEnum {
 
     private final String value;
 
-    TeamAvailabilityScoreEnum(String value) {
+    TeamScoreEnum(String value) {
         this.value = value;
     }
 

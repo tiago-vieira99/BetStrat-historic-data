@@ -61,9 +61,33 @@ public class DataAnalysisController {
         return ResponseEntity.ok().body(allTeams);
     }
 
+    @ApiOperation(value = "get Team Draw Stats")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "OK", response = ArrayList.class),
+            @ApiResponse(code = 400, message = "Bad Request", response = StandardError.class),
+            @ApiResponse(code = 401, message = "Unauthorized", response = StandardError.class),
+            @ApiResponse(code = 403, message = "Forbidden", response = StandardError.class),
+            @ApiResponse(code = 404, message = "Not Found", response = StandardError.class),
+            @ApiResponse(code = 500, message = "Internal Server Error", response = StandardError.class),
+    })
+    @GetMapping("/team-draw-stats/{teamName}")
+    public ResponseEntity<List<DrawSeasonInfo>> getTeamStats(@PathVariable("teamName") String teamName) {
+        List<DrawSeasonInfo> teamStats = teamService.getTeamDrawStats(teamName);
+        return ResponseEntity.ok().body(teamStats);
+    }
+
     @PostMapping("/updateTeamScore/{teamName}")
     public Team updateTeamScore (@PathVariable("teamName") String teamName) {
         return teamService.updateTeamScore(teamName);
+    }
+
+    @PostMapping("/updateTeamsScore")
+    public ResponseEntity<String> updateAllTeamsScore () {
+        List<Team> allTeams = teamRepository.findAll();
+        for (int i=0; i< allTeams.size(); i++) {
+            teamService.updateTeamScore(allTeams.get(i).getName());
+        }
+        return ResponseEntity.ok().body("OK");
     }
 
     @PostMapping("/draw-stats-by-team-season")
@@ -293,55 +317,4 @@ public class DataAnalysisController {
         winsMarginSeasonInfo.setCompetition((String) scrappedInfo.get("competition"));
         return winsMarginSeasonInfoService.insertWinsMarginInfo(winsMarginSeasonInfo);
     }
-
-//    @GetMapping("/draw-stats-by-team-season")
-//    public LinkedHashMap<String, LinkedHashMap> getDrawStatsByTeamSeason(@Valid @RequestParam  Optional<String> url1, @Valid @RequestParam  Optional<String> url2
-//            , @Valid @RequestParam  Optional<String> url3, @Valid @RequestParam  Optional<String> url4, @Valid @RequestParam  Optional<String> url5) {
-//        TeamDFhistoricDataZZ teamDFhistoricDataZZ = new TeamDFhistoricDataZZ();
-//        LinkedHashMap<String, LinkedHashMap> returnMap = new LinkedHashMap<>();
-//
-//        if(url1.isPresent()) {returnMap.put("url1",teamDFhistoricDataZZ.extractDFData(url1.get())); }
-//        if(url2.isPresent()) {returnMap.put("url2",teamDFhistoricDataZZ.extractDFData(url2.get())); }
-//        if(url3.isPresent()) {returnMap.put("url3",teamDFhistoricDataZZ.extractDFData(url3.get())); }
-//        if(url4.isPresent()) {returnMap.put("url4",teamDFhistoricDataZZ.extractDFData(url4.get())); }
-//        if(url5.isPresent()) {returnMap.put("url5",teamDFhistoricDataZZ.extractDFData(url5.get())); }
-//
-//        return returnMap;
-//    }
-
-//    @GetMapping("/euro-handicap-stats-by-team-season")
-//    public LinkedHashMap<String, LinkedHashMap> getEuroHandicapStatsByTeamSeason(@Valid @RequestParam  Optional<String> url1, @Valid @RequestParam  Optional<String> url2
-//            , @Valid @RequestParam  Optional<String> url3, @Valid @RequestParam  Optional<String> url4, @Valid @RequestParam  Optional<String> url5) {
-//        TeamEHhistoricDataZZ teamEHhistoricDataZZ = new TeamEHhistoricDataZZ();
-//        LinkedHashMap<String, LinkedHashMap> returnMap = new LinkedHashMap<>();
-//
-//        if(url1.isPresent()) {returnMap.put("url1",teamEHhistoricDataZZ.extractEHData(url1.get())); }
-//        if(url2.isPresent()) {returnMap.put("url2",teamEHhistoricDataZZ.extractEHData(url2.get())); }
-//        if(url3.isPresent()) {returnMap.put("url3",teamEHhistoricDataZZ.extractEHData(url3.get())); }
-//        if(url4.isPresent()) {returnMap.put("url4",teamEHhistoricDataZZ.extractEHData(url4.get())); }
-//        if(url5.isPresent()) {returnMap.put("url5",teamEHhistoricDataZZ.extractEHData(url5.get())); }
-//
-//        return returnMap;
-//    }
-//
-//    @GetMapping("/12margin-goal-stats-by-team-season")
-//    public LinkedHashMap<String, LinkedHashMap> get12MarginGoalStatsByTeamSeason(@Valid @RequestParam  Optional<String> url1, @Valid @RequestParam  Optional<String> url2
-//        , @Valid @RequestParam  Optional<String> url3, @Valid @RequestParam  Optional<String> url4, @Valid @RequestParam Optional<String> url5) {
-//        TeamEHhistoricDataZZ teamEHhistoricDataZZ = new TeamEHhistoricDataZZ();
-//        LinkedHashMap<String, LinkedHashMap> returnMap = new LinkedHashMap<>();
-//
-//        if(url1.isPresent()) {returnMap.put("url1",teamEHhistoricDataZZ.extract12MarginGoalsData(url1.get())); }
-//        if(url2.isPresent()) {returnMap.put("url2",teamEHhistoricDataZZ.extract12MarginGoalsData(url2.get())); }
-//        if(url3.isPresent()) {returnMap.put("url3",teamEHhistoricDataZZ.extract12MarginGoalsData(url3.get())); }
-//        if(url4.isPresent()) {returnMap.put("url4",teamEHhistoricDataZZ.extract12MarginGoalsData(url4.get())); }
-//        if(url5.isPresent()) {returnMap.put("url5",teamEHhistoricDataZZ.extract12MarginGoalsData(url5.get())); }
-//
-//        return returnMap;
-//    }
-
-//    @GetMapping("/sequence")
-//    public LinkedHashMap<String, String> getSequenceAnalysis(@Valid @RequestParam String sequence) {
-//        TeamDFhistoricDataZZ teamDFhistoricDataZZ = new TeamDFhistoricDataZZ();
-//        return teamDFhistoricDataZZ.sequenceAnalysis(sequence);
-//    }
 }
