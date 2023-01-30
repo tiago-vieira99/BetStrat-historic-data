@@ -249,6 +249,50 @@ public class DataAnalysisController {
         return drawSeasonInfoService.insertDrawInfo(drawSeasonInfo);
     }
 
+    @PostMapping("/12margin-goal-stats-by-team-season-fcstats")
+    public LinkedHashMap<String, WinsMarginSeasonInfo> setMarginWinsStatsByTeamSeasonFC(@Valid @RequestParam  String teamName,
+                                                                            @Valid @RequestParam(value = "begin_season", required = false) String beginSeason,
+                                                                            @Valid @RequestParam(value = "end-season", required = false) String endSeason,
+                                                                            @Valid @RequestParam(value = "url", required = false) String url) {
+        LinkedHashMap<String, WinsMarginSeasonInfo> returnMap = new LinkedHashMap<>();
+
+        Team team = teamRepository.getTeamByName(teamName);
+        if (team == null) {
+            team = new Team();
+            team.setName(teamName);
+            team.setBeginSeason(beginSeason);
+            team.setEndSeason(endSeason);
+            teamService.insertTeam(team);
+        }
+
+        TeamEHhistoricData teamEHhistoricData = new TeamEHhistoricData();
+        LinkedHashMap<String, Object> scrappedInfoMap = teamEHhistoricData.extractMarginWinsDataFromLastSeasonsFCStats(url);
+
+        for (Map.Entry<String, Object> entry : scrappedInfoMap.entrySet()) {
+            LinkedHashMap<String, Object> scrappedInfo = (LinkedHashMap<String, Object>) entry.getValue();
+            WinsMarginSeasonInfo winsMarginSeasonInfo = new WinsMarginSeasonInfo();
+
+            winsMarginSeasonInfo.setNumMatches((Integer) scrappedInfo.get("totalMatches"));
+            winsMarginSeasonInfo.setNumMarginWins((Integer) scrappedInfo.get("numMarginWins"));
+            winsMarginSeasonInfo.setNumWins((Integer) scrappedInfo.get("numWins"));
+
+            winsMarginSeasonInfo.setTeamId(team);
+            winsMarginSeasonInfo.setSeason(entry.getKey());
+            winsMarginSeasonInfo.setUrl(url);
+
+            winsMarginSeasonInfo.setWinsRate((Double) scrappedInfo.get("totalWinsRate"));
+            winsMarginSeasonInfo.setMarginWinsRate((Double) scrappedInfo.get("marginWinsRate"));
+            winsMarginSeasonInfo.setNoMarginWinsSequence((String) scrappedInfo.get("noMarginWinsSeq"));
+            winsMarginSeasonInfo.setStdDeviation((Double) scrappedInfo.get("standardDeviation"));
+            winsMarginSeasonInfo.setCoefDeviation((Double) scrappedInfo.get("coefficientVariation"));
+            winsMarginSeasonInfo.setCompetition((String) scrappedInfo.get("competition"));
+            winsMarginSeasonInfoService.insertWinsMarginInfo(winsMarginSeasonInfo);
+            returnMap.put(entry.getKey(), winsMarginSeasonInfo);
+        }
+
+        return returnMap;
+    }
+
     @PostMapping("/12margin-goal-stats-by-team-season")
     public LinkedHashMap<String, WinsMarginSeasonInfo> setMarginWinsStatsByTeamSeason(@Valid @RequestParam  String teamName,
                                                                           @Valid @RequestParam(value = "begin_season", required = false) String beginSeason,
@@ -336,14 +380,14 @@ public class DataAnalysisController {
         try {
             if (url.contains("team_matches")) {
                 scrappedInfo = teamEHhistoricData.extract12MarginGoalsDataZZ(url);
-//                winsMarginSeasonInfo.setDrawRate(Double.parseDouble((String) scrappedInfo.get("drawRate")));
-//                winsMarginSeasonInfo.setNumDraws(Integer.parseInt((String) scrappedInfo.get("totalDraws")));
                 winsMarginSeasonInfo.setNumMatches(Integer.parseInt((String) scrappedInfo.get("totalMatches")));
+                winsMarginSeasonInfo.setNumMarginWins(Integer.parseInt((String) scrappedInfo.get("numMarginWins")));
+                winsMarginSeasonInfo.setNumWins(Integer.parseInt((String) scrappedInfo.get("numWins")));
             } else {
-//                scrappedInfo = teamDFhistoricData.extractDFDataFromFC(url);
-//                winsMarginSeasonInfo.setDrawRate((Double) scrappedInfo.get("drawRate"));
-//                winsMarginSeasonInfo.setNumDraws((Integer) scrappedInfo.get("totalDraws"));
-//                winsMarginSeasonInfo.setNumMatches((Integer) scrappedInfo.get("totalMatches"));
+                scrappedInfo = teamEHhistoricData.extract12MarginGoalsDataFromFC(url);
+                winsMarginSeasonInfo.setNumMatches((Integer) scrappedInfo.get("totalMatches"));
+                winsMarginSeasonInfo.setNumMarginWins((Integer) scrappedInfo.get("numMarginWins"));
+                winsMarginSeasonInfo.setNumWins((Integer) scrappedInfo.get("numWins"));
             }
 
         } catch (Exception e) {
@@ -355,8 +399,6 @@ public class DataAnalysisController {
         winsMarginSeasonInfo.setUrl(url);
 
         winsMarginSeasonInfo.setWinsRate((Double) scrappedInfo.get("totalWinsRate"));
-        winsMarginSeasonInfo.setNumMarginWins(Integer.parseInt((String) scrappedInfo.get("numMarginWins")));
-        winsMarginSeasonInfo.setNumWins(Integer.parseInt((String) scrappedInfo.get("numWins")));
         winsMarginSeasonInfo.setMarginWinsRate((Double) scrappedInfo.get("marginWinsRate"));
         winsMarginSeasonInfo.setNoMarginWinsSequence((String) scrappedInfo.get("noMarginWinsSeq"));
         winsMarginSeasonInfo.setStdDeviation((Double) scrappedInfo.get("standardDeviation"));
