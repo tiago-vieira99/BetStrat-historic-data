@@ -20,6 +20,8 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static com.api.BetStrat.constants.BetStratConstants.SEASONS_LIST;
+
 @Service
 @Transactional
 public class TeamService {
@@ -314,12 +316,11 @@ public class TeamService {
 * */
 
     static class SortBySeason implements Comparator<DrawSeasonInfo> {
-        List<String> seasonsOrder = ImmutableList.of("2016","2016-17","2017","2017-18","2018","2018-19","2019","2019-20",
-                "2020","2020-21","2021","2021-22","2022","2022-23","2023");
+
         @Override
         public int compare(DrawSeasonInfo a, DrawSeasonInfo b) {
-            return Integer.valueOf(seasonsOrder.indexOf(a.getSeason()))
-                    .compareTo(Integer.valueOf(seasonsOrder.indexOf(b.getSeason())));
+            return Integer.valueOf(SEASONS_LIST.indexOf(a.getSeason()))
+                    .compareTo(Integer.valueOf(SEASONS_LIST.indexOf(b.getSeason())));
         }
     }
 

@@ -1,5 +1,6 @@
 package com.api.BetStrat.util;
 
+import com.google.common.base.Splitter;
 import lombok.extern.slf4j.Slf4j;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -11,6 +12,9 @@ import org.springframework.stereotype.Service;
 import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
+
+import static com.api.BetStrat.constants.BetStratConstants.FCSTATS_BASE_URL;
+import static com.api.BetStrat.constants.BetStratConstants.SEASONS_LIST;
 
 @Slf4j
 @Service
@@ -101,10 +105,8 @@ public class TeamDFhistoricData {
         int totalDraws = noDrawsSequence.size();
 
         noDrawsSequence.add(count);
-        if (allMatches.get(allMatches.size()-1).childNodes().stream().filter(m -> m.attributes().get("class").equals("boxIcon"))
+        if (!allMatches.get(allMatches.size()-1).childNodes().stream().filter(m -> m.attributes().get("class").equals("boxIcon"))
                 .collect(Collectors.toList()).get(0).toString().contains("IconD")) {
-            noDrawsSequence.add(0);
-        } else {
             noDrawsSequence.add(-1);
         }
 
@@ -135,6 +137,53 @@ public class TeamDFhistoricData {
         double stdDev =  Utils.beautifyDoubleValue(calculateSD(sequenceArray));
         returnMap.put("standardDeviaiton", String.valueOf(stdDev));
         returnMap.put("coefficientVariation", String.valueOf(Utils.beautifyDoubleValue(calculateCoeffVariation(stdDev))));
+
+        return returnMap;
+    }
+
+    public LinkedHashMap<String, Object> extractDFDataFromLastSeasonsFCStats(String teamUrl) {
+        Document document = null;
+
+        try {
+            document = Jsoup.connect(teamUrl).get();
+        } catch (IOException e) {
+            log.error("erro ao tentar conectar com Jsoup -> {}", e.getMessage());
+            log.error(e.toString());
+        }
+
+        String teamId = teamUrl.split(",")[3].replaceAll("[^0-9]", "");
+        String teamUrlName = teamUrl.split(",")[2];
+
+        List<Element> allSeasons = document.getElementsByAttributeValueContaining("class", "league_select_phase").stream().collect(Collectors.toList());
+        Collections.reverse(allSeasons);
+
+        String selectedCompetition = document.getElementsByAttribute("selected").get(1).childNode(0).toString();
+        List<Element> availableSeasons = new ArrayList<>();
+
+        for (int  i=0; i< allSeasons.size(); i++) {
+            List<Node> element = allSeasons.get(i).childNodes().stream().filter(s -> s.getClass().toString().contains("Element")).collect(Collectors.toList())
+                    .stream().filter(e -> e.childNode(0).toString().equals(selectedCompetition)).collect(Collectors.toList());
+            if (element.size() > 0) {
+                availableSeasons.add((Element) element.get(0).parentNode());
+            }
+        }
+
+        LinkedHashMap<String, Object> returnMap = new LinkedHashMap<>();
+        for (int i = 0; i < availableSeasons.size(); i++) {
+            String seasonID = availableSeasons.get(i).getElementsByAttribute("value").stream()
+                    .filter(s -> s.childNode(0).toString().equals(selectedCompetition)).collect(Collectors.toList()).get(0).attributes().get("value");
+            String season = availableSeasons.get(i).attributes().get("id").substring(7);
+            List<String> splittedSeason = Splitter.fixedLength(4).splitToList(season);
+            if (splittedSeason.get(0).equals(splittedSeason.get(1))) {
+                season = splittedSeason.get(0);
+            } else {
+                season = splittedSeason.get(0) + "-" + splittedSeason.get(1).substring(2);
+            }
+            if (SEASONS_LIST.contains(season)) {
+                String seasonURL = FCSTATS_BASE_URL + "club,matches," + teamUrlName + "," + teamId + "," + seasonID + ".php";
+                returnMap.put(season, extractDFDataFromFC(seasonURL));
+            }
+        }
 
         return returnMap;
     }

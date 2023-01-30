@@ -1,5 +1,9 @@
 package com.api.BetStrat.constants;
 
+import com.google.common.collect.ImmutableList;
+
+import java.util.List;
+
 public class BetStratConstants {
 
     //Scrapping Service
@@ -7,13 +11,7 @@ public class BetStratConstants {
     public static final String FCSTATS_BASE_URL = "http://www.fcstats.com/";
     public static final String ZEROZERO_BASE_URL = "http://www.zerozero.pt/";
 
-    //Strategies
-    public static final int ONLY_DRAWS_STRAT_ID = 1;
-    public static final int EURO_HANDICAP_STRAT_ID = 2;
-    public static final int DRAWS_HUNTER_STRAT_ID = 3;
+    public static final List<String> SEASONS_LIST = ImmutableList.of("2016","2016-17","2017","2017-18","2018","2018-19","2019","2019-20",
+            "2020","2020-21","2021","2021-22","2022");
 
-    //Final Results
-    public static final String HOME_WIN_FT_RESULT = "1";
-    public static final String AWAY_WIN_FT_RESULT = "2";
-    public static final String DRAW_FT_RESULT = "X";
 }

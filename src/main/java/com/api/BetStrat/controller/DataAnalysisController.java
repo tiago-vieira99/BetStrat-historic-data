@@ -23,6 +23,7 @@ import javax.validation.Valid;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @Api("Historical Data Analysis")
@@ -88,6 +89,52 @@ public class DataAnalysisController {
             teamService.updateTeamScore(allTeams.get(i).getName());
         }
         return ResponseEntity.ok().body("OK");
+    }
+
+    @PostMapping("/draw-stats-by-team-season-fcstats")
+    public LinkedHashMap<String, DrawSeasonInfo> setDrawStatsByTeamSeasonFC(@Valid @RequestParam  String teamName,
+                                                                            @Valid @RequestParam(value = "begin_season", required = false) String beginSeason,
+                                                                            @Valid @RequestParam(value = "end-season", required = false) String endSeason,
+                                                                            @Valid @RequestParam(value = "url", required = false) String url) {
+        LinkedHashMap<String, DrawSeasonInfo> returnMap = new LinkedHashMap<>();
+
+        Team team = teamRepository.getTeamByName(teamName);
+        if (team == null) {
+            team = new Team();
+            team.setName(teamName);
+            team.setBeginSeason(beginSeason);
+            team.setEndSeason(endSeason);
+            teamService.insertTeam(team);
+        }
+
+        TeamDFhistoricData teamDFhistoricData = new TeamDFhistoricData();
+        LinkedHashMap<String, Object> scrappedInfoMap = teamDFhistoricData.extractDFDataFromLastSeasonsFCStats(url);
+
+        for (Map.Entry<String,Object> entry : scrappedInfoMap.entrySet()){
+            LinkedHashMap<String, Object> scrappedInfo = (LinkedHashMap<String, Object>) entry.getValue();
+            DrawSeasonInfo drawSeasonInfo = new DrawSeasonInfo();
+            try {
+                drawSeasonInfo.setDrawRate((Double) scrappedInfo.get("drawRate"));
+                drawSeasonInfo.setNumDraws((Integer) scrappedInfo.get("totalDraws"));
+                drawSeasonInfo.setNumMatches((Integer) scrappedInfo.get("totalMatches"));
+
+            } catch (Exception e) {
+                return null;
+            }
+
+            drawSeasonInfo.setTeamId(team);
+            drawSeasonInfo.setSeason(entry.getKey());
+            drawSeasonInfo.setUrl(url);
+
+            drawSeasonInfo.setNoDrawsSequence((String) scrappedInfo.get("noDrawsSeq"));
+            drawSeasonInfo.setStdDeviation((Double) scrappedInfo.get("standardDeviation"));
+            drawSeasonInfo.setCoefDeviation((Double) scrappedInfo.get("coefficientVariation"));
+            drawSeasonInfo.setCompetition((String) scrappedInfo.get("competition"));
+            drawSeasonInfoService.insertDrawInfo(drawSeasonInfo);
+            returnMap.put(entry.getKey(), drawSeasonInfo);
+        }
+
+        return returnMap;
     }
 
     @PostMapping("/draw-stats-by-team-season")

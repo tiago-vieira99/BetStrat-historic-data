@@ -21,7 +21,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "DrawSeasonInfo")
+@Table(name = "DrawSeasonInfo", uniqueConstraints = { @UniqueConstraint(name = "UniqueSeasonAndCompetitionForTeam", columnNames = { "teamID", "season", "competition" }) })
 public class DrawSeasonInfo implements Serializable {
     private static final long serialVersionUID = 1L;
 
