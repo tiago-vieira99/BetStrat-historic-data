@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static com.api.BetStrat.constants.BetStratConstants.FCSTATS_BASE_URL;
 import static com.api.BetStrat.constants.BetStratConstants.SEASONS_LIST;
@@ -43,12 +44,14 @@ public class TeamEHhistoricData {
             String result = match.childNodes().stream().filter(m -> m.attributes().get("class").equals("boxIcon"))
                     .collect(Collectors.toList()).get(0).toString();
             String score = match.getElementsByAttributeValueContaining("class", "matchResult").get(0).childNode(0).childNode(0).toString();
-            int homeScore = Integer.parseInt(score.substring(0, score.indexOf(':')).replaceAll("[^0-9]", ""));
-            int awayScore = Integer.parseInt(score.substring(score.indexOf(':')+1).replaceAll("[^0-9]", ""));
-            if (result.contains(" boxIconW") && (Math.abs(homeScore-awayScore) == 1 || Math.abs(homeScore-awayScore) == 2)) {
-                goalWinIndexes.add(1);
-            } else {
-                goalWinIndexes.add(0);
+            if (score.contains(":")) {
+                int homeScore = Integer.parseInt(score.substring(0, score.indexOf(':')).replaceAll("[^0-9]", ""));
+                int awayScore = Integer.parseInt(score.substring(score.indexOf(':')+1).replaceAll("[^0-9]", ""));
+                if (result.contains(" boxIconW") && (Math.abs(homeScore-awayScore) == 1 || Math.abs(homeScore-awayScore) == 2)) {
+                    goalWinIndexes.add(1);
+                } else {
+                    goalWinIndexes.add(0);
+                }
             }
         }
 

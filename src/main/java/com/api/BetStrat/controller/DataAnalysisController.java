@@ -62,6 +62,21 @@ public class DataAnalysisController {
         return ResponseEntity.ok().body(allTeams);
     }
 
+    @ApiOperation(value = "get Team Margin Wins Stats")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "OK", response = ArrayList.class),
+            @ApiResponse(code = 400, message = "Bad Request", response = StandardError.class),
+            @ApiResponse(code = 401, message = "Unauthorized", response = StandardError.class),
+            @ApiResponse(code = 403, message = "Forbidden", response = StandardError.class),
+            @ApiResponse(code = 404, message = "Not Found", response = StandardError.class),
+            @ApiResponse(code = 500, message = "Internal Server Error", response = StandardError.class),
+    })
+    @GetMapping("/team-margin-wins-stats/{teamName}")
+    public ResponseEntity<List<WinsMarginSeasonInfo>> getTeamMarginWinsStats(@PathVariable("teamName") String teamName) {
+        List<WinsMarginSeasonInfo> teamStats = teamService.getTeamMarginWinStats(teamName);
+        return ResponseEntity.ok().body(teamStats);
+    }
+
     @ApiOperation(value = "get Team Draw Stats")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "OK", response = ArrayList.class),

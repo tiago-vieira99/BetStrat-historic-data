@@ -59,6 +59,15 @@ public class WinsMarginSeasonInfo implements Serializable {
     @Column(name = "url")
     private String url;
 
+    @Column(name = "num_matches")
+    private int numMatches;
+
+    @Column(name = "standard_deviation")
+    private double stdDeviation;
+
+    @Column(name = "coefficient_deviation")
+    private double coefDeviation;
+
     @Column(name = "winsRate")
     private double winsRate;
 
@@ -73,15 +82,6 @@ public class WinsMarginSeasonInfo implements Serializable {
 
     @Column(name = "num_marginWins")
     private int numMarginWins;
-
-    @Column(name = "num_matches")
-    private int numMatches;
-
-    @Column(name = "standard_deviation")
-    private double stdDeviation;
-
-    @Column(name = "coefficient_deviation")
-    private double coefDeviation;
 
     @SneakyThrows
     @Override

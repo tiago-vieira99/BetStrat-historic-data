@@ -12,9 +12,7 @@ import org.hibernate.annotations.CreationTimestamp;
 
 import javax.persistence.*;
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
 
 @Getter
 @Setter
@@ -50,15 +48,6 @@ public class DrawSeasonInfo implements Serializable {
     @Column(name = "url")
     private String url;
 
-    @Column(name = "drawRate")
-    private double drawRate;
-
-    @Column(name = "no_draws_sequence")
-    private String noDrawsSequence;
-
-    @Column(name = "num_draws")
-    private int numDraws;
-
     @Column(name = "num_matches")
     private int numMatches;
 
@@ -68,11 +57,19 @@ public class DrawSeasonInfo implements Serializable {
     @Column(name = "coefficient_deviation")
     private double coefDeviation;
 
+    @Column(name = "drawRate")
+    private double drawRate;
+
+    @Column(name = "no_draws_sequence")
+    private String noDrawsSequence;
+
+    @Column(name = "num_draws")
+    private int numDraws;
+
     @SneakyThrows
     @Override
     public String toString() {
         ObjectMapper mapper = new ObjectMapper();
         return mapper.writeValueAsString(this);
     }
-
 }
