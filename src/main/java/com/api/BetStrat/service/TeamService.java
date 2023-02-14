@@ -62,6 +62,7 @@ public class TeamService {
     }
 
     public Team updateTeamScore (String teamName) {
+        LOGGER.info("Updating score for " + teamName);
         Team teamByName = teamRepository.getTeamByName(teamName);
         if (null == teamByName) {
             throw new NotFoundException();

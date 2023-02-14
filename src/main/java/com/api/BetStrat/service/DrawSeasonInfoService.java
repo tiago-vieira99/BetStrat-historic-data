@@ -128,7 +128,7 @@ public class DrawSeasonInfoService {
                 maxValue = Collections.max(sequenceList);
             }
         }
-        return maxValue-7 < 0 ? 0 : maxValue-7;
+        return maxValue-6 < 0 ? 0 : maxValue-6;
     }
 
     private int calculateLast3SeasonsmaxSeqWODrawScore(List<DrawSeasonInfo> statsByTeam) {
