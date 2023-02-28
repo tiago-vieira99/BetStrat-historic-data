@@ -14,6 +14,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.api.BetStrat.constants.BetStratConstants.FCSTATS_BASE_URL;
+import static com.api.BetStrat.constants.BetStratConstants.HOCKEY_SEASONS_LIST;
 import static com.api.BetStrat.constants.BetStratConstants.SEASONS_LIST;
 
 @Slf4j
@@ -184,6 +185,104 @@ public class TeamDFhistoricData {
                 returnMap.put(season, extractDFDataFromFC(seasonURL));
             }
         }
+
+        return returnMap;
+    }
+
+    public LinkedHashMap<String, Object> extractHockeyDFDataFromLastSeasons(String teamUrl) {
+        Document document = null;
+
+        try {
+            document = Jsoup.connect(teamUrl).get();
+        } catch (IOException e) {
+            log.error("erro ao tentar conectar com Jsoup -> {}", e.getMessage());
+            log.error(e.toString());
+        }
+//next match
+//        document.getElementsByAttributeValueContaining("class", "table-games").get(0).child(1).childNodes().stream().filter(c -> c.hasAttributes()).collect(Collectors.toList()).get(0)
+
+
+        //link to matches page
+        String matchesPageLink = document.getElementsByAttributeValueContaining("class", "table-games").get(0).parent().nextElementSibling().attributes().get("href");
+
+        try {
+            document = Jsoup.connect(matchesPageLink).get();
+        } catch (IOException e) {
+            log.error("erro ao tentar conectar com Jsoup -> {}", e.getMessage());
+            log.error(e.toString());
+        }
+
+
+        //result in format '0 - 4'
+        //matchesList.get(1).childNode(7).childNode(1).childNode(0).toString()
+
+        //date in format ' 2023-02-24T18:00:00+0100 '
+        //matchesList.get(1).childNode(1).childNode(0).toString()
+
+        //homeTeam
+        //matchesList.get(1).childNode(3).childNode(3).childNode(1).childNode(0).toString().trim()
+
+        //awayTeam
+        //matchesList.get(1).childNode(5).childNode(3).childNode(1).childNode(0).toString().trim()
+
+        List<Element> availableSeasons = document.getElementsByAttributeValueContaining("title", "Select Season").get(0).getElementsByAttribute("value");
+
+        LinkedHashMap<String, Object> returnMap = new LinkedHashMap<>();
+        for (int i = 0; i < availableSeasons.size(); i++) {
+            String season = availableSeasons.get(i).childNode(0).toString();
+            if (HOCKEY_SEASONS_LIST.contains(season)) {
+                String seasonURL = matchesPageLink.replaceFirst("(?<=/games/)[^/]+(?=/all)", season);
+                returnMap.put(season, extractHockeyDFData(seasonURL));
+                System.out.println();
+            }
+        }
+
+        return returnMap;
+    }
+
+    public LinkedHashMap<String, Object> extractHockeyDFData(String url) {
+        Document document = null;
+        LinkedHashMap<String,Object> returnMap = new LinkedHashMap<>();
+
+        try {
+            document = Jsoup.connect(url).get();
+        } catch (IOException e) {
+            log.error("erro ao tentar conectar com Jsoup -> {}", e.getMessage());
+            log.error(e.toString());
+        }
+
+        List<Node> allMatches = document.getElementsByAttributeValueContaining("class", "table-games").get(0).child(1).childNodes().stream().filter(c -> c.childNodes().size() > 3).collect(Collectors.toList());
+        int totalMatches = allMatches.size();
+        Collections.reverse(allMatches);
+
+        ArrayList<Integer> noDrawsSequence = new ArrayList<>();
+        int count = 0;
+        for (Node match : allMatches) {
+            count++;
+            if (match.toString().contains("(OT") || match.toString().contains("(SO")) {
+                noDrawsSequence.add(count);
+                count = 0;
+            }
+        }
+
+        int totalDraws = noDrawsSequence.size();
+
+        noDrawsSequence.add(count);
+        if (!(allMatches.get(allMatches.size()-1).toString().contains("(OT") || allMatches.get(allMatches.size()-1).toString().contains("(SO"))) {
+            noDrawsSequence.add(-1);
+        }
+
+        String selectedCompetition = allMatches.get(0).childNode(9).childNode(1).childNode(0).toString().trim();
+
+        returnMap.put("competition", selectedCompetition);
+        returnMap.put("drawRate", Utils.beautifyDoubleValue(100*totalDraws/totalMatches));
+        returnMap.put("noDrawsSeq", noDrawsSequence.toString());
+        returnMap.put("totalDraws", totalDraws);
+        returnMap.put("totalMatches", totalMatches);
+
+        double stdDev =  Utils.beautifyDoubleValue(calculateSD(noDrawsSequence));
+        returnMap.put("standardDeviation", stdDev);
+        returnMap.put("coefficientVariation", Utils.beautifyDoubleValue(calculateCoeffVariation(stdDev)));
 
         return returnMap;
     }

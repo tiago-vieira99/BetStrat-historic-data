@@ -1,10 +1,12 @@
 package com.api.BetStrat.service;
 
 import com.api.BetStrat.entity.DrawSeasonInfo;
+import com.api.BetStrat.entity.HockeyDrawSeasonInfo;
 import com.api.BetStrat.entity.Team;
 import com.api.BetStrat.entity.WinsMarginSeasonInfo;
 import com.api.BetStrat.exception.NotFoundException;
 import com.api.BetStrat.repository.DrawSeasonInfoRepository;
+import com.api.BetStrat.repository.HockeyDrawSeasonInfoRepository;
 import com.api.BetStrat.repository.TeamRepository;
 import com.api.BetStrat.repository.WinsMarginSeasonInfoRepository;
 import org.slf4j.Logger;
@@ -26,6 +28,9 @@ public class TeamService {
     private DrawSeasonInfoService drawSeasonInfoService;
 
     @Autowired
+    private HockeyDrawSeasonInfoService hockeyDrawSeasonInfoService;
+
+    @Autowired
     private WinsMarginSeasonInfoService winsMarginSeasonInfoService;
 
     @Autowired
@@ -35,10 +40,23 @@ public class TeamService {
     private DrawSeasonInfoRepository drawSeasonInfoRepository;
 
     @Autowired
+    private HockeyDrawSeasonInfoRepository hockeyDrawSeasonInfoRepository;
+
+    @Autowired
     private WinsMarginSeasonInfoRepository winsMarginSeasonInfoRepository;
 
     public Team insertTeam(Team team) {
         return teamRepository.save(team);
+    }
+
+    public List<HockeyDrawSeasonInfo> getHockeyTeamDrawStats(String teamName) {
+        Team teamByName = teamRepository.getTeamByName(teamName);
+        if (null == teamByName) {
+            throw new NotFoundException();
+        }
+
+        List<HockeyDrawSeasonInfo> statsByTeam = hockeyDrawSeasonInfoRepository.getStatsByTeam(teamByName);
+        return statsByTeam;
     }
 
     public List<DrawSeasonInfo> getTeamDrawStats(String teamName) {
@@ -69,6 +87,7 @@ public class TeamService {
         }
 
         Team updatedTeam = drawSeasonInfoService.updateTeamScore(teamByName);
+        hockeyDrawSeasonInfoService.updateTeamScore(teamByName);
         teamRepository.save(winsMarginSeasonInfoService.updateTeamScore(updatedTeam));
 
         return updatedTeam;

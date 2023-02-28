@@ -1,11 +1,13 @@
 package com.api.BetStrat.controller;
 
 import com.api.BetStrat.entity.DrawSeasonInfo;
+import com.api.BetStrat.entity.HockeyDrawSeasonInfo;
 import com.api.BetStrat.entity.Team;
 import com.api.BetStrat.entity.WinsMarginSeasonInfo;
 import com.api.BetStrat.exception.StandardError;
 import com.api.BetStrat.repository.TeamRepository;
 import com.api.BetStrat.service.DrawSeasonInfoService;
+import com.api.BetStrat.service.HockeyDrawSeasonInfoService;
 import com.api.BetStrat.service.TeamService;
 import com.api.BetStrat.service.WinsMarginSeasonInfoService;
 import com.api.BetStrat.util.TeamDFhistoricData;
@@ -38,6 +40,9 @@ public class DataAnalysisController {
 
     @Autowired
     private DrawSeasonInfoService drawSeasonInfoService;
+
+    @Autowired
+    private HockeyDrawSeasonInfoService hockeyDrawSeasonInfoService;
 
     @Autowired
     private WinsMarginSeasonInfoService winsMarginSeasonInfoService;
@@ -90,6 +95,21 @@ public class DataAnalysisController {
     @GetMapping("/team-draw-stats/{teamName}")
     public ResponseEntity<List<DrawSeasonInfo>> getTeamStats(@PathVariable("teamName") String teamName) {
         List<DrawSeasonInfo> teamStats = teamService.getTeamDrawStats(teamName);
+        return ResponseEntity.ok().body(teamStats);
+    }
+
+    @ApiOperation(value = "get Hockey Team Draw Stats")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "OK", response = ArrayList.class),
+            @ApiResponse(code = 400, message = "Bad Request", response = StandardError.class),
+            @ApiResponse(code = 401, message = "Unauthorized", response = StandardError.class),
+            @ApiResponse(code = 403, message = "Forbidden", response = StandardError.class),
+            @ApiResponse(code = 404, message = "Not Found", response = StandardError.class),
+            @ApiResponse(code = 500, message = "Internal Server Error", response = StandardError.class),
+    })
+    @GetMapping("/team-hockey-draw-stats/{teamName}")
+    public ResponseEntity<List<HockeyDrawSeasonInfo>> getHockeyTeamStats(@PathVariable("teamName") String teamName) {
+        List<HockeyDrawSeasonInfo> teamStats = teamService.getHockeyTeamDrawStats(teamName);
         return ResponseEntity.ok().body(teamStats);
     }
 
@@ -148,6 +168,52 @@ public class DataAnalysisController {
             drawSeasonInfo.setCompetition((String) scrappedInfo.get("competition"));
             drawSeasonInfoService.insertDrawInfo(drawSeasonInfo);
             returnMap.put(entry.getKey(), drawSeasonInfo);
+        }
+
+        return returnMap;
+    }
+
+    @PostMapping("/hockey-draw-stats-by-team")
+    public LinkedHashMap<String, HockeyDrawSeasonInfo> setHockeyDrawStatsByTeamSeason(@Valid @RequestParam  String teamName,
+                                                                            @Valid @RequestParam(value = "begin_season", required = false) String beginSeason,
+                                                                            @Valid @RequestParam(value = "end-season", required = false) String endSeason,
+                                                                            @Valid @RequestParam(value = "url", required = false) String url) {
+        LinkedHashMap<String, HockeyDrawSeasonInfo> returnMap = new LinkedHashMap<>();
+
+        Team team = teamRepository.getTeamByName(teamName);
+        if (team == null) {
+            team = new Team();
+            team.setName(teamName);
+            team.setBeginSeason(beginSeason);
+            team.setEndSeason(endSeason);
+            teamService.insertTeam(team);
+        }
+
+        TeamDFhistoricData teamDFhistoricData = new TeamDFhistoricData();
+        LinkedHashMap<String, Object> scrappedInfoMap = teamDFhistoricData.extractHockeyDFDataFromLastSeasons(url);
+
+        for (Map.Entry<String,Object> entry : scrappedInfoMap.entrySet()){
+            LinkedHashMap<String, Object> scrappedInfo = (LinkedHashMap<String, Object>) entry.getValue();
+            HockeyDrawSeasonInfo hockeyDrawSeasonInfo = new HockeyDrawSeasonInfo();
+            try {
+                hockeyDrawSeasonInfo.setDrawRate((Double) scrappedInfo.get("drawRate"));
+                hockeyDrawSeasonInfo.setNumDraws((Integer) scrappedInfo.get("totalDraws"));
+                hockeyDrawSeasonInfo.setNumMatches((Integer) scrappedInfo.get("totalMatches"));
+
+            } catch (Exception e) {
+                return null;
+            }
+
+            hockeyDrawSeasonInfo.setTeamId(team);
+            hockeyDrawSeasonInfo.setSeason(entry.getKey());
+            hockeyDrawSeasonInfo.setUrl(url);
+
+            hockeyDrawSeasonInfo.setNoDrawsSequence((String) scrappedInfo.get("noDrawsSeq"));
+            hockeyDrawSeasonInfo.setStdDeviation((Double) scrappedInfo.get("standardDeviation"));
+            hockeyDrawSeasonInfo.setCoefDeviation((Double) scrappedInfo.get("coefficientVariation"));
+            hockeyDrawSeasonInfo.setCompetition((String) scrappedInfo.get("competition"));
+            hockeyDrawSeasonInfoService.insertDrawInfo(hockeyDrawSeasonInfo);
+            returnMap.put(entry.getKey(), hockeyDrawSeasonInfo);
         }
 
         return returnMap;
