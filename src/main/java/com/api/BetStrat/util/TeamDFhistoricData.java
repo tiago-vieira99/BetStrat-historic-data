@@ -7,6 +7,8 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.nodes.Node;
 import org.jsoup.select.Elements;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -21,11 +23,14 @@ import static com.api.BetStrat.constants.BetStratConstants.SEASONS_LIST;
 @Service
 public class TeamDFhistoricData {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(TeamDFhistoricData.class);
+
     private double mean = this.mean;
 
     public LinkedHashMap<String, Object> extractDFDataFromZZ(String url) {
         Document document = null;
         LinkedHashMap<String,Object> returnMap = new LinkedHashMap<>();
+        LOGGER.info("Scraping data: " + url);
 
         try {
             document = Jsoup.connect(url).get();
@@ -80,6 +85,7 @@ public class TeamDFhistoricData {
     public LinkedHashMap<String, Object> extractDFDataFromFC(String url) {
         Document document = null;
         LinkedHashMap<String,Object> returnMap = new LinkedHashMap<>();
+        LOGGER.info("Scraping data: " + url);
 
         try {
             document = Jsoup.connect(url).get();
@@ -144,6 +150,7 @@ public class TeamDFhistoricData {
 
     public LinkedHashMap<String, Object> extractDFDataFromLastSeasonsFCStats(String teamUrl) {
         Document document = null;
+        LOGGER.info("Scraping data: " + teamUrl);
 
         try {
             document = Jsoup.connect(teamUrl).get();
@@ -190,10 +197,11 @@ public class TeamDFhistoricData {
     }
 
     public LinkedHashMap<String, Object> extractHockeyDFDataFromLastSeasons(String teamUrl) {
-        Document document = null;
+        Document originalDocument = null;
+        LOGGER.info("Scraping data: " + teamUrl);
 
         try {
-            document = Jsoup.connect(teamUrl).get();
+            originalDocument = Jsoup.connect(teamUrl).get();
         } catch (IOException e) {
             log.error("erro ao tentar conectar com Jsoup -> {}", e.getMessage());
             log.error(e.toString());
@@ -203,8 +211,9 @@ public class TeamDFhistoricData {
 
 
         //link to matches page
-        String matchesPageLink = document.getElementsByAttributeValueContaining("class", "table-games").get(0).parent().nextElementSibling().attributes().get("href");
+        String matchesPageLink = originalDocument.getElementsByAttributeValueContaining("class", "table-games").get(0).parent().nextElementSibling().attributes().get("href");
 
+        Document document = null;
         try {
             document = Jsoup.connect(matchesPageLink).get();
         } catch (IOException e) {

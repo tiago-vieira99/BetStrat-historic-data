@@ -16,19 +16,37 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
+import org.apache.http.NameValuePair;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClients;
+import org.apache.http.message.BasicNameValuePair;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Node;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
+@Slf4j
 @Api("Historical Data Analysis")
 @RestController
 @CrossOrigin
@@ -52,6 +70,9 @@ public class DataAnalysisController {
 
     @Autowired
     private TeamRepository teamRepository;
+
+    // one instance, reuse
+    private final CloseableHttpClient httpClient = HttpClients.createDefault();
 
     @ApiOperation(value = "get All Teams")
     @ApiResponses(value = {
@@ -138,6 +159,7 @@ public class DataAnalysisController {
         if (team == null) {
             team = new Team();
             team.setName(teamName);
+            team.setSport("Football");
             team.setBeginSeason(beginSeason);
             team.setEndSeason(endSeason);
             teamService.insertTeam(team);
@@ -173,6 +195,59 @@ public class DataAnalysisController {
         return returnMap;
     }
 
+    @PostMapping("/hockey-draw-stats-bulk-by-league")
+    public LinkedHashMap<String, HockeyDrawSeasonInfo> setHockeyDrawStatsBulkByLeagueSeason(@Valid @RequestParam  String leagueName, @Valid @RequestParam  String country,
+                                                                                            @Valid @RequestParam  String season,
+                                                                                      @Valid @RequestParam(value = "begin_season", required = false) String beginSeason,
+                                                                                      @Valid @RequestParam(value = "end-season", required = false) String endSeason,
+                                                                                      @Valid @RequestParam String url) throws UnsupportedEncodingException {
+        LinkedHashMap<String, HockeyDrawSeasonInfo> returnMap = new LinkedHashMap<>();
+
+        HttpPost httppost = new HttpPost("http://betstrat-coreapp:8080/api/league/new");
+        // Request parameters and other properties.
+        List<NameValuePair> params = new ArrayList<NameValuePair>(5);
+        params.add(new BasicNameValuePair("country", country));
+        params.add(new BasicNameValuePair("name", leagueName));
+        params.add(new BasicNameValuePair("season", season));
+        params.add(new BasicNameValuePair("sport", "Hockey"));
+        params.add(new BasicNameValuePair("url", url));
+        httppost.setEntity(new UrlEncodedFormEntity(params, "UTF-8"));
+
+        //Execute and get the response.
+        try (CloseableHttpResponse response = httpClient.execute(httppost)) {
+            HttpEntity entity = response.getEntity();
+
+            if (entity != null) {
+                try (InputStream instream = entity.getContent()) {
+                    // do something useful
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+
+        Document originalDocument = null;
+
+        try {
+            originalDocument = Jsoup.connect(url).get();
+        } catch (IOException e) {
+            log.error("erro ao tentar conectar com Jsoup -> {}", e.getMessage());
+            log.error(e.toString());
+        }
+
+        List<Node> standingsTableTeams = originalDocument.getElementsByAttributeValueContaining("class", "standings").get(0).childNode(3).childNodes().stream().filter(c -> c.childNodes().size() > 3).collect(Collectors.toList());
+
+        for (Node team : standingsTableTeams) {
+            String teamUrl = team.childNode(3).childNode(1).attr("href");
+            String teamName = team.childNode(3).childNode(1).childNode(0).toString().trim();
+
+            setHockeyDrawStatsByTeamSeason(teamName, beginSeason, endSeason, teamUrl);
+        }
+
+        return returnMap;
+    }
+
     @PostMapping("/hockey-draw-stats-by-team")
     public LinkedHashMap<String, HockeyDrawSeasonInfo> setHockeyDrawStatsByTeamSeason(@Valid @RequestParam  String teamName,
                                                                             @Valid @RequestParam(value = "begin_season", required = false) String beginSeason,
@@ -184,6 +259,7 @@ public class DataAnalysisController {
         if (team == null) {
             team = new Team();
             team.setName(teamName);
+            team.setSport("Hockey");
             team.setBeginSeason(beginSeason);
             team.setEndSeason(endSeason);
             teamService.insertTeam(team);
@@ -245,6 +321,7 @@ public class DataAnalysisController {
         if (team == null) {
             team = new Team();
             team.setName(teamName);
+            team.setSport("Football");
             team.setBeginSeason(beginSeason);
             team.setEndSeason(endSeason);
             teamService.insertTeam(team);
@@ -331,7 +408,7 @@ public class DataAnalysisController {
         return drawSeasonInfoService.insertDrawInfo(drawSeasonInfo);
     }
 
-    @PostMapping("/12margin-goal-stats-by-team-season-fcstats")
+    @PostMapping("/margin-wins-stats-by-team-season-fcstats")
     public LinkedHashMap<String, WinsMarginSeasonInfo> setMarginWinsStatsByTeamSeasonFC(@Valid @RequestParam  String teamName,
                                                                             @Valid @RequestParam(value = "begin_season", required = false) String beginSeason,
                                                                             @Valid @RequestParam(value = "end-season", required = false) String endSeason,
@@ -342,6 +419,7 @@ public class DataAnalysisController {
         if (team == null) {
             team = new Team();
             team.setName(teamName);
+            team.setSport("Football");
             team.setBeginSeason(beginSeason);
             team.setEndSeason(endSeason);
             teamService.insertTeam(team);
