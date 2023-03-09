@@ -3,13 +3,18 @@ package com.api.BetStrat.controller;
 import com.api.BetStrat.entity.DrawSeasonInfo;
 import com.api.BetStrat.entity.HockeyDrawSeasonInfo;
 import com.api.BetStrat.entity.Team;
+import com.api.BetStrat.entity.WinsMargin3SeasonInfo;
+import com.api.BetStrat.entity.WinsMarginAny2SeasonInfo;
 import com.api.BetStrat.entity.WinsMarginSeasonInfo;
 import com.api.BetStrat.exception.StandardError;
 import com.api.BetStrat.repository.TeamRepository;
 import com.api.BetStrat.service.DrawSeasonInfoService;
 import com.api.BetStrat.service.HockeyDrawSeasonInfoService;
 import com.api.BetStrat.service.TeamService;
+import com.api.BetStrat.service.WinsMargin3SeasonInfoService;
+import com.api.BetStrat.service.WinsMarginAny2SeasonInfoService;
 import com.api.BetStrat.service.WinsMarginSeasonInfoService;
+import com.api.BetStrat.util.HockeyEurohockeyScrappingData;
 import com.api.BetStrat.util.TeamDFhistoricData;
 import com.api.BetStrat.util.TeamEHhistoricData;
 import io.swagger.annotations.Api;
@@ -31,6 +36,7 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Node;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -45,6 +51,8 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
+
+import static com.api.BetStrat.constants.BetStratConstants.HOCKEY_SEASONS_LIST;
 
 @Slf4j
 @Api("Historical Data Analysis")
@@ -64,6 +72,12 @@ public class DataAnalysisController {
 
     @Autowired
     private WinsMarginSeasonInfoService winsMarginSeasonInfoService;
+
+    @Autowired
+    private WinsMarginAny2SeasonInfoService winsMarginAny2SeasonInfoService;
+
+    @Autowired
+    private WinsMargin3SeasonInfoService winsMargin3SeasonInfoService;
 
     @Autowired
     private ModelMapper modelMapper;
@@ -143,7 +157,11 @@ public class DataAnalysisController {
     public ResponseEntity<String> updateAllTeamsScore () {
         List<Team> allTeams = teamRepository.findAll();
         for (int i=0; i< allTeams.size(); i++) {
-            teamService.updateTeamScore(allTeams.get(i).getName());
+            try {
+                teamService.updateTeamScore(allTeams.get(i).getName());
+            } catch (NumberFormatException er) {
+                log.error(er.toString());
+            }
         }
         return ResponseEntity.ok().body("OK");
     }
@@ -190,6 +208,166 @@ public class DataAnalysisController {
             drawSeasonInfo.setCompetition((String) scrappedInfo.get("competition"));
             drawSeasonInfoService.insertDrawInfo(drawSeasonInfo);
             returnMap.put(entry.getKey(), drawSeasonInfo);
+        }
+
+        return returnMap;
+    }
+
+    @PostMapping("/hockey-stats-bulk-by-league-from-eurohockey")
+    public LinkedHashMap<String, Object> setHockeyStatsBulkByLeagueSeasonFromEurohockey(@Valid @RequestParam  String leagueName, @Valid @RequestParam  String country,
+                                                                                            @Valid @RequestParam  String season,
+                                                                                            @Valid @RequestParam(value = "begin_season", required = false) String beginSeason,
+                                                                                            @Valid @RequestParam(value = "end-season", required = false) String endSeason,
+                                                                                            @Valid @RequestParam String leagueURL) throws UnsupportedEncodingException {
+        LinkedHashMap<String, Object> returnMap = new LinkedHashMap<>();
+        LinkedHashMap<String, Object> matchesURLsMap = new LinkedHashMap<>();
+
+        HttpPost httppost = new HttpPost("http://34.125.116.128:8880/api/league/new");
+        // Request parameters and other properties.
+        List<NameValuePair> params = new ArrayList<NameValuePair>(5);
+        params.add(new BasicNameValuePair("country", country));
+        params.add(new BasicNameValuePair("name", leagueName));
+        params.add(new BasicNameValuePair("season", season));
+        params.add(new BasicNameValuePair("sport", "Hockey"));
+        params.add(new BasicNameValuePair("url", leagueURL));
+        httppost.setEntity(new UrlEncodedFormEntity(params, "UTF-8"));
+
+        //Execute and get the response.
+        try (CloseableHttpResponse response = httpClient.execute(httppost)) {
+            HttpEntity entity = response.getEntity();
+
+            if (entity != null) {
+                try (InputStream instream = entity.getContent()) {
+                    // do something useful
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        HockeyEurohockeyScrappingData hockeyEurohockeyScrappingData = new HockeyEurohockeyScrappingData();
+        for (String hockeySeason : HOCKEY_SEASONS_LIST) {
+            String leagueUrlBySeason = leagueURL.replace(leagueURL.substring(leagueURL.indexOf("=")+1), hockeySeason.substring(5));
+            LinkedHashMap<String, Object> allMatchesURLsBySeason = hockeyEurohockeyScrappingData.extractTeamsURLBySeason(leagueUrlBySeason);
+            matchesURLsMap.put(hockeySeason, allMatchesURLsBySeason);
+        }
+
+        for (Map.Entry<String,Object> entry : matchesURLsMap.entrySet()) {
+            String seasonn = entry.getKey();
+            LinkedHashMap<String, Object> teamMatchesURLMap = (LinkedHashMap<String, Object>) entry.getValue();
+
+            for (Map.Entry<String,Object> teamEntry : teamMatchesURLMap.entrySet()) {
+                String teamName = teamEntry.getKey();
+                log.info(seasonn + " -> " + teamName);
+                Team team = teamRepository.getTeamByName(teamName);
+                if (team == null) {
+                    team = new Team();
+                    team.setName(teamName);
+                    team.setSport("Hockey");
+                    team.setBeginSeason(beginSeason);
+                    team.setEndSeason(endSeason);
+                    teamService.insertTeam(team);
+                }
+
+                //draws hunter stats
+                LinkedHashMap<String, Object> scrappedInfo = hockeyEurohockeyScrappingData.buildDrawStatsMap((List<Node>) teamEntry.getValue());
+                HockeyDrawSeasonInfo hockeyDrawSeasonInfo = new HockeyDrawSeasonInfo();
+                try {
+                    hockeyDrawSeasonInfo.setDrawRate((Double) scrappedInfo.get("drawRate"));
+                    hockeyDrawSeasonInfo.setNumDraws((Integer) scrappedInfo.get("totalDraws"));
+                    hockeyDrawSeasonInfo.setNumMatches((Integer) scrappedInfo.get("totalMatches"));
+
+                } catch (Exception e) {
+                    return null;
+                }
+
+                hockeyDrawSeasonInfo.setTeamId(team);
+                hockeyDrawSeasonInfo.setSeason(seasonn);
+//                    hockeyDrawSeasonInfo.setUrl(url);
+
+                hockeyDrawSeasonInfo.setNoDrawsSequence((String) scrappedInfo.get("noDrawsSeq"));
+                hockeyDrawSeasonInfo.setStdDeviation((Double) scrappedInfo.get("standardDeviation"));
+                hockeyDrawSeasonInfo.setCoefDeviation((Double) scrappedInfo.get("coefficientVariation"));
+                hockeyDrawSeasonInfo.setCompetition((String) scrappedInfo.get("competition"));
+                try {
+                    hockeyDrawSeasonInfoService.insertDrawInfo(hockeyDrawSeasonInfo);
+                } catch (DataIntegrityViolationException er) {
+                    log.error(er.toString());
+                }
+
+//                ///////////margin wins 2-3
+//                LinkedHashMap<String, Object> MW23scrappedInfo = hockeyEurohockeyScrappingData.build23MarginWinStatsMap((List<Node>) teamEntry.getValue(), teamName);
+//                WinsMarginSeasonInfo winsMarginSeasonInfo = new WinsMarginSeasonInfo();
+//
+//                winsMarginSeasonInfo.setNumMatches((Integer) MW23scrappedInfo.get("totalMatches"));
+//                winsMarginSeasonInfo.setNumMarginWins((Integer) MW23scrappedInfo.get("numMarginWins"));
+//                winsMarginSeasonInfo.setNumWins((Integer) MW23scrappedInfo.get("numWins"));
+//
+//                winsMarginSeasonInfo.setTeamId(team);
+//                winsMarginSeasonInfo.setSeason(entry.getKey());
+////                winsMarginSeasonInfo.setUrl(url);
+//
+//                winsMarginSeasonInfo.setWinsRate((Double) MW23scrappedInfo.get("totalWinsRate"));
+//                winsMarginSeasonInfo.setMarginWinsRate((Double) MW23scrappedInfo.get("marginWinsRate"));
+//                winsMarginSeasonInfo.setNoMarginWinsSequence((String) MW23scrappedInfo.get("noMarginWinsSeq"));
+//                winsMarginSeasonInfo.setStdDeviation((Double) MW23scrappedInfo.get("standardDeviation"));
+//                winsMarginSeasonInfo.setCoefDeviation((Double) MW23scrappedInfo.get("coefficientVariation"));
+//                winsMarginSeasonInfo.setCompetition((String) MW23scrappedInfo.get("competition"));
+//                try {
+//                    winsMarginSeasonInfoService.insertWinsMarginInfo(winsMarginSeasonInfo);
+//                } catch (DataIntegrityViolationException er) {
+//                    log.error(er.toString());
+//                }
+//
+//                //////margin wins any 2
+//                LinkedHashMap<String, Object> MWAny2scrappedInfo = hockeyEurohockeyScrappingData.buildAny2MarginWinStatsMap((List<Node>) teamEntry.getValue(), teamName);
+//                WinsMarginAny2SeasonInfo winsMarginAny2SeasonInfo = new WinsMarginAny2SeasonInfo();
+//
+//                winsMarginAny2SeasonInfo.setNumMatches((Integer) MWAny2scrappedInfo.get("totalMatches"));
+//                winsMarginAny2SeasonInfo.setNumMarginWins((Integer) MWAny2scrappedInfo.get("numMarginWins"));
+//                winsMarginAny2SeasonInfo.setNumWins((Integer) MWAny2scrappedInfo.get("numWins"));
+//
+//                winsMarginAny2SeasonInfo.setTeamId(team);
+//                winsMarginAny2SeasonInfo.setSeason(entry.getKey());
+////                winsMarginSeasonInfo.setUrl(url);
+//
+//                winsMarginAny2SeasonInfo.setWinsRate((Double) MWAny2scrappedInfo.get("totalWinsRate"));
+//                winsMarginAny2SeasonInfo.setMarginWinsRate((Double) MWAny2scrappedInfo.get("marginWinsRate"));
+//                winsMarginAny2SeasonInfo.setNoMarginWinsSequence((String) MWAny2scrappedInfo.get("noMarginWinsSeq"));
+//                winsMarginAny2SeasonInfo.setStdDeviation((Double) MWAny2scrappedInfo.get("standardDeviation"));
+//                winsMarginAny2SeasonInfo.setCoefDeviation((Double) MWAny2scrappedInfo.get("coefficientVariation"));
+//                winsMarginAny2SeasonInfo.setCompetition((String) MWAny2scrappedInfo.get("competition"));
+//                try {
+//                    winsMarginAny2SeasonInfoService.insertWinsMarginInfo(winsMarginAny2SeasonInfo);
+//                } catch (DataIntegrityViolationException er) {
+//                    log.error(er.toString());
+//                }
+//
+//                //////margin wins by 3
+//                LinkedHashMap<String, Object> MW3scrappedInfo = hockeyEurohockeyScrappingData.buildMargin3WinStatsMap((List<Node>) teamEntry.getValue(), teamName);
+//                WinsMargin3SeasonInfo winsMargin3SeasonInfo = new WinsMargin3SeasonInfo();
+//
+//                winsMargin3SeasonInfo.setNumMatches((Integer) MW3scrappedInfo.get("totalMatches"));
+//                winsMargin3SeasonInfo.setNumMarginWins((Integer) MW3scrappedInfo.get("numMarginWins"));
+//                winsMargin3SeasonInfo.setNumWins((Integer) MW3scrappedInfo.get("numWins"));
+//
+//                winsMargin3SeasonInfo.setTeamId(team);
+//                winsMargin3SeasonInfo.setSeason(entry.getKey());
+////                winsMarginSeasonInfo.setUrl(url);
+//
+//                winsMargin3SeasonInfo.setWinsRate((Double) MW3scrappedInfo.get("totalWinsRate"));
+//                winsMargin3SeasonInfo.setMarginWinsRate((Double) MW3scrappedInfo.get("marginWinsRate"));
+//                winsMargin3SeasonInfo.setNoMarginWinsSequence((String) MW3scrappedInfo.get("noMarginWinsSeq"));
+//                winsMargin3SeasonInfo.setStdDeviation((Double) MW3scrappedInfo.get("standardDeviation"));
+//                winsMargin3SeasonInfo.setCoefDeviation((Double) MW3scrappedInfo.get("coefficientVariation"));
+//                winsMargin3SeasonInfo.setCompetition((String) MW3scrappedInfo.get("competition"));
+//                try {
+//                    winsMargin3SeasonInfoService.insertWinsMarginInfo(winsMargin3SeasonInfo);
+//                } catch (DataIntegrityViolationException er) {
+//                    log.error(er.toString());
+//                }
+            }
+
         }
 
         return returnMap;

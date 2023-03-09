@@ -34,6 +34,12 @@ public class TeamService {
     private WinsMarginSeasonInfoService winsMarginSeasonInfoService;
 
     @Autowired
+    private WinsMarginAny2SeasonInfoService winsMarginAny2SeasonInfoService;
+
+    @Autowired
+    private WinsMargin3SeasonInfoService winsMargin3SeasonInfoService;
+
+    @Autowired
     private TeamRepository teamRepository;
 
     @Autowired
@@ -86,8 +92,14 @@ public class TeamService {
             throw new NotFoundException();
         }
 
+        if (teamByName.getSport().equals("Football")) {
+            return teamByName;
+        }
+
         Team updatedTeam = drawSeasonInfoService.updateTeamScore(teamByName);
         hockeyDrawSeasonInfoService.updateTeamScore(teamByName);
+        winsMarginAny2SeasonInfoService.updateTeamScore(teamByName);
+        winsMargin3SeasonInfoService.updateTeamScore(teamByName);
         teamRepository.save(winsMarginSeasonInfoService.updateTeamScore(updatedTeam));
 
         return updatedTeam;
