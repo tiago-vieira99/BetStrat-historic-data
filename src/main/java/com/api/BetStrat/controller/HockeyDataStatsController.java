@@ -3,8 +3,6 @@ package com.api.BetStrat.controller;
 import com.api.BetStrat.entity.DrawSeasonInfo;
 import com.api.BetStrat.entity.HockeyDrawSeasonInfo;
 import com.api.BetStrat.entity.Team;
-import com.api.BetStrat.entity.WinsMargin3SeasonInfo;
-import com.api.BetStrat.entity.WinsMarginAny2SeasonInfo;
 import com.api.BetStrat.entity.WinsMarginSeasonInfo;
 import com.api.BetStrat.exception.StandardError;
 import com.api.BetStrat.repository.TeamRepository;
@@ -23,7 +21,6 @@ import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.http.HttpEntity;
-import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -38,7 +35,13 @@ import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 import javax.validation.Valid;
 import java.io.IOException;
@@ -49,17 +52,16 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 import static com.api.BetStrat.constants.BetStratConstants.HOCKEY_SEASONS_LIST;
 
 @Slf4j
-@Api("Historical Data Analysis")
+@Api("Historical Data Analysis for Hockey")
 @RestController
 @CrossOrigin
-@RequestMapping("/api/bhd")
-public class DataAnalysisController {
+@RequestMapping("/api/hockey")
+public class HockeyDataStatsController {
 
     @Autowired
     private TeamService teamService;

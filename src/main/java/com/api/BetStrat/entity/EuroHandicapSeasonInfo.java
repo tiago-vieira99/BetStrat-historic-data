@@ -30,8 +30,8 @@ import java.util.Date;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "WinsMarginSeasonInfo",  uniqueConstraints = { @UniqueConstraint(name = "UniqueSeasonAndCompetitionForTeamWM", columnNames = { "teamID", "season", "competition" }) })
-public class WinsMarginSeasonInfo implements Serializable {
+@Table(name = "EuroHandicapSeasonInfo",  uniqueConstraints = { @UniqueConstraint(name = "UniqueSeasonAndCompetitionForTeamEH", columnNames = { "teamID", "season", "competition" }) })
+public class EuroHandicapSeasonInfo implements Serializable {
     private static final long serialVersionUID = 1L;
 
     @Id

@@ -50,6 +50,9 @@ public class WinsMargin3SeasonInfo implements Serializable {
     @Column(name = "created_date")
     private Date created_date;
 
+    @Column(name = "description")
+    private String description;
+
     @Column(name = "season")
     private String season;
 

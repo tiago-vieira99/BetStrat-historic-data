@@ -48,8 +48,14 @@ public class Team implements Serializable {
     @Column(name = "end_season")
     private String endSeason;
 
+    @Column(name = "url")
+    private String url;
+
     @Column(name = "draws_hunter_score")
     private String drawsHunterScore;
+
+    @Column(name = "euro_handicap_score")
+    private String euroHandicapScore;
 
     @Column(name = "margin_wins_score")
     private String marginWinsScore;
