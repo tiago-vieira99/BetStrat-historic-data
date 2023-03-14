@@ -52,21 +52,21 @@ public class DrawSeasonInfoService {
                     0.15*last3SeasonsmaxSeqWODrawScore + 0.05*allSeasonsmaxSeqWODrawScore +
                     0.3*last3SeasonsStdDevScore + 0.1*allSeasonsStdDevScore + 0.05*totalMatchesScore);
 
-            teamByName.setDrawsHunterScore(calculateFinalRating(totalScore, calculateRecommendedLevelToStartSequence(statsByTeam)));
+            teamByName.setDrawsHunterScore(calculateFinalRating(totalScore));
         }
 
         return teamByName;
     }
 
-    private String calculateFinalRating(double score, int recLevel) {
+    private String calculateFinalRating(double score) {
         if (isBetween(score,90,150)) {
-            return TeamScoreEnum.EXCELLENT.getValue() + " (" + score + ", " + recLevel + ")";
+            return TeamScoreEnum.EXCELLENT.getValue() + " (" + score + ")";
         } else if(isBetween(score,65,90)) {
-            return TeamScoreEnum.ACCEPTABLE.getValue() + " (" + score + ", " + recLevel + ")";
+            return TeamScoreEnum.ACCEPTABLE.getValue() + " (" + score + ")";
         } else if(isBetween(score,50,65)) {
-            return TeamScoreEnum.RISKY.getValue() + " (" + score + ", " + recLevel + ")";
+            return TeamScoreEnum.RISKY.getValue() + " (" + score + ")";
         } else if(isBetween(score,0,50)) {
-            return TeamScoreEnum.INAPT.getValue() + " (" + score + ", " + recLevel + ")";
+            return TeamScoreEnum.INAPT.getValue() + " (" + score + ")";
         }
         return "";
     }
