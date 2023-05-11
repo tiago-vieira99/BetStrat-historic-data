@@ -466,25 +466,24 @@ public class FootballDataStatsController {
             teamService.insertTeam(team);
         }
 
-
         if (seasonTime.equals("WINTER")) {
             Map<String, String> winterSeasonsIds  = new HashMap<String, String>() {{
-                put("2016-17", "146");
-                put("2017-18", "147");
-                put("2018-19", "148");
-                put("2019-20", "149");
-                put("2020-21", "150");
-                put("2021-22", "151");
+                put("2016-17", "2016-2017");
+                put("2017-18", "2017-2018");
+                put("2018-19", "2018-2019");
+                put("2019-20", "2019-2020");
+                put("2020-21", "2020-2021");
+                put("2021-22", "2021-2022");
             }};
 
             for (Map.Entry<String,String> entry : winterSeasonsIds.entrySet()) {
-                String url = String.format("https://www.zerozero.pt/team_matches.php?epoca_id=%s&id=%s&menu=allmatches&page=2", entry.getValue(), teamId);
+                String url = String.format("https://fbref.com/en/squads/%s/%s/all_comps", teamId, entry.getValue());
                 returnMap.put(entry.getKey(), insertGoalsFestInfoBySeason(team, entry.getKey(), url));
             }
         } else {
             List<String> summerSeasonss = Arrays.asList("2016", "2017", "2018", "2019", "2020", "2021", "2022");
             for (String season : summerSeasonss) {
-                String url = String.format("https://www.zerozero.pt/team_matches.php?ano=%s&id=%s&menu=allmatches&page=2", season, teamId);
+                String url = String.format("https://fbref.com/en/squads/%s/%s/all_comps", teamId, season);
                 returnMap.put(season, insertGoalsFestInfoBySeason(team, season, url));
             }
         }
@@ -497,7 +496,7 @@ public class FootballDataStatsController {
         LinkedHashMap<String, Object> scrappedInfo = null;
         GoalsFestSeasonInfo goalsFestSeasonInfo = new GoalsFestSeasonInfo();
         try {
-            scrappedInfo = teamGoalsFestHistoricData.extractGoalsFestDataFromZZ(url);
+            scrappedInfo = teamGoalsFestHistoricData.extractGoalsFestDataFromFBref(url);
             goalsFestSeasonInfo.setGoalsFestRate((Double) scrappedInfo.get("goalsFestRate"));
             goalsFestSeasonInfo.setNumGoalsFest((Integer) scrappedInfo.get("totalGoalsFest"));
             goalsFestSeasonInfo.setNumMatches((Integer) scrappedInfo.get("totalMatches"));

@@ -30,9 +30,9 @@ public class TeamGoalsFestHistoricData {
 
     private double mean = this.mean;
 
-    public LinkedHashMap<String, Object> extractGoalsFestDataFromZZ(String url) {
+    public LinkedHashMap<String, Object> extractGoalsFestDataFromFBref(String url) {
         Document document = null;
-        LinkedHashMap<String,Object> returnMap = new LinkedHashMap<>();
+        LinkedHashMap<String, Object> returnMap = new LinkedHashMap<>();
         LOGGER.info("Scraping data: " + url);
 
         try {
@@ -42,29 +42,16 @@ public class TeamGoalsFestHistoricData {
             log.error(e.toString());
         }
 
-        List<Element> matches1X2 = document.getElementsByAttributeValue("class", "result").stream().collect(Collectors.toList());
-        Collections.reverse(matches1X2);
-
-        if (url.contains("page=2")) {
-            try {
-                document = Jsoup.connect(url.replace("page=2", "page=1")).get();
-            } catch (IOException e) {
-                log.error("erro ao tentar conectar com Jsoup -> {}", e.getMessage());
-                log.error(e.toString());
-            }
-            List<Element> page1Matches = document.getElementsByAttributeValue("class", "result").stream().collect(Collectors.toList());
-            Collections.reverse(page1Matches);
-            matches1X2.addAll(page1Matches);
-        }
+        List<Node> allMatches = document.getElementsByAttributeValue("id", "matchlogs_for").get(0).childNode(7).childNodes().stream().filter(c -> c.siblingIndex() % 2 != 0).collect(Collectors.toList());
 
         ArrayList<Integer> noGoalsFestSequence = new ArrayList<>();
         int count = 0;
-        for (Element elem : matches1X2) {
+        for (Node match : allMatches) {
             try {
-                int homeScore = Integer.parseInt(elem.childNode(0).childNode(0).toString().split("-")[0]);
-                int awayScore = Integer.parseInt(elem.childNode(0).childNode(0).toString().split("-")[1]);
+                int goalsFor = Integer.parseInt(match.childNode(7).childNode(0).toString().trim());
+                int goalsAgainst = Integer.parseInt(match.childNode(8).childNode(0).toString().trim());
                 count++;
-                if ((homeScore + awayScore) > 2 && homeScore > 0 && awayScore > 0) {
+                if ((goalsFor + goalsAgainst) > 2 && goalsFor > 0 && goalsAgainst > 0) {
                     noGoalsFestSequence.add(count);
                     count = 0;
                 }
@@ -75,18 +62,18 @@ public class TeamGoalsFestHistoricData {
 
         returnMap.put("competition", "all");
 
-        int lastHomeScore = Integer.parseInt(matches1X2.get(matches1X2.size()-1).childNode(0).childNode(0).toString().split("-")[0]);
-        int lastAwayScore = Integer.parseInt(matches1X2.get(matches1X2.size()-1).childNode(0).childNode(0).toString().split("-")[1]);
+        int lastGoalsFor = Integer.parseInt(allMatches.get(allMatches.size()-1).childNode(7).childNode(0).toString().trim());
+        int lastGoalsAgainst = Integer.parseInt(allMatches.get(allMatches.size()-1).childNode(8).childNode(0).toString().trim());
 
-        if ((lastHomeScore+lastAwayScore) > 2 && lastHomeScore > 0 && lastAwayScore > 0) {
+        if ((lastGoalsFor+lastGoalsAgainst) > 2 && lastGoalsFor > 0 && lastGoalsAgainst > 0) {
             noGoalsFestSequence.add(0);
         } else {
             noGoalsFestSequence.add(count);
             noGoalsFestSequence.add(-1);
         }
 
-        int totalMatches = matches1X2.size();
-        double goalsFestRate = 100*(noGoalsFestSequence.size() - 1) / Double.valueOf(matches1X2.size());
+        int totalMatches = allMatches.size();
+        double goalsFestRate = 100*(noGoalsFestSequence.size() - 1) / Double.valueOf(allMatches.size());
 
         returnMap.put("goalsFestRate", Utils.beautifyDoubleValue(goalsFestRate));
         returnMap.put("noGoalsFestSeq", noGoalsFestSequence.toString());
