@@ -66,6 +66,9 @@ public class Team implements Serializable {
     @Column(name = "margin_wins_3_score")
     private String marginWins3Score;
 
+    @Column(name = "goals_fest_score")
+    private String goalsFestScore;
+
     @Column(name = "hockey_draws_hunter_score")
     private String hockeyDrawsHunterScore;
 

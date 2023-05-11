@@ -2,12 +2,14 @@ package com.api.BetStrat.service;
 
 import com.api.BetStrat.entity.DrawSeasonInfo;
 import com.api.BetStrat.entity.EuroHandicapSeasonInfo;
+import com.api.BetStrat.entity.GoalsFestSeasonInfo;
 import com.api.BetStrat.entity.HockeyDrawSeasonInfo;
 import com.api.BetStrat.entity.Team;
 import com.api.BetStrat.entity.WinsMarginSeasonInfo;
 import com.api.BetStrat.exception.NotFoundException;
 import com.api.BetStrat.repository.DrawSeasonInfoRepository;
 import com.api.BetStrat.repository.EuroHandicapSeasonInfoRepository;
+import com.api.BetStrat.repository.GoalsFestSeasonInfoRepository;
 import com.api.BetStrat.repository.HockeyDrawSeasonInfoRepository;
 import com.api.BetStrat.repository.TeamRepository;
 import com.api.BetStrat.repository.WinsMarginSeasonInfoRepository;
@@ -57,6 +59,12 @@ public class TeamService {
     private EuroHandicapSeasonInfoService euroHandicapSeasonInfoService;
 
     @Autowired
+    private GoalsFestSeasonInfoRepository goalsFestSeasonInfoRepository;
+
+    @Autowired
+    private GoalsFestSeasonInfoService goalsFestSeasonInfoService;
+
+    @Autowired
     private EuroHandicapSeasonInfoRepository euroHandicapSeasonInfoRepository;
 
     public Team insertTeam(Team team) {
@@ -103,6 +111,16 @@ public class TeamService {
         return statsByTeam;
     }
 
+    public List<GoalsFestSeasonInfo> getTeamGoalsFestStats(String teamName) {
+        Team teamByName = teamRepository.getTeamByName(teamName);
+        if (null == teamByName) {
+            throw new NotFoundException();
+        }
+
+        List<GoalsFestSeasonInfo> statsByTeam = goalsFestSeasonInfoRepository.getStatsByTeam(teamByName);
+        return statsByTeam;
+    }
+
     public Team updateTeamScore (String teamName) {
         LOGGER.info("Updating score for " + teamName);
         Team teamByName = teamRepository.getTeamByName(teamName);
@@ -119,6 +137,7 @@ public class TeamService {
 
         Team updatedTeam = drawSeasonInfoService.updateTeamScore(teamByName);
         euroHandicapSeasonInfoService.updateTeamScore(teamByName);
+        goalsFestSeasonInfoService.updateTeamScore(teamByName);
         teamRepository.save(winsMarginSeasonInfoService.updateTeamScore(updatedTeam));
         return updatedTeam;
     }

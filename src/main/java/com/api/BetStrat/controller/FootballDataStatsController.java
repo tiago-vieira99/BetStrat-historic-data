@@ -2,15 +2,18 @@ package com.api.BetStrat.controller;
 
 import com.api.BetStrat.entity.DrawSeasonInfo;
 import com.api.BetStrat.entity.EuroHandicapSeasonInfo;
+import com.api.BetStrat.entity.GoalsFestSeasonInfo;
 import com.api.BetStrat.entity.Team;
 import com.api.BetStrat.entity.WinsMarginSeasonInfo;
 import com.api.BetStrat.exception.NotFoundException;
 import com.api.BetStrat.exception.StandardError;
 import com.api.BetStrat.repository.DrawSeasonInfoRepository;
+import com.api.BetStrat.repository.GoalsFestSeasonInfoRepository;
 import com.api.BetStrat.repository.TeamRepository;
 import com.api.BetStrat.repository.WinsMarginSeasonInfoRepository;
 import com.api.BetStrat.service.DrawSeasonInfoService;
 import com.api.BetStrat.service.EuroHandicapSeasonInfoService;
+import com.api.BetStrat.service.GoalsFestSeasonInfoService;
 import com.api.BetStrat.service.HockeyDrawSeasonInfoService;
 import com.api.BetStrat.service.TeamService;
 import com.api.BetStrat.service.WinsMargin3SeasonInfoService;
@@ -18,6 +21,7 @@ import com.api.BetStrat.service.WinsMarginAny2SeasonInfoService;
 import com.api.BetStrat.service.WinsMarginSeasonInfoService;
 import com.api.BetStrat.util.TeamDFhistoricData;
 import com.api.BetStrat.util.TeamEHhistoricData;
+import com.api.BetStrat.util.TeamGoalsFestHistoricData;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
@@ -31,7 +35,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -50,6 +57,9 @@ public class FootballDataStatsController {
 
     @Autowired
     private DrawSeasonInfoService drawSeasonInfoService;
+
+    @Autowired
+    private GoalsFestSeasonInfoService goalsFestSeasonInfoService;
 
     @Autowired
     private HockeyDrawSeasonInfoService hockeyDrawSeasonInfoService;
@@ -77,6 +87,9 @@ public class FootballDataStatsController {
 
     @Autowired
     private WinsMarginSeasonInfoRepository winsMarginSeasonInfoRepository;
+
+    @Autowired
+    private GoalsFestSeasonInfoRepository goalsFestSeasonInfoRepository;
 
     // one instance, reuse
     private final CloseableHttpClient httpClient = HttpClients.createDefault();
@@ -138,6 +151,21 @@ public class FootballDataStatsController {
     @GetMapping("/team-draw-stats/{teamName}")
     public ResponseEntity<List<DrawSeasonInfo>> getTeamStats(@PathVariable("teamName") String teamName) {
         List<DrawSeasonInfo> teamStats = teamService.getTeamDrawStats(teamName);
+        return ResponseEntity.ok().body(teamStats);
+    }
+
+    @ApiOperation(value = "get Team Goals Fest Stats")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "OK", response = ArrayList.class),
+            @ApiResponse(code = 400, message = "Bad Request", response = StandardError.class),
+            @ApiResponse(code = 401, message = "Unauthorized", response = StandardError.class),
+            @ApiResponse(code = 403, message = "Forbidden", response = StandardError.class),
+            @ApiResponse(code = 404, message = "Not Found", response = StandardError.class),
+            @ApiResponse(code = 500, message = "Internal Server Error", response = StandardError.class),
+    })
+    @GetMapping("/team-goals-fest-stats/{teamName}")
+    public ResponseEntity<List<GoalsFestSeasonInfo>> getTeamGoalsFestStats(@PathVariable("teamName") String teamName) {
+        List<GoalsFestSeasonInfo> teamStats = teamService.getTeamGoalsFestStats(teamName);
         return ResponseEntity.ok().body(teamStats);
     }
 
@@ -416,6 +444,83 @@ public class FootballDataStatsController {
         drawSeasonInfo.setCoefDeviation((Double) scrappedInfo.get("coefficientVariation"));
         drawSeasonInfo.setCompetition((String) scrappedInfo.get("competition"));
         return drawSeasonInfoService.insertDrawInfo(drawSeasonInfo);
+    }
+
+    @ApiOperation(value = "setGoalsFestStatsByTeamSeason", notes = "set goals fest stats from ZZ in bulk. Provide teamId and season time (WINTER/SUMMER)")
+    @PostMapping("/goals-fest-stats-by-team-season")
+    public LinkedHashMap<String, GoalsFestSeasonInfo> setGoalsFestStatsByTeamSeason(@Valid @RequestParam  String teamName,
+                                                                                    @Valid @RequestParam  String teamId,
+                                                                                    @Valid @RequestParam  String seasonTime,
+                                                                                    @Valid @RequestParam(value = "begin_season", required = false) String beginSeason,
+                                                                                    @Valid @RequestParam(value = "end-season", required = false) String endSeason) {
+
+        LinkedHashMap<String, GoalsFestSeasonInfo> returnMap = new LinkedHashMap<>();
+
+        Team team = teamRepository.getTeamByName(teamName);
+        if (team == null) {
+            team = new Team();
+            team.setName(teamName);
+            team.setSport("Football");
+            team.setBeginSeason(beginSeason);
+            team.setEndSeason(endSeason);
+            teamService.insertTeam(team);
+        }
+
+
+        if (seasonTime.equals("WINTER")) {
+            Map<String, String> winterSeasonsIds  = new HashMap<String, String>() {{
+                put("2016-17", "146");
+                put("2017-18", "147");
+                put("2018-19", "148");
+                put("2019-20", "149");
+                put("2020-21", "150");
+                put("2021-22", "151");
+            }};
+
+            for (Map.Entry<String,String> entry : winterSeasonsIds.entrySet()) {
+                String url = String.format("https://www.zerozero.pt/team_matches.php?epoca_id=%s&id=%s&menu=allmatches&page=2", entry.getValue(), teamId);
+                returnMap.put(entry.getKey(), insertGoalsFestInfoBySeason(team, entry.getKey(), url));
+            }
+        } else {
+            List<String> summerSeasonss = Arrays.asList("2016", "2017", "2018", "2019", "2020", "2021", "2022");
+            for (String season : summerSeasonss) {
+                String url = String.format("https://www.zerozero.pt/team_matches.php?ano=%s&id=%s&menu=allmatches&page=2", season, teamId);
+                returnMap.put(season, insertGoalsFestInfoBySeason(team, season, url));
+            }
+        }
+
+        return returnMap;
+    }
+
+    private GoalsFestSeasonInfo insertGoalsFestInfoBySeason (Team team, String season, String url) {
+        TeamGoalsFestHistoricData teamGoalsFestHistoricData = new TeamGoalsFestHistoricData();
+        LinkedHashMap<String, Object> scrappedInfo = null;
+        GoalsFestSeasonInfo goalsFestSeasonInfo = new GoalsFestSeasonInfo();
+        try {
+            scrappedInfo = teamGoalsFestHistoricData.extractGoalsFestDataFromZZ(url);
+            goalsFestSeasonInfo.setGoalsFestRate((Double) scrappedInfo.get("goalsFestRate"));
+            goalsFestSeasonInfo.setNumGoalsFest((Integer) scrappedInfo.get("totalGoalsFest"));
+            goalsFestSeasonInfo.setNumMatches((Integer) scrappedInfo.get("totalMatches"));
+            goalsFestSeasonInfo.setTeamId(team);
+            goalsFestSeasonInfo.setSeason(season);
+            goalsFestSeasonInfo.setUrl(url);
+
+            goalsFestSeasonInfo.setNoGoalsFestSequence((String) scrappedInfo.get("noGoalsFestSeq"));
+            goalsFestSeasonInfo.setStdDeviation((Double) scrappedInfo.get("standardDeviation"));
+            goalsFestSeasonInfo.setCoefDeviation((Double) scrappedInfo.get("coefficientVariation"));
+            goalsFestSeasonInfo.setCompetition((String) scrappedInfo.get("competition"));
+
+        } catch (Exception e) {
+            log.error(e.toString());
+            return null;
+        }
+        GoalsFestSeasonInfo insertedData = null;
+        try {
+            insertedData = goalsFestSeasonInfoService.insertGoalsFestInfo(goalsFestSeasonInfo);
+        } catch (Exception e) {
+            log.error(e.toString());
+        }
+        return insertedData;
     }
 
     @PostMapping("/margin-wins-stats-by-team-season-fcstats")
