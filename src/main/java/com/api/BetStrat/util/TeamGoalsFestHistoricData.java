@@ -1,6 +1,7 @@
 package com.api.BetStrat.util;
 
 import com.google.common.base.Splitter;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -13,6 +14,7 @@ import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -30,12 +32,14 @@ public class TeamGoalsFestHistoricData {
 
     private double mean = this.mean;
 
+    @SneakyThrows
     public LinkedHashMap<String, Object> extractGoalsFestDataFromFBref(String url) {
         Document document = null;
         LinkedHashMap<String, Object> returnMap = new LinkedHashMap<>();
         LOGGER.info("Scraping data: " + url);
 
         try {
+            Thread.sleep(2000);
             document = Jsoup.connect(url).get();
         } catch (IOException e) {
             log.error("erro ao tentar conectar com Jsoup -> {}", e.getMessage());
@@ -43,6 +47,7 @@ public class TeamGoalsFestHistoricData {
         }
 
         List<Node> allMatches = document.getElementsByAttributeValue("id", "matchlogs_for").get(0).childNode(7).childNodes().stream().filter(c -> c.siblingIndex() % 2 != 0).collect(Collectors.toList());
+        allMatches = allMatches.stream().filter(m -> m.childNode(7).childNodes().size() > 0).collect(Collectors.toList());
 
         ArrayList<Integer> noGoalsFestSequence = new ArrayList<>();
         int count = 0;
@@ -55,7 +60,7 @@ public class TeamGoalsFestHistoricData {
                     noGoalsFestSequence.add(count);
                     count = 0;
                 }
-            } catch (NumberFormatException e) {
+            } catch (Exception e) {
                 log.error(e.toString());
             }
         }

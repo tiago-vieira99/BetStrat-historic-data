@@ -170,16 +170,17 @@ public class FootballDataStatsController {
     }
 
     @PostMapping("/updateTeamScore/{teamName}")
-    public Team updateTeamScore (@PathVariable("teamName") String teamName) {
-        return teamService.updateTeamScore(teamName);
+    public Team updateTeamScore (@PathVariable("teamName") String teamName, @Valid @RequestParam  String strategy) {
+        return teamService.updateTeamScore(teamName, strategy);
     }
 
-    @PostMapping("/updateTeamsScore")
-    public ResponseEntity<String> updateAllTeamsScore () {
+    @ApiOperation(value = "updateAllTeamsScoreBystrategy", notes = "Strate0gy values: hockeyDraw, hockeyWinsMarginAny2, hockeyWinsMargin3, footballDrawHunter, footballMarginWins, footballGoalsFest, footballEuroHandicap, basketComebacks")
+    @PostMapping("/updateAllTeamsScoreBystrategy")
+    public ResponseEntity<String> updateAllTeamsScoreBystrategy (@Valid @RequestParam  String strategy) {
         List<Team> allTeams = teamRepository.findAll();
         for (int i=0; i< allTeams.size(); i++) {
             try {
-                teamService.updateTeamScore(allTeams.get(i).getName());
+                teamService.updateTeamScore(allTeams.get(i).getName(), strategy);
             } catch (NumberFormatException er) {
                 log.error(er.toString());
             }
@@ -239,7 +240,7 @@ public class FootballDataStatsController {
         drawSeasonInfo.setCoefDeviation(coefDev);
         drawSeasonInfo.setCompetition(competition);
 
-        teamService.updateTeamScore(teamName);
+        //teamService.updateTeamScore(teamName);
 
         return drawSeasonInfoService.insertDrawInfo(drawSeasonInfo);
     }
@@ -280,7 +281,7 @@ public class FootballDataStatsController {
         winsMarginSeasonInfo.setCoefDeviation(coefDev);
         winsMarginSeasonInfo.setCompetition(competition);
 
-        teamService.updateTeamScore(teamName);
+        //teamService.updateTeamScore(teamName);
 
         return winsMarginSeasonInfoService.insertWinsMarginInfo(winsMarginSeasonInfo);
     }
@@ -446,7 +447,7 @@ public class FootballDataStatsController {
         return drawSeasonInfoService.insertDrawInfo(drawSeasonInfo);
     }
 
-    @ApiOperation(value = "setGoalsFestStatsByTeamSeason", notes = "set goals fest stats from ZZ in bulk. Provide teamId and season time (WINTER/SUMMER)")
+    @ApiOperation(value = "setGoalsFestStatsByTeamSeason", notes = "set goals fest stats from FBref in bulk. Provide teamId and season time (WINTER/SUMMER)")
     @PostMapping("/goals-fest-stats-by-team-season")
     public LinkedHashMap<String, GoalsFestSeasonInfo> setGoalsFestStatsByTeamSeason(@Valid @RequestParam  String teamName,
                                                                                     @Valid @RequestParam  String teamId,
