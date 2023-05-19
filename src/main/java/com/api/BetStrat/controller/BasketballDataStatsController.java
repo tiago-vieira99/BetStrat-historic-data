@@ -2,10 +2,12 @@ package com.api.BetStrat.controller;
 
 import com.api.BetStrat.entity.ComebackSeasonInfo;
 import com.api.BetStrat.entity.GoalsFestSeasonInfo;
+import com.api.BetStrat.entity.ShortBasketWinsSeasonInfo;
 import com.api.BetStrat.entity.Team;
 import com.api.BetStrat.exception.StandardError;
 import com.api.BetStrat.repository.TeamRepository;
 import com.api.BetStrat.service.ComebackSeasonInfoService;
+import com.api.BetStrat.service.ShortBasketWinsSeasonInfoService;
 import com.api.BetStrat.service.TeamService;
 import com.api.BetStrat.util.BasketballScrappingData;
 import io.swagger.annotations.Api;
@@ -45,6 +47,9 @@ public class BasketballDataStatsController {
 
     @Autowired
     private ComebackSeasonInfoService comebackSeasonInfoService;
+
+    @Autowired
+    private ShortBasketWinsSeasonInfoService shortBasketWinsSeasonInfoService;
 
     @Autowired
     private ModelMapper modelMapper;
@@ -128,7 +133,7 @@ public class BasketballDataStatsController {
         return returnMap;
     }
 
-    @ApiOperation(value = "setComebacksStatsByTeamSeason", notes = "set comebacks stats from BRef in bulk.")
+    @ApiOperation(value = "setComebacksStatsByTeamSeason", notes = "set comebacks stats from ESPN in bulk.")
     @PostMapping("/comebacks-stats-by-team-season")
     public LinkedHashMap<String, ComebackSeasonInfo> setGoalsFestStatsByTeamSeason(@Valid @RequestParam  String teamName,
                                                                                     @Valid @RequestParam  String teamPath,
@@ -183,6 +188,65 @@ public class BasketballDataStatsController {
         ComebackSeasonInfo insertedData = null;
         try {
             insertedData = comebackSeasonInfoService.insertComebackInfo(comebackSeasonInfo);
+        } catch (Exception e) {
+            log.error(e.toString());
+        }
+        return insertedData;
+    }
+
+    @ApiOperation(value = "setShortWinsStatsByTeamSeason", notes = "set short wins (<6pts) stats from ESPN in bulk.")
+    @PostMapping("/shortwins-stats-by-team-season")
+    public LinkedHashMap<String, ShortBasketWinsSeasonInfo> setShortWinsStatsByTeamSeason(@Valid @RequestParam  String teamName,
+                                                                                   @Valid @RequestParam  String teamPath,
+                                                                                   @Valid @RequestParam(value = "begin_season", required = false) String beginSeason,
+                                                                                   @Valid @RequestParam(value = "end-season", required = false) String endSeason) {
+
+        LinkedHashMap<String, ShortBasketWinsSeasonInfo> returnMap = new LinkedHashMap<>();
+
+        Team team = teamRepository.getTeamByName(teamName);
+        if (team == null) {
+            team = new Team();
+            team.setName(teamName);
+            team.setSport("Basketball");
+            team.setBeginSeason(beginSeason);
+            team.setEndSeason(endSeason);
+            teamService.insertTeam(team);
+        }
+
+        List<String> summerSeasonss = Arrays.asList("2016", "2017", "2018", "2019", "2020", "2021", "2022");
+        for (String season : summerSeasonss) {
+            String url = String.format("https://www.espn.com/nba/team/schedule/_/name/%s/season/%s/seasontype/2", teamPath, season);
+            returnMap.put(season, insertShortWinsInfoBySeason(team, season, url));
+        }
+
+        return returnMap;
+    }
+
+    private ShortBasketWinsSeasonInfo insertShortWinsInfoBySeason (Team team, String season, String url) {
+        BasketballScrappingData basketballScrappingData = new BasketballScrappingData();
+        LinkedHashMap<String, Object> scrappedInfo = null;
+        ShortBasketWinsSeasonInfo shortBasketWinsSeasonInfo = new ShortBasketWinsSeasonInfo();
+        try {
+            scrappedInfo = basketballScrappingData.extractNBAShortWinsFromESPN(url);
+            shortBasketWinsSeasonInfo.setShortWinsRate((Double) scrappedInfo.get("shortWinsRate"));
+            shortBasketWinsSeasonInfo.setNumShortWins((Integer) scrappedInfo.get("totalShortWins"));
+            shortBasketWinsSeasonInfo.setNumMatches((Integer) scrappedInfo.get("totalMatches"));
+            shortBasketWinsSeasonInfo.setTeamId(team);
+            shortBasketWinsSeasonInfo.setSeason(season);
+            shortBasketWinsSeasonInfo.setUrl(url);
+
+            shortBasketWinsSeasonInfo.setNoShortWinsSequence((String) scrappedInfo.get("noShortWinsSequence"));
+            shortBasketWinsSeasonInfo.setStdDeviation((Double) scrappedInfo.get("standardDeviation"));
+            shortBasketWinsSeasonInfo.setCoefDeviation((Double) scrappedInfo.get("coefficientVariation"));
+            shortBasketWinsSeasonInfo.setCompetition((String) scrappedInfo.get("competition"));
+
+        } catch (Exception e) {
+            log.error(e.toString());
+            return null;
+        }
+        ShortBasketWinsSeasonInfo insertedData = null;
+        try {
+            insertedData = shortBasketWinsSeasonInfoService.insertShortWinsInfo(shortBasketWinsSeasonInfo);
         } catch (Exception e) {
             log.error(e.toString());
         }

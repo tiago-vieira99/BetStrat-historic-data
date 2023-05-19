@@ -75,6 +75,9 @@ public class Team implements Serializable {
     @Column(name = "basket_comeback_score")
     private String basketComebackScore;
 
+    @Column(name = "basket_short_wins_score")
+    private String basketShortWinsScore;
+
     @Column(name = "sport")
     private String sport;
 

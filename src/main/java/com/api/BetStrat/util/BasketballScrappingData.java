@@ -100,6 +100,77 @@ public class BasketballScrappingData {
     }
 
     @SneakyThrows
+    public LinkedHashMap<String, Object> extractNBAShortWinsFromESPN(String url) {
+        Document document = null;
+        LinkedHashMap<String, Object> returnMap = new LinkedHashMap<>();
+        LOGGER.info("Scraping data: " + url);
+
+        try {
+            document = Jsoup.connect(url).get();
+        } catch (IOException e) {
+            log.error("erro ao tentar conectar com Jsoup -> {}", e.getMessage());
+            log.error(e.toString());
+        }
+
+        List<Element> allMatches = document.getElementsByAttributeValueContaining("class", "Table__even").stream().filter(l -> l.childNodeSize() > 1 && !l.childNode(0).toString().contains("DATE")).collect(Collectors.toList());
+
+        try {
+            document = Jsoup.connect(url.replace("seasontype/2", "seasontype/3")).get();
+        } catch (IOException e) {
+            log.error("erro ao tentar conectar com Jsoup -> {}", e.getMessage());
+            log.error(e.toString());
+        }
+        List<Element> playOffMatches = document.getElementsByAttributeValueContaining("class", "Table__even").stream().filter(l -> l.childNodeSize() > 1 && !l.childNode(0).toString().contains("DATE")).collect(Collectors.toList());
+        if (playOffMatches.size() != allMatches.size()) {
+            allMatches.addAll(playOffMatches);
+        }
+
+        ArrayList<Integer> noShortWinsSequence = new ArrayList<>();
+        int count = 0;
+        for (Element match : allMatches) {
+            if (match.toString().contains("Postponed")) {
+                continue;
+            }
+            String gameDate = match.childNode(0).childNode(0).childNode(0).toString();
+            System.out.println(gameDate);
+            String result = match.childNode(2).childNode(0).childNode(0).toString();
+            int result1 = Integer.parseInt(match.childNode(2).childNode(1).childNode(0).childNode(0).toString().split("-")[0].trim());
+            int result2 = Integer.parseInt(match.childNode(2).childNode(1).childNode(0).childNode(0).toString().split("-")[1].split(" ")[0].trim());
+
+            count++;
+            if (Math.abs(result1-result2) < 6) {
+                noShortWinsSequence.add(count);
+                count = 0;
+            }
+        }
+
+        returnMap.put("competition", "NBA");
+
+        int lastResult1 = Integer.parseInt(allMatches.get(allMatches.size()-1).childNode(2).childNode(1).childNode(0).childNode(0).toString().split("-")[0].trim());
+        int lastResult2 = Integer.parseInt(allMatches.get(allMatches.size()-1).childNode(2).childNode(1).childNode(0).childNode(0).toString().split("-")[1].split(" ")[0].trim());
+        if (Math.abs(lastResult1-lastResult2) < 6) {
+            noShortWinsSequence.add(0);
+        } else {
+            noShortWinsSequence.add(count);
+            noShortWinsSequence.add(-1);
+        }
+
+        int totalMatches = allMatches.size();
+        double comebacksRate = 100*(noShortWinsSequence.size() - 1) / Double.valueOf(allMatches.size());
+
+        returnMap.put("shortWinsRate", Utils.beautifyDoubleValue(comebacksRate));
+        returnMap.put("noShortWinsSequence", noShortWinsSequence.toString());
+        returnMap.put("totalShortWins", noShortWinsSequence.size()-1);
+        returnMap.put("totalMatches", totalMatches);
+
+        double stdDev =  Utils.beautifyDoubleValue(calculateSD(noShortWinsSequence));
+        returnMap.put("standardDeviation", stdDev);
+        returnMap.put("coefficientVariation", Utils.beautifyDoubleValue(calculateCoeffVariation(stdDev)));
+
+        return returnMap;
+    }
+
+    @SneakyThrows
     public LinkedHashMap<String, Object> extractNBAComebacksFromESPN(String url) {
         Document document = null;
         LinkedHashMap<String, Object> returnMap = new LinkedHashMap<>();
