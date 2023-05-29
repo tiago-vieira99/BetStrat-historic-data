@@ -286,6 +286,41 @@ public class FootballDataStatsController {
         return winsMarginSeasonInfoService.insertWinsMarginInfo(winsMarginSeasonInfo);
     }
 
+    @PostMapping("/goals-fest-manually")
+    public GoalsFestSeasonInfo setGoalsFestStatsManually (@Valid @RequestParam  String teamName,
+                                                @Valid @RequestParam(value = "season", required = false) String season,
+                                                @Valid @RequestParam(value = "url", required = false) String url,
+                                                @Valid @RequestParam(value = "goalsFestRate", required = false) Double goalsFestRate,
+                                                @Valid @RequestParam(value = "numGoalsFest", required = false) Integer numGoalsFest,
+                                                @Valid @RequestParam(value = "numMatches", required = false) Integer numMatches,
+                                                @Valid @RequestParam(value = "noGoalsFestSeq", required = false) String noGoalsFestSeq,
+                                                @Valid @RequestParam(value = "stdDev", required = false) Double stdDev,
+                                                @Valid @RequestParam(value = "coefDev", required = false) Double coefDev) {
+
+
+        GoalsFestSeasonInfo goalsFestSeasonInfo = new GoalsFestSeasonInfo();
+
+        Team team = teamRepository.getTeamByName(teamName);
+        if (team == null) {
+            throw new NotFoundException();
+        }
+
+        goalsFestSeasonInfo.setTeamId(team);
+        goalsFestSeasonInfo.setSeason(season);
+        goalsFestSeasonInfo.setUrl(url);
+        goalsFestSeasonInfo.setGoalsFestRate(goalsFestRate);
+        goalsFestSeasonInfo.setNumGoalsFest(numGoalsFest);
+        goalsFestSeasonInfo.setNumMatches(numMatches);
+        goalsFestSeasonInfo.setNoGoalsFestSequence(noGoalsFestSeq);
+        goalsFestSeasonInfo.setStdDeviation(stdDev);
+        goalsFestSeasonInfo.setCoefDeviation(coefDev);
+        goalsFestSeasonInfo.setCompetition("all");
+
+        //teamService.updateTeamScore(teamName);
+
+        return goalsFestSeasonInfoService.insertGoalsFestInfo(goalsFestSeasonInfo);
+    }
+
     @PostMapping("/draw-stats-by-team-season-fcstats")
     public LinkedHashMap<String, DrawSeasonInfo> setDrawStatsByTeamSeasonFC(@Valid @RequestParam  String teamName,
                                                                             @Valid @RequestParam(value = "begin_season", required = false) String beginSeason,

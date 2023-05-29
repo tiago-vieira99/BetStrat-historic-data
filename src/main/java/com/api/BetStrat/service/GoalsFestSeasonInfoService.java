@@ -37,7 +37,7 @@ public class GoalsFestSeasonInfoService {
         Collections.sort(statsByTeam, new SortStatsDataBySeason());
         Collections.reverse(statsByTeam);
 
-        if (statsByTeam.size() < 3) {
+        if (statsByTeam.size() < 3 || statsByTeam.stream().filter(s -> s.getNumMatches() < 15).findAny().isPresent()) {
             teamByName.setGoalsFestScore(TeamScoreEnum.INSUFFICIENT_DATA.getValue());
         } else {
             int last3SeasonsGoalsFestRateScore = calculateLast3SeasonsGoalsFestRateScore(statsByTeam);
@@ -46,11 +46,11 @@ public class GoalsFestSeasonInfoService {
             int allSeasonsmaxSeqWOGoalsFestScore = calculateAllSeasonsmaxSeqWOGoalsFestScore(statsByTeam);
             int last3SeasonsStdDevScore = calculateLast3SeasonsStdDevScore(statsByTeam);
             int allSeasonsStdDevScore = calculateAllSeasonsStdDevScore(statsByTeam);
-            int totalMatchesScore = calculateLeagueMatchesScore(statsByTeam.get(0).getNumMatches());
+//            int totalMatchesScore = calculateLeagueMatchesScore(statsByTeam.get(0).getNumMatches());
 
-            double totalScore = Utils.beautifyDoubleValue(0.25*last3SeasonsGoalsFestRateScore + 0.15*allSeasonsGoalsFestRateScore +
-                    0.1*last3SeasonsmaxSeqWOGoalsFestScore + 0.05*allSeasonsmaxSeqWOGoalsFestScore +
-                    0.3*last3SeasonsStdDevScore + 0.1*allSeasonsStdDevScore + 0.05*totalMatchesScore);
+            double totalScore = Utils.beautifyDoubleValue(0.2*last3SeasonsGoalsFestRateScore + 0.1*allSeasonsGoalsFestRateScore +
+                    0.2*last3SeasonsmaxSeqWOGoalsFestScore + 0.1*allSeasonsmaxSeqWOGoalsFestScore +
+                    0.3*last3SeasonsStdDevScore + 0.1*allSeasonsStdDevScore);
 
             teamByName.setGoalsFestScore(calculateFinalRating(totalScore));
         }
@@ -129,15 +129,15 @@ public class GoalsFestSeasonInfoService {
             }
         }
 
-        if (isBetween(maxValue,0,6)) {
+        if (isBetween(maxValue,0,5)) {
             return 100;
-        } else if(isBetween(maxValue,6,7)) {
+        } else if(isBetween(maxValue,5,6)) {
             return 80;
-        } else if(isBetween(maxValue,7,8)) {
+        } else if(isBetween(maxValue,6,7)) {
             return 70;
-        } else if(isBetween(maxValue,8,9)) {
+        } else if(isBetween(maxValue,7,8)) {
             return 50;
-        } else if(isBetween(maxValue,9,25)) {
+        } else if(isBetween(maxValue,8,25)) {
             return 30;
         }
         return 0;
@@ -153,15 +153,15 @@ public class GoalsFestSeasonInfoService {
             }
         }
 
-        if (isBetween(maxValue,0,6)) {
+        if (isBetween(maxValue,0,5)) {
             return 100;
-        } else if(isBetween(maxValue,6,7)) {
+        } else if(isBetween(maxValue,5,6)) {
             return 80;
-        } else if(isBetween(maxValue,7,8)) {
+        } else if(isBetween(maxValue,6,7)) {
             return 70;
-        } else if(isBetween(maxValue,8,9)) {
+        } else if(isBetween(maxValue,7,8)) {
             return 50;
-        } else if(isBetween(maxValue,9,25)) {
+        } else if(isBetween(maxValue,8,25)) {
             return 30;
         }
         return 0;
@@ -211,20 +211,20 @@ public class GoalsFestSeasonInfoService {
         return 0;
     }
 
-    private int calculateLeagueMatchesScore(int totalMatches) {
-        if (isBetween(totalMatches,0,31)) {
-            return 100;
-        } else if(isBetween(totalMatches,31,33)) {
-            return 90;
-        } else if(isBetween(totalMatches,33,35)) {
-            return 80;
-        } else if(isBetween(totalMatches,35,41)) {
-            return 60;
-        } else if(isBetween(totalMatches,41,50)) {
-            return 30;
-        }
-        return 0;
-    }
+//    private int calculateLeagueMatchesScore(int totalMatches) {
+//        if (isBetween(totalMatches,0,31)) {
+//            return 100;
+//        } else if(isBetween(totalMatches,31,33)) {
+//            return 90;
+//        } else if(isBetween(totalMatches,33,35)) {
+//            return 80;
+//        } else if(isBetween(totalMatches,35,41)) {
+//            return 60;
+//        } else if(isBetween(totalMatches,41,50)) {
+//            return 30;
+//        }
+//        return 0;
+//    }
 
     private static boolean isBetween(double x, double lower, double upper) {
         return lower <= x && x < upper;
