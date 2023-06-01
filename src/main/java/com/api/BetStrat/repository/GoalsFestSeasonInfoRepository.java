@@ -3,6 +3,7 @@ package com.api.BetStrat.repository;
 import com.api.BetStrat.entity.GoalsFestSeasonInfo;
 import com.api.BetStrat.entity.Team;
 import com.api.BetStrat.entity.GoalsFestSeasonInfo;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
@@ -17,6 +18,7 @@ import java.util.List;
 @RepositoryDefinition(domainClass = GoalsFestSeasonInfo.class, idClass = Long.class)
 public interface GoalsFestSeasonInfoRepository extends JpaRepository<GoalsFestSeasonInfo, Long>, JpaSpecificationExecutor<GoalsFestSeasonInfo> {
 
+    @Cacheable(value="List<GoalsFestSeasonInfo>", key="{#root.methodName, #team}")
     @Query(value = "SELECT m FROM GoalsFestSeasonInfo m WHERE m.teamId = ?1")
     List<GoalsFestSeasonInfo> getStatsByTeam(Team team);
 

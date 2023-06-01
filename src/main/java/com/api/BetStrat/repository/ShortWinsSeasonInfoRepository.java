@@ -3,6 +3,7 @@ package com.api.BetStrat.repository;
 import com.api.BetStrat.entity.ComebackSeasonInfo;
 import com.api.BetStrat.entity.ShortBasketWinsSeasonInfo;
 import com.api.BetStrat.entity.Team;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
@@ -17,6 +18,7 @@ import java.util.List;
 @RepositoryDefinition(domainClass = ShortWinsSeasonInfoRepository.class, idClass = Long.class)
 public interface ShortWinsSeasonInfoRepository extends JpaRepository<ShortBasketWinsSeasonInfo, Long>, JpaSpecificationExecutor<ShortBasketWinsSeasonInfo> {
 
+    @Cacheable(value="List<ShortBasketWinsSeasonInfo>", key="{#root.methodName, #team}")
     @Query(value = "SELECT m FROM ShortBasketWinsSeasonInfo m WHERE m.teamId = ?1")
     List<ShortBasketWinsSeasonInfo> getStatsByTeam(Team team);
 

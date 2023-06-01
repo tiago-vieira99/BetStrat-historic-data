@@ -3,6 +3,7 @@ package com.api.BetStrat.repository;
 import com.api.BetStrat.entity.EuroHandicapSeasonInfo;
 import com.api.BetStrat.entity.Team;
 import com.api.BetStrat.entity.WinsMarginSeasonInfo;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
@@ -17,6 +18,7 @@ import java.util.List;
 @RepositoryDefinition(domainClass = EuroHandicapSeasonInfo.class, idClass = Long.class)
 public interface EuroHandicapSeasonInfoRepository extends JpaRepository<EuroHandicapSeasonInfo, Long>, JpaSpecificationExecutor<EuroHandicapSeasonInfo> {
 
+    @Cacheable(value="List<EuroHandicapSeasonInfo>", key="{#root.methodName, #team}")
     @Query(value = "SELECT m FROM EuroHandicapSeasonInfo m WHERE m.teamId = ?1")
     List<EuroHandicapSeasonInfo> getStatsByTeam(Team team);
 
