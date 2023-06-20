@@ -1,7 +1,13 @@
 package com.api.BetStrat.util;
 
+import com.api.BetStrat.entity.DrawSeasonInfo;
+import com.api.BetStrat.entity.EuroHandicapSeasonInfo;
+import com.api.BetStrat.entity.WinsMarginSeasonInfo;
 import com.google.common.base.Splitter;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import org.json.JSONArray;
+import org.json.JSONObject;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -12,16 +18,65 @@ import org.springframework.stereotype.Service;
 import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static com.api.BetStrat.constants.BetStratConstants.FCSTATS_BASE_URL;
-import static com.api.BetStrat.constants.BetStratConstants.SEASONS_LIST;
+import static com.api.BetStrat.constants.BetStratConstants.FOOTBALL_SEASONS_LIST;
 
 @Slf4j
 @Service
 public class TeamEHhistoricData {
 
     private double mean = this.mean;
+
+    @SneakyThrows
+    public WinsMarginSeasonInfo buildSeason12MarginWinStatsData(JSONArray allMatches, String teamName) {
+        WinsMarginSeasonInfo winsMarginSeasonInfo = new WinsMarginSeasonInfo();
+
+        ArrayList<Integer> noMarginWinsSequence = new ArrayList<>();
+        int count = 0;
+        int totalWins= 0;
+        for (int i=0; i < allMatches.length(); i++) {
+            JSONObject match = (JSONObject) allMatches.get(i);
+            String res = match.getString("ftResult");
+            count++;
+            int homeResult = Integer.parseInt(res.split(":")[0]);
+            int awayResult = Integer.parseInt(res.split(":")[1]);
+            if ((match.getString("homeTeam").equals(teamName) && homeResult>awayResult) || (match.getString("awayTeam").equals(teamName) && homeResult<awayResult)) {
+                totalWins++;
+                if (Math.abs(homeResult - awayResult) <= 2) {
+                    noMarginWinsSequence.add(count);
+                    count = 0;
+                }
+            }
+        }
+
+        int totalMarginWins = noMarginWinsSequence.size();
+
+        noMarginWinsSequence.add(count);
+        JSONObject lastMatch = (JSONObject) allMatches.get(allMatches.length() - 1);
+        String lastResult = lastMatch.getString("ftResult");
+        if (!((lastMatch.getString("homeTeam").equals(teamName) && Integer.parseInt(lastResult.split(":")[0])>Integer.parseInt(lastResult.split(":")[1])) ||
+                (lastMatch.getString("awayTeam").equals(teamName) && Integer.parseInt(lastResult.split(":")[0])<Integer.parseInt(lastResult.split(":")[1]))) ||
+                (Math.abs(Integer.parseInt(lastResult.split(":")[0]) - Integer.parseInt(lastResult.split(":")[1])) > 2)) {
+            noMarginWinsSequence.add(-1);
+        }
+
+        String selectedCompetition = ((JSONObject) allMatches.get(0)).getString("competition");
+
+        winsMarginSeasonInfo.setCompetition(selectedCompetition);
+        winsMarginSeasonInfo.setMarginWinsRate(Utils.beautifyDoubleValue(100*totalMarginWins/totalWins));
+        winsMarginSeasonInfo.setNoMarginWinsSequence(noMarginWinsSequence.toString());
+        winsMarginSeasonInfo.setNumMarginWins(totalMarginWins);
+        winsMarginSeasonInfo.setNumMatches(allMatches.length());
+        winsMarginSeasonInfo.setNumWins(totalWins);
+        winsMarginSeasonInfo.setWinsRate(Utils.beautifyDoubleValue(100*totalWins/allMatches.length()));
+
+        double stdDev =  Utils.beautifyDoubleValue(calculateSD(noMarginWinsSequence));
+        winsMarginSeasonInfo.setStdDeviation(stdDev);
+        winsMarginSeasonInfo.setCoefDeviation(Utils.beautifyDoubleValue(calculateCoeffVariation(stdDev)));
+
+        return winsMarginSeasonInfo;
+    }
 
     public LinkedHashMap<String, Object> extract12MarginGoalsDataFromFC(String url) {
         Document document = null;
@@ -194,7 +249,7 @@ public class TeamEHhistoricData {
             } else {
                 season = splittedSeason.get(0) + "-" + splittedSeason.get(1).substring(2);
             }
-            if (SEASONS_LIST.contains(season)) {
+            if (FOOTBALL_SEASONS_LIST.contains(season)) {
                 String seasonURL = FCSTATS_BASE_URL + "club,matches," + teamUrlName + "," + teamId + "," + seasonID + ".php";
                 returnMap.put(season, extract12MarginGoalsDataFromFC(seasonURL));
             }
@@ -375,7 +430,7 @@ public class TeamEHhistoricData {
             } else {
                 season = splittedSeason.get(0) + "-" + splittedSeason.get(1).substring(2);
             }
-            if (SEASONS_LIST.contains(season)) {
+            if (FOOTBALL_SEASONS_LIST.contains(season)) {
                 String seasonURL = FCSTATS_BASE_URL + "club,matches," + teamUrlName + "," + teamId + "," + seasonID + ".php";
                 returnMap.put(season, extractEuroHandicapDataFromFC(seasonURL));
             }

@@ -174,9 +174,9 @@ public class FootballDataStatsController {
         return teamService.updateTeamScore(teamName, strategy);
     }
 
-    @ApiOperation(value = "updateAllTeamsScoreBystrategy", notes = "Strate0gy values: hockeyDraw, hockeyWinsMarginAny2, hockeyWinsMargin3, footballDrawHunter, footballMarginWins, footballGoalsFest, footballEuroHandicap, basketComebacks")
-    @PostMapping("/updateAllTeamsScoreBystrategy")
-    public ResponseEntity<String> updateAllTeamsScoreBystrategy (@Valid @RequestParam  String strategy) {
+    @ApiOperation(value = "updateAllTeamsScoreByStrategy", notes = "Strategy values: hockeyDraw, hockeyWinsMarginAny2, hockeyWinsMargin3, footballDrawHunter, footballMarginWins, footballGoalsFest, footballEuroHandicap, basketComebacks.")
+    @PostMapping("/updateAllTeamsScoreByStrategy")
+    public ResponseEntity<String> updateAllTeamsScoreByStrategy (@Valid @RequestParam  String strategy) {
         List<Team> allTeams = teamRepository.findAll();
         for (int i=0; i< allTeams.size(); i++) {
             try {
@@ -188,24 +188,24 @@ public class FootballDataStatsController {
         return ResponseEntity.ok().body("OK");
     }
 
-    @PostMapping("/fullAnalysis")
-    public ResponseEntity<String> fullAnalysis () {
-        List<Team> allTeams = teamRepository.findAll().stream().filter(t -> t.getSport().equals("Football")).collect(Collectors.toList());
+    @ApiOperation(value = "updateAllTeamsStatsByStrategy", notes = "Strategy values: hockeyDraw, hockeyWinsMarginAny2, hockeyWinsMargin3, footballDrawHunter, footballMarginWins, footballGoalsFest, footballEuroHandicap, basketComebacks. \nData sources:  \n FBRef:\n" +
+            " \n https://fbref.com/en/squads/d48ad4ff/2022-2023/matchlogs/schedule/Napoli-Scores-and-Fixturesn" +
+            " \n\n" +
+            " \n ZZ:\n" +
+            " \n https://www.zerozero.pt/team_matches.php?grp=1&ond=&epoca_id=152&compet_id_jogos=0&ved=&epoca_id=151&comfim=0&id=9&equipa_1=9&menu=allmatches&type=season&op=ver_confronto\n" +
+            " \n\n" +
+            " \n WF:\n" +
+            " \n https://www.worldfootball.net/teams/fc-porto/")
+    @PostMapping("/updateAllTeamsStatsByStrategy")
+    public ResponseEntity<String> fullAnalysis (@Valid @RequestParam  String strategy) {
+        List<Team> allTeams = teamRepository.findAll().stream().filter(t -> t.getSport().equals("Football") && t.getName().startsWith("B")).collect(Collectors.toList());
 
         for (int i=0; i< allTeams.size(); i++) {
             log.info("handling " + allTeams.get(i).getName());
-            try {
-                if (allTeams.get(i).getMarginWinsScore() == null || allTeams.get(i).getMarginWinsScore().contains("DATA")) {
-                    setMarginWinsStatsByTeamSeasonFC(allTeams.get(i).getName(), allTeams.get(i).getBeginSeason(), allTeams.get(i).getEndSeason(), allTeams.get(i).getUrl());
-                }
-                if (allTeams.get(i).getDrawsHunterScore() == null || allTeams.get(i).getDrawsHunterScore().contains("DATA")) {
-                    setDrawStatsByTeamSeasonFC(allTeams.get(i).getName(), allTeams.get(i).getBeginSeason(), allTeams.get(i).getEndSeason(), allTeams.get(i).getUrl());
-                }
-                setEuroHandicapStatsByTeamSeasonFC(allTeams.get(i).getName(), allTeams.get(i).getBeginSeason(), allTeams.get(i).getEndSeason(), allTeams.get(i).getUrl());
-            } catch (Exception er) {
-                log.error(er.toString());
-            }
+            teamService.updateTeamStats(allTeams.get(i), strategy);
+            teamService.updateTeamScore(allTeams.get(i).getName(), strategy);
         }
+
         return ResponseEntity.ok().body("OK");
     }
 

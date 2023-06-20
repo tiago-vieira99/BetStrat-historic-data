@@ -4,20 +4,53 @@ import com.api.BetStrat.constants.TeamScoreEnum;
 import com.api.BetStrat.entity.DrawSeasonInfo;
 import com.api.BetStrat.entity.Team;
 import com.api.BetStrat.repository.DrawSeasonInfoRepository;
+import com.api.BetStrat.util.ScrappingUtil;
+import com.api.BetStrat.util.TeamDFhistoricData;
 import com.api.BetStrat.util.Utils;
+import lombok.SneakyThrows;
+import org.apache.http.HttpEntity;
+import org.apache.http.NameValuePair;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.StringEntity;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClients;
+import org.apache.http.message.BasicNameValuePair;
+import org.apache.http.util.EntityUtils;
+import org.json.JSONArray;
+import org.json.JSONException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.context.event.ApplicationReadyEvent;
+import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.IOException;
+import java.net.URI;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static com.api.BetStrat.constants.BetStratConstants.SEASONS_LIST;
+import static com.api.BetStrat.constants.BetStratConstants.FBREF_BASE_URL;
+import static com.api.BetStrat.constants.BetStratConstants.FOOTBALL_SEASONS_LIST;
+import static com.api.BetStrat.constants.BetStratConstants.FOOTBALL_SUMMER_SEASONS_BEGIN_MONTH_LIST;
+import static com.api.BetStrat.constants.BetStratConstants.FOOTBALL_SUMMER_SEASONS_LIST;
+import static com.api.BetStrat.constants.BetStratConstants.FOOTBALL_WINTER_SEASONS_BEGIN_MONTH_LIST;
+import static com.api.BetStrat.constants.BetStratConstants.FOOTBALL_WINTER_SEASONS_LIST;
+import static com.api.BetStrat.constants.BetStratConstants.SCRAPPER_SERVICE_URL;
+import static com.api.BetStrat.constants.BetStratConstants.WORLDFOOTBALL_BASE_URL;
+import static com.api.BetStrat.constants.BetStratConstants.ZEROZERO_BASE_URL;
+import static com.api.BetStrat.constants.BetStratConstants.ZEROZERO_SEASON_CODES;
 
 @Service
 @Transactional
@@ -29,7 +62,64 @@ public class DrawSeasonInfoService {
     private DrawSeasonInfoRepository drawSeasonInfoRepository;
 
     public DrawSeasonInfo insertDrawInfo(DrawSeasonInfo drawSeasonInfo) {
+        LOGGER.info("Inserted " + drawSeasonInfo.getClass() + " for " + drawSeasonInfo.getTeamId().getName() + " and season " + drawSeasonInfo.getSeason());
         return drawSeasonInfoRepository.save(drawSeasonInfo);
+    }
+
+    public void updateStatsDataInfo(Team team) {
+        List<DrawSeasonInfo> statsByTeam = drawSeasonInfoRepository.getStatsByTeam(team);
+        List<String> seasonsList = null;
+
+        if (FOOTBALL_SUMMER_SEASONS_BEGIN_MONTH_LIST.contains(team.getBeginSeason())) {
+            seasonsList = FOOTBALL_SUMMER_SEASONS_LIST;
+        } else if (FOOTBALL_WINTER_SEASONS_BEGIN_MONTH_LIST.contains(team.getBeginSeason())) {
+            seasonsList = FOOTBALL_WINTER_SEASONS_LIST;
+        }
+
+        for (String season : seasonsList) {
+            if (!statsByTeam.stream().filter(s -> s.getSeason().equals(season)).findAny().isPresent()) {
+                String teamUrl = team.getUrl();
+                JSONArray scrappingData = null;
+                String newSeasonUrl = "";
+
+                if (teamUrl.contains(ZEROZERO_BASE_URL)) {
+                    String seasonZZCode = ZEROZERO_SEASON_CODES.get(season);
+                    newSeasonUrl = teamUrl.replaceAll("epoca_id=\\d+", "epoca_id=" + seasonZZCode);
+                    scrappingData = ScrappingUtil.getScrappingData(team.getName(), season, newSeasonUrl, false);
+                } else if (teamUrl.contains(FBREF_BASE_URL)) {
+                    String newSeason = "";
+                    if (season.contains("-")) {
+                        newSeason = season.split("-")[0] + "-20" + season.split("-")[1];
+                    } else {
+                        newSeason = season;
+                    }
+                    newSeasonUrl = teamUrl.split("/matchlogs")[0].substring(0, teamUrl.split("/matchlogs")[0].lastIndexOf('/')) + "/" + newSeason + "/matchlogs" + teamUrl.split("/matchlogs")[1];
+                    scrappingData = ScrappingUtil.getScrappingData(team.getName(), newSeason, newSeasonUrl, false);
+                } else if (teamUrl.contains(WORLDFOOTBALL_BASE_URL)) {
+                    String newSeason = "";
+                    if (season.contains("-")) {
+                        newSeason = "20" + season.split("-")[1];
+                    } else {
+                        newSeason = season;
+                    }
+                    newSeasonUrl = teamUrl + "/" + newSeason + "/3/";
+                    scrappingData = ScrappingUtil.getScrappingData(team.getName(), newSeason, newSeasonUrl, false);
+                }
+
+                if (scrappingData != null) {
+                    TeamDFhistoricData teamDFhistoricData = new TeamDFhistoricData();
+                    try {
+                        DrawSeasonInfo drawSeasonInfo = teamDFhistoricData.buildSeasonDFStatsData(scrappingData);
+                        drawSeasonInfo.setSeason(season);
+                        drawSeasonInfo.setTeamId(team);
+                        drawSeasonInfo.setUrl(newSeasonUrl);
+                        insertDrawInfo(drawSeasonInfo);
+                    } catch (Exception e) {
+                        System.out.println(e.getMessage());
+                    }
+                }
+            }
+        }
     }
 
     public Team updateTeamScore (Team teamByName) {
@@ -270,8 +360,8 @@ public class DrawSeasonInfoService {
 
         @Override
         public int compare(DrawSeasonInfo a, DrawSeasonInfo b) {
-            return Integer.valueOf(SEASONS_LIST.indexOf(a.getSeason()))
-                    .compareTo(Integer.valueOf(SEASONS_LIST.indexOf(b.getSeason())));
+            return Integer.valueOf(FOOTBALL_SEASONS_LIST.indexOf(a.getSeason()))
+                    .compareTo(Integer.valueOf(FOOTBALL_SEASONS_LIST.indexOf(b.getSeason())));
         }
     }
 

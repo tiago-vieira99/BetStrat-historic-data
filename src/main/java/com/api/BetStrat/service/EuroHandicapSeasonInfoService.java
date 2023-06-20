@@ -3,8 +3,6 @@ package com.api.BetStrat.service;
 import com.api.BetStrat.constants.TeamScoreEnum;
 import com.api.BetStrat.entity.EuroHandicapSeasonInfo;
 import com.api.BetStrat.entity.Team;
-import com.api.BetStrat.entity.EuroHandicapSeasonInfo;
-import com.api.BetStrat.repository.EuroHandicapSeasonInfoRepository;
 import com.api.BetStrat.repository.EuroHandicapSeasonInfoRepository;
 import com.api.BetStrat.util.Utils;
 import org.slf4j.Logger;
@@ -19,7 +17,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static com.api.BetStrat.constants.BetStratConstants.SEASONS_LIST;
+import static com.api.BetStrat.constants.BetStratConstants.FOOTBALL_SEASONS_LIST;
 
 @Service
 @Transactional
@@ -30,8 +28,9 @@ public class EuroHandicapSeasonInfoService {
     @Autowired
     private EuroHandicapSeasonInfoRepository euroHandicapSeasonInfoRepository;
 
-    public EuroHandicapSeasonInfo insertEuroHandicapSeasonInfo(EuroHandicapSeasonInfo EuroHandicapSeasonInfo) {
-        return euroHandicapSeasonInfoRepository.save(EuroHandicapSeasonInfo);
+    public EuroHandicapSeasonInfo insertEuroHandicapSeasonInfo(EuroHandicapSeasonInfo euroHandicapSeasonInfo) {
+        LOGGER.info("Inserted " + euroHandicapSeasonInfo.getClass() + " for " + euroHandicapSeasonInfo.getTeamId().getName() + " and season " + euroHandicapSeasonInfo.getSeason());
+        return euroHandicapSeasonInfoRepository.save(euroHandicapSeasonInfo);
     }
 
     public Team updateTeamScore (Team teamByName) {
@@ -274,8 +273,8 @@ public class EuroHandicapSeasonInfoService {
 
         @Override
         public int compare(EuroHandicapSeasonInfo a, EuroHandicapSeasonInfo b) {
-            return Integer.valueOf(SEASONS_LIST.indexOf(a.getSeason()))
-                    .compareTo(Integer.valueOf(SEASONS_LIST.indexOf(b.getSeason())));
+            return Integer.valueOf(FOOTBALL_SEASONS_LIST.indexOf(a.getSeason()))
+                    .compareTo(Integer.valueOf(FOOTBALL_SEASONS_LIST.indexOf(b.getSeason())));
         }
     }
 

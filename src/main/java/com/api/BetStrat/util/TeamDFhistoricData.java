@@ -1,7 +1,11 @@
 package com.api.BetStrat.util;
 
+import com.api.BetStrat.entity.DrawSeasonInfo;
 import com.google.common.base.Splitter;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import org.json.JSONArray;
+import org.json.JSONObject;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -17,7 +21,7 @@ import java.util.stream.Collectors;
 
 import static com.api.BetStrat.constants.BetStratConstants.FCSTATS_BASE_URL;
 import static com.api.BetStrat.constants.BetStratConstants.HOCKEY_SEASONS_LIST;
-import static com.api.BetStrat.constants.BetStratConstants.SEASONS_LIST;
+import static com.api.BetStrat.constants.BetStratConstants.FOOTBALL_SEASONS_LIST;
 
 @Slf4j
 @Service
@@ -26,6 +30,45 @@ public class TeamDFhistoricData {
     private static final Logger LOGGER = LoggerFactory.getLogger(TeamDFhistoricData.class);
 
     private double mean = this.mean;
+
+    @SneakyThrows
+    public DrawSeasonInfo buildSeasonDFStatsData(JSONArray allMatches) {
+        DrawSeasonInfo drawSeasonInfo = new DrawSeasonInfo();
+
+        ArrayList<Integer> noDrawsSequence = new ArrayList<>();
+        int count = 0;
+        for (int i=0; i < allMatches.length(); i++) {
+            JSONObject match = (JSONObject) allMatches.get(i);
+            String res = match.getString("ftResult");
+            count++;
+            if (res.split(":")[0].equals(res.split(":")[1])) {
+                noDrawsSequence.add(count);
+                count = 0;
+            }
+        }
+
+        int totalDraws = noDrawsSequence.size();
+
+        noDrawsSequence.add(count);
+        String lastResult = ((JSONObject) allMatches.get(allMatches.length() - 1)).getString("ftResult");
+        if (!lastResult.split(":")[0].equals(lastResult.split(":")[1])) {
+            noDrawsSequence.add(-1);
+        }
+
+        String selectedCompetition = ((JSONObject) allMatches.get(0)).getString("competition");
+
+        drawSeasonInfo.setCompetition(selectedCompetition);
+        drawSeasonInfo.setDrawRate(Utils.beautifyDoubleValue(100*totalDraws/allMatches.length()));
+        drawSeasonInfo.setNoDrawsSequence(noDrawsSequence.toString());
+        drawSeasonInfo.setNumDraws(totalDraws);
+        drawSeasonInfo.setNumMatches(allMatches.length());
+
+        double stdDev =  Utils.beautifyDoubleValue(calculateSD(noDrawsSequence));
+        drawSeasonInfo.setStdDeviation(stdDev);
+        drawSeasonInfo.setCoefDeviation(Utils.beautifyDoubleValue(calculateCoeffVariation(stdDev)));
+
+        return drawSeasonInfo;
+    }
 
     public LinkedHashMap<String, Object> extractDFDataFromZZ(String url) {
         Document document = null;
@@ -187,7 +230,7 @@ public class TeamDFhistoricData {
             } else {
                 season = splittedSeason.get(0) + "-" + splittedSeason.get(1).substring(2);
             }
-            if (SEASONS_LIST.contains(season)) {
+            if (FOOTBALL_SEASONS_LIST.contains(season)) {
                 String seasonURL = FCSTATS_BASE_URL + "club,matches," + teamUrlName + "," + teamId + "," + seasonID + ".php";
                 returnMap.put(season, extractDFDataFromFC(seasonURL));
             }

@@ -1,28 +1,23 @@
 package com.api.BetStrat.util;
 
-import com.google.common.base.Splitter;
+import com.api.BetStrat.entity.DrawSeasonInfo;
+import com.api.BetStrat.entity.GoalsFestSeasonInfo;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import org.json.JSONArray;
+import org.json.JSONObject;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
-import org.jsoup.nodes.Element;
 import org.jsoup.nodes.Node;
-import org.jsoup.select.Elements;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.stream.Collectors;
-
-import static com.api.BetStrat.constants.BetStratConstants.FCSTATS_BASE_URL;
-import static com.api.BetStrat.constants.BetStratConstants.HOCKEY_SEASONS_LIST;
-import static com.api.BetStrat.constants.BetStratConstants.SEASONS_LIST;
 
 @Slf4j
 @Service
@@ -31,6 +26,47 @@ public class TeamGoalsFestHistoricData {
     private static final Logger LOGGER = LoggerFactory.getLogger(TeamGoalsFestHistoricData.class);
 
     private double mean = this.mean;
+
+    @SneakyThrows
+    public GoalsFestSeasonInfo buildSeasonGoalsFestStatsData(JSONArray allMatches) {
+        GoalsFestSeasonInfo goalsFestSeasonInfo = new GoalsFestSeasonInfo();
+
+        ArrayList<Integer> noGoalsFestSequence = new ArrayList<>();
+        int count = 0;
+        for (int i=0; i < allMatches.length(); i++) {
+            JSONObject match = (JSONObject) allMatches.get(i);
+            String res = match.getString("ftResult");
+            int homeResult = Integer.parseInt(res.split(":")[0]);
+            int awayResult = Integer.parseInt(res.split(":")[1]);
+            count++;
+            if ((homeResult + awayResult > 2) && homeResult > 0 && awayResult > 0) {
+                noGoalsFestSequence.add(count);
+                count = 0;
+            }
+        }
+
+        int totalGoalsFest = noGoalsFestSequence.size();
+
+        noGoalsFestSequence.add(count);
+        String lastResult = ((JSONObject) allMatches.get(allMatches.length() - 1)).getString("ftResult");
+        int lastHomeResult = Integer.parseInt(lastResult.split(":")[0]);
+        int lastAwayResult = Integer.parseInt(lastResult.split(":")[1]);
+        if (!((lastHomeResult + lastAwayResult > 2) && lastHomeResult > 0 && lastAwayResult > 0)) {
+            noGoalsFestSequence.add(-1);
+        }
+
+        goalsFestSeasonInfo.setCompetition("all");
+        goalsFestSeasonInfo.setGoalsFestRate(Utils.beautifyDoubleValue(100*totalGoalsFest/allMatches.length()));
+        goalsFestSeasonInfo.setNoGoalsFestSequence(noGoalsFestSequence.toString());
+        goalsFestSeasonInfo.setNumGoalsFest(totalGoalsFest);
+        goalsFestSeasonInfo.setNumMatches(allMatches.length());
+
+        double stdDev =  Utils.beautifyDoubleValue(calculateSD(noGoalsFestSequence));
+        goalsFestSeasonInfo.setStdDeviation(stdDev);
+        goalsFestSeasonInfo.setCoefDeviation(Utils.beautifyDoubleValue(calculateCoeffVariation(stdDev)));
+
+        return goalsFestSeasonInfo;
+    }
 
     @SneakyThrows
     public LinkedHashMap<String, Object> extractGoalsFestDataFromFBref(String url) {

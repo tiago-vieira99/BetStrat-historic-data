@@ -1,10 +1,15 @@
 package com.api.BetStrat.service;
 
 import com.api.BetStrat.constants.TeamScoreEnum;
+import com.api.BetStrat.entity.DrawSeasonInfo;
 import com.api.BetStrat.entity.Team;
 import com.api.BetStrat.entity.WinsMarginSeasonInfo;
 import com.api.BetStrat.repository.WinsMarginSeasonInfoRepository;
+import com.api.BetStrat.util.ScrappingUtil;
+import com.api.BetStrat.util.TeamDFhistoricData;
+import com.api.BetStrat.util.TeamEHhistoricData;
 import com.api.BetStrat.util.Utils;
+import org.json.JSONArray;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,7 +22,15 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static com.api.BetStrat.constants.BetStratConstants.SEASONS_LIST;
+import static com.api.BetStrat.constants.BetStratConstants.FBREF_BASE_URL;
+import static com.api.BetStrat.constants.BetStratConstants.FOOTBALL_SEASONS_LIST;
+import static com.api.BetStrat.constants.BetStratConstants.FOOTBALL_SUMMER_SEASONS_BEGIN_MONTH_LIST;
+import static com.api.BetStrat.constants.BetStratConstants.FOOTBALL_SUMMER_SEASONS_LIST;
+import static com.api.BetStrat.constants.BetStratConstants.FOOTBALL_WINTER_SEASONS_BEGIN_MONTH_LIST;
+import static com.api.BetStrat.constants.BetStratConstants.FOOTBALL_WINTER_SEASONS_LIST;
+import static com.api.BetStrat.constants.BetStratConstants.WORLDFOOTBALL_BASE_URL;
+import static com.api.BetStrat.constants.BetStratConstants.ZEROZERO_BASE_URL;
+import static com.api.BetStrat.constants.BetStratConstants.ZEROZERO_SEASON_CODES;
 
 @Service
 @Transactional
@@ -29,7 +42,64 @@ public class WinsMarginSeasonInfoService {
     private WinsMarginSeasonInfoRepository winsMarginSeasonInfoRepository;
 
     public WinsMarginSeasonInfo insertWinsMarginInfo(WinsMarginSeasonInfo winsMarginSeasonInfo) {
+        LOGGER.info("Inserted " + winsMarginSeasonInfo.getClass() + " for " + winsMarginSeasonInfo.getTeamId().getName() + " and season " + winsMarginSeasonInfo.getSeason());
         return winsMarginSeasonInfoRepository.save(winsMarginSeasonInfo);
+    }
+
+    public void updateStatsDataInfo(Team team) {
+        List<WinsMarginSeasonInfo> statsByTeam = winsMarginSeasonInfoRepository.getStatsByTeam(team);
+        List<String> seasonsList = null;
+
+        if (FOOTBALL_SUMMER_SEASONS_BEGIN_MONTH_LIST.contains(team.getBeginSeason())) {
+            seasonsList = FOOTBALL_SUMMER_SEASONS_LIST;
+        } else if (FOOTBALL_WINTER_SEASONS_BEGIN_MONTH_LIST.contains(team.getBeginSeason())) {
+            seasonsList = FOOTBALL_WINTER_SEASONS_LIST;
+        }
+
+        for (String season : seasonsList) {
+            if (!statsByTeam.stream().filter(s -> s.getSeason().equals(season)).findAny().isPresent()) {
+                String teamUrl = team.getUrl();
+                JSONArray scrappingData = null;
+                String newSeasonUrl = "";
+
+                if (teamUrl.contains(ZEROZERO_BASE_URL)) {
+                    String seasonZZCode = ZEROZERO_SEASON_CODES.get(season);
+                    newSeasonUrl = teamUrl.replaceAll("epoca_id=\\d+", "epoca_id=" + seasonZZCode);
+                    scrappingData = ScrappingUtil.getScrappingData(team.getName(), season, newSeasonUrl, false);
+                } else if (teamUrl.contains(FBREF_BASE_URL)) {
+                    String newSeason = "";
+                    if (season.contains("-")) {
+                        newSeason = season.split("-")[0] + "-20" + season.split("-")[1];
+                    } else {
+                        newSeason = season;
+                    }
+                    newSeasonUrl = teamUrl.split("/matchlogs")[0].substring(0, teamUrl.split("/matchlogs")[0].lastIndexOf('/')) + "/" + newSeason + "/matchlogs" + teamUrl.split("/matchlogs")[1];
+                    scrappingData = ScrappingUtil.getScrappingData(team.getName(), newSeason, newSeasonUrl, false);
+                } else if (teamUrl.contains(WORLDFOOTBALL_BASE_URL)) {
+                    String newSeason = "";
+                    if (season.contains("-")) {
+                        newSeason = "20" + season.split("-")[1];
+                    } else {
+                        newSeason = season;
+                    }
+                    newSeasonUrl = teamUrl + "/" + newSeason + "/3/";
+                    scrappingData = ScrappingUtil.getScrappingData(team.getName(), newSeason, newSeasonUrl, false);
+                }
+
+                if (scrappingData != null) {
+                    TeamEHhistoricData teamEHhistoricData = new TeamEHhistoricData();
+                    try {
+                        WinsMarginSeasonInfo winsMarginSeasonInfo = teamEHhistoricData.buildSeason12MarginWinStatsData(scrappingData, team.getName());
+                        winsMarginSeasonInfo.setSeason(season);
+                        winsMarginSeasonInfo.setTeamId(team);
+                        winsMarginSeasonInfo.setUrl(newSeasonUrl);
+                        insertWinsMarginInfo(winsMarginSeasonInfo);
+                    } catch (Exception e) {
+                        System.out.println(e.getMessage());
+                    }
+                }
+            }
+        }
     }
 
     public Team updateTeamScore (Team teamByName) {
@@ -56,7 +126,7 @@ public class WinsMarginSeasonInfoService {
             double last3SeasonsScore = Utils.beautifyDoubleValue(0.3*last3SeasonsWinsAvg + 0.4*last3SeasonsmaxSeqWOMarginWinsScore + 0.3*last3SeasonsStdDevScore);
             double allSeasonsScore = Utils.beautifyDoubleValue(0.3*allSeasonsWinsAvg + 0.4*allSeasonsmaxSeqWOMarginWinsScore + 0.3*allSeasonsStdDevScore);
 
-            double totalScore = Utils.beautifyDoubleValue(0.70*last3SeasonsScore + 0.25*allSeasonsScore + 0.05*totalMatchesScore);
+            double totalScore = Utils.beautifyDoubleValue(0.75*last3SeasonsScore + 0.20*allSeasonsScore + 0.05*totalMatchesScore);
 
             teamByName.setMarginWinsScore(calculateFinalRating(totalScore));
         }
@@ -125,11 +195,15 @@ public class WinsMarginSeasonInfoService {
 
         double avgDrawRate = Utils.beautifyDoubleValue(totalWinsRates / 3);
 
-        if (isBetween(avgDrawRate,70,100)) {
+        if (isBetween(avgDrawRate,80,100)) {
             return 100;
+        } else if(isBetween(avgDrawRate,70,80)) {
+            return 90;
         } else if(isBetween(avgDrawRate,60,70)) {
             return 80;
-        } else if(isBetween(avgDrawRate,40,60)) {
+        } else if(isBetween(avgDrawRate,50,60)) {
+            return 70;
+        } else if(isBetween(avgDrawRate,40,50)) {
             return 60;
         } else if(isBetween(avgDrawRate,0,40)) {
             return 30;
@@ -145,11 +219,15 @@ public class WinsMarginSeasonInfoService {
 
         double avgDrawRate = Utils.beautifyDoubleValue(totalWinsRates / statsByTeam.size());
 
-        if (isBetween(avgDrawRate,70,100)) {
+        if (isBetween(avgDrawRate,80,100)) {
             return 100;
+        } else if(isBetween(avgDrawRate,70,80)) {
+            return 90;
         } else if(isBetween(avgDrawRate,60,70)) {
             return 80;
-        } else if(isBetween(avgDrawRate,40,60)) {
+        } else if(isBetween(avgDrawRate,50,60)) {
+            return 70;
+        } else if(isBetween(avgDrawRate,40,50)) {
             return 60;
         } else if(isBetween(avgDrawRate,0,40)) {
             return 30;
@@ -167,15 +245,15 @@ public class WinsMarginSeasonInfoService {
             }
         }
 
-        if (isBetween(maxValue,0,5)) {
+        if (isBetween(maxValue,0,7)) {
             return 100;
-        } else if(isBetween(maxValue,5,6)) {
-            return 90;
-        } else if(isBetween(maxValue,6,7)) {
-            return 80;
         } else if(isBetween(maxValue,7,8)) {
+            return 90;
+        } else if(isBetween(maxValue,8,9)) {
+            return 80;
+        } else if(isBetween(maxValue,9,10)) {
             return 60;
-        } else if(isBetween(maxValue,8,25)) {
+        } else if(isBetween(maxValue,10,25)) {
             return 30;
         }
         return 0;
@@ -191,15 +269,15 @@ public class WinsMarginSeasonInfoService {
             }
         }
 
-        if (isBetween(maxValue,0,5)) {
+        if (isBetween(maxValue,0,7)) {
             return 100;
-        } else if(isBetween(maxValue,5,6)) {
-            return 90;
-        } else if(isBetween(maxValue,6,7)) {
-            return 80;
         } else if(isBetween(maxValue,7,8)) {
+            return 90;
+        } else if(isBetween(maxValue,8,9)) {
+            return 80;
+        } else if(isBetween(maxValue,9,10)) {
             return 60;
-        } else if(isBetween(maxValue,8,25)) {
+        } else if(isBetween(maxValue,10,25)) {
             return 30;
         }
         return 0;
@@ -272,8 +350,8 @@ public class WinsMarginSeasonInfoService {
 
         @Override
         public int compare(WinsMarginSeasonInfo a, WinsMarginSeasonInfo b) {
-            return Integer.valueOf(SEASONS_LIST.indexOf(a.getSeason()))
-                    .compareTo(Integer.valueOf(SEASONS_LIST.indexOf(b.getSeason())));
+            return Integer.valueOf(FOOTBALL_SEASONS_LIST.indexOf(a.getSeason()))
+                    .compareTo(Integer.valueOf(FOOTBALL_SEASONS_LIST.indexOf(b.getSeason())));
         }
     }
 

@@ -81,6 +81,29 @@ public class TeamService {
         return teamRepository.save(team);
     }
 
+    public Team updateTeamStats (Team team, String strategy) {
+        LOGGER.info("Updating stats for " + team.getName() + " and strategy " + strategy);
+
+        switch (strategy) {
+            case "footballDrawHunter":
+                drawSeasonInfoService.updateStatsDataInfo(team);
+                break;
+            case "footballMarginWins":
+                winsMarginSeasonInfoService.updateStatsDataInfo(team);
+                break;
+            case "footballGoalsFest":
+                goalsFestSeasonInfoService.updateStatsDataInfo(team);
+                break;
+            case "footballEuroHandicap":
+
+                break;
+            default:
+                break;
+        }
+
+        return team;
+    }
+
     public List<HockeyDrawSeasonInfo> getHockeyTeamDrawStats(String teamName) {
         Team teamByName = teamRepository.getTeamByName(teamName);
         if (null == teamByName) {
@@ -152,31 +175,31 @@ public class TeamService {
 
         switch (strategy) {
             case "hockeyDraw":
-                if (teamByName.getSport() == "Hockey") {
+                if (teamByName.getSport().equals("Hockey")) {
                     updatedTeam = hockeyDrawSeasonInfoService.updateTeamScore(teamByName);
                     teamRepository.save(updatedTeam);
                 }
                 break;
             case "hockeyWinsMarginAny2":
-                if (teamByName.getSport() == "Hockey") {
+                if (teamByName.getSport().equals("Hockey")) {
                     updatedTeam = winsMarginAny2SeasonInfoService.updateTeamScore(teamByName);
                     teamRepository.save(updatedTeam);
                 }
                 break;
             case "hockeyWinsMargin3":
-                if (teamByName.getSport() == "Hockey") {
+                if (teamByName.getSport().equals("Hockey")) {
                     updatedTeam = winsMargin3SeasonInfoService.updateTeamScore(teamByName);
                     teamRepository.save(updatedTeam);
                 }
                 break;
             case "footballDrawHunter":
-                if (teamByName.getSport() == "Football") {
+                if (teamByName.getSport().equals("Football")) {
                     updatedTeam = drawSeasonInfoService.updateTeamScore(teamByName);
                     teamRepository.save(updatedTeam);
                 }
                 break;
             case "footballMarginWins":
-                if (teamByName.getSport() == "Football") {
+                if (teamByName.getSport().equals("Football")) {
                     updatedTeam = winsMarginSeasonInfoService.updateTeamScore(teamByName);
                     teamRepository.save(updatedTeam);
                 }
@@ -188,13 +211,13 @@ public class TeamService {
                 }
                 break;
             case "footballEuroHandicap":
-                if (teamByName.getSport() == "Football") {
+                if (teamByName.getSport().equals("Football")) {
                     updatedTeam = euroHandicapSeasonInfoService.updateTeamScore(teamByName);
                     teamRepository.save(updatedTeam);
                 }
                 break;
             case "basketComebacks":
-                if (teamByName.getSport() == "Basketball") {
+                if (teamByName.getSport().equals("Basketball")) {
                     updatedTeam = comebackSeasonInfoService.updateTeamScore(teamByName);
                     teamRepository.save(updatedTeam);
                 }

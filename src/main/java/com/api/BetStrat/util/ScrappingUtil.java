@@ -1,14 +1,29 @@
 package com.api.BetStrat.util;
 
 import com.api.BetStrat.entity.DrawSeasonInfo;
+import com.api.BetStrat.service.DrawSeasonInfoService;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.http.HttpEntity;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.StringEntity;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClients;
+import org.apache.http.util.EntityUtils;
+import org.json.JSONArray;
+import org.json.JSONException;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
+import java.net.URI;
+import java.net.URLEncoder;
 import java.text.*;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -19,6 +34,11 @@ import static com.api.BetStrat.constants.BetStratConstants.*;
 @Slf4j
 @Service
 public class ScrappingUtil {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(ScrappingUtil.class);
+
+    // one instance, reuse
+    private static final CloseableHttpClient httpClient = HttpClients.createDefault();
 
 //    public static List<DrawSeasonInfo> getNilMatches() {
 //        List<DrawSeasonInfo> nilHFmatches = new ArrayList<>();
@@ -77,6 +97,44 @@ public class ScrappingUtil {
 //
 //        return drawSeasonInfoList;
 //    }
+
+    @SneakyThrows
+    public static  JSONArray getScrappingData(String teamName, String season, String url, boolean allLeagues) {
+        HttpPost request = new HttpPost(SCRAPPER_SERVICE_URL);
+        JSONArray teamStatsDataObj = null;
+
+        String queryParams = "team=" + URLEncoder.encode(teamName, "UTF-8") + "&season=" + URLEncoder.encode(season, "UTF-8") + "&allleagues=" + allLeagues;
+
+        request.setURI(new URI(SCRAPPER_SERVICE_URL + "football-stats/all-season-matches?" + queryParams));
+
+        // Set the request body
+        String requestBody = url;
+        StringEntity requestEntity = new StringEntity(requestBody);
+        request.setEntity(requestEntity);
+
+        // Set the Content-Type header
+        request.setHeader("Content-Type", "text/plain");
+
+        try (CloseableHttpResponse response = httpClient.execute(request)) {
+            HttpEntity entity = response.getEntity();
+
+            LOGGER.info("Response from ScappingService: " + response.getStatusLine().toString());
+
+            if (entity != null) {
+                // return it as a String
+                String result = EntityUtils.toString(entity);
+                if (result.contains("error")) {
+                    LOGGER.info(result);
+                }
+                teamStatsDataObj = new JSONArray(result);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        return teamStatsDataObj;
+    }
 
     private static boolean isGoodHTMatch(String url) {
 
