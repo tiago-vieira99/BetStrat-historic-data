@@ -7,36 +7,18 @@ import com.api.BetStrat.repository.DrawSeasonInfoRepository;
 import com.api.BetStrat.util.ScrappingUtil;
 import com.api.BetStrat.util.TeamDFhistoricData;
 import com.api.BetStrat.util.Utils;
-import lombok.SneakyThrows;
-import org.apache.http.HttpEntity;
-import org.apache.http.NameValuePair;
-import org.apache.http.client.entity.UrlEncodedFormEntity;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClients;
-import org.apache.http.message.BasicNameValuePair;
-import org.apache.http.util.EntityUtils;
+import com.google.common.collect.ImmutableList;
 import org.json.JSONArray;
-import org.json.JSONException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.context.event.ApplicationReadyEvent;
-import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.io.IOException;
-import java.net.URI;
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -47,7 +29,6 @@ import static com.api.BetStrat.constants.BetStratConstants.FOOTBALL_SUMMER_SEASO
 import static com.api.BetStrat.constants.BetStratConstants.FOOTBALL_SUMMER_SEASONS_LIST;
 import static com.api.BetStrat.constants.BetStratConstants.FOOTBALL_WINTER_SEASONS_BEGIN_MONTH_LIST;
 import static com.api.BetStrat.constants.BetStratConstants.FOOTBALL_WINTER_SEASONS_LIST;
-import static com.api.BetStrat.constants.BetStratConstants.SCRAPPER_SERVICE_URL;
 import static com.api.BetStrat.constants.BetStratConstants.WORLDFOOTBALL_BASE_URL;
 import static com.api.BetStrat.constants.BetStratConstants.ZEROZERO_BASE_URL;
 import static com.api.BetStrat.constants.BetStratConstants.ZEROZERO_SEASON_CODES;
@@ -146,6 +127,59 @@ public class DrawSeasonInfoService {
         }
 
         return teamByName;
+    }
+
+    public LinkedHashMap<String, String> getSimulatedScorePartialSeasons(Team teamByName, int seasonsToDiscard) {
+        List<DrawSeasonInfo> statsByTeam = drawSeasonInfoRepository.getStatsByTeam(teamByName);
+        LinkedHashMap<String, String> outMap = new LinkedHashMap<>();
+        List<String> profits = ImmutableList.of("1","0,6","1,2","1,3","2","2,8","4,3","6,6","-20,4","-23,4","-19,8","-19,2","-15","-10,2","-1,2");
+
+        if (statsByTeam.size() <= 2) {
+            outMap.put("footballDrawHunter", TeamScoreEnum.INSUFFICIENT_DATA.getValue());
+            return outMap;
+        }
+        Collections.sort(statsByTeam, new SortStatsDataBySeason());
+        Collections.reverse(statsByTeam);
+        List<DrawSeasonInfo> filteredStats = statsByTeam.subList(seasonsToDiscard, statsByTeam.size());
+
+        if (filteredStats.size() < 3 || !filteredStats.get(0).getSeason().equals(FOOTBALL_SUMMER_SEASONS_LIST.get(FOOTBALL_SUMMER_SEASONS_LIST.size()-1-seasonsToDiscard))) {
+            outMap.put("footballDrawHunter", TeamScoreEnum.INSUFFICIENT_DATA.getValue());
+            return outMap;
+        } else {
+            int last3SeasonsDrawRateScore = calculateLast3SeasonsDrawRateScore(filteredStats);
+            int allSeasonsDrawRateScore = calculateAllSeasonsDrawRateScore(filteredStats);
+            int last3SeasonsmaxSeqWODrawScore = calculateLast3SeasonsmaxSeqWODrawScore(filteredStats);
+            int allSeasonsmaxSeqWODrawScore = calculateAllSeasonsmaxSeqWODrawScore(filteredStats);
+            int last3SeasonsStdDevScore = calculateLast3SeasonsStdDevScore(filteredStats);
+            int allSeasonsStdDevScore = calculateAllSeasonsStdDevScore(filteredStats);
+            int totalMatchesScore = calculateLeagueMatchesScore(filteredStats.get(0).getNumMatches());
+
+            double totalScore = Utils.beautifyDoubleValue(0.2*last3SeasonsDrawRateScore + 0.15*allSeasonsDrawRateScore +
+                    0.15*last3SeasonsmaxSeqWODrawScore + 0.05*allSeasonsmaxSeqWODrawScore +
+                    0.3*last3SeasonsStdDevScore + 0.1*allSeasonsStdDevScore + 0.05*totalMatchesScore);
+
+            String finalScore = calculateFinalRating(totalScore);
+            outMap.put("footballDrawHunter", finalScore);
+            outMap.put("sequence", statsByTeam.get(seasonsToDiscard-1).getNoDrawsSequence());
+            double balance = 0;
+            String[] seqArray = statsByTeam.get(seasonsToDiscard - 1).getNoDrawsSequence().replaceAll("\\[","").replaceAll("]","").split(",");
+            for (int i=0; i<seqArray.length-2; i++) {
+                int excelBadRun = 2;
+                int accepBadRun = 3;
+                if (Integer.parseInt(seqArray[i].trim())-accepBadRun > 12) {
+                    balance = -48;
+                    break;
+                }
+                double drawsScorePoints = Double.parseDouble(finalScore.substring(finalScore.indexOf('(') + 1, finalScore.indexOf(')')));
+                if (finalScore.contains("EXCEL") && Integer.parseInt(seqArray[i].trim()) > excelBadRun &&  Integer.parseInt(seqArray[i].trim()) <= 17) {
+                   balance += Double.parseDouble(profits.get(Integer.parseInt(seqArray[i].trim())-excelBadRun-1).replaceAll(",","."));
+                } else if (drawsScorePoints >= 70 && finalScore.contains("ACCEPTABLE") &&  Integer.parseInt(seqArray[i].trim()) > accepBadRun &&  Integer.parseInt(seqArray[i].trim()) <= 17) {
+                    balance += Double.parseDouble(profits.get(Integer.parseInt(seqArray[i].trim())-accepBadRun-1).replaceAll(",","."));
+                }
+            }
+            outMap.put("balance", String.valueOf(balance).replaceAll("\\.",","));
+            return outMap;
+        }
     }
 
     private String calculateFinalRating(double score) {

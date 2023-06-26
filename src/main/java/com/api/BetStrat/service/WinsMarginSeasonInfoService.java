@@ -9,6 +9,7 @@ import com.api.BetStrat.util.ScrappingUtil;
 import com.api.BetStrat.util.TeamDFhistoricData;
 import com.api.BetStrat.util.TeamEHhistoricData;
 import com.api.BetStrat.util.Utils;
+import com.google.common.collect.ImmutableList;
 import org.json.JSONArray;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,6 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -132,6 +134,64 @@ public class WinsMarginSeasonInfoService {
         }
 
         return teamByName;
+    }
+
+    public LinkedHashMap<String, String> getSimulatedScorePartialSeasons(Team teamByName, int seasonsToDiscard) {
+        List<WinsMarginSeasonInfo> statsByTeam = winsMarginSeasonInfoRepository.getStatsByTeam(teamByName);
+        LinkedHashMap<String, String> outMap = new LinkedHashMap<>();
+
+        if (statsByTeam.size() <= 2) {
+            outMap.put("footballMarginWins", TeamScoreEnum.INSUFFICIENT_DATA.getValue());
+            return outMap;
+        }
+        Collections.sort(statsByTeam, new SortStatsDataBySeason());
+        Collections.reverse(statsByTeam);
+        List<WinsMarginSeasonInfo> filteredStats = statsByTeam.subList(seasonsToDiscard, statsByTeam.size());
+
+        if (filteredStats.size() < 3 || !filteredStats.get(0).getSeason().equals(FOOTBALL_WINTER_SEASONS_LIST.get(FOOTBALL_WINTER_SEASONS_LIST.size()-1-seasonsToDiscard))) {
+            outMap.put("footballMarginWins", TeamScoreEnum.INSUFFICIENT_DATA.getValue());
+            return outMap;
+        } else {
+            int last3SeasonsMarginWinsRateScore = calculateLast3SeasonsMarginWinsRateScore(filteredStats);
+            int allSeasonsMarginWinsRateScore = calculateAllSeasonsMarginWinsRateScore(filteredStats);
+            int last3SeasonsTotalWinsRateScore = calculateLast3SeasonsTotalWinsRateScore(filteredStats);
+            int allSeasonsTotalWinsRateScore = calculateAllSeasonsTotalWinsRateScore(filteredStats);
+            int last3SeasonsmaxSeqWOMarginWinsScore = calculateLast3SeasonsmaxSeqWOMarginWinsScore(filteredStats);
+            int allSeasonsmaxSeqWOMarginWinsScore = calculateAllSeasonsmaxSeqWOMarginWinsScore(filteredStats);
+            int last3SeasonsStdDevScore = calculateLast3SeasonsStdDevScore(filteredStats);
+            int allSeasonsStdDevScore = calculateAllSeasonsStdDevScore(filteredStats);
+            int totalMatchesScore = calculateLeagueMatchesScore(filteredStats.get(0).getNumMatches());
+
+            double last3SeasonsWinsAvg = (last3SeasonsTotalWinsRateScore + last3SeasonsMarginWinsRateScore) / 2;
+            double allSeasonsWinsAvg = (allSeasonsTotalWinsRateScore + allSeasonsMarginWinsRateScore) / 2;
+
+            double last3SeasonsScore = Utils.beautifyDoubleValue(0.3*last3SeasonsWinsAvg + 0.4*last3SeasonsmaxSeqWOMarginWinsScore + 0.3*last3SeasonsStdDevScore);
+            double allSeasonsScore = Utils.beautifyDoubleValue(0.3*allSeasonsWinsAvg + 0.4*allSeasonsmaxSeqWOMarginWinsScore + 0.3*allSeasonsStdDevScore);
+
+            double totalScore = Utils.beautifyDoubleValue(0.75*last3SeasonsScore + 0.20*allSeasonsScore + 0.05*totalMatchesScore);
+
+            String finalScore = calculateFinalRating(totalScore);
+            outMap.put("footballMarginWins", finalScore);
+            outMap.put("sequence", statsByTeam.get(seasonsToDiscard-1).getNoMarginWinsSequence());
+            double balance = 0;
+            String[] seqArray = statsByTeam.get(seasonsToDiscard - 1).getNoMarginWinsSequence().replaceAll("\\[","").replaceAll("]","").split(",");
+            for (int i=0; i<seqArray.length-2; i++) {
+                int excelBadRun = 4;
+                int accepBadRun = 5;
+                if (Integer.parseInt(seqArray[i].trim())-accepBadRun > 7) {
+                    balance = -60;
+                    break;
+                }
+                double marginWinsScorePoints = Double.parseDouble(finalScore.substring(finalScore.indexOf('(') + 1, finalScore.indexOf(')')));
+                if (finalScore.contains("EXCEL") && Integer.parseInt(seqArray[i].trim()) > excelBadRun) {
+                    balance += 1.5;
+                } else if (marginWinsScorePoints >= 70 && finalScore.contains("ACCEPTABLE") &&  Integer.parseInt(seqArray[i].trim()) > accepBadRun) {
+                    balance += 1.5;
+                }
+            }
+            outMap.put("balance", String.valueOf(balance).replaceAll("\\.",","));
+            return outMap;
+        }
     }
 
     private String calculateFinalRating(double score) {

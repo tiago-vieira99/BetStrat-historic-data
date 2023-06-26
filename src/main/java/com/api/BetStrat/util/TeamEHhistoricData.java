@@ -78,6 +78,56 @@ public class TeamEHhistoricData {
         return winsMarginSeasonInfo;
     }
 
+    @SneakyThrows
+    public EuroHandicapSeasonInfo buildSeasonEuroHandicapStatsData(JSONArray allMatches, String teamName) {
+        EuroHandicapSeasonInfo euroHandicapSeasonInfo = new EuroHandicapSeasonInfo();
+
+        ArrayList<Integer> noEuroHandicapsSequence = new ArrayList<>();
+        int count = 0;
+        int totalWins= 0;
+        for (int i=0; i < allMatches.length(); i++) {
+            JSONObject match = (JSONObject) allMatches.get(i);
+            String res = match.getString("ftResult");
+            count++;
+            int homeResult = Integer.parseInt(res.split(":")[0]);
+            int awayResult = Integer.parseInt(res.split(":")[1]);
+            if ((match.getString("homeTeam").equals(teamName) && homeResult>awayResult) || (match.getString("awayTeam").equals(teamName) && homeResult<awayResult)) {
+                totalWins++;
+                if (Math.abs(homeResult - awayResult) == 1) {
+                    noEuroHandicapsSequence.add(count);
+                    count = 0;
+                }
+            }
+        }
+
+        int totalMarginWins = noEuroHandicapsSequence.size();
+
+        noEuroHandicapsSequence.add(count);
+        JSONObject lastMatch = (JSONObject) allMatches.get(allMatches.length() - 1);
+        String lastResult = lastMatch.getString("ftResult");
+        if (!((lastMatch.getString("homeTeam").equals(teamName) && Integer.parseInt(lastResult.split(":")[0])>Integer.parseInt(lastResult.split(":")[1])) ||
+                (lastMatch.getString("awayTeam").equals(teamName) && Integer.parseInt(lastResult.split(":")[0])<Integer.parseInt(lastResult.split(":")[1]))) ||
+                (Math.abs(Integer.parseInt(lastResult.split(":")[0]) - Integer.parseInt(lastResult.split(":")[1])) > 1)) {
+            noEuroHandicapsSequence.add(-1);
+        }
+
+        String selectedCompetition = ((JSONObject) allMatches.get(0)).getString("competition");
+
+        euroHandicapSeasonInfo.setCompetition(selectedCompetition);
+        euroHandicapSeasonInfo.setMarginWinsRate(Utils.beautifyDoubleValue(100*totalMarginWins/totalWins));
+        euroHandicapSeasonInfo.setNoMarginWinsSequence(noEuroHandicapsSequence.toString());
+        euroHandicapSeasonInfo.setNumMarginWins(totalMarginWins);
+        euroHandicapSeasonInfo.setNumMatches(allMatches.length());
+        euroHandicapSeasonInfo.setNumWins(totalWins);
+        euroHandicapSeasonInfo.setWinsRate(Utils.beautifyDoubleValue(100*totalWins/allMatches.length()));
+
+        double stdDev =  Utils.beautifyDoubleValue(calculateSD(noEuroHandicapsSequence));
+        euroHandicapSeasonInfo.setStdDeviation(stdDev);
+        euroHandicapSeasonInfo.setCoefDeviation(Utils.beautifyDoubleValue(calculateCoeffVariation(stdDev)));
+
+        return euroHandicapSeasonInfo;
+    }
+
     public LinkedHashMap<String, Object> extract12MarginGoalsDataFromFC(String url) {
         Document document = null;
         LinkedHashMap<String,Object> returnMap = new LinkedHashMap<>();

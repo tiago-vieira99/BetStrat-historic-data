@@ -3,8 +3,12 @@ package com.api.BetStrat.service;
 import com.api.BetStrat.constants.TeamScoreEnum;
 import com.api.BetStrat.entity.EuroHandicapSeasonInfo;
 import com.api.BetStrat.entity.Team;
+import com.api.BetStrat.entity.WinsMarginSeasonInfo;
 import com.api.BetStrat.repository.EuroHandicapSeasonInfoRepository;
+import com.api.BetStrat.util.ScrappingUtil;
+import com.api.BetStrat.util.TeamEHhistoricData;
 import com.api.BetStrat.util.Utils;
+import org.json.JSONArray;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,7 +21,15 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static com.api.BetStrat.constants.BetStratConstants.FBREF_BASE_URL;
 import static com.api.BetStrat.constants.BetStratConstants.FOOTBALL_SEASONS_LIST;
+import static com.api.BetStrat.constants.BetStratConstants.FOOTBALL_SUMMER_SEASONS_BEGIN_MONTH_LIST;
+import static com.api.BetStrat.constants.BetStratConstants.FOOTBALL_SUMMER_SEASONS_LIST;
+import static com.api.BetStrat.constants.BetStratConstants.FOOTBALL_WINTER_SEASONS_BEGIN_MONTH_LIST;
+import static com.api.BetStrat.constants.BetStratConstants.FOOTBALL_WINTER_SEASONS_LIST;
+import static com.api.BetStrat.constants.BetStratConstants.WORLDFOOTBALL_BASE_URL;
+import static com.api.BetStrat.constants.BetStratConstants.ZEROZERO_BASE_URL;
+import static com.api.BetStrat.constants.BetStratConstants.ZEROZERO_SEASON_CODES;
 
 @Service
 @Transactional
@@ -31,6 +43,62 @@ public class EuroHandicapSeasonInfoService {
     public EuroHandicapSeasonInfo insertEuroHandicapSeasonInfo(EuroHandicapSeasonInfo euroHandicapSeasonInfo) {
         LOGGER.info("Inserted " + euroHandicapSeasonInfo.getClass() + " for " + euroHandicapSeasonInfo.getTeamId().getName() + " and season " + euroHandicapSeasonInfo.getSeason());
         return euroHandicapSeasonInfoRepository.save(euroHandicapSeasonInfo);
+    }
+
+    public void updateStatsDataInfo(Team team) {
+        List<EuroHandicapSeasonInfo> statsByTeam = euroHandicapSeasonInfoRepository.getStatsByTeam(team);
+        List<String> seasonsList = null;
+
+        if (FOOTBALL_SUMMER_SEASONS_BEGIN_MONTH_LIST.contains(team.getBeginSeason())) {
+            seasonsList = FOOTBALL_SUMMER_SEASONS_LIST;
+        } else if (FOOTBALL_WINTER_SEASONS_BEGIN_MONTH_LIST.contains(team.getBeginSeason())) {
+            seasonsList = FOOTBALL_WINTER_SEASONS_LIST;
+        }
+
+        for (String season : seasonsList) {
+            if (!statsByTeam.stream().filter(s -> s.getSeason().equals(season)).findAny().isPresent()) {
+                String teamUrl = team.getUrl();
+                JSONArray scrappingData = null;
+                String newSeasonUrl = "";
+
+                if (teamUrl.contains(ZEROZERO_BASE_URL)) {
+                    String seasonZZCode = ZEROZERO_SEASON_CODES.get(season);
+                    newSeasonUrl = teamUrl.replaceAll("epoca_id=\\d+", "epoca_id=" + seasonZZCode);
+                    scrappingData = ScrappingUtil.getScrappingData(team.getName(), season, newSeasonUrl, false);
+                } else if (teamUrl.contains(FBREF_BASE_URL)) {
+                    String newSeason = "";
+                    if (season.contains("-")) {
+                        newSeason = season.split("-")[0] + "-20" + season.split("-")[1];
+                    } else {
+                        newSeason = season;
+                    }
+                    newSeasonUrl = teamUrl.split("/matchlogs")[0].substring(0, teamUrl.split("/matchlogs")[0].lastIndexOf('/')) + "/" + newSeason + "/matchlogs" + teamUrl.split("/matchlogs")[1];
+                    scrappingData = ScrappingUtil.getScrappingData(team.getName(), newSeason, newSeasonUrl, false);
+                } else if (teamUrl.contains(WORLDFOOTBALL_BASE_URL)) {
+                    String newSeason = "";
+                    if (season.contains("-")) {
+                        newSeason = "20" + season.split("-")[1];
+                    } else {
+                        newSeason = season;
+                    }
+                    newSeasonUrl = teamUrl + "/" + newSeason + "/3/";
+                    scrappingData = ScrappingUtil.getScrappingData(team.getName(), newSeason, newSeasonUrl, false);
+                }
+
+                if (scrappingData != null) {
+                    TeamEHhistoricData teamEHhistoricData = new TeamEHhistoricData();
+                    try {
+                        EuroHandicapSeasonInfo euroHandicapSeasonInfo = teamEHhistoricData.buildSeasonEuroHandicapStatsData(scrappingData, team.getName());
+                        euroHandicapSeasonInfo.setSeason(season);
+                        euroHandicapSeasonInfo.setTeamId(team);
+                        euroHandicapSeasonInfo.setUrl(newSeasonUrl);
+                        insertEuroHandicapSeasonInfo(euroHandicapSeasonInfo);
+                    } catch (Exception e) {
+                        System.out.println(e.getMessage());
+                    }
+                }
+            }
+        }
     }
 
     public Team updateTeamScore (Team teamByName) {

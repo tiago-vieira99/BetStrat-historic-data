@@ -35,7 +35,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -174,6 +173,19 @@ public class FootballDataStatsController {
         return teamService.updateTeamScore(teamName, strategy);
     }
 
+    @PostMapping("/newTeam")
+    public Team insertTeam (@Valid @RequestParam String teamName, @Valid @RequestParam  String url,
+                            @Valid @RequestParam  String beginSeason, @Valid @RequestParam  String endSeason, @Valid @RequestParam  String country) {
+        Team team = new Team();
+        team.setName(teamName);
+        team.setUrl(url);
+        team.setBeginSeason(beginSeason);
+        team.setEndSeason(endSeason);
+        team.setCountry(country);
+        team.setSport("Football");
+        return teamService.insertTeam(team);
+    }
+
     @ApiOperation(value = "updateAllTeamsScoreByStrategy", notes = "Strategy values: hockeyDraw, hockeyWinsMarginAny2, hockeyWinsMargin3, footballDrawHunter, footballMarginWins, footballGoalsFest, footballEuroHandicap, basketComebacks.")
     @PostMapping("/updateAllTeamsScoreByStrategy")
     public ResponseEntity<String> updateAllTeamsScoreByStrategy (@Valid @RequestParam  String strategy) {
@@ -188,6 +200,23 @@ public class FootballDataStatsController {
         return ResponseEntity.ok().body("OK");
     }
 
+    @ApiOperation(value = "updateAllTeamsScoreByStrategy", notes = "Strategy values: hockeyDraw, hockeyWinsMarginAny2, hockeyWinsMargin3, footballDrawHunter, footballMarginWins, footballGoalsFest, footballEuroHandicap, basketComebacks.")
+    @PostMapping("/simulateAllTeamsScoreByStrategyAndFilteredSeasons")
+    public ResponseEntity<HashMap<String, HashMap>> simulateAllTeamsScoreByStrategyAndFilteredSeasons (@Valid @RequestParam  String strategy, @RequestParam @Valid int seasonsToDiscard) {
+        List<Team> allTeams = teamRepository.findAll().stream().filter(t -> t.getSport().equals("Football")).collect(Collectors.toList());
+        HashMap<String, HashMap> outMap = new HashMap<>();
+        for (int i=0; i< allTeams.size(); i++) {
+            log.info("handling " + allTeams.get(i).getName());
+            try {
+                HashMap<String, String> simulatedTeamScoreByFilteredSeason = teamService.getSimulatedTeamScoreByFilteredSeason(allTeams.get(i), strategy, seasonsToDiscard);
+                outMap.put(allTeams.get(i).getName(), simulatedTeamScoreByFilteredSeason);
+            } catch (NumberFormatException er) {
+                log.error(er.toString());
+            }
+        }
+        return ResponseEntity.ok().body(outMap);
+    }
+
     @ApiOperation(value = "updateAllTeamsStatsByStrategy", notes = "Strategy values: hockeyDraw, hockeyWinsMarginAny2, hockeyWinsMargin3, footballDrawHunter, footballMarginWins, footballGoalsFest, footballEuroHandicap, basketComebacks. \nData sources:  \n FBRef:\n" +
             " \n https://fbref.com/en/squads/d48ad4ff/2022-2023/matchlogs/schedule/Napoli-Scores-and-Fixturesn" +
             " \n\n" +
@@ -197,8 +226,8 @@ public class FootballDataStatsController {
             " \n WF:\n" +
             " \n https://www.worldfootball.net/teams/fc-porto/")
     @PostMapping("/updateAllTeamsStatsByStrategy")
-    public ResponseEntity<String> fullAnalysis (@Valid @RequestParam  String strategy) {
-        List<Team> allTeams = teamRepository.findAll().stream().filter(t -> t.getSport().equals("Football") && t.getName().startsWith("B")).collect(Collectors.toList());
+    public ResponseEntity<String> updateAllTeamsStatsByStrategy (@Valid @RequestParam  String strategy) {
+        List<Team> allTeams = teamRepository.findAll().stream().filter(t -> t.getSport().equals("Football")).collect(Collectors.toList());
 
         for (int i=0; i< allTeams.size(); i++) {
             log.info("handling " + allTeams.get(i).getName());

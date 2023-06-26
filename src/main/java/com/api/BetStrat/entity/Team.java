@@ -23,7 +23,7 @@ import java.util.Date;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "Teams", uniqueConstraints={@UniqueConstraint(columnNames={"name"})})
+@Table(name = "Teams",  uniqueConstraints = { @UniqueConstraint(name = "UniqueTeamCountry", columnNames = { "name", "country" }) })
 public class Team implements Serializable {
     private static final long serialVersionUID = 1L;
 
@@ -34,6 +34,9 @@ public class Team implements Serializable {
 
     @Column(name = "name")
     private String name;
+
+    @Column(name = "country")
+    private String country;
 
     @ApiModelProperty(example = "dd-MM-yyyy hh:mm:ss")
     @JsonFormat(pattern = "dd-MM-yyyy hh:mm:ss")

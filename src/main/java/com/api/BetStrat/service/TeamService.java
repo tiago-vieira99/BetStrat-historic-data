@@ -21,7 +21,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Collections;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 
 @Service
@@ -95,7 +96,7 @@ public class TeamService {
                 goalsFestSeasonInfoService.updateStatsDataInfo(team);
                 break;
             case "footballEuroHandicap":
-
+                euroHandicapSeasonInfoService.updateStatsDataInfo(team);
                 break;
             default:
                 break;
@@ -227,6 +228,68 @@ public class TeamService {
         }
 
         return updatedTeam;
+    }
+
+    public HashMap<String, String> getSimulatedTeamScoreByFilteredSeason (Team team, String strategy, int seasonsToDiscard) {
+
+        HashMap<String, String> outMap = new LinkedHashMap<>();
+        Team simulatedTeam = null;
+
+        switch (strategy) {
+            case "hockeyDraw":
+                if (team.getSport().equals("Hockey")) {
+                    simulatedTeam = hockeyDrawSeasonInfoService.updateTeamScore(team);
+                }
+                break;
+            case "hockeyWinsMarginAny2":
+                if (team.getSport().equals("Hockey")) {
+                    simulatedTeam = winsMarginAny2SeasonInfoService.updateTeamScore(team);
+                }
+                break;
+            case "hockeyWinsMargin3":
+                if (team.getSport().equals("Hockey")) {
+                    simulatedTeam = winsMargin3SeasonInfoService.updateTeamScore(team);
+                }
+                break;
+            case "footballDrawHunter":
+                if (team.getSport().equals("Football")) {
+                    LinkedHashMap<String, String> simulatedScore = drawSeasonInfoService.getSimulatedScorePartialSeasons(team, seasonsToDiscard);
+                    outMap.put("beginSeason", team.getBeginSeason());
+                    outMap.put("endSeason", team.getEndSeason());
+                    outMap.putAll(simulatedScore);
+                }
+                break;
+            case "footballMarginWins":
+                if (team.getSport().equals("Football")) {
+                    LinkedHashMap<String, String> simulatedScore = winsMarginSeasonInfoService.getSimulatedScorePartialSeasons(team, seasonsToDiscard);
+                    outMap.put("beginSeason", team.getBeginSeason());
+                    outMap.put("endSeason", team.getEndSeason());
+                    outMap.putAll(simulatedScore);
+                }
+                break;
+            case "footballGoalsFest":
+                if (team.getSport().equals("Football")) {
+                    LinkedHashMap<String, String> simulatedScore = goalsFestSeasonInfoService.getSimulatedScorePartialSeasons(team, seasonsToDiscard);
+                    outMap.put("beginSeason", team.getBeginSeason());
+                    outMap.put("endSeason", team.getEndSeason());
+                    outMap.putAll(simulatedScore);
+                }
+                break;
+            case "footballEuroHandicap":
+                if (team.getSport().equals("Football")) {
+                    simulatedTeam = euroHandicapSeasonInfoService.updateTeamScore(team);
+                }
+                break;
+            case "basketComebacks":
+                if (team.getSport().equals("Basketball")) {
+                    simulatedTeam = comebackSeasonInfoService.updateTeamScore(team);
+                }
+                break;
+            default:
+                break;
+        }
+
+        return outMap;
     }
 
 }

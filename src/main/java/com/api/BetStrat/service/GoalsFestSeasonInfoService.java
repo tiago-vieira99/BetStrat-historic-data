@@ -25,6 +25,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.TimeZone;
@@ -136,6 +137,58 @@ public class GoalsFestSeasonInfoService {
         return teamByName;
     }
 
+    public LinkedHashMap<String, String> getSimulatedScorePartialSeasons(Team teamByName, int seasonsToDiscard) {
+        List<GoalsFestSeasonInfo> statsByTeam = goalsFestSeasonInfoRepository.getStatsByTeam(teamByName);
+        LinkedHashMap<String, String> outMap = new LinkedHashMap<>();
+
+        if (statsByTeam.size() <= 2) {
+            outMap.put("footballGoalsFest", TeamScoreEnum.INSUFFICIENT_DATA.getValue());
+            return outMap;
+        }
+        Collections.sort(statsByTeam, new SortStatsDataBySeason());
+        Collections.reverse(statsByTeam);
+        List<GoalsFestSeasonInfo> filteredStats = statsByTeam.subList(seasonsToDiscard, statsByTeam.size());
+
+        if (filteredStats.size() < 3 || !filteredStats.get(0).getSeason().equals(FOOTBALL_WINTER_SEASONS_LIST.get(FOOTBALL_WINTER_SEASONS_LIST.size()-1-seasonsToDiscard))) {
+            outMap.put("footballGoalsFest", TeamScoreEnum.INSUFFICIENT_DATA.getValue());
+            return outMap;
+        } else {
+            int last3SeasonsGoalsFestRateScore = calculateLast3SeasonsGoalsFestRateScore(filteredStats);
+            int allSeasonsGoalsFestRateScore = calculateAllSeasonsGoalsFestRateScore(filteredStats);
+            int last3SeasonsmaxSeqWOGoalsFestScore = calculateLast3SeasonsmaxSeqWOGoalsFestScore(filteredStats);
+            int allSeasonsmaxSeqWOGoalsFestScore = calculateAllSeasonsmaxSeqWOGoalsFestScore(filteredStats);
+            int last3SeasonsStdDevScore = calculateLast3SeasonsStdDevScore(filteredStats);
+            int allSeasonsStdDevScore = calculateAllSeasonsStdDevScore(filteredStats);
+//            int totalMatchesScore = calculateLeagueMatchesScore(statsByTeam.get(0).getNumMatches());
+
+            double totalScore = Utils.beautifyDoubleValue(0.2*last3SeasonsGoalsFestRateScore + 0.1*allSeasonsGoalsFestRateScore +
+                    0.2*last3SeasonsmaxSeqWOGoalsFestScore + 0.1*allSeasonsmaxSeqWOGoalsFestScore +
+                    0.3*last3SeasonsStdDevScore + 0.1*allSeasonsStdDevScore);
+
+            String finalScore = calculateFinalRating(totalScore);
+            outMap.put("footballGoalsFest", finalScore);
+            outMap.put("sequence", statsByTeam.get(seasonsToDiscard-1).getNoGoalsFestSequence());
+            double balance = 0;
+            String[] seqArray = statsByTeam.get(seasonsToDiscard - 1).getNoGoalsFestSequence().replaceAll("\\[","").replaceAll("]","").split(",");
+            for (int i=0; i<seqArray.length-2; i++) {
+                int excelBadRun = 5;
+                int accepBadRun = 6;
+                if (Integer.parseInt(seqArray[i].trim())-accepBadRun > 5) {
+                    balance = -40;
+                    break;
+                }
+                double marginWinsScorePoints = Double.parseDouble(finalScore.substring(finalScore.indexOf('(') + 1, finalScore.indexOf(')')));
+                if (finalScore.contains("EXCEL") && Integer.parseInt(seqArray[i].trim()) > excelBadRun) {
+                    balance += 2;
+                } else if (marginWinsScorePoints >= 70 && finalScore.contains("ACCEPTABLE") &&  Integer.parseInt(seqArray[i].trim()) > accepBadRun) {
+                    balance += 2;
+                }
+            }
+            outMap.put("balance", String.valueOf(balance).replaceAll("\\.",","));
+            return outMap;
+        }
+    }
+
     private String calculateFinalRating(double score) {
         if (isBetween(score,85,150)) {
             return TeamScoreEnum.EXCELLENT.getValue() + " (" + score + ")";
@@ -207,14 +260,12 @@ public class GoalsFestSeasonInfoService {
             }
         }
 
-        if (isBetween(maxValue,0,5)) {
+        if (isBetween(maxValue,0,6)) {
             return 100;
-        } else if(isBetween(maxValue,5,6)) {
-            return 80;
         } else if(isBetween(maxValue,6,7)) {
-            return 70;
+            return 80;
         } else if(isBetween(maxValue,7,8)) {
-            return 50;
+            return 70;
         } else if(isBetween(maxValue,8,25)) {
             return 30;
         }
@@ -231,14 +282,12 @@ public class GoalsFestSeasonInfoService {
             }
         }
 
-        if (isBetween(maxValue,0,5)) {
+        if (isBetween(maxValue,0,6)) {
             return 100;
-        } else if(isBetween(maxValue,5,6)) {
-            return 80;
         } else if(isBetween(maxValue,6,7)) {
-            return 70;
+            return 80;
         } else if(isBetween(maxValue,7,8)) {
-            return 50;
+            return 70;
         } else if(isBetween(maxValue,8,25)) {
             return 30;
         }
