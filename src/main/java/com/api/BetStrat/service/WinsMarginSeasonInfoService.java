@@ -310,9 +310,9 @@ public class WinsMarginSeasonInfoService {
         } else if(isBetween(maxValue,7,8)) {
             return 90;
         } else if(isBetween(maxValue,8,9)) {
-            return 80;
+            return 70;
         } else if(isBetween(maxValue,9,10)) {
-            return 60;
+            return 50;
         } else if(isBetween(maxValue,10,25)) {
             return 30;
         }
@@ -334,9 +334,9 @@ public class WinsMarginSeasonInfoService {
         } else if(isBetween(maxValue,7,8)) {
             return 90;
         } else if(isBetween(maxValue,8,9)) {
-            return 80;
+            return 70;
         } else if(isBetween(maxValue,9,10)) {
-            return 60;
+            return 50;
         } else if(isBetween(maxValue,10,25)) {
             return 30;
         }
