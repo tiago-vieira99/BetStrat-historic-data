@@ -141,7 +141,7 @@ public class GoalsFestSeasonInfoService {
         List<GoalsFestSeasonInfo> statsByTeam = goalsFestSeasonInfoRepository.getStatsByTeam(teamByName);
         LinkedHashMap<String, String> outMap = new LinkedHashMap<>();
 
-        if (statsByTeam.size() <= 2) {
+        if (statsByTeam.size() <= 2 || statsByTeam.stream().filter(s -> s.getNumMatches() < 15).findAny().isPresent() || statsByTeam.size() < seasonsToDiscard) {
             outMap.put("footballGoalsFest", TeamScoreEnum.INSUFFICIENT_DATA.getValue());
             return outMap;
         }
@@ -149,9 +149,10 @@ public class GoalsFestSeasonInfoService {
         Collections.reverse(statsByTeam);
         List<GoalsFestSeasonInfo> filteredStats = statsByTeam.subList(seasonsToDiscard, statsByTeam.size());
 
-        if (filteredStats.size() < 3 || !filteredStats.get(0).getSeason().equals(FOOTBALL_WINTER_SEASONS_LIST.get(FOOTBALL_WINTER_SEASONS_LIST.size()-1-seasonsToDiscard))) {
+        if (filteredStats.size() < 3 || !filteredStats.get(0).getSeason().equals(FOOTBALL_WINTER_SEASONS_LIST.get(FOOTBALL_WINTER_SEASONS_LIST.size()-1-seasonsToDiscard)) ||
+                !filteredStats.get(1).getSeason().equals(FOOTBALL_WINTER_SEASONS_LIST.get(FOOTBALL_WINTER_SEASONS_LIST.size()-2-seasonsToDiscard)) ||
+                !filteredStats.get(2).getSeason().equals(FOOTBALL_WINTER_SEASONS_LIST.get(FOOTBALL_WINTER_SEASONS_LIST.size()-3-seasonsToDiscard))) {
             outMap.put("footballGoalsFest", TeamScoreEnum.INSUFFICIENT_DATA.getValue());
-            return outMap;
         } else {
             int last3SeasonsGoalsFestRateScore = calculateLast3SeasonsGoalsFestRateScore(filteredStats);
             int allSeasonsGoalsFestRateScore = calculateAllSeasonsGoalsFestRateScore(filteredStats);
@@ -171,22 +172,37 @@ public class GoalsFestSeasonInfoService {
             double balance = 0;
             String[] seqArray = statsByTeam.get(seasonsToDiscard - 1).getNoGoalsFestSequence().replaceAll("\\[","").replaceAll("]","").split(",");
             for (int i=0; i<seqArray.length-2; i++) {
-                int excelBadRun = 5;
-                int accepBadRun = 6;
-                if (Integer.parseInt(seqArray[i].trim())-accepBadRun > 5) {
-                    balance = -40;
+                int excelBadRun = 0;
+                int accepBadRun = 0;
+                if (balance < -20) {
                     break;
                 }
+//                } else if (Integer.parseInt(seqArray[i].trim())-accepBadRun >= 7 && Integer.parseInt(seqArray[i].trim())-accepBadRun < 10) {
+//                    balance += -11;
+//                } else if (Integer.parseInt(seqArray[i].trim())-accepBadRun >= 10 && Integer.parseInt(seqArray[i].trim())-accepBadRun < 13) {
+//                    balance += -17;
+//                } else if (Integer.parseInt(seqArray[i].trim())-accepBadRun >= 13 && Integer.parseInt(seqArray[i].trim())-accepBadRun < 16) {
+//                    balance += -23;
+//                } else if (Integer.parseInt(seqArray[i].trim())-accepBadRun >= 16) {
+//                    balance += -29;
                 double marginWinsScorePoints = Double.parseDouble(finalScore.substring(finalScore.indexOf('(') + 1, finalScore.indexOf(')')));
                 if (finalScore.contains("EXCEL") && Integer.parseInt(seqArray[i].trim()) > excelBadRun) {
-                    balance += 2;
-                } else if (marginWinsScorePoints >= 70 && finalScore.contains("ACCEPTABLE") &&  Integer.parseInt(seqArray[i].trim()) > accepBadRun) {
-                    balance += 2;
+                    if (Integer.parseInt(seqArray[i].trim())-excelBadRun > 4) {
+                        balance += -10;
+                        continue;
+                    }
+                    balance += 1;
+                } else if (finalScore.contains("ACCEPTABLE") &&  Integer.parseInt(seqArray[i].trim()) > accepBadRun) {
+                    if (Integer.parseInt(seqArray[i].trim())-accepBadRun > 4) {
+                        balance += -10;
+                        continue;
+                    }
+                    balance += 1;
                 }
             }
             outMap.put("balance", String.valueOf(balance).replaceAll("\\.",","));
-            return outMap;
         }
+        return outMap;
     }
 
     private String calculateFinalRating(double score) {
@@ -260,12 +276,14 @@ public class GoalsFestSeasonInfoService {
             }
         }
 
-        if (isBetween(maxValue,0,6)) {
+        if (isBetween(maxValue,0,5)) {
             return 100;
+        } else if(isBetween(maxValue,5,6)) {
+            return 90;
         } else if(isBetween(maxValue,6,7)) {
             return 80;
         } else if(isBetween(maxValue,7,8)) {
-            return 70;
+            return 50;
         } else if(isBetween(maxValue,8,25)) {
             return 30;
         }
@@ -282,12 +300,14 @@ public class GoalsFestSeasonInfoService {
             }
         }
 
-        if (isBetween(maxValue,0,6)) {
+        if (isBetween(maxValue,0,5)) {
             return 100;
+        } else if(isBetween(maxValue,5,6)) {
+            return 90;
         } else if(isBetween(maxValue,6,7)) {
             return 80;
         } else if(isBetween(maxValue,7,8)) {
-            return 70;
+            return 50;
         } else if(isBetween(maxValue,8,25)) {
             return 30;
         }
@@ -302,9 +322,9 @@ public class GoalsFestSeasonInfoService {
 
         double avgStdDev = Utils.beautifyDoubleValue(sumStdDev/3);
 
-        if (isBetween(avgStdDev,0,1.8)) {
+        if (isBetween(avgStdDev,0,1.7)) {
             return 100;
-        } else if(isBetween(avgStdDev,1.8,2.0)) {
+        } else if(isBetween(avgStdDev,1.7,2.0)) {
             return 80;
         } else if(isBetween(avgStdDev,2.0,2.2)) {
             return 70;
@@ -324,9 +344,9 @@ public class GoalsFestSeasonInfoService {
 
         double avgStdDev = Utils.beautifyDoubleValue(sumStdDev/statsByTeam.size());
 
-        if (isBetween(avgStdDev,0,1.8)) {
+        if (isBetween(avgStdDev,0,1.7)) {
             return 100;
-        } else if(isBetween(avgStdDev,1.8,2.0)) {
+        } else if(isBetween(avgStdDev,1.7,2.0)) {
             return 80;
         } else if(isBetween(avgStdDev,2.0,2.2)) {
             return 70;

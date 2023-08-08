@@ -132,9 +132,9 @@ public class DrawSeasonInfoService {
     public LinkedHashMap<String, String> getSimulatedScorePartialSeasons(Team teamByName, int seasonsToDiscard) {
         List<DrawSeasonInfo> statsByTeam = drawSeasonInfoRepository.getStatsByTeam(teamByName);
         LinkedHashMap<String, String> outMap = new LinkedHashMap<>();
-        List<String> profits = ImmutableList.of("1","0,6","1,2","1,3","2","2,8","4,3","6,6","-20,4","-23,4","-19,8","-19,2","-15","-10,2","-1,2");
+        List<String> profits = ImmutableList.of("1","0,6","1,2","1,3","2","2,8","4,3","6,6","-20,4","-23,4","-19,8","-19,2","-15");
 
-        if (statsByTeam.size() <= 2) {
+        if (statsByTeam.size() <= 2 || statsByTeam.size() < seasonsToDiscard) {
             outMap.put("footballDrawHunter", TeamScoreEnum.INSUFFICIENT_DATA.getValue());
             return outMap;
         }
@@ -142,9 +142,10 @@ public class DrawSeasonInfoService {
         Collections.reverse(statsByTeam);
         List<DrawSeasonInfo> filteredStats = statsByTeam.subList(seasonsToDiscard, statsByTeam.size());
 
-        if (filteredStats.size() < 3 || !filteredStats.get(0).getSeason().equals(FOOTBALL_SUMMER_SEASONS_LIST.get(FOOTBALL_SUMMER_SEASONS_LIST.size()-1-seasonsToDiscard))) {
+        if (filteredStats.size() < 3 || !filteredStats.get(0).getSeason().equals(FOOTBALL_WINTER_SEASONS_LIST.get(FOOTBALL_WINTER_SEASONS_LIST.size()-1-seasonsToDiscard)) ||
+                !filteredStats.get(1).getSeason().equals(FOOTBALL_WINTER_SEASONS_LIST.get(FOOTBALL_WINTER_SEASONS_LIST.size()-2-seasonsToDiscard)) ||
+                !filteredStats.get(2).getSeason().equals(FOOTBALL_WINTER_SEASONS_LIST.get(FOOTBALL_WINTER_SEASONS_LIST.size()-3-seasonsToDiscard))) {
             outMap.put("footballDrawHunter", TeamScoreEnum.INSUFFICIENT_DATA.getValue());
-            return outMap;
         } else {
             int last3SeasonsDrawRateScore = calculateLast3SeasonsDrawRateScore(filteredStats);
             int allSeasonsDrawRateScore = calculateAllSeasonsDrawRateScore(filteredStats);
@@ -164,22 +165,26 @@ public class DrawSeasonInfoService {
             double balance = 0;
             String[] seqArray = statsByTeam.get(seasonsToDiscard - 1).getNoDrawsSequence().replaceAll("\\[","").replaceAll("]","").split(",");
             for (int i=0; i<seqArray.length-2; i++) {
-                int excelBadRun = 2;
-                int accepBadRun = 3;
-                if (Integer.parseInt(seqArray[i].trim())-accepBadRun > 12) {
-                    balance = -48;
-                    break;
-                }
+                int excelBadRun = 5;
+                int accepBadRun = 6;
                 double drawsScorePoints = Double.parseDouble(finalScore.substring(finalScore.indexOf('(') + 1, finalScore.indexOf(')')));
-                if (finalScore.contains("EXCEL") && Integer.parseInt(seqArray[i].trim()) > excelBadRun &&  Integer.parseInt(seqArray[i].trim()) <= 17) {
+                if (finalScore.contains("EXCEL") && Integer.parseInt(seqArray[i].trim()) > excelBadRun) {
+                    if (Integer.parseInt(seqArray[i].trim())-excelBadRun > 6) {
+                        balance += -10;
+                        continue;
+                    }
                    balance += Double.parseDouble(profits.get(Integer.parseInt(seqArray[i].trim())-excelBadRun-1).replaceAll(",","."));
-                } else if (drawsScorePoints >= 70 && finalScore.contains("ACCEPTABLE") &&  Integer.parseInt(seqArray[i].trim()) > accepBadRun &&  Integer.parseInt(seqArray[i].trim()) <= 17) {
+                } else if (drawsScorePoints >= 70 && finalScore.contains("ACCEPTABLE") &&  Integer.parseInt(seqArray[i].trim()) > accepBadRun) {
+                    if (Integer.parseInt(seqArray[i].trim())-accepBadRun > 6) {
+                        balance += -10;
+                        continue;
+                    }
                     balance += Double.parseDouble(profits.get(Integer.parseInt(seqArray[i].trim())-accepBadRun-1).replaceAll(",","."));
                 }
             }
             outMap.put("balance", String.valueOf(balance).replaceAll("\\.",","));
-            return outMap;
         }
+        return outMap;
     }
 
     private String calculateFinalRating(double score) {

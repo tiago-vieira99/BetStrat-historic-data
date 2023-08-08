@@ -200,21 +200,25 @@ public class FootballDataStatsController {
         return ResponseEntity.ok().body("OK");
     }
 
-    @ApiOperation(value = "updateAllTeamsScoreByStrategy", notes = "Strategy values: hockeyDraw, hockeyWinsMarginAny2, hockeyWinsMargin3, footballDrawHunter, footballMarginWins, footballGoalsFest, footballEuroHandicap, basketComebacks.")
+    @ApiOperation(value = "simulateAllTeamsScoreByStrategyAndFilteredSeasons", notes = "Strategy values: hockeyDraw, hockeyWinsMarginAny2, hockeyWinsMargin3, footballDrawHunter, footballMarginWins, footballGoalsFest, footballEuroHandicap, basketComebacks.")
     @PostMapping("/simulateAllTeamsScoreByStrategyAndFilteredSeasons")
     public ResponseEntity<HashMap<String, HashMap>> simulateAllTeamsScoreByStrategyAndFilteredSeasons (@Valid @RequestParam  String strategy, @RequestParam @Valid int seasonsToDiscard) {
         List<Team> allTeams = teamRepository.findAll().stream().filter(t -> t.getSport().equals("Football")).collect(Collectors.toList());
-        HashMap<String, HashMap> outMap = new HashMap<>();
-        for (int i=0; i< allTeams.size(); i++) {
-            log.info("handling " + allTeams.get(i).getName());
-            try {
-                HashMap<String, String> simulatedTeamScoreByFilteredSeason = teamService.getSimulatedTeamScoreByFilteredSeason(allTeams.get(i), strategy, seasonsToDiscard);
-                outMap.put(allTeams.get(i).getName(), simulatedTeamScoreByFilteredSeason);
-            } catch (NumberFormatException er) {
-                log.error(er.toString());
+        HashMap<String, HashMap> newOutMap = new HashMap<>();
+        for (int j=1;j<5;j++) {
+            HashMap<String, HashMap> outMap = new HashMap<>();
+            for (int i = 0; i < allTeams.size(); i++) {
+                log.info("handling " + allTeams.get(i).getName());
+                try {
+                    HashMap<String, String> simulatedTeamScoreByFilteredSeason = teamService.getSimulatedTeamScoreByFilteredSeason(allTeams.get(i), strategy, j);
+                    outMap.put(allTeams.get(i).getName(), simulatedTeamScoreByFilteredSeason);
+                } catch (NumberFormatException er) {
+                    log.error(er.toString());
+                }
             }
+            newOutMap.put("discarded " + j, outMap);
         }
-        return ResponseEntity.ok().body(outMap);
+        return ResponseEntity.ok().body(newOutMap);
     }
 
     @ApiOperation(value = "updateAllTeamsStatsByStrategy", notes = "Strategy values: hockeyDraw, hockeyWinsMarginAny2, hockeyWinsMargin3, footballDrawHunter, footballMarginWins, footballGoalsFest, footballEuroHandicap, basketComebacks. \nData sources:  \n FBRef:\n" +
@@ -289,8 +293,6 @@ public class FootballDataStatsController {
         drawSeasonInfo.setStdDeviation(stdDev);
         drawSeasonInfo.setCoefDeviation(coefDev);
         drawSeasonInfo.setCompetition(competition);
-
-        //teamService.updateTeamScore(teamName);
 
         return drawSeasonInfoService.insertDrawInfo(drawSeasonInfo);
     }
