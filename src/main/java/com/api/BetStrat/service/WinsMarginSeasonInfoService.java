@@ -161,6 +161,11 @@ public class WinsMarginSeasonInfoService {
                 }
             }
 
+            if (filteredStats.stream().filter(st -> st.getWinsRate() >= 50).collect(Collectors.toList()).size() < (0.6* filteredStats.size())) {
+                outMap.put("footballMarginWins", TeamScoreEnum.INSUFFICIENT_DATA.getValue());
+                return outMap;
+            }
+
             int last3SeasonsMarginWinsRateScore = calculateLast3SeasonsMarginWinsRateScore(filteredStats);
             int allSeasonsMarginWinsRateScore = calculateAllSeasonsMarginWinsRateScore(filteredStats);
             int last3SeasonsTotalWinsRateScore = calculateLast3SeasonsTotalWinsRateScore(filteredStats);
@@ -185,11 +190,11 @@ public class WinsMarginSeasonInfoService {
             double balance = 0;
             String[] seqArray = statsByTeam.get(seasonsToDiscard - 1).getNoMarginWinsSequence().replaceAll("\\[","").replaceAll("]","").split(",");
             for (int i=0; i<seqArray.length-2; i++) {
-                int excelBadRun = 5;
-                int accepBadRun = 6;
-                if (Integer.parseInt(seqArray[i].trim())-accepBadRun > 7) {
-                    balance = -60;
-                    break;
+                int excelBadRun = 3;
+                int accepBadRun = 4;
+                if (Integer.parseInt(seqArray[i].trim())-accepBadRun > 4 || Integer.parseInt(seqArray[i].trim())-excelBadRun > 4) {
+                    balance += -20;
+//                    break;
                 }
                 double marginWinsScorePoints = Double.parseDouble(finalScore.substring(finalScore.indexOf('(') + 1, finalScore.indexOf(')')));
                 if (finalScore.contains("EXCEL") && Integer.parseInt(seqArray[i].trim()) > excelBadRun) {

@@ -12,10 +12,8 @@ import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import lombok.SneakyThrows;
 import org.json.simple.JSONArray;
-import org.json.simple.parser.JSONParser;
 import org.springframework.web.bind.annotation.*;
 
-import javax.rmi.CORBA.Util;
 import javax.validation.Valid;
 import java.io.File;
 import java.io.IOException;
@@ -67,6 +65,79 @@ public class TestController {
     public HashMap<String, Map> getDrawFiboStatsByLeague2(@Valid @RequestParam String leagueURL) {
         TeamDrawFiboStatsByLeague teamDrawFiboStatsByLeague = new TeamDrawFiboStatsByLeague();
         return teamDrawFiboStatsByLeague.findFirstDrawsByLeague2(leagueURL);
+    }
+
+    @SneakyThrows
+    @ApiOperation(value = "testMarginWinsBankrollManagement", notes = "Real simulation with real sequences and odd avg for testing StacksBankrollManagement system for MarginWins strategy")
+    @GetMapping("/test-marginwins-bankroll-management")
+    public double testNewMarginWinsBankrollManagement(@Valid @RequestParam String teamSequence, @Valid @RequestParam double oddAvg, @Valid @RequestParam double targetProfit) {
+        List<String> sequences = Arrays.asList(teamSequence.split(","));
+
+        double totalBalance= 0.0;
+
+        Stack<Double> stakesPlayed = new Stack<>();
+        Stack<Double> stakesToRecover = new Stack<>();
+        Stack<Double> sums = new Stack<>();
+        double laststake = 0.0;
+        boolean recoveryMode = false;
+        double stakesDivisor = 9 * targetProfit;
+
+        for (int k = 0; k< sequences.size()-1;k++) {
+            int numNoWins = Integer.parseInt(sequences.get(k).trim());
+            double sumStakesPlayed = 0.0;
+
+            for (int i = 0; i<numNoWins; i++) {
+                if (sumStakesPlayed >= stakesDivisor) {
+                    totalBalance = Utils.beautifyDoubleValue(totalBalance - sumStakesPlayed);
+                    sums.push(-sumStakesPlayed);
+                    stakesToRecover.push(Utils.beautifyDoubleValue(sumStakesPlayed/3));
+                    stakesToRecover.push(Utils.beautifyDoubleValue(sumStakesPlayed/3));
+                    stakesToRecover.push(Utils.beautifyDoubleValue(sumStakesPlayed/3));
+                    sumStakesPlayed = 0;
+                    recoveryMode = true;
+                }
+                double stakeToPlay = 0;
+                if (!recoveryMode) {
+                    stakeToPlay = Utils.beautifyDoubleValue((targetProfit + sumStakesPlayed)/(oddAvg-1));
+                } else if (recoveryMode && sumStakesPlayed == 0) {
+                    stakeToPlay = Utils.beautifyDoubleValue((stakesToRecover.peek())/(oddAvg-1));
+                } else if (recoveryMode && sumStakesPlayed > 0) {
+                    stakeToPlay = Utils.beautifyDoubleValue((stakesToRecover.peek() + sumStakesPlayed)/(oddAvg-1));
+                }
+                stakesPlayed.push(stakeToPlay);
+                sumStakesPlayed = Utils.beautifyDoubleValue(sumStakesPlayed + stakeToPlay);
+            }
+
+            laststake = stakesPlayed.peek();
+            if (Integer.parseInt(sequences.get(k+1).trim()) == -1) {
+                totalBalance = totalBalance - laststake;
+                break;
+            } else if (Integer.parseInt(sequences.get(k+1).trim()) == 0) {
+                totalBalance += laststake;
+                break;
+            }
+
+            //add to balance last balance
+            if (recoveryMode) {
+                totalBalance = Utils.beautifyDoubleValue(totalBalance + stakesToRecover.peek());
+                sums.push(stakesToRecover.peek());
+            } else {
+                totalBalance = Utils.beautifyDoubleValue(totalBalance + targetProfit);
+                sums.push(targetProfit);
+            }
+
+            if (stakesToRecover.size() > 0) {
+                stakesToRecover.pop();
+            }
+
+            if (stakesToRecover.size() == 0) {
+                recoveryMode = false;
+            }
+        }
+
+        String stakesString = stakesPlayed.toString();
+
+        return totalBalance;
     }
 
 
@@ -131,7 +202,7 @@ public class TestController {
 
 //        Stack<LinkedHashMap<Double, JsonNode>> stack = new Stack<>();
         List<Stack<LinkedHashMap<Double, JsonNode>>> stakesToRecover = new ArrayList<>();
-        double targetProfit = 2;
+        double targetProfit = 1;
 
         double accumulatedBalance = 0.0;
         List<LinkedHashMap> allSimulatedData = new ArrayList<>();
@@ -207,11 +278,14 @@ public class TestController {
                     accumulatedBalance += Utils.beautifyDoubleValue((firstStake*overOdd) - firstStake);
                     stakesToRecover.remove(stackByJsonNode);
                 } else {
-                    if (stackByJsonNode.size() > 1 || firstStake >= 10) {
+                    //penso que daqui para baixo se deva usar calculateSumOfKeys(stackByJsonNode) em vez de firstStake
+                    if (stackByJsonNode.size() > 2 || firstStake >= 10) {
                         int numSplittedStakes = 2;
                         if (firstStake >= 10) {
                             numSplittedStakes = 3;
                         }
+//                        int numSplittedStakes = 5;
+
                         double splittedStake = Utils.beautifyDoubleValue(firstStake/numSplittedStakes);
                         //split it into X new stacks
                         for (int i=0;i<numSplittedStakes;i++) {

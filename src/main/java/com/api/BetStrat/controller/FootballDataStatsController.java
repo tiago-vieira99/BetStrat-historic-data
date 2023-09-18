@@ -1,5 +1,6 @@
 package com.api.BetStrat.controller;
 
+import com.api.BetStrat.constants.TeamScoreEnum;
 import com.api.BetStrat.entity.DrawSeasonInfo;
 import com.api.BetStrat.entity.EuroHandicapSeasonInfo;
 import com.api.BetStrat.entity.GoalsFestSeasonInfo;
