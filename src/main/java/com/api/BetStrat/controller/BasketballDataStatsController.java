@@ -1,13 +1,13 @@
 package com.api.BetStrat.controller;
 
-import com.api.BetStrat.entity.ComebackSeasonInfo;
-import com.api.BetStrat.entity.GoalsFestSeasonInfo;
-import com.api.BetStrat.entity.ShortBasketWinsSeasonInfo;
+import com.api.BetStrat.entity.basketball.ComebackSeasonInfo;
+import com.api.BetStrat.entity.football.GoalsFestSeasonInfo;
+import com.api.BetStrat.entity.basketball.ShortBasketWinsSeasonInfo;
 import com.api.BetStrat.entity.Team;
 import com.api.BetStrat.exception.StandardError;
 import com.api.BetStrat.repository.TeamRepository;
-import com.api.BetStrat.service.ComebackSeasonInfoService;
-import com.api.BetStrat.service.ShortBasketWinsSeasonInfoService;
+import com.api.BetStrat.service.basketball.ComebackSeasonInfoService;
+import com.api.BetStrat.service.basketball.ShortBasketWinsSeasonInfoService;
 import com.api.BetStrat.service.TeamService;
 import com.api.BetStrat.util.BasketballScrappingData;
 import io.swagger.annotations.Api;

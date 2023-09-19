@@ -1,7 +1,6 @@
-package com.api.BetStrat.repository;
+package com.api.BetStrat.repository.basketball;
 
-import com.api.BetStrat.entity.ComebackSeasonInfo;
-import com.api.BetStrat.entity.ShortBasketWinsSeasonInfo;
+import com.api.BetStrat.entity.basketball.ShortBasketWinsSeasonInfo;
 import com.api.BetStrat.entity.Team;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.jpa.repository.JpaRepository;

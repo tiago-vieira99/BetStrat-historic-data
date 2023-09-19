@@ -1,7 +1,5 @@
 package com.api.BetStrat.util;
 
-import com.api.BetStrat.entity.DrawSeasonInfo;
-import com.api.BetStrat.service.DrawSeasonInfoService;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.http.HttpEntity;
@@ -24,7 +22,6 @@ import org.springframework.stereotype.Service;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URLEncoder;
-import java.text.*;
 import java.util.*;
 import java.util.stream.Collectors;
 

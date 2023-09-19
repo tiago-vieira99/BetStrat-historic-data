@@ -1,9 +1,9 @@
-package com.api.BetStrat.service;
+package com.api.BetStrat.service.basketball;
 
 import com.api.BetStrat.constants.TeamScoreEnum;
-import com.api.BetStrat.entity.ComebackSeasonInfo;
+import com.api.BetStrat.entity.basketball.ShortBasketWinsSeasonInfo;
 import com.api.BetStrat.entity.Team;
-import com.api.BetStrat.repository.ComebackSeasonInfoRepository;
+import com.api.BetStrat.repository.basketball.ShortWinsSeasonInfoRepository;
 import com.api.BetStrat.util.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,38 +21,38 @@ import static com.api.BetStrat.constants.BetStratConstants.FOOTBALL_SEASONS_LIST
 
 @Service
 @Transactional
-public class ComebackSeasonInfoService {
+public class ShortBasketWinsSeasonInfoService {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(ComebackSeasonInfoService.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ShortBasketWinsSeasonInfoService.class);
 
     @Autowired
-    private ComebackSeasonInfoRepository ComebackSeasonInfoRepository;
+    private ShortWinsSeasonInfoRepository shortWinsSeasonInfoRepository;
 
-    public ComebackSeasonInfo insertComebackInfo(ComebackSeasonInfo ComebackSeasonInfo) {
-        return ComebackSeasonInfoRepository.save(ComebackSeasonInfo);
+    public ShortBasketWinsSeasonInfo insertShortWinsInfo(ShortBasketWinsSeasonInfo ShortBasketWinsSeasonInfo) {
+        return shortWinsSeasonInfoRepository.save(ShortBasketWinsSeasonInfo);
     }
 
     public Team updateTeamScore (Team teamByName) {
-        List<ComebackSeasonInfo> statsByTeam = ComebackSeasonInfoRepository.getStatsByTeam(teamByName);
+        List<ShortBasketWinsSeasonInfo> statsByTeam = shortWinsSeasonInfoRepository.getStatsByTeam(teamByName);
         Collections.sort(statsByTeam, new SortStatsDataBySeason());
         Collections.reverse(statsByTeam);
 
         if (statsByTeam.size() < 3) {
-            teamByName.setBasketComebackScore(TeamScoreEnum.INSUFFICIENT_DATA.getValue());
+            teamByName.setBasketShortWinsScore(TeamScoreEnum.INSUFFICIENT_DATA.getValue());
         } else {
-            int last3SeasonsComebackRateScore = calculateLast3SeasonsComebackRateScore(statsByTeam);
-            int allSeasonsComebackRateScore = calculateAllSeasonsComebackRateScore(statsByTeam);
-            int last3SeasonsmaxSeqWOComebackScore = calculateLast3SeasonsmaxSeqWOComebackScore(statsByTeam);
-            int allSeasonsmaxSeqWOComebackScore = calculateAllSeasonsmaxSeqWOComebackScore(statsByTeam);
+            int last3SeasonsDrawRateScore = calculateLast3SeasonsShortWinsRateScore(statsByTeam);
+            int allSeasonsDrawRateScore = calculateAllSeasonsShortWinsRateScore(statsByTeam);
+            int last3SeasonsmaxSeqWODrawScore = calculateLast3SeasonsmaxSeqWODrawScore(statsByTeam);
+            int allSeasonsmaxSeqWODrawScore = calculateAllSeasonsmaxSeqWODrawScore(statsByTeam);
             int last3SeasonsStdDevScore = calculateLast3SeasonsStdDevScore(statsByTeam);
             int allSeasonsStdDevScore = calculateAllSeasonsStdDevScore(statsByTeam);
             int totalMatchesScore = calculateLeagueMatchesScore(statsByTeam.get(0).getNumMatches());
 
-            double totalScore = Utils.beautifyDoubleValue(0.2*last3SeasonsComebackRateScore + 0.15*allSeasonsComebackRateScore +
-                    0.15*last3SeasonsmaxSeqWOComebackScore + 0.05*allSeasonsmaxSeqWOComebackScore +
+            double totalScore = Utils.beautifyDoubleValue(0.2*last3SeasonsDrawRateScore + 0.15*allSeasonsDrawRateScore +
+                    0.15*last3SeasonsmaxSeqWODrawScore + 0.05*allSeasonsmaxSeqWODrawScore +
                     0.3*last3SeasonsStdDevScore + 0.1*allSeasonsStdDevScore + 0.05*totalMatchesScore);
 
-            teamByName.setBasketComebackScore(calculateFinalRating(totalScore));
+            teamByName.setBasketShortWinsScore(calculateFinalRating(totalScore));
         }
 
         return teamByName;
@@ -71,58 +71,58 @@ public class ComebackSeasonInfoService {
         return "";
     }
 
-    private int calculateLast3SeasonsComebackRateScore(List<ComebackSeasonInfo> statsByTeam) {
-        double sumComebackRates = 0;
+    private int calculateLast3SeasonsShortWinsRateScore(List<ShortBasketWinsSeasonInfo> statsByTeam) {
+        double sumDrawRates = 0;
         for (int i=0; i<3; i++) {
-            sumComebackRates += statsByTeam.get(i).getComebacksRate();
+            sumDrawRates += statsByTeam.get(i).getNumShortWins();
         }
 
-        double avgComebackRate = Utils.beautifyDoubleValue(sumComebackRates / 3);
+        double avgDrawRate = Utils.beautifyDoubleValue(sumDrawRates / 3);
 
-        if (isBetween(avgComebackRate,35,100)) {
+        if (isBetween(avgDrawRate,35,100)) {
             return 100;
-        } else if(isBetween(avgComebackRate,30,35)) {
+        } else if(isBetween(avgDrawRate,30,35)) {
             return 90;
-        } else if(isBetween(avgComebackRate,27,30)) {
+        } else if(isBetween(avgDrawRate,27,30)) {
             return 80;
-        } else if(isBetween(avgComebackRate,25,27)) {
+        } else if(isBetween(avgDrawRate,25,27)) {
             return 60;
-        } else if(isBetween(avgComebackRate,20,25)) {
+        } else if(isBetween(avgDrawRate,20,25)) {
             return 50;
-        } else if(isBetween(avgComebackRate,0,20)) {
+        } else if(isBetween(avgDrawRate,0,20)) {
             return 30;
         }
         return 0;
     }
 
-    private int calculateAllSeasonsComebackRateScore(List<ComebackSeasonInfo> statsByTeam) {
-        double sumComebackRates = 0;
+    private int calculateAllSeasonsShortWinsRateScore(List<ShortBasketWinsSeasonInfo> statsByTeam) {
+        double sumDrawRates = 0;
         for (int i=0; i<statsByTeam.size(); i++) {
-            sumComebackRates += statsByTeam.get(i).getComebacksRate();
+            sumDrawRates += statsByTeam.get(i).getShortWinsRate();
         }
 
-        double avgComebackRate = Utils.beautifyDoubleValue(sumComebackRates / statsByTeam.size());
+        double avgDrawRate = Utils.beautifyDoubleValue(sumDrawRates / statsByTeam.size());
 
-        if (isBetween(avgComebackRate,35,100)) {
+        if (isBetween(avgDrawRate,35,100)) {
             return 100;
-        } else if(isBetween(avgComebackRate,30,35)) {
+        } else if(isBetween(avgDrawRate,30,35)) {
             return 90;
-        } else if(isBetween(avgComebackRate,27,30)) {
+        } else if(isBetween(avgDrawRate,27,30)) {
             return 80;
-        } else if(isBetween(avgComebackRate,25,27)) {
+        } else if(isBetween(avgDrawRate,25,27)) {
             return 60;
-        } else if(isBetween(avgComebackRate,20,25)) {
+        } else if(isBetween(avgDrawRate,20,25)) {
             return 50;
-        } else if(isBetween(avgComebackRate,0,20)) {
+        } else if(isBetween(avgDrawRate,0,20)) {
             return 30;
         }
         return 0;
     }
 
-    private int calculateRecommendedLevelToStartSequence(List<ComebackSeasonInfo> statsByTeam) {
+    private int calculateRecommendedLevelToStartSequence(List<ShortBasketWinsSeasonInfo> statsByTeam) {
         int maxValue = 0;
         for (int i = 0; i < 3; i++) {
-            String sequenceStr = statsByTeam.get(i).getNoComebacksSequence().replaceAll("[\\[\\]\\s]", "");
+            String sequenceStr = statsByTeam.get(i).getNoShortWinsSequence().replaceAll("[\\[\\]\\s]", "");
             List<Integer> sequenceList = Arrays.asList(sequenceStr.split(",")).stream().map(Integer::parseInt).collect(Collectors.toList());
             if (Collections.max(sequenceList) > maxValue) {
                 maxValue = Collections.max(sequenceList);
@@ -131,10 +131,10 @@ public class ComebackSeasonInfoService {
         return maxValue-6 < 0 ? 0 : maxValue-6;
     }
 
-    private int calculateLast3SeasonsmaxSeqWOComebackScore(List<ComebackSeasonInfo> statsByTeam) {
+    private int calculateLast3SeasonsmaxSeqWODrawScore(List<ShortBasketWinsSeasonInfo> statsByTeam) {
         int maxValue = 0;
         for (int i=0; i<3; i++) {
-            String sequenceStr = statsByTeam.get(i).getNoComebacksSequence().replaceAll("[\\[\\]\\s]", "");
+            String sequenceStr = statsByTeam.get(i).getNoShortWinsSequence().replaceAll("[\\[\\]\\s]", "");
             List<Integer> sequenceList = Arrays.asList(sequenceStr.split(",")).stream().map(Integer::parseInt).collect(Collectors.toList());
             if (Collections.max(sequenceList) > maxValue) {
                 maxValue = Collections.max(sequenceList);
@@ -161,10 +161,10 @@ public class ComebackSeasonInfoService {
         return 0;
     }
 
-    private int calculateAllSeasonsmaxSeqWOComebackScore(List<ComebackSeasonInfo> statsByTeam) {
+    private int calculateAllSeasonsmaxSeqWODrawScore(List<ShortBasketWinsSeasonInfo> statsByTeam) {
         int maxValue = 0;
         for (int i=0; i<statsByTeam.size(); i++) {
-            String sequenceStr = statsByTeam.get(i).getNoComebacksSequence().replaceAll("[\\[\\]\\s]", "");
+            String sequenceStr = statsByTeam.get(i).getNoShortWinsSequence().replaceAll("[\\[\\]\\s]", "");
             List<Integer> sequenceList = Arrays.asList(sequenceStr.split(",")).stream().map(Integer::parseInt).collect(Collectors.toList());
             if (Collections.max(sequenceList) > maxValue) {
                 maxValue = Collections.max(sequenceList);
@@ -191,7 +191,7 @@ public class ComebackSeasonInfoService {
         return 0;
     }
 
-    private int calculateLast3SeasonsStdDevScore(List<ComebackSeasonInfo> statsByTeam) {
+    private int calculateLast3SeasonsStdDevScore(List<ShortBasketWinsSeasonInfo> statsByTeam) {
         double sumStdDev = 0;
         for (int i=0; i<3; i++) {
             sumStdDev += statsByTeam.get(i).getStdDeviation();
@@ -219,7 +219,7 @@ public class ComebackSeasonInfoService {
         return 0;
     }
 
-    private int calculateAllSeasonsStdDevScore(List<ComebackSeasonInfo> statsByTeam) {
+    private int calculateAllSeasonsStdDevScore(List<ShortBasketWinsSeasonInfo> statsByTeam) {
         double sumStdDev = 0;
         for (int i=0; i<statsByTeam.size(); i++) {
             sumStdDev += statsByTeam.get(i).getStdDeviation();
@@ -266,10 +266,10 @@ public class ComebackSeasonInfoService {
         return lower <= x && x < upper;
     }
 
-    static class SortStatsDataBySeason implements Comparator<ComebackSeasonInfo> {
+    static class SortStatsDataBySeason implements Comparator<ShortBasketWinsSeasonInfo> {
 
         @Override
-        public int compare(ComebackSeasonInfo a, ComebackSeasonInfo b) {
+        public int compare(ShortBasketWinsSeasonInfo a, ShortBasketWinsSeasonInfo b) {
             return Integer.valueOf(FOOTBALL_SEASONS_LIST.indexOf(a.getSeason()))
                     .compareTo(Integer.valueOf(FOOTBALL_SEASONS_LIST.indexOf(b.getSeason())));
         }
@@ -278,24 +278,24 @@ public class ComebackSeasonInfoService {
     /* avaliar cada parametro independentemente:
      *
      * 1) dar peso a cada parametro:
-     *   ComebackRate (last3) - 25
-     *   ComebackRate (total) - 20
-     *   maxSeqWOComeback (last3) - 15
-     *   maxSeqWOComeback (total) - 5
+     *   drawRate (last3) - 25
+     *   drawRate (total) - 20
+     *   maxSeqWODraw (last3) - 15
+     *   maxSeqWODraw (total) - 5
      *   stdDev (last3) - 20
      *   stdDev (total) - 10
      *   numTotalMatches - 5
      *
      *
-     *   ComebackRate -> (100 se > 35) ; (90 se < 35) ; (80 entre 27 e 30) ; (60 entre 25 e 27) ; (50 entre 20 e 25) ; (30 se < 20)
-     *   maxSeqWOComeback -> (100 se < 7) ; (90 se == 7) ; (80 se == 8) ; (70 se == 9) ; (60 se == 10 ou 11) ; (50 se == 12 ou 13) ; (40 se == 14) ; (30 se > 14)
+     *   drawRate -> (100 se > 35) ; (90 se < 35) ; (80 entre 27 e 30) ; (60 entre 25 e 27) ; (50 entre 20 e 25) ; (30 se < 20)
+     *   maxSeqWODraw -> (100 se < 7) ; (90 se == 7) ; (80 se == 8) ; (70 se == 9) ; (60 se == 10 ou 11) ; (50 se == 12 ou 13) ; (40 se == 14) ; (30 se > 14)
      *   stdDev -> (100 se < 2.3) ; (90 se < 2.4) ; (80 se < 2.5) ; (70 se < 2.6) ; (60 se < 2.7) ; (50 se < 2.8) ; (40 se < 2.9) ; (30 se > 3)
      *   numTotalMatches -> (100 se < 30) ; (90 se < 32) ; (80 se < 34) ; (50 se < 40) ; (30 se > 40)
      *
      *
-     * excellent: avg std dev < 2.1 && avg ComebackRate > 30 && list.size > 3 && maxSeqValue < 9
-     * acceptable: ((avg std dev > 2.1 & < 2.5 ; min ComebackRate > 23) || avg ComebackRate > 32) && maxSeqValue <= 10
-     * risky: (max std dev > 3 && min ComebackRate < 20) || maxSeqValue > 15
+     * excellent: avg std dev < 2.1 && avg drawRate > 30 && list.size > 3 && maxSeqValue < 9
+     * acceptable: ((avg std dev > 2.1 & < 2.5 ; min drawRate > 23) || avg drawRate > 32) && maxSeqValue <= 10
+     * risky: (max std dev > 3 && min drawRate < 20) || maxSeqValue > 15
      *
      * */
 

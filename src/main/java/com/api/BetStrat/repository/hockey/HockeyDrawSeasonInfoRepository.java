@@ -1,7 +1,6 @@
-package com.api.BetStrat.repository;
+package com.api.BetStrat.repository.hockey;
 
-import com.api.BetStrat.entity.DrawSeasonInfo;
-import com.api.BetStrat.entity.HockeyDrawSeasonInfo;
+import com.api.BetStrat.entity.hockey.HockeyDrawSeasonInfo;
 import com.api.BetStrat.entity.Team;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.jpa.repository.JpaRepository;

@@ -1,9 +1,9 @@
-package com.api.BetStrat.service;
+package com.api.BetStrat.service.hockey;
 
 import com.api.BetStrat.constants.TeamScoreEnum;
-import com.api.BetStrat.entity.HockeyDrawSeasonInfo;
+import com.api.BetStrat.entity.hockey.HockeyDrawSeasonInfo;
 import com.api.BetStrat.entity.Team;
-import com.api.BetStrat.repository.HockeyDrawSeasonInfoRepository;
+import com.api.BetStrat.repository.hockey.HockeyDrawSeasonInfoRepository;
 import com.api.BetStrat.util.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

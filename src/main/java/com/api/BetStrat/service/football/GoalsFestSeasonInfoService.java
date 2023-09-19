@@ -1,34 +1,24 @@
-package com.api.BetStrat.service;
+package com.api.BetStrat.service.football;
 
 import com.api.BetStrat.constants.TeamScoreEnum;
 import com.api.BetStrat.entity.Team;
-import com.api.BetStrat.entity.GoalsFestSeasonInfo;
-import com.api.BetStrat.entity.WinsMarginSeasonInfo;
-import com.api.BetStrat.repository.GoalsFestSeasonInfoRepository;
+import com.api.BetStrat.entity.football.GoalsFestSeasonInfo;
+import com.api.BetStrat.repository.football.GoalsFestSeasonInfoRepository;
 import com.api.BetStrat.util.ScrappingUtil;
-import com.api.BetStrat.util.TeamEHhistoricData;
 import com.api.BetStrat.util.TeamGoalsFestHistoricData;
 import com.api.BetStrat.util.Utils;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import lombok.SneakyThrows;
 import org.json.JSONArray;
-import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.io.DataInput;
-import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Locale;
-import java.util.TimeZone;
 import java.util.stream.Collectors;
 
 import static com.api.BetStrat.constants.BetStratConstants.FBREF_BASE_URL;

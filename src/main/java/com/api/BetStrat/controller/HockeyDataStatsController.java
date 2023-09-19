@@ -1,17 +1,17 @@
 package com.api.BetStrat.controller;
 
-import com.api.BetStrat.entity.DrawSeasonInfo;
-import com.api.BetStrat.entity.HockeyDrawSeasonInfo;
+import com.api.BetStrat.entity.football.DrawSeasonInfo;
+import com.api.BetStrat.entity.hockey.HockeyDrawSeasonInfo;
 import com.api.BetStrat.entity.Team;
-import com.api.BetStrat.entity.WinsMarginSeasonInfo;
+import com.api.BetStrat.entity.football.WinsMarginSeasonInfo;
 import com.api.BetStrat.exception.StandardError;
 import com.api.BetStrat.repository.TeamRepository;
-import com.api.BetStrat.service.DrawSeasonInfoService;
-import com.api.BetStrat.service.HockeyDrawSeasonInfoService;
+import com.api.BetStrat.service.football.DrawSeasonInfoService;
+import com.api.BetStrat.service.hockey.HockeyDrawSeasonInfoService;
 import com.api.BetStrat.service.TeamService;
-import com.api.BetStrat.service.WinsMargin3SeasonInfoService;
-import com.api.BetStrat.service.WinsMarginAny2SeasonInfoService;
-import com.api.BetStrat.service.WinsMarginSeasonInfoService;
+import com.api.BetStrat.service.hockey.WinsMargin3SeasonInfoService;
+import com.api.BetStrat.service.hockey.WinsMarginAny2SeasonInfoService;
+import com.api.BetStrat.service.football.WinsMarginSeasonInfoService;
 import com.api.BetStrat.util.HockeyEurohockeyScrappingData;
 import com.api.BetStrat.util.TeamDFhistoricData;
 import com.api.BetStrat.util.TeamEHhistoricData;

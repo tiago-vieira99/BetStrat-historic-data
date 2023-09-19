@@ -1,5 +1,6 @@
-package com.api.BetStrat.entity;
+package com.api.BetStrat.entity.football;
 
+import com.api.BetStrat.entity.Team;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.annotations.ApiModelProperty;
@@ -10,18 +11,7 @@ import lombok.Setter;
 import lombok.SneakyThrows;
 import org.hibernate.annotations.CreationTimestamp;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.Table;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
-import javax.persistence.UniqueConstraint;
+import javax.persistence.*;
 import java.io.Serializable;
 import java.util.Date;
 
@@ -30,8 +20,8 @@ import java.util.Date;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "EuroHandicapSeasonInfo",  uniqueConstraints = { @UniqueConstraint(name = "UniqueSeasonAndCompetitionForTeamEH", columnNames = { "teamID", "season", "competition" }) })
-public class EuroHandicapSeasonInfo implements Serializable {
+@Table(name = "DrawSeasonInfo", uniqueConstraints = { @UniqueConstraint(name = "UniqueSeasonAndCompetitionForTeam", columnNames = { "teamID", "season", "competition" }) })
+public class DrawSeasonInfo implements Serializable {
     private static final long serialVersionUID = 1L;
 
     @Id
@@ -71,20 +61,14 @@ public class EuroHandicapSeasonInfo implements Serializable {
     @Column(name = "coefficient_deviation")
     private double coefDeviation;
 
-    @Column(name = "winsRate")
-    private double winsRate;
+    @Column(name = "drawRate")
+    private double drawRate;
 
-    @Column(name = "marginWinsRate")
-    private double marginWinsRate;
+    @Column(name = "no_draws_sequence")
+    private String noDrawsSequence;
 
-    @Column(name = "no_marginWins_sequence")
-    private String noMarginWinsSequence;
-
-    @Column(name = "num_wins")
-    private int numWins;
-
-    @Column(name = "num_marginWins")
-    private int numMarginWins;
+    @Column(name = "num_draws")
+    private int numDraws;
 
     @SneakyThrows
     @Override
@@ -92,5 +76,4 @@ public class EuroHandicapSeasonInfo implements Serializable {
         ObjectMapper mapper = new ObjectMapper();
         return mapper.writeValueAsString(this);
     }
-
 }

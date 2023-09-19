@@ -1,5 +1,6 @@
-package com.api.BetStrat.entity;
+package com.api.BetStrat.entity.football;
 
+import com.api.BetStrat.entity.Team;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.annotations.ApiModelProperty;
@@ -10,7 +11,18 @@ import lombok.Setter;
 import lombok.SneakyThrows;
 import org.hibernate.annotations.CreationTimestamp;
 
-import javax.persistence.*;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.Table;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
+import javax.persistence.UniqueConstraint;
 import java.io.Serializable;
 import java.util.Date;
 
@@ -19,8 +31,8 @@ import java.util.Date;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "DrawSeasonInfo", uniqueConstraints = { @UniqueConstraint(name = "UniqueSeasonAndCompetitionForTeam", columnNames = { "teamID", "season", "competition" }) })
-public class DrawSeasonInfo implements Serializable {
+@Table(name = "GoalsFestSeasonInfo",  uniqueConstraints = { @UniqueConstraint(name = "UniqueSeasonAndCompetitionForTeamGF", columnNames = { "teamID", "season", "competition" }) })
+public class GoalsFestSeasonInfo implements Serializable {
     private static final long serialVersionUID = 1L;
 
     @Id
@@ -60,14 +72,14 @@ public class DrawSeasonInfo implements Serializable {
     @Column(name = "coefficient_deviation")
     private double coefDeviation;
 
-    @Column(name = "drawRate")
-    private double drawRate;
+    @Column(name = "goalsFestRate")
+    private double goalsFestRate;
 
-    @Column(name = "no_draws_sequence")
-    private String noDrawsSequence;
+    @Column(name = "no_goalsFest_sequence")
+    private String noGoalsFestSequence;
 
-    @Column(name = "num_draws")
-    private int numDraws;
+    @Column(name = "num_goalsFest")
+    private int numGoalsFest;
 
     @SneakyThrows
     @Override
@@ -75,4 +87,5 @@ public class DrawSeasonInfo implements Serializable {
         ObjectMapper mapper = new ObjectMapper();
         return mapper.writeValueAsString(this);
     }
+
 }

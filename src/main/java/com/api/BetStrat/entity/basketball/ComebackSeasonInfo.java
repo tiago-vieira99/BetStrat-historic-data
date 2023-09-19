@@ -1,5 +1,6 @@
-package com.api.BetStrat.entity;
+package com.api.BetStrat.entity.basketball;
 
+import com.api.BetStrat.entity.Team;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.annotations.ApiModelProperty;
@@ -30,8 +31,8 @@ import java.util.Date;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "WinsMarginSeasonInfo",  uniqueConstraints = { @UniqueConstraint(name = "UniqueSeasonAndCompetitionForTeamWM", columnNames = { "teamID", "season", "competition" }) })
-public class WinsMarginSeasonInfo implements Serializable {
+@Table(name = "ComebackSeasonInfo", uniqueConstraints = { @UniqueConstraint(name = "UniqueSeasonAndCompetitionForTeamComebacks", columnNames = { "teamID", "season", "competition" }) })
+public class ComebackSeasonInfo implements Serializable {
     private static final long serialVersionUID = 1L;
 
     @Id
@@ -71,20 +72,20 @@ public class WinsMarginSeasonInfo implements Serializable {
     @Column(name = "coefficient_deviation")
     private double coefDeviation;
 
+    @Column(name = "comebacksRate")
+    private double comebacksRate;
+
     @Column(name = "winsRate")
     private double winsRate;
 
-    @Column(name = "marginWinsRate")
-    private double marginWinsRate;
+    @Column(name = "no_comebacks_sequence")
+    private String noComebacksSequence;
 
-    @Column(name = "no_marginWins_sequence")
-    private String noMarginWinsSequence;
+    @Column(name = "num_comebacks")
+    private int numComebacks;
 
     @Column(name = "num_wins")
     private int numWins;
-
-    @Column(name = "num_marginWins")
-    private int numMarginWins;
 
     @SneakyThrows
     @Override
@@ -92,5 +93,4 @@ public class WinsMarginSeasonInfo implements Serializable {
         ObjectMapper mapper = new ObjectMapper();
         return mapper.writeValueAsString(this);
     }
-
 }

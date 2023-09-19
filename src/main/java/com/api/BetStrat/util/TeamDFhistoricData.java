@@ -1,6 +1,6 @@
 package com.api.BetStrat.util;
 
-import com.api.BetStrat.entity.DrawSeasonInfo;
+import com.api.BetStrat.entity.football.DrawSeasonInfo;
 import com.google.common.base.Splitter;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;

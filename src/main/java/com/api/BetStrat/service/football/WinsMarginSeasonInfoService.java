@@ -1,10 +1,9 @@
-package com.api.BetStrat.service;
+package com.api.BetStrat.service.football;
 
 import com.api.BetStrat.constants.TeamScoreEnum;
-import com.api.BetStrat.entity.EuroHandicapSeasonInfo;
 import com.api.BetStrat.entity.Team;
-import com.api.BetStrat.entity.WinsMarginSeasonInfo;
-import com.api.BetStrat.repository.EuroHandicapSeasonInfoRepository;
+import com.api.BetStrat.entity.football.WinsMarginSeasonInfo;
+import com.api.BetStrat.repository.football.WinsMarginSeasonInfoRepository;
 import com.api.BetStrat.util.ScrappingUtil;
 import com.api.BetStrat.util.TeamEHhistoricData;
 import com.api.BetStrat.util.Utils;
@@ -18,6 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -33,20 +33,20 @@ import static com.api.BetStrat.constants.BetStratConstants.ZEROZERO_SEASON_CODES
 
 @Service
 @Transactional
-public class EuroHandicapSeasonInfoService {
+public class WinsMarginSeasonInfoService {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(EuroHandicapSeasonInfoService.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(WinsMarginSeasonInfoService.class);
 
     @Autowired
-    private EuroHandicapSeasonInfoRepository euroHandicapSeasonInfoRepository;
+    private WinsMarginSeasonInfoRepository winsMarginSeasonInfoRepository;
 
-    public EuroHandicapSeasonInfo insertEuroHandicapSeasonInfo(EuroHandicapSeasonInfo euroHandicapSeasonInfo) {
-        LOGGER.info("Inserted " + euroHandicapSeasonInfo.getClass() + " for " + euroHandicapSeasonInfo.getTeamId().getName() + " and season " + euroHandicapSeasonInfo.getSeason());
-        return euroHandicapSeasonInfoRepository.save(euroHandicapSeasonInfo);
+    public WinsMarginSeasonInfo insertWinsMarginInfo(WinsMarginSeasonInfo winsMarginSeasonInfo) {
+        LOGGER.info("Inserted " + winsMarginSeasonInfo.getClass() + " for " + winsMarginSeasonInfo.getTeamId().getName() + " and season " + winsMarginSeasonInfo.getSeason());
+        return winsMarginSeasonInfoRepository.save(winsMarginSeasonInfo);
     }
 
     public void updateStatsDataInfo(Team team) {
-        List<EuroHandicapSeasonInfo> statsByTeam = euroHandicapSeasonInfoRepository.getStatsByTeam(team);
+        List<WinsMarginSeasonInfo> statsByTeam = winsMarginSeasonInfoRepository.getStatsByTeam(team);
         List<String> seasonsList = null;
 
         if (FOOTBALL_SUMMER_SEASONS_BEGIN_MONTH_LIST.contains(team.getBeginSeason())) {
@@ -88,11 +88,11 @@ public class EuroHandicapSeasonInfoService {
                 if (scrappingData != null) {
                     TeamEHhistoricData teamEHhistoricData = new TeamEHhistoricData();
                     try {
-                        EuroHandicapSeasonInfo euroHandicapSeasonInfo = teamEHhistoricData.buildSeasonEuroHandicapStatsData(scrappingData, team.getName());
-                        euroHandicapSeasonInfo.setSeason(season);
-                        euroHandicapSeasonInfo.setTeamId(team);
-                        euroHandicapSeasonInfo.setUrl(newSeasonUrl);
-                        insertEuroHandicapSeasonInfo(euroHandicapSeasonInfo);
+                        WinsMarginSeasonInfo winsMarginSeasonInfo = teamEHhistoricData.buildSeason12MarginWinStatsData(scrappingData, team.getName());
+                        winsMarginSeasonInfo.setSeason(season);
+                        winsMarginSeasonInfo.setTeamId(team);
+                        winsMarginSeasonInfo.setUrl(newSeasonUrl);
+                        insertWinsMarginInfo(winsMarginSeasonInfo);
                     } catch (Exception e) {
                         System.out.println(e.getMessage());
                     }
@@ -102,12 +102,12 @@ public class EuroHandicapSeasonInfoService {
     }
 
     public Team updateTeamScore (Team teamByName) {
-        List<EuroHandicapSeasonInfo> statsByTeam = euroHandicapSeasonInfoRepository.getStatsByTeam(teamByName);
+        List<WinsMarginSeasonInfo> statsByTeam = winsMarginSeasonInfoRepository.getStatsByTeam(teamByName);
         Collections.sort(statsByTeam, new SortStatsDataBySeason());
         Collections.reverse(statsByTeam);
 
         if (statsByTeam.size() < 3) {
-            teamByName.setEuroHandicapScore(TeamScoreEnum.INSUFFICIENT_DATA.getValue());
+            teamByName.setMarginWinsScore(TeamScoreEnum.INSUFFICIENT_DATA.getValue());
         } else {
             int last3SeasonsMarginWinsRateScore = calculateLast3SeasonsMarginWinsRateScore(statsByTeam);
             int allSeasonsMarginWinsRateScore = calculateAllSeasonsMarginWinsRateScore(statsByTeam);
@@ -125,12 +125,84 @@ public class EuroHandicapSeasonInfoService {
             double last3SeasonsScore = Utils.beautifyDoubleValue(0.3*last3SeasonsWinsAvg + 0.4*last3SeasonsmaxSeqWOMarginWinsScore + 0.3*last3SeasonsStdDevScore);
             double allSeasonsScore = Utils.beautifyDoubleValue(0.3*allSeasonsWinsAvg + 0.4*allSeasonsmaxSeqWOMarginWinsScore + 0.3*allSeasonsStdDevScore);
 
-            double totalScore = Utils.beautifyDoubleValue(0.70*last3SeasonsScore + 0.25*allSeasonsScore + 0.05*totalMatchesScore);
+            double totalScore = Utils.beautifyDoubleValue(0.75*last3SeasonsScore + 0.20*allSeasonsScore + 0.05*totalMatchesScore);
 
-            teamByName.setEuroHandicapScore(calculateFinalRating(totalScore));
+            teamByName.setMarginWinsScore(calculateFinalRating(totalScore));
         }
 
         return teamByName;
+    }
+
+    public LinkedHashMap<String, String> getSimulatedScorePartialSeasons(Team teamByName, int seasonsToDiscard) {
+        List<WinsMarginSeasonInfo> statsByTeam = winsMarginSeasonInfoRepository.getStatsByTeam(teamByName);
+        LinkedHashMap<String, String> outMap = new LinkedHashMap<>();
+
+        if (statsByTeam.size() <= 2 || statsByTeam.size() < seasonsToDiscard) {
+            outMap.put("footballMarginWins", TeamScoreEnum.INSUFFICIENT_DATA.getValue());
+            return outMap;
+        }
+        Collections.sort(statsByTeam, new SortStatsDataBySeason());
+        Collections.reverse(statsByTeam);
+        List<WinsMarginSeasonInfo> filteredStats = statsByTeam.subList(seasonsToDiscard, statsByTeam.size());
+
+        if (filteredStats.size() < 3 || !filteredStats.get(0).getSeason().equals(FOOTBALL_WINTER_SEASONS_LIST.get(FOOTBALL_WINTER_SEASONS_LIST.size()-1-seasonsToDiscard)) ||
+                !filteredStats.get(1).getSeason().equals(FOOTBALL_WINTER_SEASONS_LIST.get(FOOTBALL_WINTER_SEASONS_LIST.size()-2-seasonsToDiscard)) ||
+                !filteredStats.get(2).getSeason().equals(FOOTBALL_WINTER_SEASONS_LIST.get(FOOTBALL_WINTER_SEASONS_LIST.size()-3-seasonsToDiscard))) {
+            outMap.put("footballMarginWins", TeamScoreEnum.INSUFFICIENT_DATA.getValue());
+        } else {
+            String lastComp = filteredStats.get(0).getCompetition().substring(0, filteredStats.get(0).getCompetition().lastIndexOf(' '));
+            for (int i=1; i<3; i++) {
+                if (!filteredStats.get(i).getCompetition().substring(0, filteredStats.get(i).getCompetition().lastIndexOf(' ')).contains(lastComp)) {
+                    outMap.put("footballMarginWins", TeamScoreEnum.INSUFFICIENT_DATA.getValue());
+                    return outMap;
+                }
+            }
+
+            if (filteredStats.stream().filter(st -> st.getWinsRate() >= 50).collect(Collectors.toList()).size() < (0.6* filteredStats.size())) {
+                outMap.put("footballMarginWins", TeamScoreEnum.INSUFFICIENT_DATA.getValue());
+                return outMap;
+            }
+
+            int last3SeasonsMarginWinsRateScore = calculateLast3SeasonsMarginWinsRateScore(filteredStats);
+            int allSeasonsMarginWinsRateScore = calculateAllSeasonsMarginWinsRateScore(filteredStats);
+            int last3SeasonsTotalWinsRateScore = calculateLast3SeasonsTotalWinsRateScore(filteredStats);
+            int allSeasonsTotalWinsRateScore = calculateAllSeasonsTotalWinsRateScore(filteredStats);
+            int last3SeasonsmaxSeqWOMarginWinsScore = calculateLast3SeasonsmaxSeqWOMarginWinsScore(filteredStats);
+            int allSeasonsmaxSeqWOMarginWinsScore = calculateAllSeasonsmaxSeqWOMarginWinsScore(filteredStats);
+            int last3SeasonsStdDevScore = calculateLast3SeasonsStdDevScore(filteredStats);
+            int allSeasonsStdDevScore = calculateAllSeasonsStdDevScore(filteredStats);
+            int totalMatchesScore = calculateLeagueMatchesScore(filteredStats.get(0).getNumMatches());
+
+            double last3SeasonsWinsAvg = (last3SeasonsTotalWinsRateScore + last3SeasonsMarginWinsRateScore) / 2;
+            double allSeasonsWinsAvg = (allSeasonsTotalWinsRateScore + allSeasonsMarginWinsRateScore) / 2;
+
+            double last3SeasonsScore = Utils.beautifyDoubleValue(0.3*last3SeasonsWinsAvg + 0.4*last3SeasonsmaxSeqWOMarginWinsScore + 0.3*last3SeasonsStdDevScore);
+            double allSeasonsScore = Utils.beautifyDoubleValue(0.3*allSeasonsWinsAvg + 0.4*allSeasonsmaxSeqWOMarginWinsScore + 0.3*allSeasonsStdDevScore);
+
+            double totalScore = Utils.beautifyDoubleValue(0.75*last3SeasonsScore + 0.20*allSeasonsScore + 0.05*totalMatchesScore);
+
+            String finalScore = calculateFinalRating(totalScore);
+            outMap.put("footballMarginWins", finalScore);
+            outMap.put("sequence", statsByTeam.get(seasonsToDiscard-1).getNoMarginWinsSequence());
+            double balance = 0;
+            String[] seqArray = statsByTeam.get(seasonsToDiscard - 1).getNoMarginWinsSequence().replaceAll("\\[","").replaceAll("]","").split(",");
+            for (int i=0; i<seqArray.length-2; i++) {
+                int excelBadRun = 3;
+                int accepBadRun = 4;
+                if (Integer.parseInt(seqArray[i].trim())-accepBadRun > 4 || Integer.parseInt(seqArray[i].trim())-excelBadRun > 4) {
+                    balance += -20;
+//                    break;
+                }
+                double marginWinsScorePoints = Double.parseDouble(finalScore.substring(finalScore.indexOf('(') + 1, finalScore.indexOf(')')));
+                if (finalScore.contains("EXCEL") && Integer.parseInt(seqArray[i].trim()) > excelBadRun) {
+                    balance += 1.5;
+                } else if (finalScore.contains("ACCEPTABLE") &&  Integer.parseInt(seqArray[i].trim()) > accepBadRun) {
+                    balance += 1.5;
+                }
+            }
+            outMap.put("balance", String.valueOf(balance).replaceAll("\\.",","));
+        }
+        return outMap;
     }
 
     private String calculateFinalRating(double score) {
@@ -146,7 +218,7 @@ public class EuroHandicapSeasonInfoService {
         return "";
     }
 
-    private int calculateLast3SeasonsMarginWinsRateScore(List<EuroHandicapSeasonInfo> statsByTeam) {
+    private int calculateLast3SeasonsMarginWinsRateScore(List<WinsMarginSeasonInfo> statsByTeam) {
         double marginWinsRates = 0;
         for (int i=0; i<3; i++) {
             marginWinsRates += statsByTeam.get(i).getMarginWinsRate();
@@ -166,7 +238,7 @@ public class EuroHandicapSeasonInfoService {
         return 0;
     }
 
-    private int calculateAllSeasonsMarginWinsRateScore(List<EuroHandicapSeasonInfo> statsByTeam) {
+    private int calculateAllSeasonsMarginWinsRateScore(List<WinsMarginSeasonInfo> statsByTeam) {
         double marginWinsRates = 0;
         for (int i=0; i<statsByTeam.size(); i++) {
             marginWinsRates += statsByTeam.get(i).getMarginWinsRate();
@@ -186,7 +258,7 @@ public class EuroHandicapSeasonInfoService {
         return 0;
     }
 
-    private int calculateLast3SeasonsTotalWinsRateScore(List<EuroHandicapSeasonInfo> statsByTeam) {
+    private int calculateLast3SeasonsTotalWinsRateScore(List<WinsMarginSeasonInfo> statsByTeam) {
         double totalWinsRates = 0;
         for (int i=0; i<3; i++) {
             totalWinsRates += statsByTeam.get(i).getMarginWinsRate();
@@ -194,11 +266,15 @@ public class EuroHandicapSeasonInfoService {
 
         double avgDrawRate = Utils.beautifyDoubleValue(totalWinsRates / 3);
 
-        if (isBetween(avgDrawRate,70,100)) {
+        if (isBetween(avgDrawRate,80,100)) {
             return 100;
+        } else if(isBetween(avgDrawRate,70,80)) {
+            return 90;
         } else if(isBetween(avgDrawRate,60,70)) {
             return 80;
-        } else if(isBetween(avgDrawRate,40,60)) {
+        } else if(isBetween(avgDrawRate,50,60)) {
+            return 70;
+        } else if(isBetween(avgDrawRate,40,50)) {
             return 60;
         } else if(isBetween(avgDrawRate,0,40)) {
             return 30;
@@ -206,7 +282,7 @@ public class EuroHandicapSeasonInfoService {
         return 0;
     }
 
-    private int calculateAllSeasonsTotalWinsRateScore(List<EuroHandicapSeasonInfo> statsByTeam) {
+    private int calculateAllSeasonsTotalWinsRateScore(List<WinsMarginSeasonInfo> statsByTeam) {
         double totalWinsRates = 0;
         for (int i=0; i<statsByTeam.size(); i++) {
             totalWinsRates += statsByTeam.get(i).getMarginWinsRate();
@@ -214,11 +290,15 @@ public class EuroHandicapSeasonInfoService {
 
         double avgDrawRate = Utils.beautifyDoubleValue(totalWinsRates / statsByTeam.size());
 
-        if (isBetween(avgDrawRate,70,100)) {
+        if (isBetween(avgDrawRate,80,100)) {
             return 100;
+        } else if(isBetween(avgDrawRate,70,80)) {
+            return 90;
         } else if(isBetween(avgDrawRate,60,70)) {
             return 80;
-        } else if(isBetween(avgDrawRate,40,60)) {
+        } else if(isBetween(avgDrawRate,50,60)) {
+            return 70;
+        } else if(isBetween(avgDrawRate,40,50)) {
             return 60;
         } else if(isBetween(avgDrawRate,0,40)) {
             return 30;
@@ -226,7 +306,7 @@ public class EuroHandicapSeasonInfoService {
         return 0;
     }
 
-    private int calculateLast3SeasonsmaxSeqWOMarginWinsScore(List<EuroHandicapSeasonInfo> statsByTeam) {
+    private int calculateLast3SeasonsmaxSeqWOMarginWinsScore(List<WinsMarginSeasonInfo> statsByTeam) {
         int maxValue = 0;
         for (int i=0; i<3; i++) {
             String sequenceStr = statsByTeam.get(i).getNoMarginWinsSequence().replaceAll("[\\[\\]\\s]", "");
@@ -236,21 +316,21 @@ public class EuroHandicapSeasonInfoService {
             }
         }
 
-        if (isBetween(maxValue,0,5)) {
+        if (isBetween(maxValue,0,7)) {
             return 100;
-        } else if(isBetween(maxValue,5,6)) {
-            return 90;
-        } else if(isBetween(maxValue,6,7)) {
-            return 80;
         } else if(isBetween(maxValue,7,8)) {
-            return 60;
-        } else if(isBetween(maxValue,8,25)) {
+            return 90;
+        } else if(isBetween(maxValue,8,9)) {
+            return 70;
+        } else if(isBetween(maxValue,9,10)) {
+            return 50;
+        } else if(isBetween(maxValue,10,25)) {
             return 30;
         }
         return 0;
     }
 
-    private int calculateAllSeasonsmaxSeqWOMarginWinsScore(List<EuroHandicapSeasonInfo> statsByTeam) {
+    private int calculateAllSeasonsmaxSeqWOMarginWinsScore(List<WinsMarginSeasonInfo> statsByTeam) {
         int maxValue = 0;
         for (int i=0; i<statsByTeam.size(); i++) {
             String sequenceStr = statsByTeam.get(i).getNoMarginWinsSequence().replaceAll("[\\[\\]\\s]", "");
@@ -260,21 +340,21 @@ public class EuroHandicapSeasonInfoService {
             }
         }
 
-        if (isBetween(maxValue,0,5)) {
+        if (isBetween(maxValue,0,7)) {
             return 100;
-        } else if(isBetween(maxValue,5,6)) {
-            return 90;
-        } else if(isBetween(maxValue,6,7)) {
-            return 80;
         } else if(isBetween(maxValue,7,8)) {
-            return 60;
-        } else if(isBetween(maxValue,8,25)) {
+            return 90;
+        } else if(isBetween(maxValue,8,9)) {
+            return 70;
+        } else if(isBetween(maxValue,9,10)) {
+            return 50;
+        } else if(isBetween(maxValue,10,25)) {
             return 30;
         }
         return 0;
     }
 
-    private int calculateLast3SeasonsStdDevScore(List<EuroHandicapSeasonInfo> statsByTeam) {
+    private int calculateLast3SeasonsStdDevScore(List<WinsMarginSeasonInfo> statsByTeam) {
         double sumStdDev = 0;
         for (int i=0; i<3; i++) {
             sumStdDev += statsByTeam.get(i).getStdDeviation();
@@ -296,7 +376,7 @@ public class EuroHandicapSeasonInfoService {
         return 0;
     }
 
-    private int calculateAllSeasonsStdDevScore(List<EuroHandicapSeasonInfo> statsByTeam) {
+    private int calculateAllSeasonsStdDevScore(List<WinsMarginSeasonInfo> statsByTeam) {
         double sumStdDev = 0;
         for (int i=0; i<statsByTeam.size(); i++) {
             sumStdDev += statsByTeam.get(i).getStdDeviation();
@@ -337,10 +417,10 @@ public class EuroHandicapSeasonInfoService {
         return lower <= x && x < upper;
     }
 
-    static class SortStatsDataBySeason implements Comparator<EuroHandicapSeasonInfo> {
+    static class SortStatsDataBySeason implements Comparator<WinsMarginSeasonInfo> {
 
         @Override
-        public int compare(EuroHandicapSeasonInfo a, EuroHandicapSeasonInfo b) {
+        public int compare(WinsMarginSeasonInfo a, WinsMarginSeasonInfo b) {
             return Integer.valueOf(FOOTBALL_SEASONS_LIST.indexOf(a.getSeason()))
                     .compareTo(Integer.valueOf(FOOTBALL_SEASONS_LIST.indexOf(b.getSeason())));
         }
