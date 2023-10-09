@@ -2,11 +2,6 @@ package com.api.BetStrat.controller;
 
 import com.api.BetStrat.entity.HistoricMatch;
 import com.api.BetStrat.entity.Team;
-import com.api.BetStrat.entity.football.DrawSeasonInfo;
-import com.api.BetStrat.entity.football.EuroHandicapSeasonInfo;
-import com.api.BetStrat.entity.football.GoalsFestSeasonInfo;
-import com.api.BetStrat.entity.football.WinsMarginSeasonInfo;
-import com.api.BetStrat.exception.NotFoundException;
 import com.api.BetStrat.exception.StandardError;
 import com.api.BetStrat.repository.HistoricMatchRepository;
 import com.api.BetStrat.repository.TeamRepository;
@@ -18,13 +13,11 @@ import com.api.BetStrat.service.football.DrawSeasonInfoService;
 import com.api.BetStrat.service.football.EuroHandicapSeasonInfoService;
 import com.api.BetStrat.service.football.GoalsFestSeasonInfoService;
 import com.api.BetStrat.service.football.WinsMarginSeasonInfoService;
+import com.api.BetStrat.service.handball.HandballWinsMargin49SeasonInfoService;
 import com.api.BetStrat.service.hockey.HockeyDrawSeasonInfoService;
 import com.api.BetStrat.service.hockey.WinsMargin3SeasonInfoService;
 import com.api.BetStrat.service.hockey.WinsMarginAny2SeasonInfoService;
 import com.api.BetStrat.util.ScrappingUtil;
-import com.api.BetStrat.util.TeamDFhistoricData;
-import com.api.BetStrat.util.TeamEHhistoricData;
-import com.api.BetStrat.util.TeamGoalsFestHistoricData;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
@@ -40,7 +33,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -48,19 +40,14 @@ import org.springframework.web.bind.annotation.RestController;
 
 import javax.validation.Valid;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static com.api.BetStrat.constants.BetStratConstants.FBREF_BASE_URL;
-import static com.api.BetStrat.constants.BetStratConstants.FOOTBALL_SUMMER_SEASONS_BEGIN_MONTH_LIST;
-import static com.api.BetStrat.constants.BetStratConstants.FOOTBALL_SUMMER_SEASONS_LIST;
-import static com.api.BetStrat.constants.BetStratConstants.FOOTBALL_WINTER_SEASONS_BEGIN_MONTH_LIST;
-import static com.api.BetStrat.constants.BetStratConstants.FOOTBALL_WINTER_SEASONS_LIST;
+import static com.api.BetStrat.constants.BetStratConstants.SUMMER_SEASONS_BEGIN_MONTH_LIST;
+import static com.api.BetStrat.constants.BetStratConstants.SUMMER_SEASONS_LIST;
+import static com.api.BetStrat.constants.BetStratConstants.WINTER_SEASONS_BEGIN_MONTH_LIST;
+import static com.api.BetStrat.constants.BetStratConstants.WINTER_SEASONS_LIST;
 import static com.api.BetStrat.constants.BetStratConstants.WORLDFOOTBALL_BASE_URL;
 import static com.api.BetStrat.constants.BetStratConstants.ZEROZERO_BASE_URL;
 import static com.api.BetStrat.constants.BetStratConstants.ZEROZERO_SEASON_CODES;
@@ -96,6 +83,9 @@ public class HandballDataStatsController {
 
     @Autowired
     private EuroHandicapSeasonInfoService euroHandicapSeasonInfoService;
+
+    @Autowired
+    private HandballWinsMargin49SeasonInfoService handballWinsMargin49SeasonInfoService;
 
     @Autowired
     private ModelMapper modelMapper;
@@ -156,10 +146,10 @@ public class HandballDataStatsController {
 
         List<String> seasonsList = null;
 
-        if (FOOTBALL_SUMMER_SEASONS_BEGIN_MONTH_LIST.contains(team.getBeginSeason())) {
-            seasonsList = FOOTBALL_SUMMER_SEASONS_LIST;
-        } else if (FOOTBALL_WINTER_SEASONS_BEGIN_MONTH_LIST.contains(team.getBeginSeason())) {
-            seasonsList = FOOTBALL_WINTER_SEASONS_LIST;
+        if (SUMMER_SEASONS_BEGIN_MONTH_LIST.contains(team.getBeginSeason())) {
+            seasonsList = SUMMER_SEASONS_LIST;
+        } else if (WINTER_SEASONS_BEGIN_MONTH_LIST.contains(team.getBeginSeason())) {
+            seasonsList = WINTER_SEASONS_LIST;
         }
 
         for (String season : seasonsList) {
@@ -216,6 +206,15 @@ public class HandballDataStatsController {
                 }
             }
         }
+    }
+
+    @SneakyThrows
+    @PostMapping("/historicalStatsData")
+    public void updateHistoricalStatsData(@Valid @RequestParam Long teamId) {
+        Team team = teamRepository.getOne(teamId);
+
+        handballWinsMargin49SeasonInfoService.updateStatsDataInfo(team);
+
     }
 
     @GetMapping("/getHistoricMatches")

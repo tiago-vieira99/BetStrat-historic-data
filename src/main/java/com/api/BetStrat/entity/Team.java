@@ -81,6 +81,15 @@ public class Team implements Serializable {
     @Column(name = "basket_short_wins_score")
     private String basketShortWinsScore;
 
+    @Column(name = "handball_16margin_wins_score")
+    private String handball16MarginWinsScore;
+
+    @Column(name = "handball_49margin_wins_score")
+    private String handball49MarginWinsScore;
+
+    @Column(name = "handball_712margin_wins_score")
+    private String handball712MarginWinsScore;
+
     @Column(name = "sport")
     private String sport;
 

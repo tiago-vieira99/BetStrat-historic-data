@@ -17,16 +17,16 @@ public class BetStratConstants {
     public static final String FBREF_BASE_URL = "fbref.com";
     public static final String WORLDFOOTBALL_BASE_URL = "worldfootball.net";
 
-    public static final List<String> FOOTBALL_SEASONS_LIST = ImmutableList.of("2016","2016-17","2017","2017-18","2018","2018-19","2019","2019-20",
+    public static final List<String> SEASONS_LIST = ImmutableList.of("2016","2016-17","2017","2017-18","2018","2018-19","2019","2019-20",
             "2020","2020-21","2021","2021-22","2022","2022-23");
 
-    public static final List<String> FOOTBALL_SUMMER_SEASONS_LIST = ImmutableList.of("2016","2017","2018","2019","2020","2021","2022");
+    public static final List<String> SUMMER_SEASONS_LIST = ImmutableList.of("2016","2017","2018","2019","2020","2021","2022");
 
-    public static final List<String> FOOTBALL_WINTER_SEASONS_LIST = ImmutableList.of("2016-17","2017-18","2018-19","2019-20","2020-21","2021-22","2022-23");
+    public static final List<String> WINTER_SEASONS_LIST = ImmutableList.of("2016-17","2017-18","2018-19","2019-20","2020-21","2021-22","2022-23");
 
-    public static final List<String> FOOTBALL_SUMMER_SEASONS_BEGIN_MONTH_LIST = ImmutableList.of("January","February","March","April","May");
+    public static final List<String> SUMMER_SEASONS_BEGIN_MONTH_LIST = ImmutableList.of("January","February","March","April","May");
 
-    public static final List<String> FOOTBALL_WINTER_SEASONS_BEGIN_MONTH_LIST = ImmutableList.of("July","August","September","October","November");
+    public static final List<String> WINTER_SEASONS_BEGIN_MONTH_LIST = ImmutableList.of("July","August","September","October","November");
 
     public static final List<String> HOCKEY_SEASONS_LIST = ImmutableList.of("2016-2017","2017-2018","2018-2019","2019-2020",
             "2020-2021","2021-2022","2021-2022");

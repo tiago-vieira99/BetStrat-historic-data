@@ -22,11 +22,11 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static com.api.BetStrat.constants.BetStratConstants.FBREF_BASE_URL;
-import static com.api.BetStrat.constants.BetStratConstants.FOOTBALL_SEASONS_LIST;
-import static com.api.BetStrat.constants.BetStratConstants.FOOTBALL_SUMMER_SEASONS_BEGIN_MONTH_LIST;
-import static com.api.BetStrat.constants.BetStratConstants.FOOTBALL_SUMMER_SEASONS_LIST;
-import static com.api.BetStrat.constants.BetStratConstants.FOOTBALL_WINTER_SEASONS_BEGIN_MONTH_LIST;
-import static com.api.BetStrat.constants.BetStratConstants.FOOTBALL_WINTER_SEASONS_LIST;
+import static com.api.BetStrat.constants.BetStratConstants.SEASONS_LIST;
+import static com.api.BetStrat.constants.BetStratConstants.SUMMER_SEASONS_BEGIN_MONTH_LIST;
+import static com.api.BetStrat.constants.BetStratConstants.SUMMER_SEASONS_LIST;
+import static com.api.BetStrat.constants.BetStratConstants.WINTER_SEASONS_BEGIN_MONTH_LIST;
+import static com.api.BetStrat.constants.BetStratConstants.WINTER_SEASONS_LIST;
 import static com.api.BetStrat.constants.BetStratConstants.WORLDFOOTBALL_BASE_URL;
 import static com.api.BetStrat.constants.BetStratConstants.ZEROZERO_BASE_URL;
 import static com.api.BetStrat.constants.BetStratConstants.ZEROZERO_SEASON_CODES;
@@ -49,10 +49,10 @@ public class GoalsFestSeasonInfoService {
         List<GoalsFestSeasonInfo> statsByTeam = goalsFestSeasonInfoRepository.getStatsByTeam(team);
         List<String> seasonsList = null;
 
-        if (FOOTBALL_SUMMER_SEASONS_BEGIN_MONTH_LIST.contains(team.getBeginSeason())) {
-            seasonsList = FOOTBALL_SUMMER_SEASONS_LIST;
-        } else if (FOOTBALL_WINTER_SEASONS_BEGIN_MONTH_LIST.contains(team.getBeginSeason())) {
-            seasonsList = FOOTBALL_WINTER_SEASONS_LIST;
+        if (SUMMER_SEASONS_BEGIN_MONTH_LIST.contains(team.getBeginSeason())) {
+            seasonsList = SUMMER_SEASONS_LIST;
+        } else if (WINTER_SEASONS_BEGIN_MONTH_LIST.contains(team.getBeginSeason())) {
+            seasonsList = WINTER_SEASONS_LIST;
         }
 
         for (String season : seasonsList) {
@@ -139,9 +139,9 @@ public class GoalsFestSeasonInfoService {
         Collections.reverse(statsByTeam);
         List<GoalsFestSeasonInfo> filteredStats = statsByTeam.subList(seasonsToDiscard, statsByTeam.size());
 
-        if (filteredStats.size() < 3 || !filteredStats.get(0).getSeason().equals(FOOTBALL_WINTER_SEASONS_LIST.get(FOOTBALL_WINTER_SEASONS_LIST.size()-1-seasonsToDiscard)) ||
-                !filteredStats.get(1).getSeason().equals(FOOTBALL_WINTER_SEASONS_LIST.get(FOOTBALL_WINTER_SEASONS_LIST.size()-2-seasonsToDiscard)) ||
-                !filteredStats.get(2).getSeason().equals(FOOTBALL_WINTER_SEASONS_LIST.get(FOOTBALL_WINTER_SEASONS_LIST.size()-3-seasonsToDiscard))) {
+        if (filteredStats.size() < 3 || !filteredStats.get(0).getSeason().equals(WINTER_SEASONS_LIST.get(WINTER_SEASONS_LIST.size()-1-seasonsToDiscard)) ||
+                !filteredStats.get(1).getSeason().equals(WINTER_SEASONS_LIST.get(WINTER_SEASONS_LIST.size()-2-seasonsToDiscard)) ||
+                !filteredStats.get(2).getSeason().equals(WINTER_SEASONS_LIST.get(WINTER_SEASONS_LIST.size()-3-seasonsToDiscard))) {
             outMap.put("footballGoalsFest", TeamScoreEnum.INSUFFICIENT_DATA.getValue());
         } else {
             int last3SeasonsGoalsFestRateScore = calculateLast3SeasonsGoalsFestRateScore(filteredStats);
@@ -371,8 +371,8 @@ public class GoalsFestSeasonInfoService {
 
         @Override
         public int compare(GoalsFestSeasonInfo a, GoalsFestSeasonInfo b) {
-            return Integer.valueOf(FOOTBALL_SEASONS_LIST.indexOf(a.getSeason()))
-                    .compareTo(Integer.valueOf(FOOTBALL_SEASONS_LIST.indexOf(b.getSeason())));
+            return Integer.valueOf(SEASONS_LIST.indexOf(a.getSeason()))
+                    .compareTo(Integer.valueOf(SEASONS_LIST.indexOf(b.getSeason())));
         }
     }
 

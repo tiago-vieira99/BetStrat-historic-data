@@ -21,7 +21,6 @@ import com.api.BetStrat.service.TeamService;
 import com.api.BetStrat.service.hockey.WinsMargin3SeasonInfoService;
 import com.api.BetStrat.service.hockey.WinsMarginAny2SeasonInfoService;
 import com.api.BetStrat.service.football.WinsMarginSeasonInfoService;
-import com.api.BetStrat.util.ScrappingUtil;
 import com.api.BetStrat.util.TeamDFhistoricData;
 import com.api.BetStrat.util.TeamEHhistoricData;
 import com.api.BetStrat.util.TeamGoalsFestHistoricData;
@@ -33,8 +32,6 @@ import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
-import org.json.JSONArray;
-import org.json.JSONObject;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -49,15 +46,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
-
-import static com.api.BetStrat.constants.BetStratConstants.FBREF_BASE_URL;
-import static com.api.BetStrat.constants.BetStratConstants.FOOTBALL_SUMMER_SEASONS_BEGIN_MONTH_LIST;
-import static com.api.BetStrat.constants.BetStratConstants.FOOTBALL_SUMMER_SEASONS_LIST;
-import static com.api.BetStrat.constants.BetStratConstants.FOOTBALL_WINTER_SEASONS_BEGIN_MONTH_LIST;
-import static com.api.BetStrat.constants.BetStratConstants.FOOTBALL_WINTER_SEASONS_LIST;
-import static com.api.BetStrat.constants.BetStratConstants.WORLDFOOTBALL_BASE_URL;
-import static com.api.BetStrat.constants.BetStratConstants.ZEROZERO_BASE_URL;
-import static com.api.BetStrat.constants.BetStratConstants.ZEROZERO_SEASON_CODES;
 
 @Slf4j
 @Api("Historical Data Analysis for Football")

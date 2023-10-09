@@ -21,11 +21,11 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static com.api.BetStrat.constants.BetStratConstants.FBREF_BASE_URL;
-import static com.api.BetStrat.constants.BetStratConstants.FOOTBALL_SEASONS_LIST;
-import static com.api.BetStrat.constants.BetStratConstants.FOOTBALL_SUMMER_SEASONS_BEGIN_MONTH_LIST;
-import static com.api.BetStrat.constants.BetStratConstants.FOOTBALL_SUMMER_SEASONS_LIST;
-import static com.api.BetStrat.constants.BetStratConstants.FOOTBALL_WINTER_SEASONS_BEGIN_MONTH_LIST;
-import static com.api.BetStrat.constants.BetStratConstants.FOOTBALL_WINTER_SEASONS_LIST;
+import static com.api.BetStrat.constants.BetStratConstants.SEASONS_LIST;
+import static com.api.BetStrat.constants.BetStratConstants.SUMMER_SEASONS_BEGIN_MONTH_LIST;
+import static com.api.BetStrat.constants.BetStratConstants.SUMMER_SEASONS_LIST;
+import static com.api.BetStrat.constants.BetStratConstants.WINTER_SEASONS_BEGIN_MONTH_LIST;
+import static com.api.BetStrat.constants.BetStratConstants.WINTER_SEASONS_LIST;
 import static com.api.BetStrat.constants.BetStratConstants.WORLDFOOTBALL_BASE_URL;
 import static com.api.BetStrat.constants.BetStratConstants.ZEROZERO_BASE_URL;
 import static com.api.BetStrat.constants.BetStratConstants.ZEROZERO_SEASON_CODES;
@@ -48,10 +48,10 @@ public class EuroHandicapSeasonInfoService {
         List<EuroHandicapSeasonInfo> statsByTeam = euroHandicapSeasonInfoRepository.getStatsByTeam(team);
         List<String> seasonsList = null;
 
-        if (FOOTBALL_SUMMER_SEASONS_BEGIN_MONTH_LIST.contains(team.getBeginSeason())) {
-            seasonsList = FOOTBALL_SUMMER_SEASONS_LIST;
-        } else if (FOOTBALL_WINTER_SEASONS_BEGIN_MONTH_LIST.contains(team.getBeginSeason())) {
-            seasonsList = FOOTBALL_WINTER_SEASONS_LIST;
+        if (SUMMER_SEASONS_BEGIN_MONTH_LIST.contains(team.getBeginSeason())) {
+            seasonsList = SUMMER_SEASONS_LIST;
+        } else if (WINTER_SEASONS_BEGIN_MONTH_LIST.contains(team.getBeginSeason())) {
+            seasonsList = WINTER_SEASONS_LIST;
         }
 
         for (String season : seasonsList) {
@@ -340,8 +340,8 @@ public class EuroHandicapSeasonInfoService {
 
         @Override
         public int compare(EuroHandicapSeasonInfo a, EuroHandicapSeasonInfo b) {
-            return Integer.valueOf(FOOTBALL_SEASONS_LIST.indexOf(a.getSeason()))
-                    .compareTo(Integer.valueOf(FOOTBALL_SEASONS_LIST.indexOf(b.getSeason())));
+            return Integer.valueOf(SEASONS_LIST.indexOf(a.getSeason()))
+                    .compareTo(Integer.valueOf(SEASONS_LIST.indexOf(b.getSeason())));
         }
     }
 

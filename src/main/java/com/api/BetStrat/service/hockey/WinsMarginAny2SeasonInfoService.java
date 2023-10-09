@@ -17,7 +17,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static com.api.BetStrat.constants.BetStratConstants.FOOTBALL_SEASONS_LIST;
+import static com.api.BetStrat.constants.BetStratConstants.SEASONS_LIST;
 
 @Service
 @Transactional
@@ -272,8 +272,8 @@ public class WinsMarginAny2SeasonInfoService {
 
         @Override
         public int compare(WinsMarginAny2SeasonInfo a, WinsMarginAny2SeasonInfo b) {
-            return Integer.valueOf(FOOTBALL_SEASONS_LIST.indexOf(a.getSeason()))
-                    .compareTo(Integer.valueOf(FOOTBALL_SEASONS_LIST.indexOf(b.getSeason())));
+            return Integer.valueOf(SEASONS_LIST.indexOf(a.getSeason()))
+                    .compareTo(Integer.valueOf(SEASONS_LIST.indexOf(b.getSeason())));
         }
     }
 

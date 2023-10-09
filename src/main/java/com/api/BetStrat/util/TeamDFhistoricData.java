@@ -21,7 +21,7 @@ import java.util.stream.Collectors;
 
 import static com.api.BetStrat.constants.BetStratConstants.FCSTATS_BASE_URL;
 import static com.api.BetStrat.constants.BetStratConstants.HOCKEY_SEASONS_LIST;
-import static com.api.BetStrat.constants.BetStratConstants.FOOTBALL_SEASONS_LIST;
+import static com.api.BetStrat.constants.BetStratConstants.SEASONS_LIST;
 
 @Slf4j
 @Service
@@ -230,7 +230,7 @@ public class TeamDFhistoricData {
             } else {
                 season = splittedSeason.get(0) + "-" + splittedSeason.get(1).substring(2);
             }
-            if (FOOTBALL_SEASONS_LIST.contains(season)) {
+            if (SEASONS_LIST.contains(season)) {
                 String seasonURL = FCSTATS_BASE_URL + "club,matches," + teamUrlName + "," + teamId + "," + seasonID + ".php";
                 returnMap.put(season, extractDFDataFromFC(seasonURL));
             }
