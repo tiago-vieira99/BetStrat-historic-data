@@ -8,6 +8,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.SneakyThrows;
+import lombok.ToString;
 import org.hibernate.annotations.CreationTimestamp;
 
 import javax.persistence.Column;
@@ -25,6 +26,7 @@ import javax.persistence.UniqueConstraint;
 import java.io.Serializable;
 import java.util.Date;
 
+@ToString
 @Getter
 @Setter
 @NoArgsConstructor
@@ -73,12 +75,5 @@ public class HistoricMatch implements Serializable {
 
     @Column(name = "sport")
     private String sport;
-
-    @SneakyThrows
-    @Override
-    public String toString() {
-        ObjectMapper mapper = new ObjectMapper();
-        return mapper.writeValueAsString(this);
-    }
 
 }

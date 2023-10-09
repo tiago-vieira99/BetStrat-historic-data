@@ -561,72 +561,13 @@ public class FootballDataStatsController {
     @PostMapping("/saveHistoricMatches")
     public void saveHistoricMatches() {
 
-        List<String> seasonsList = null;
-        List<Team> teams = teamRepository.findAll();
 
-        for (int j = 1002; j < teams.size()-1; j++) {
-            Team team = teams.get(j);
-            if (FOOTBALL_SUMMER_SEASONS_BEGIN_MONTH_LIST.contains(team.getBeginSeason())) {
-                seasonsList = FOOTBALL_SUMMER_SEASONS_LIST;
-            } else if (FOOTBALL_WINTER_SEASONS_BEGIN_MONTH_LIST.contains(team.getBeginSeason())) {
-                seasonsList = FOOTBALL_WINTER_SEASONS_LIST;
-            }
-
-            for (String season : seasonsList) {
-                log.info(team.getName() + " - " + season);
-                String teamUrl = team.getUrl();
-                JSONArray scrappingData = null;
-                String newSeasonUrl = "";
-
-                if (teamUrl == null) {
-                    continue;
-                }
-
-                if (teamUrl.contains(ZEROZERO_BASE_URL)) {
-                    String seasonZZCode = ZEROZERO_SEASON_CODES.get(season);
-                    newSeasonUrl = teamUrl.replaceAll("epoca_id=\\d+", "epoca_id=" + seasonZZCode);
-                    scrappingData = ScrappingUtil.getScrappingData(team.getName(), season, newSeasonUrl, true);
-                } else if (teamUrl.contains(FBREF_BASE_URL)) {
-                    String newSeason = "";
-                    if (season.contains("-")) {
-                        newSeason = season.split("-")[0] + "-20" + season.split("-")[1];
-                    } else {
-                        newSeason = season;
-                    }
-                    newSeasonUrl = teamUrl.split("/matchlogs")[0].substring(0, teamUrl.split("/matchlogs")[0].lastIndexOf('/')) + "/" + newSeason + "/matchlogs" + teamUrl.split("/matchlogs")[1];
-                    scrappingData = ScrappingUtil.getScrappingData(team.getName(), newSeason, newSeasonUrl, true);
-                } else if (teamUrl.contains(WORLDFOOTBALL_BASE_URL)) {
-                    String newSeason = "";
-                    if (season.contains("-")) {
-                        newSeason = "20" + season.split("-")[1];
-                    } else {
-                        newSeason = season;
-                    }
-                    newSeasonUrl = teamUrl + "/" + newSeason + "/3/";
-                    scrappingData = ScrappingUtil.getScrappingData(team.getName(), newSeason, newSeasonUrl, true);
-                }
-
-                if (scrappingData != null) {
-                    for (int i = 0; i < scrappingData.length(); i++) {
-                        JSONObject match = (JSONObject) scrappingData.get(i);
-                        HistoricMatch historicMatch = new HistoricMatch();
-                        historicMatch.setTeamId(team);
-                        historicMatch.setMatchDate(match.getString("date"));
-                        historicMatch.setHomeTeam(match.getString("homeTeam"));
-                        historicMatch.setAwayTeam(match.getString("awayTeam"));
-                        historicMatch.setFtResult(match.getString("ftResult"));
-                        historicMatch.setCompetition(match.getString("competition"));
-                        historicMatch.setSport(team.getSport());
-                        historicMatch.setSeason(season);
-                        try {
-                            historicMatchRepository.save(historicMatch);
-                        } catch (Exception e) {
-                            log.info("match already inserted:  " + historicMatch.toString());
-                        }
-                    }
-                }
-            }
-        }
+//        List<Team> teams = teamRepository.findAll();
+//
+//        for (int j = 1002; j < teams.size()-1; j++) {
+//            Team team = teams.get(j);
+//
+//        }
     }
 
     @ApiOperation(value = "setGoalsFestStatsByTeamSeason", notes = "set goals fest stats from FBref in bulk. Provide teamId and season time (WINTER/SUMMER)")

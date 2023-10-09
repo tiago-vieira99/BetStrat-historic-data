@@ -23,7 +23,7 @@ import java.util.Date;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "Teams",  uniqueConstraints = { @UniqueConstraint(name = "UniqueTeamCountry", columnNames = { "name", "country" }) })
+@Table(name = "Teams",  uniqueConstraints = { @UniqueConstraint(name = "UniqueTeamCountrySport", columnNames = { "name", "country", "sport" }) })
 public class Team implements Serializable {
     private static final long serialVersionUID = 1L;
 

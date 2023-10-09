@@ -1,5 +1,6 @@
 package com.api.BetStrat.service;
 
+import com.api.BetStrat.entity.HistoricMatch;
 import com.api.BetStrat.entity.basketball.ComebackSeasonInfo;
 import com.api.BetStrat.entity.football.DrawSeasonInfo;
 import com.api.BetStrat.entity.football.EuroHandicapSeasonInfo;
@@ -8,6 +9,7 @@ import com.api.BetStrat.entity.hockey.HockeyDrawSeasonInfo;
 import com.api.BetStrat.entity.Team;
 import com.api.BetStrat.entity.football.WinsMarginSeasonInfo;
 import com.api.BetStrat.exception.NotFoundException;
+import com.api.BetStrat.repository.HistoricMatchRepository;
 import com.api.BetStrat.repository.basketball.ComebackSeasonInfoRepository;
 import com.api.BetStrat.repository.football.DrawSeasonInfoRepository;
 import com.api.BetStrat.repository.football.EuroHandicapSeasonInfoRepository;
@@ -23,6 +25,10 @@ import com.api.BetStrat.service.football.WinsMarginSeasonInfoService;
 import com.api.BetStrat.service.hockey.HockeyDrawSeasonInfoService;
 import com.api.BetStrat.service.hockey.WinsMargin3SeasonInfoService;
 import com.api.BetStrat.service.hockey.WinsMarginAny2SeasonInfoService;
+import com.api.BetStrat.util.ScrappingUtil;
+import lombok.SneakyThrows;
+import org.json.JSONArray;
+import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,6 +38,15 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
+
+import static com.api.BetStrat.constants.BetStratConstants.FBREF_BASE_URL;
+import static com.api.BetStrat.constants.BetStratConstants.FOOTBALL_SUMMER_SEASONS_BEGIN_MONTH_LIST;
+import static com.api.BetStrat.constants.BetStratConstants.FOOTBALL_SUMMER_SEASONS_LIST;
+import static com.api.BetStrat.constants.BetStratConstants.FOOTBALL_WINTER_SEASONS_BEGIN_MONTH_LIST;
+import static com.api.BetStrat.constants.BetStratConstants.FOOTBALL_WINTER_SEASONS_LIST;
+import static com.api.BetStrat.constants.BetStratConstants.WORLDFOOTBALL_BASE_URL;
+import static com.api.BetStrat.constants.BetStratConstants.ZEROZERO_BASE_URL;
+import static com.api.BetStrat.constants.BetStratConstants.ZEROZERO_SEASON_CODES;
 
 @Service
 @Transactional
@@ -84,6 +99,8 @@ public class TeamService {
     @Autowired
     private ComebackSeasonInfoService comebackSeasonInfoService;
 
+    @Autowired
+    private HistoricMatchRepository historicMatchRepository;
 
 
     public Team insertTeam(Team team) {
