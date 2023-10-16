@@ -32,7 +32,7 @@ import java.util.Date;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "HistoricMatches",  uniqueConstraints = { @UniqueConstraint(name = "UniqueHistoricMatch", columnNames = { "teamId", "homeTeam", "awayTeam", "season", "competition", "ftResult" }) })
+@Table(name = "HistoricMatches",  uniqueConstraints = { @UniqueConstraint(name = "UniqueHistoricMatch", columnNames = { "teamId", "matchDate", "homeTeam", "awayTeam", "season", "competition", "ftResult" }) })
 public class HistoricMatch implements Serializable {
     private static final long serialVersionUID = 1L;
 

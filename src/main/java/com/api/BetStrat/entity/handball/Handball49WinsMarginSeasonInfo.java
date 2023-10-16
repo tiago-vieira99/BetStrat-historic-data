@@ -5,10 +5,12 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.AllArgsConstructor;
+import lombok.Data;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.SneakyThrows;
+import lombok.ToString;
 import org.hibernate.annotations.CreationTimestamp;
 
 import javax.persistence.Column;
@@ -26,6 +28,7 @@ import javax.persistence.UniqueConstraint;
 import java.io.Serializable;
 import java.util.Date;
 
+@ToString
 @Getter
 @Setter
 @NoArgsConstructor
@@ -86,12 +89,5 @@ public class Handball49WinsMarginSeasonInfo implements Serializable {
 
     @Column(name = "num_marginWins")
     private int numMarginWins;
-
-    @SneakyThrows
-    @Override
-    public String toString() {
-        ObjectMapper mapper = new ObjectMapper();
-        return mapper.writeValueAsString(this);
-    }
 
 }

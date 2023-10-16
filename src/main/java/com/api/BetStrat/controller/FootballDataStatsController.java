@@ -21,6 +21,7 @@ import com.api.BetStrat.service.TeamService;
 import com.api.BetStrat.service.hockey.WinsMargin3SeasonInfoService;
 import com.api.BetStrat.service.hockey.WinsMarginAny2SeasonInfoService;
 import com.api.BetStrat.service.football.WinsMarginSeasonInfoService;
+import com.api.BetStrat.util.ScrappingUtil;
 import com.api.BetStrat.util.TeamDFhistoricData;
 import com.api.BetStrat.util.TeamEHhistoricData;
 import com.api.BetStrat.util.TeamGoalsFestHistoricData;
@@ -32,6 +33,8 @@ import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
+import org.json.JSONArray;
+import org.json.JSONObject;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -40,12 +43,23 @@ import org.springframework.web.bind.annotation.*;
 import javax.validation.Valid;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
+
+import static com.api.BetStrat.constants.BetStratConstants.FBREF_BASE_URL;
+import static com.api.BetStrat.constants.BetStratConstants.SUMMER_SEASONS_BEGIN_MONTH_LIST;
+import static com.api.BetStrat.constants.BetStratConstants.SUMMER_SEASONS_LIST;
+import static com.api.BetStrat.constants.BetStratConstants.WINTER_SEASONS_BEGIN_MONTH_LIST;
+import static com.api.BetStrat.constants.BetStratConstants.WINTER_SEASONS_LIST;
+import static com.api.BetStrat.constants.BetStratConstants.WORLDFOOTBALL_BASE_URL;
+import static com.api.BetStrat.constants.BetStratConstants.ZEROZERO_BASE_URL;
+import static com.api.BetStrat.constants.BetStratConstants.ZEROZERO_SEASON_CODES;
+import static com.sun.xml.internal.ws.spi.db.BindingContextFactory.LOGGER;
 
 @Slf4j
 @Api("Historical Data Analysis for Football")
@@ -546,16 +560,63 @@ public class FootballDataStatsController {
     }
 
     @SneakyThrows
-    @PostMapping("/saveHistoricMatches")
-    public void saveHistoricMatches() {
+    @PostMapping("/historicalMatchesResults")
+    public void insertHistoricalMatches(@Valid @RequestParam  Long teamId, @Valid @RequestParam String season) {
 
+        Team team = teamRepository.getOne(teamId);
 
-//        List<Team> teams = teamRepository.findAll();
-//
-//        for (int j = 1002; j < teams.size()-1; j++) {
-//            Team team = teams.get(j);
-//
-//        }
+        LOGGER.info(team.getName() + " - " + season);
+        String teamUrl = team.getUrl();
+        JSONArray scrappingData = null;
+        String newSeasonUrl = "";
+
+        if (teamUrl == null) {
+            return;
+        }
+
+        if (teamUrl.contains(ZEROZERO_BASE_URL)) {
+            String seasonZZCode = ZEROZERO_SEASON_CODES.get(season);
+            newSeasonUrl = teamUrl.replaceAll("epoca_id=\\d+", "epoca_id=" + seasonZZCode);
+            scrappingData = ScrappingUtil.getScrappingData(team.getName(), season, newSeasonUrl, true);
+        } else if (teamUrl.contains(FBREF_BASE_URL)) {
+            String newSeason = "";
+            if (season.contains("-")) {
+                newSeason = season.split("-")[0] + "-20" + season.split("-")[1];
+            } else {
+                newSeason = season;
+            }
+            newSeasonUrl = teamUrl.split("/matchlogs")[0].substring(0, teamUrl.split("/matchlogs")[0].lastIndexOf('/')) + "/" + newSeason + "/matchlogs" + teamUrl.split("/matchlogs")[1];
+            scrappingData = ScrappingUtil.getScrappingData(team.getName(), newSeason, newSeasonUrl, true);
+        } else if (teamUrl.contains(WORLDFOOTBALL_BASE_URL)) {
+            String newSeason = "";
+            if (season.contains("-")) {
+                newSeason = "20" + season.split("-")[1];
+            } else {
+                newSeason = season;
+            }
+            newSeasonUrl = teamUrl + "/" + newSeason + "/3/";
+            scrappingData = ScrappingUtil.getScrappingData(team.getName(), newSeason, newSeasonUrl, true);
+        }
+
+        if (scrappingData != null) {
+            for (int i = 0; i < scrappingData.length(); i++) {
+                JSONObject match = (JSONObject) scrappingData.get(i);
+                HistoricMatch historicMatch = new HistoricMatch();
+                historicMatch.setTeamId(team);
+                historicMatch.setMatchDate(match.getString("date"));
+                historicMatch.setHomeTeam(match.getString("homeTeam"));
+                historicMatch.setAwayTeam(match.getString("awayTeam"));
+                historicMatch.setFtResult(match.getString("ftResult"));
+                historicMatch.setCompetition(match.getString("competition"));
+                historicMatch.setSport(team.getSport());
+                historicMatch.setSeason(season);
+                try {
+                    historicMatchRepository.save(historicMatch);
+                } catch (Exception e) {
+                    log.info("match:  " + historicMatch.toString() + "\nerror:  " + e.toString());
+                }
+            }
+        }
     }
 
     @ApiOperation(value = "setGoalsFestStatsByTeamSeason", notes = "set goals fest stats from FBref in bulk. Provide teamId and season time (WINTER/SUMMER)")

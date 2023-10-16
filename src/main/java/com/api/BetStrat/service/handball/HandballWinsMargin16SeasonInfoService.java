@@ -3,14 +3,11 @@ package com.api.BetStrat.service.handball;
 import com.api.BetStrat.constants.TeamScoreEnum;
 import com.api.BetStrat.entity.HistoricMatch;
 import com.api.BetStrat.entity.Team;
-import com.api.BetStrat.entity.football.WinsMarginSeasonInfo;
-import com.api.BetStrat.entity.handball.Handball49WinsMarginSeasonInfo;
+import com.api.BetStrat.entity.handball.Handball16WinsMarginSeasonInfo;
+import com.api.BetStrat.entity.handball.Handball16WinsMarginSeasonInfo;
 import com.api.BetStrat.repository.HistoricMatchRepository;
-import com.api.BetStrat.repository.handball.Handball49WinsMarginSeasonInfoRepository;
-import com.api.BetStrat.util.ScrappingUtil;
-import com.api.BetStrat.util.TeamEHhistoricData;
+import com.api.BetStrat.repository.handball.Handball16WinsMarginSeasonInfoRepository;
 import com.api.BetStrat.util.Utils;
-import org.json.JSONArray;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,37 +21,33 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static com.api.BetStrat.constants.BetStratConstants.FBREF_BASE_URL;
 import static com.api.BetStrat.constants.BetStratConstants.SEASONS_LIST;
 import static com.api.BetStrat.constants.BetStratConstants.SUMMER_SEASONS_BEGIN_MONTH_LIST;
 import static com.api.BetStrat.constants.BetStratConstants.SUMMER_SEASONS_LIST;
 import static com.api.BetStrat.constants.BetStratConstants.WINTER_SEASONS_BEGIN_MONTH_LIST;
 import static com.api.BetStrat.constants.BetStratConstants.WINTER_SEASONS_LIST;
-import static com.api.BetStrat.constants.BetStratConstants.WORLDFOOTBALL_BASE_URL;
-import static com.api.BetStrat.constants.BetStratConstants.ZEROZERO_BASE_URL;
-import static com.api.BetStrat.constants.BetStratConstants.ZEROZERO_SEASON_CODES;
 import static com.api.BetStrat.util.Utils.calculateCoeffVariation;
 import static com.api.BetStrat.util.Utils.calculateSD;
 
 @Service
 @Transactional
-public class HandballWinsMargin49SeasonInfoService {
+public class HandballWinsMargin16SeasonInfoService {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(HandballWinsMargin49SeasonInfoService.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(HandballWinsMargin16SeasonInfoService.class);
 
     @Autowired
-    private Handball49WinsMarginSeasonInfoRepository handball49WinsMarginSeasonInfoRepository;
+    private Handball16WinsMarginSeasonInfoRepository handball16WinsMarginSeasonInfoRepository;
 
     @Autowired
     private HistoricMatchRepository historicMatchRepository;
 
-    public Handball49WinsMarginSeasonInfo insert49WinsMarginInfo(Handball49WinsMarginSeasonInfo winsMarginSeasonInfo) {
+    public Handball16WinsMarginSeasonInfo insert16WinsMarginInfo(Handball16WinsMarginSeasonInfo winsMarginSeasonInfo) {
         LOGGER.info("Inserted " + winsMarginSeasonInfo.getClass() + " for " + winsMarginSeasonInfo.getTeamId().getName() + " and season " + winsMarginSeasonInfo.getSeason());
-        return handball49WinsMarginSeasonInfoRepository.save(winsMarginSeasonInfo);
+        return handball16WinsMarginSeasonInfoRepository.save(winsMarginSeasonInfo);
     }
 
     public void updateStatsDataInfo(Team team) {
-        List<Handball49WinsMarginSeasonInfo> statsByTeam = handball49WinsMarginSeasonInfoRepository.getStatsByTeam(team);
+        List<Handball16WinsMarginSeasonInfo> statsByTeam = handball16WinsMarginSeasonInfoRepository.getStatsByTeam(team);
         List<String> seasonsList = null;
 
         if (SUMMER_SEASONS_BEGIN_MONTH_LIST.contains(team.getBeginSeason())) {
@@ -70,7 +63,7 @@ public class HandballWinsMargin49SeasonInfoService {
                 String mainCompetition = Utils.findMainCompetition(teamMatchesBySeason);
                 List<HistoricMatch> filteredMatches = teamMatchesBySeason.stream().filter(t -> t.getCompetition().equals(mainCompetition)).collect(Collectors.toList());
 
-                Handball49WinsMarginSeasonInfo handball49WinsMarginSeasonInfo = new Handball49WinsMarginSeasonInfo();
+                Handball16WinsMarginSeasonInfo handball16WinsMarginSeasonInfo = new Handball16WinsMarginSeasonInfo();
 
                 ArrayList<Integer> noMarginWinsSequence = new ArrayList<>();
                 int count = 0;
@@ -88,7 +81,7 @@ public class HandballWinsMargin49SeasonInfoService {
 
                     if ((historicMatch.getHomeTeam().equals(team.getName()) && homeResult > awayResult) || (historicMatch.getAwayTeam().equals(team.getName()) && homeResult < awayResult)) {
                         totalWins++;
-                        if (Math.abs(homeResult - awayResult) <= 9 && Math.abs(homeResult - awayResult) >= 4) {
+                        if (Math.abs(homeResult - awayResult) <= 6 && Math.abs(homeResult - awayResult) >= 1) {
                             noMarginWinsSequence.add(count);
                             count = 0;
                         }
@@ -102,22 +95,22 @@ public class HandballWinsMargin49SeasonInfoService {
                     noMarginWinsSequence.add(-1);
                 }
 
-                handball49WinsMarginSeasonInfo.setCompetition(mainCompetition);
-                handball49WinsMarginSeasonInfo.setMarginWinsRate(Utils.beautifyDoubleValue(100*totalMarginWins/totalWins));
-                handball49WinsMarginSeasonInfo.setNoMarginWinsSequence(noMarginWinsSequence.toString());
-                handball49WinsMarginSeasonInfo.setNumMarginWins(totalMarginWins);
-                handball49WinsMarginSeasonInfo.setNumMatches(filteredMatches.size());
-                handball49WinsMarginSeasonInfo.setNumWins(totalWins);
-                handball49WinsMarginSeasonInfo.setWinsRate(Utils.beautifyDoubleValue(100*totalWins/ filteredMatches.size()));
+                handball16WinsMarginSeasonInfo.setCompetition(mainCompetition);
+                handball16WinsMarginSeasonInfo.setMarginWinsRate(Utils.beautifyDoubleValue(100*totalMarginWins/totalWins));
+                handball16WinsMarginSeasonInfo.setNoMarginWinsSequence(noMarginWinsSequence.toString());
+                handball16WinsMarginSeasonInfo.setNumMarginWins(totalMarginWins);
+                handball16WinsMarginSeasonInfo.setNumMatches(filteredMatches.size());
+                handball16WinsMarginSeasonInfo.setNumWins(totalWins);
+                handball16WinsMarginSeasonInfo.setWinsRate(Utils.beautifyDoubleValue(100*totalWins/ filteredMatches.size()));
 
                 double stdDev =  Utils.beautifyDoubleValue(calculateSD(noMarginWinsSequence));
-                handball49WinsMarginSeasonInfo.setStdDeviation(stdDev);
-                handball49WinsMarginSeasonInfo.setCoefDeviation(Utils.beautifyDoubleValue(calculateCoeffVariation(stdDev, noMarginWinsSequence)));
+                handball16WinsMarginSeasonInfo.setStdDeviation(stdDev);
+                handball16WinsMarginSeasonInfo.setCoefDeviation(Utils.beautifyDoubleValue(calculateCoeffVariation(stdDev, noMarginWinsSequence)));
 
-                handball49WinsMarginSeasonInfo.setSeason(season);
-                handball49WinsMarginSeasonInfo.setTeamId(team);
-                handball49WinsMarginSeasonInfo.setUrl(team.getUrl());
-//                insert49WinsMarginInfo(handball49WinsMarginSeasonInfo);
+                handball16WinsMarginSeasonInfo.setSeason(season);
+                handball16WinsMarginSeasonInfo.setTeamId(team);
+                handball16WinsMarginSeasonInfo.setUrl(team.getUrl());
+//                insert16WinsMarginInfo(handball16WinsMarginSeasonInfo);
                 System.out.println();
 
             }
@@ -125,7 +118,7 @@ public class HandballWinsMargin49SeasonInfoService {
     }
 
     public Team updateTeamScore (Team teamByName) {
-        List<Handball49WinsMarginSeasonInfo> statsByTeam = handball49WinsMarginSeasonInfoRepository.getStatsByTeam(teamByName);
+        List<Handball16WinsMarginSeasonInfo> statsByTeam = handball16WinsMarginSeasonInfoRepository.getStatsByTeam(teamByName);
         Collections.sort(statsByTeam, new SortStatsDataBySeason());
         Collections.reverse(statsByTeam);
 
@@ -169,7 +162,7 @@ public class HandballWinsMargin49SeasonInfoService {
         return "";
     }
 
-    private int calculateLast3SeasonsMarginWinsRateScore(List<Handball49WinsMarginSeasonInfo> statsByTeam) {
+    private int calculateLast3SeasonsMarginWinsRateScore(List<Handball16WinsMarginSeasonInfo> statsByTeam) {
         double marginWinsRates = 0;
         for (int i=0; i<3; i++) {
             marginWinsRates += statsByTeam.get(i).getMarginWinsRate();
@@ -189,7 +182,7 @@ public class HandballWinsMargin49SeasonInfoService {
         return 0;
     }
 
-    private int calculateAllSeasonsMarginWinsRateScore(List<Handball49WinsMarginSeasonInfo> statsByTeam) {
+    private int calculateAllSeasonsMarginWinsRateScore(List<Handball16WinsMarginSeasonInfo> statsByTeam) {
         double marginWinsRates = 0;
         for (int i=0; i<statsByTeam.size(); i++) {
             marginWinsRates += statsByTeam.get(i).getMarginWinsRate();
@@ -209,7 +202,7 @@ public class HandballWinsMargin49SeasonInfoService {
         return 0;
     }
 
-    private int calculateLast3SeasonsTotalWinsRateScore(List<Handball49WinsMarginSeasonInfo> statsByTeam) {
+    private int calculateLast3SeasonsTotalWinsRateScore(List<Handball16WinsMarginSeasonInfo> statsByTeam) {
         double totalWinsRates = 0;
         for (int i=0; i<3; i++) {
             totalWinsRates += statsByTeam.get(i).getMarginWinsRate();
@@ -233,7 +226,7 @@ public class HandballWinsMargin49SeasonInfoService {
         return 0;
     }
 
-    private int calculateAllSeasonsTotalWinsRateScore(List<Handball49WinsMarginSeasonInfo> statsByTeam) {
+    private int calculateAllSeasonsTotalWinsRateScore(List<Handball16WinsMarginSeasonInfo> statsByTeam) {
         double totalWinsRates = 0;
         for (int i=0; i<statsByTeam.size(); i++) {
             totalWinsRates += statsByTeam.get(i).getMarginWinsRate();
@@ -257,7 +250,7 @@ public class HandballWinsMargin49SeasonInfoService {
         return 0;
     }
 
-    private int calculateLast3SeasonsmaxSeqWOMarginWinsScore(List<Handball49WinsMarginSeasonInfo> statsByTeam) {
+    private int calculateLast3SeasonsmaxSeqWOMarginWinsScore(List<Handball16WinsMarginSeasonInfo> statsByTeam) {
         int maxValue = 0;
         for (int i=0; i<3; i++) {
             String sequenceStr = statsByTeam.get(i).getNoMarginWinsSequence().replaceAll("[\\[\\]\\s]", "");
@@ -281,7 +274,7 @@ public class HandballWinsMargin49SeasonInfoService {
         return 0;
     }
 
-    private int calculateAllSeasonsmaxSeqWOMarginWinsScore(List<Handball49WinsMarginSeasonInfo> statsByTeam) {
+    private int calculateAllSeasonsmaxSeqWOMarginWinsScore(List<Handball16WinsMarginSeasonInfo> statsByTeam) {
         int maxValue = 0;
         for (int i=0; i<statsByTeam.size(); i++) {
             String sequenceStr = statsByTeam.get(i).getNoMarginWinsSequence().replaceAll("[\\[\\]\\s]", "");
@@ -305,7 +298,7 @@ public class HandballWinsMargin49SeasonInfoService {
         return 0;
     }
 
-    private int calculateLast3SeasonsStdDevScore(List<Handball49WinsMarginSeasonInfo> statsByTeam) {
+    private int calculateLast3SeasonsStdDevScore(List<Handball16WinsMarginSeasonInfo> statsByTeam) {
         double sumStdDev = 0;
         for (int i=0; i<3; i++) {
             sumStdDev += statsByTeam.get(i).getStdDeviation();
@@ -327,7 +320,7 @@ public class HandballWinsMargin49SeasonInfoService {
         return 0;
     }
 
-    private int calculateAllSeasonsStdDevScore(List<Handball49WinsMarginSeasonInfo> statsByTeam) {
+    private int calculateAllSeasonsStdDevScore(List<Handball16WinsMarginSeasonInfo> statsByTeam) {
         double sumStdDev = 0;
         for (int i=0; i<statsByTeam.size(); i++) {
             sumStdDev += statsByTeam.get(i).getStdDeviation();
@@ -368,10 +361,10 @@ public class HandballWinsMargin49SeasonInfoService {
         return lower <= x && x < upper;
     }
 
-    static class SortStatsDataBySeason implements Comparator<Handball49WinsMarginSeasonInfo> {
+    static class SortStatsDataBySeason implements Comparator<Handball16WinsMarginSeasonInfo> {
 
         @Override
-        public int compare(Handball49WinsMarginSeasonInfo a, Handball49WinsMarginSeasonInfo b) {
+        public int compare(Handball16WinsMarginSeasonInfo a, Handball16WinsMarginSeasonInfo b) {
             return Integer.valueOf(SEASONS_LIST.indexOf(a.getSeason()))
                     .compareTo(Integer.valueOf(SEASONS_LIST.indexOf(b.getSeason())));
         }

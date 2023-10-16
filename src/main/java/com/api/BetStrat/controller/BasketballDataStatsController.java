@@ -1,22 +1,28 @@
 package com.api.BetStrat.controller;
 
+import com.api.BetStrat.entity.HistoricMatch;
 import com.api.BetStrat.entity.basketball.ComebackSeasonInfo;
 import com.api.BetStrat.entity.football.GoalsFestSeasonInfo;
 import com.api.BetStrat.entity.basketball.ShortBasketWinsSeasonInfo;
 import com.api.BetStrat.entity.Team;
 import com.api.BetStrat.exception.StandardError;
+import com.api.BetStrat.repository.HistoricMatchRepository;
 import com.api.BetStrat.repository.TeamRepository;
 import com.api.BetStrat.service.basketball.ComebackSeasonInfoService;
 import com.api.BetStrat.service.basketball.ShortBasketWinsSeasonInfoService;
 import com.api.BetStrat.service.TeamService;
 import com.api.BetStrat.util.BasketballScrappingData;
+import com.api.BetStrat.util.ScrappingUtil;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
+import org.json.JSONArray;
+import org.json.JSONObject;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -34,6 +40,16 @@ import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.stream.Collectors;
+
+import static com.api.BetStrat.constants.BetStratConstants.FBREF_BASE_URL;
+import static com.api.BetStrat.constants.BetStratConstants.SUMMER_SEASONS_BEGIN_MONTH_LIST;
+import static com.api.BetStrat.constants.BetStratConstants.SUMMER_SEASONS_LIST;
+import static com.api.BetStrat.constants.BetStratConstants.WINTER_SEASONS_BEGIN_MONTH_LIST;
+import static com.api.BetStrat.constants.BetStratConstants.WINTER_SEASONS_LIST;
+import static com.api.BetStrat.constants.BetStratConstants.WORLDFOOTBALL_BASE_URL;
+import static com.api.BetStrat.constants.BetStratConstants.ZEROZERO_BASE_URL;
+import static com.api.BetStrat.constants.BetStratConstants.ZEROZERO_SEASON_CODES;
+import static com.sun.xml.internal.ws.spi.db.BindingContextFactory.LOGGER;
 
 @Slf4j
 @Api("Historical Data Analysis for Basketball")
@@ -56,6 +72,9 @@ public class BasketballDataStatsController {
 
     @Autowired
     private TeamRepository teamRepository;
+
+    @Autowired
+    private HistoricMatchRepository historicMatchRepository;
 
 
     // one instance, reuse
@@ -81,7 +100,67 @@ public class BasketballDataStatsController {
         return teamService.updateTeamScore(teamName, strategy);
     }
 
-    @ApiOperation(value = "updateAllTeamsScoreBystrategy", notes = "Strate0gy values: hockeyDraw, hockeyWinsMarginAny2, hockeyWinsMargin3, footballDrawHunter, footballMarginWins, footballGoalsFest, footballEuroHandicap, basketComebacks")
+    @SneakyThrows
+    @PostMapping("/saveHistoricMatches")
+    public void saveHistoricMatches() {
+        List<Team> allTeams = teamRepository.findAll().stream().filter(t -> t.getSport().equals("Basketball")).collect(Collectors.toList());
+
+        for (int j = 29; j < allTeams.size(); j++) {
+            insertHistoricalMatches(allTeams.get(j).getId());
+        }
+    }
+
+    @ApiOperation(value = "scrape all historic matches results for every seasons for the team", notes = "")
+    @SneakyThrows
+    @PostMapping("/historicalMatchesResults")
+    public void insertHistoricalMatches(@Valid @RequestParam Long teamId) {
+
+        Team team = teamRepository.getOne(teamId);
+
+        List<String> seasonsList = null;
+
+        if (SUMMER_SEASONS_BEGIN_MONTH_LIST.contains(team.getBeginSeason())) {
+            seasonsList = SUMMER_SEASONS_LIST;
+        } else if (WINTER_SEASONS_BEGIN_MONTH_LIST.contains(team.getBeginSeason())) {
+            seasonsList = WINTER_SEASONS_LIST;
+        }
+
+        for (String season : seasonsList) {
+            LOGGER.info(team.getName() + " - " + season);
+            String teamUrl = team.getUrl();
+            JSONArray scrappingData = null;
+            String newSeasonUrl = String.format("http://www.espn.com/nba/team/schedule/_/name/%s/season/%s/seasontype/2", teamUrl, season.split("-")[0]);
+
+            if (teamUrl == null) {
+                continue;
+            }
+
+            scrappingData = ScrappingUtil.getScrappingData(team.getName(), season.split("-")[0], newSeasonUrl, true);
+
+            if (scrappingData != null) {
+                for (int i = 0; i < scrappingData.length(); i++) {
+                    JSONObject match = (JSONObject) scrappingData.get(i);
+                    HistoricMatch historicMatch = new HistoricMatch();
+                    historicMatch.setTeamId(team);
+                    historicMatch.setMatchDate(match.getString("date"));
+                    historicMatch.setHomeTeam(match.getString("homeTeam"));
+                    historicMatch.setAwayTeam(match.getString("awayTeam"));
+                    historicMatch.setHtResult(match.getString("ftResult").replaceAll("-",":").split(";")[0]);
+                    historicMatch.setFtResult(match.getString("ftResult").replaceAll("-",":").split(";")[1]);
+                    historicMatch.setCompetition(match.getString("competition"));
+                    historicMatch.setSport(team.getSport());
+                    historicMatch.setSeason(season);
+                    try {
+                        historicMatchRepository.save(historicMatch);
+                    } catch (Exception e) {
+                        log.info("match already inserted:  " + historicMatch.toString());
+                    }
+                }
+            }
+        }
+    }
+
+    @ApiOperation(value = "updateAllTeamsScoreBystrategy", notes = "Strategy values: hockeyDraw, hockeyWinsMarginAny2, hockeyWinsMargin3, footballDrawHunter, footballMarginWins, footballGoalsFest, footballEuroHandicap, basketComebacks")
     @PostMapping("/updateAllTeamsScoreBystrategy")
     public ResponseEntity<String> updateAllTeamsScoreBystrategy (@Valid @RequestParam  String strategy) {
         List<Team> allTeams = teamRepository.findAll();

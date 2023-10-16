@@ -5,12 +5,15 @@ import lombok.SneakyThrows;
 
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
 public class Utils {
+
+    private double mean = this.mean;
 
     @SneakyThrows
     public static double beautifyDoubleValue (double value) {
@@ -29,5 +32,44 @@ public class Utils {
                 .entrySet().stream().max(Map.Entry.comparingByValue())
                 // map to tag
                 .map(Map.Entry::getKey).orElse(null);
+    }
+
+    public static double calculateSD(ArrayList<Integer> sequence) {
+        List<Integer> sequence2 = new ArrayList<>(sequence.subList(0, sequence.size()-1));
+        if (sequence.get(sequence.size()-1) == 0) {
+            sequence2.add(1);
+        }
+
+        //mean
+        double mean = sequence2.stream().mapToInt(Integer::intValue).average().getAsDouble();
+
+        //squared deviation
+        List<Double> ssList = new ArrayList<>();
+
+        for (int i : sequence2) {
+            ssList.add(Math.pow(Math.abs(mean-i),2));
+        }
+
+        //SS value
+        double ssValue = ssList.stream().collect(Collectors.summingDouble(i -> i));
+
+        //s^2
+        double s2 = ssValue / (sequence2.size() - 1);
+
+        //standard deviation
+        double stdDev = Math.sqrt(s2);
+
+        return stdDev;
+    }
+
+    public static double calculateCoeffVariation(double stdDev, ArrayList<Integer> sequence) {
+        List<Integer> sequence2 = new ArrayList<>(sequence.subList(0, sequence.size()-1));
+        if (sequence.get(sequence.size()-1) == 0) {
+            sequence2.add(1);
+        }
+
+        //mean
+        double mean = sequence2.stream().mapToInt(Integer::intValue).average().getAsDouble();
+        return (stdDev/mean)*100;
     }
 }

@@ -139,6 +139,16 @@ public class HandballDataStatsController {
     }
 
     @SneakyThrows
+    @PostMapping("/saveHistoricMatches")
+    public void saveHistoricMatches() {
+        List<Team> allTeams = teamRepository.findAll().stream().filter(t -> t.getSport().equals("Handball")).collect(Collectors.toList());
+
+        //for (int j = 0; j < allTeams.size()-1; j++) {
+            insertHistoricalMatches(1129L);
+        //}
+    }
+
+    @SneakyThrows
     @PostMapping("/historicalMatchesResults")
     public void insertHistoricalMatches(@Valid @RequestParam Long teamId) {
 

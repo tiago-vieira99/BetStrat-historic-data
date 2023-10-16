@@ -6,10 +6,12 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import io.swagger.annotations.ApiModelProperty;
 import io.swagger.annotations.ApiParam;
 import lombok.AllArgsConstructor;
+import lombok.Data;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.SneakyThrows;
+import lombok.ToString;
 import org.hibernate.annotations.CreationTimestamp;
 import org.springframework.context.annotation.Primary;
 
@@ -18,6 +20,7 @@ import java.io.Serializable;
 import java.sql.Timestamp;
 import java.util.Date;
 
+@ToString
 @Getter
 @Setter
 @NoArgsConstructor
@@ -92,12 +95,5 @@ public class Team implements Serializable {
 
     @Column(name = "sport")
     private String sport;
-
-    @SneakyThrows
-    @Override
-    public String toString() {
-        ObjectMapper mapper = new ObjectMapper();
-        return mapper.writeValueAsString(this);
-    }
 
 }
