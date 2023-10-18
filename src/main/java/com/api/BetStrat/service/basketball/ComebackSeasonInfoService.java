@@ -1,8 +1,11 @@
 package com.api.BetStrat.service.basketball;
 
 import com.api.BetStrat.constants.TeamScoreEnum;
+import com.api.BetStrat.entity.HistoricMatch;
 import com.api.BetStrat.entity.basketball.ComebackSeasonInfo;
 import com.api.BetStrat.entity.Team;
+import com.api.BetStrat.entity.handball.Handball16WinsMarginSeasonInfo;
+import com.api.BetStrat.repository.HistoricMatchRepository;
 import com.api.BetStrat.repository.basketball.ComebackSeasonInfoRepository;
 import com.api.BetStrat.util.Utils;
 import org.slf4j.Logger;
@@ -11,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
@@ -18,6 +22,12 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static com.api.BetStrat.constants.BetStratConstants.SEASONS_LIST;
+import static com.api.BetStrat.constants.BetStratConstants.SUMMER_SEASONS_BEGIN_MONTH_LIST;
+import static com.api.BetStrat.constants.BetStratConstants.SUMMER_SEASONS_LIST;
+import static com.api.BetStrat.constants.BetStratConstants.WINTER_SEASONS_BEGIN_MONTH_LIST;
+import static com.api.BetStrat.constants.BetStratConstants.WINTER_SEASONS_LIST;
+import static com.api.BetStrat.util.Utils.calculateCoeffVariation;
+import static com.api.BetStrat.util.Utils.calculateSD;
 
 @Service
 @Transactional
@@ -26,14 +36,96 @@ public class ComebackSeasonInfoService {
     private static final Logger LOGGER = LoggerFactory.getLogger(ComebackSeasonInfoService.class);
 
     @Autowired
-    private ComebackSeasonInfoRepository ComebackSeasonInfoRepository;
+    private HistoricMatchRepository historicMatchRepository;
+
+    @Autowired
+    private ComebackSeasonInfoRepository comebackSeasonInfoRepository;
 
     public ComebackSeasonInfo insertComebackInfo(ComebackSeasonInfo ComebackSeasonInfo) {
-        return ComebackSeasonInfoRepository.save(ComebackSeasonInfo);
+        return comebackSeasonInfoRepository.save(ComebackSeasonInfo);
+    }
+
+    public void updateStatsDataInfo(Team team) {
+        List<ComebackSeasonInfo> statsByTeam = comebackSeasonInfoRepository.getStatsByTeam(team);
+        List<String> seasonsList = null;
+
+        if (SUMMER_SEASONS_BEGIN_MONTH_LIST.contains(team.getBeginSeason())) {
+            seasonsList = SUMMER_SEASONS_LIST;
+        } else if (WINTER_SEASONS_BEGIN_MONTH_LIST.contains(team.getBeginSeason())) {
+            seasonsList = WINTER_SEASONS_LIST;
+        }
+
+        for (String season : seasonsList) {
+            if (!statsByTeam.stream().filter(s -> s.getSeason().equals(season)).findAny().isPresent()) {
+
+                List<HistoricMatch> teamMatchesBySeason = historicMatchRepository.getTeamMatchesBySeason(team, season);
+                String mainCompetition = Utils.findMainCompetition(teamMatchesBySeason);
+                List<HistoricMatch> filteredMatches = teamMatchesBySeason.stream().filter(t -> t.getCompetition().equals(mainCompetition)).collect(Collectors.toList());
+//                filteredMatches.sort(new Utils.MatchesByDateSorter());
+
+                ComebackSeasonInfo comebackSeasonInfo = new ComebackSeasonInfo();
+                LOGGER.info("Insert " + comebackSeasonInfo.getClass() + " for " + team.getName() + " and season " + season);
+                ArrayList<Integer> noComebacksSequence = new ArrayList<>();
+                int count = 0;
+                int totalWins= 0;
+                for (HistoricMatch historicMatch : filteredMatches) {
+                    String ftResult = historicMatch.getFtResult().split(" ")[0];
+                    String htResult = historicMatch.getHtResult();
+                    count++;
+                    int homeFTResult = Integer.parseInt(ftResult.split(":")[0]);
+                    int awayFTResult = Integer.parseInt(ftResult.split(":")[1]);
+                    int homeHTResult = Integer.parseInt(htResult.split(":")[0]);
+                    int awayHTResult = Integer.parseInt(htResult.split(":")[1]);
+
+                    if (historicMatch.getHomeTeam().equals(team.getName()) && homeFTResult > awayFTResult) {
+                        totalWins++;
+                        if (awayHTResult > homeHTResult) {
+                            noComebacksSequence.add(count);
+                            count = 0;
+                        }
+                    } else if (historicMatch.getAwayTeam().equals(team.getName()) && homeFTResult < awayFTResult) {
+                        totalWins++;
+                        if (awayHTResult < homeHTResult) {
+                            noComebacksSequence.add(count);
+                            count = 0;
+                        }
+                    }
+                }
+
+                int totalComebacks = noComebacksSequence.size();
+
+                noComebacksSequence.add(count);
+                if (noComebacksSequence.get(noComebacksSequence.size()-1) != 0) {
+                    noComebacksSequence.add(-1);
+                }
+
+                comebackSeasonInfo.setCompetition(mainCompetition);
+                if (totalWins == 0) {
+                    comebackSeasonInfo.setComebacksRate(0);
+                    comebackSeasonInfo.setWinsRate(0);
+                } else {
+                    comebackSeasonInfo.setComebacksRate(Utils.beautifyDoubleValue(100 * totalComebacks / totalWins));
+                    comebackSeasonInfo.setWinsRate(Utils.beautifyDoubleValue(100*totalWins/ filteredMatches.size()));
+                }
+                comebackSeasonInfo.setNoComebacksSequence(noComebacksSequence.toString());
+                comebackSeasonInfo.setNumComebacks(totalComebacks);
+                comebackSeasonInfo.setNumMatches(filteredMatches.size());
+                comebackSeasonInfo.setNumWins(totalWins);
+
+                double stdDev =  Utils.beautifyDoubleValue(calculateSD(noComebacksSequence));
+                comebackSeasonInfo.setStdDeviation(stdDev);
+                comebackSeasonInfo.setCoefDeviation(Utils.beautifyDoubleValue(calculateCoeffVariation(stdDev, noComebacksSequence)));
+
+                comebackSeasonInfo.setSeason(season);
+                comebackSeasonInfo.setTeamId(team);
+                comebackSeasonInfo.setUrl(team.getUrl());
+                insertComebackInfo(comebackSeasonInfo);
+            }
+        }
     }
 
     public Team updateTeamScore (Team teamByName) {
-        List<ComebackSeasonInfo> statsByTeam = ComebackSeasonInfoRepository.getStatsByTeam(teamByName);
+        List<ComebackSeasonInfo> statsByTeam = comebackSeasonInfoRepository.getStatsByTeam(teamByName);
         Collections.sort(statsByTeam, new SortStatsDataBySeason());
         Collections.reverse(statsByTeam);
 

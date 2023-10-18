@@ -69,6 +69,7 @@ public class HandballWinsMargin49SeasonInfoService {
                 List<HistoricMatch> teamMatchesBySeason = historicMatchRepository.getTeamMatchesBySeason(team, season);
                 String mainCompetition = Utils.findMainCompetition(teamMatchesBySeason);
                 List<HistoricMatch> filteredMatches = teamMatchesBySeason.stream().filter(t -> t.getCompetition().equals(mainCompetition)).collect(Collectors.toList());
+                filteredMatches.sort(new Utils.MatchesByDateSorter());
 
                 Handball49WinsMarginSeasonInfo handball49WinsMarginSeasonInfo = new Handball49WinsMarginSeasonInfo();
 
@@ -117,9 +118,7 @@ public class HandballWinsMargin49SeasonInfoService {
                 handball49WinsMarginSeasonInfo.setSeason(season);
                 handball49WinsMarginSeasonInfo.setTeamId(team);
                 handball49WinsMarginSeasonInfo.setUrl(team.getUrl());
-//                insert49WinsMarginInfo(handball49WinsMarginSeasonInfo);
-                System.out.println();
-
+                insert49WinsMarginInfo(handball49WinsMarginSeasonInfo);
             }
         }
     }
@@ -130,7 +129,7 @@ public class HandballWinsMargin49SeasonInfoService {
         Collections.reverse(statsByTeam);
 
         if (statsByTeam.size() < 3) {
-            teamByName.setMarginWinsScore(TeamScoreEnum.INSUFFICIENT_DATA.getValue());
+            teamByName.setHandball49MarginWinsScore(TeamScoreEnum.INSUFFICIENT_DATA.getValue());
         } else {
             int last3SeasonsMarginWinsRateScore = calculateLast3SeasonsMarginWinsRateScore(statsByTeam);
             int allSeasonsMarginWinsRateScore = calculateAllSeasonsMarginWinsRateScore(statsByTeam);
@@ -150,7 +149,7 @@ public class HandballWinsMargin49SeasonInfoService {
 
             double totalScore = Utils.beautifyDoubleValue(0.75*last3SeasonsScore + 0.20*allSeasonsScore + 0.05*totalMatchesScore);
 
-            teamByName.setMarginWinsScore(calculateFinalRating(totalScore));
+            teamByName.setHandball49MarginWinsScore(calculateFinalRating(totalScore));
         }
 
         return teamByName;

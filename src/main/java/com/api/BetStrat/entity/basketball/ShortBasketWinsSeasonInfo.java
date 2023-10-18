@@ -75,11 +75,17 @@ public class ShortBasketWinsSeasonInfo implements Serializable {
     @Column(name = "shortWinsRate")
     private double shortWinsRate;
 
+    @Column(name = "winsRate")
+    private double winsRate;
+
     @Column(name = "no_shortWins_sequence")
     private String noShortWinsSequence;
 
     @Column(name = "num_shortWins")
     private int numShortWins;
+
+    @Column(name = "num_wins")
+    private int numWins;
 
     @SneakyThrows
     @Override

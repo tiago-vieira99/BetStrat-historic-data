@@ -1,15 +1,22 @@
 package com.api.BetStrat.util;
 
 import com.api.BetStrat.entity.HistoricMatch;
+import com.api.BetStrat.entity.handball.Handball16WinsMarginSeasonInfo;
 import lombok.SneakyThrows;
 
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
+
+import static com.api.BetStrat.constants.BetStratConstants.SEASONS_LIST;
 
 public class Utils {
 
@@ -71,5 +78,36 @@ public class Utils {
         //mean
         double mean = sequence2.stream().mapToInt(Integer::intValue).average().getAsDouble();
         return (stdDev/mean)*100;
+    }
+
+    public static class MatchesByDateSorter implements Comparator<HistoricMatch> {
+        private SimpleDateFormat[] dateFormats = {
+                new SimpleDateFormat("MM/dd/yyyy"),
+                new SimpleDateFormat("yyyy-MM-dd")
+        };
+
+        @Override
+        public int compare(HistoricMatch obj1, HistoricMatch obj2) {
+            Date date1 = parseDate(obj1.getMatchDate());
+            Date date2 = parseDate(obj2.getMatchDate());
+
+            if (date1 != null && date2 != null) {
+                return date1.compareTo(date2);
+            }
+
+            // Handle cases where parsing fails by treating them as greater
+            return 1;
+        }
+
+        private Date parseDate(String dateString) {
+            for (SimpleDateFormat dateFormat : dateFormats) {
+                try {
+                    return dateFormat.parse(dateString);
+                } catch (ParseException e) {
+                    // Parsing failed, try the next format
+                }
+            }
+            return null; // Parsing failed for all formats
+        }
     }
 }

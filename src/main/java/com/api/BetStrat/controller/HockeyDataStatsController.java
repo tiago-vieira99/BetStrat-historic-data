@@ -152,7 +152,7 @@ public class HockeyDataStatsController {
 
     @PostMapping("/updateTeamScore/{teamName}")
     public Team updateTeamScore (@PathVariable("teamName") String teamName, @Valid @RequestParam  String strategy) {
-        return teamService.updateTeamScore(teamName, strategy);
+        return teamService.updateTeamScore(teamName, strategy, "Hockey");
     }
 
     @ApiOperation(value = "updateAllTeamsScoreBystrategy", notes = "Strate0gy values: hockeyDraw, hockeyWinsMarginAny2, hockeyWinsMargin3, footballDrawHunter, footballMarginWins, footballGoalsFest, footballEuroHandicap, basketComebacks")
@@ -161,7 +161,7 @@ public class HockeyDataStatsController {
         List<Team> allTeams = teamRepository.findAll();
         for (int i=0; i< allTeams.size(); i++) {
             try {
-                teamService.updateTeamScore(allTeams.get(i).getName(), strategy);
+                teamService.updateTeamScore(allTeams.get(i).getName(), strategy, "Hockey");
             } catch (NumberFormatException er) {
                 log.error(er.toString());
             }

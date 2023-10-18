@@ -190,7 +190,7 @@ public class FootballDataStatsController {
 
     @PostMapping("/updateTeamScore/{teamName}")
     public Team updateTeamScore (@PathVariable("teamName") String teamName, @Valid @RequestParam  String strategy) {
-        return teamService.updateTeamScore(teamName, strategy);
+        return teamService.updateTeamScore(teamName, strategy, "Football");
     }
 
     @PostMapping("/newTeam")
@@ -212,7 +212,7 @@ public class FootballDataStatsController {
         List<Team> allTeams = teamRepository.findAll();
         for (int i=0; i< allTeams.size(); i++) {
             try {
-                teamService.updateTeamScore(allTeams.get(i).getName(), strategy);
+                teamService.updateTeamScore(allTeams.get(i).getName(), strategy, "Football");
             } catch (NumberFormatException er) {
                 log.error(er.toString());
             }
@@ -256,7 +256,7 @@ public class FootballDataStatsController {
         for (int i=0; i< allTeams.size(); i++) {
             log.info("handling " + allTeams.get(i).getName());
             teamService.updateTeamStats(allTeams.get(i), strategy);
-            teamService.updateTeamScore(allTeams.get(i).getName(), strategy);
+            teamService.updateTeamScore(allTeams.get(i).getName(), strategy, "Football");
         }
 
         return ResponseEntity.ok().body("OK");
@@ -278,7 +278,7 @@ public class FootballDataStatsController {
         }
 
         teamService.updateTeamStats(teamByName, strategy);
-        teamService.updateTeamScore(teamByName.getName(), strategy);
+        teamService.updateTeamScore(teamByName.getName(), strategy, "Football");
 
         return ResponseEntity.ok().body("OK");
     }

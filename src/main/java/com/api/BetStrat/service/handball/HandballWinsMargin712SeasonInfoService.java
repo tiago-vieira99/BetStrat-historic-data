@@ -61,6 +61,7 @@ public class HandballWinsMargin712SeasonInfoService {
                 List<HistoricMatch> teamMatchesBySeason = historicMatchRepository.getTeamMatchesBySeason(team, season);
                 String mainCompetition = Utils.findMainCompetition(teamMatchesBySeason);
                 List<HistoricMatch> filteredMatches = teamMatchesBySeason.stream().filter(t -> t.getCompetition().equals(mainCompetition)).collect(Collectors.toList());
+                filteredMatches.sort(new Utils.MatchesByDateSorter());
 
                 Handball712WinsMarginSeasonInfo handball712WinsMarginSeasonInfo = new Handball712WinsMarginSeasonInfo();
 
@@ -109,9 +110,7 @@ public class HandballWinsMargin712SeasonInfoService {
                 handball712WinsMarginSeasonInfo.setSeason(season);
                 handball712WinsMarginSeasonInfo.setTeamId(team);
                 handball712WinsMarginSeasonInfo.setUrl(team.getUrl());
-//                insert712WinsMarginInfo(handball712WinsMarginSeasonInfo);
-                System.out.println();
-
+                insert712WinsMarginInfo(handball712WinsMarginSeasonInfo);
             }
         }
     }
@@ -122,7 +121,7 @@ public class HandballWinsMargin712SeasonInfoService {
         Collections.reverse(statsByTeam);
 
         if (statsByTeam.size() < 3) {
-            teamByName.setMarginWinsScore(TeamScoreEnum.INSUFFICIENT_DATA.getValue());
+            teamByName.setHandball712MarginWinsScore(TeamScoreEnum.INSUFFICIENT_DATA.getValue());
         } else {
             int last3SeasonsMarginWinsRateScore = calculateLast3SeasonsMarginWinsRateScore(statsByTeam);
             int allSeasonsMarginWinsRateScore = calculateAllSeasonsMarginWinsRateScore(statsByTeam);
@@ -142,7 +141,7 @@ public class HandballWinsMargin712SeasonInfoService {
 
             double totalScore = Utils.beautifyDoubleValue(0.75*last3SeasonsScore + 0.20*allSeasonsScore + 0.05*totalMatchesScore);
 
-            teamByName.setMarginWinsScore(calculateFinalRating(totalScore));
+            teamByName.setHandball712MarginWinsScore(calculateFinalRating(totalScore));
         }
 
         return teamByName;
