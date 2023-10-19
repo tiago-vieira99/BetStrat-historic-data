@@ -1,6 +1,7 @@
 package com.api.BetStrat.service;
 
 import com.api.BetStrat.entity.basketball.ComebackSeasonInfo;
+import com.api.BetStrat.entity.basketball.LongBasketWinsSeasonInfo;
 import com.api.BetStrat.entity.basketball.ShortBasketWinsSeasonInfo;
 import com.api.BetStrat.entity.football.DrawSeasonInfo;
 import com.api.BetStrat.entity.football.EuroHandicapSeasonInfo;
@@ -14,6 +15,7 @@ import com.api.BetStrat.entity.football.WinsMarginSeasonInfo;
 import com.api.BetStrat.exception.NotFoundException;
 import com.api.BetStrat.repository.HistoricMatchRepository;
 import com.api.BetStrat.repository.basketball.ComebackSeasonInfoRepository;
+import com.api.BetStrat.repository.basketball.LongWinsSeasonInfoRepository;
 import com.api.BetStrat.repository.basketball.ShortWinsSeasonInfoRepository;
 import com.api.BetStrat.repository.football.DrawSeasonInfoRepository;
 import com.api.BetStrat.repository.football.EuroHandicapSeasonInfoRepository;
@@ -25,6 +27,7 @@ import com.api.BetStrat.repository.hockey.HockeyDrawSeasonInfoRepository;
 import com.api.BetStrat.repository.TeamRepository;
 import com.api.BetStrat.repository.football.WinsMarginSeasonInfoRepository;
 import com.api.BetStrat.service.basketball.ComebackSeasonInfoService;
+import com.api.BetStrat.service.basketball.LongBasketWinsSeasonInfoService;
 import com.api.BetStrat.service.basketball.ShortBasketWinsSeasonInfoService;
 import com.api.BetStrat.service.football.DrawSeasonInfoService;
 import com.api.BetStrat.service.football.EuroHandicapSeasonInfoService;
@@ -98,10 +101,16 @@ public class TeamService {
     private ShortWinsSeasonInfoRepository shortWinsSeasonInfoRepository;
 
     @Autowired
+    private LongWinsSeasonInfoRepository longWinsSeasonInfoRepository;
+
+    @Autowired
     private ComebackSeasonInfoService comebackSeasonInfoService;
 
     @Autowired
     private ShortBasketWinsSeasonInfoService shortBasketWinsSeasonInfoService;
+
+    @Autowired
+    private LongBasketWinsSeasonInfoService longBasketWinsSeasonInfoService;
 
     @Autowired
     private HistoricMatchRepository historicMatchRepository;
@@ -222,6 +231,16 @@ public class TeamService {
         return statsByTeam;
     }
 
+    public List<LongBasketWinsSeasonInfo> getTeamLongWinsStats(String teamName) {
+        Team teamByName = teamRepository.getTeamByNameAndSport(teamName, "Basketball");
+        if (null == teamByName) {
+            throw new NotFoundException();
+        }
+
+        List<LongBasketWinsSeasonInfo> statsByTeam = longWinsSeasonInfoRepository.getStatsByTeam(teamByName);
+        return statsByTeam;
+    }
+
     public List<WinsMarginSeasonInfo> getTeamMarginWinStats(String teamName) {
         Team teamByName = teamRepository.getTeamByName(teamName);
         if (null == teamByName) {
@@ -249,16 +268,6 @@ public class TeamService {
         }
 
         List<GoalsFestSeasonInfo> statsByTeam = goalsFestSeasonInfoRepository.getStatsByTeam(teamByName);
-        return statsByTeam;
-    }
-
-    public List<ComebackSeasonInfo> getTeamComebackStats(String teamName) {
-        Team teamByName = teamRepository.getTeamByName(teamName);
-        if (null == teamByName) {
-            throw new NotFoundException();
-        }
-
-        List<ComebackSeasonInfo> statsByTeam = comebackSeasonInfoRepository.getStatsByTeam(teamByName);
         return statsByTeam;
     }
 
@@ -323,6 +332,12 @@ public class TeamService {
             case "basketShortWins":
                 if (teamByName.getSport().equals("Basketball")) {
                     updatedTeam = shortBasketWinsSeasonInfoService.updateTeamScore(teamByName);
+                    teamRepository.save(updatedTeam);
+                }
+                break;
+            case "basketLongWins":
+                if (teamByName.getSport().equals("Basketball")) {
+                    updatedTeam = longBasketWinsSeasonInfoService.updateTeamScore(teamByName);
                     teamRepository.save(updatedTeam);
                 }
                 break;
