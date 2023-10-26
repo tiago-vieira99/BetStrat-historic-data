@@ -161,40 +161,40 @@ public class ShortBasketWinsSeasonInfoService {
     }
 
     private int calculateLast3SeasonsShortWinsRateScore(List<ShortBasketWinsSeasonInfo> statsByTeam) {
-        double sumDrawRates = 0;
+        double sumShortWinsRates = 0;
         for (int i=0; i<3; i++) {
-            sumDrawRates += statsByTeam.get(i).getNumShortWins();
+            sumShortWinsRates += statsByTeam.get(i).getNumShortWins();
         }
 
-        double avgDrawRate = Utils.beautifyDoubleValue(sumDrawRates / 3);
+        double avgShortWinsRate = Utils.beautifyDoubleValue(sumShortWinsRates / 3);
 
-        if (isBetween(avgDrawRate,65,100)) {
+        if (isBetween(avgShortWinsRate,65,100)) {
             return 100;
-        } else if(isBetween(avgDrawRate,55,65)) {
+        } else if(isBetween(avgShortWinsRate,55,65)) {
             return 80;
-        } else if(isBetween(avgDrawRate,45,55)) {
+        } else if(isBetween(avgShortWinsRate,45,55)) {
             return 60;
-        } else if(isBetween(avgDrawRate,0,55)) {
+        } else if(isBetween(avgShortWinsRate,0,55)) {
             return 30;
         }
         return 0;
     }
 
     private int calculateAllSeasonsShortWinsRateScore(List<ShortBasketWinsSeasonInfo> statsByTeam) {
-        double sumDrawRates = 0;
+        double sumShortWinsRates = 0;
         for (int i=0; i<statsByTeam.size(); i++) {
-            sumDrawRates += statsByTeam.get(i).getShortWinsRate();
+            sumShortWinsRates += statsByTeam.get(i).getShortWinsRate();
         }
 
-        double avgDrawRate = Utils.beautifyDoubleValue(sumDrawRates / statsByTeam.size());
+        double avgShortWinsRate = Utils.beautifyDoubleValue(sumShortWinsRates / statsByTeam.size());
 
-        if (isBetween(avgDrawRate,65,100)) {
+        if (isBetween(avgShortWinsRate,65,100)) {
             return 100;
-        } else if(isBetween(avgDrawRate,55,65)) {
+        } else if(isBetween(avgShortWinsRate,55,65)) {
             return 80;
-        } else if(isBetween(avgDrawRate,45,55)) {
+        } else if(isBetween(avgShortWinsRate,45,55)) {
             return 60;
-        } else if(isBetween(avgDrawRate,0,55)) {
+        } else if(isBetween(avgShortWinsRate,0,55)) {
             return 30;
         }
         return 0;
@@ -203,22 +203,22 @@ public class ShortBasketWinsSeasonInfoService {
     private int calculateLast3SeasonsTotalWinsRateScore(List<ShortBasketWinsSeasonInfo> statsByTeam) {
         double totalWinsRates = 0;
         for (int i=0; i<3; i++) {
-            totalWinsRates += statsByTeam.get(i).getShortWinsRate();
+            totalWinsRates += statsByTeam.get(i).getWinsRate();
         }
 
-        double avgDrawRate = Utils.beautifyDoubleValue(totalWinsRates / 3);
+        double avgWinsRate = Utils.beautifyDoubleValue(totalWinsRates / 3);
 
-        if (isBetween(avgDrawRate,70,100)) {
+        if (isBetween(avgWinsRate,70,100)) {
             return 100;
-        } else if(isBetween(avgDrawRate,65,70)) {
+        } else if(isBetween(avgWinsRate,65,70)) {
             return 90;
-        } else if(isBetween(avgDrawRate,60,65)) {
+        } else if(isBetween(avgWinsRate,60,65)) {
             return 80;
-        } else if(isBetween(avgDrawRate,55,60)) {
+        } else if(isBetween(avgWinsRate,55,60)) {
             return 70;
-        } else if(isBetween(avgDrawRate,45,55)) {
+        } else if(isBetween(avgWinsRate,45,55)) {
             return 60;
-        } else if(isBetween(avgDrawRate,0,45)) {
+        } else if(isBetween(avgWinsRate,0,45)) {
             return 30;
         }
         return 0;
@@ -227,22 +227,22 @@ public class ShortBasketWinsSeasonInfoService {
     private int calculateAllSeasonsTotalWinsRateScore(List<ShortBasketWinsSeasonInfo> statsByTeam) {
         double totalWinsRates = 0;
         for (int i=0; i<statsByTeam.size(); i++) {
-            totalWinsRates += statsByTeam.get(i).getShortWinsRate();
+            totalWinsRates += statsByTeam.get(i).getWinsRate();
         }
 
-        double avgDrawRate = Utils.beautifyDoubleValue(totalWinsRates / statsByTeam.size());
+        double avgWinsRate = Utils.beautifyDoubleValue(totalWinsRates / statsByTeam.size());
 
-        if (isBetween(avgDrawRate,70,100)) {
+        if (isBetween(avgWinsRate,70,100)) {
             return 100;
-        } else if(isBetween(avgDrawRate,65,70)) {
+        } else if(isBetween(avgWinsRate,65,70)) {
             return 90;
-        } else if(isBetween(avgDrawRate,60,65)) {
+        } else if(isBetween(avgWinsRate,60,65)) {
             return 80;
-        } else if(isBetween(avgDrawRate,55,60)) {
+        } else if(isBetween(avgWinsRate,55,60)) {
             return 70;
-        } else if(isBetween(avgDrawRate,45,55)) {
+        } else if(isBetween(avgWinsRate,45,55)) {
             return 60;
-        } else if(isBetween(avgDrawRate,0,45)) {
+        } else if(isBetween(avgWinsRate,0,45)) {
             return 30;
         }
         return 0;

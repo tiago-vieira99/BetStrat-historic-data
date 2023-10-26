@@ -209,7 +209,7 @@ public class FootballDataStatsController {
     @ApiOperation(value = "updateAllTeamsScoreByStrategy", notes = "Strategy values: hockeyDraw, hockeyWinsMarginAny2, hockeyWinsMargin3, footballDrawHunter, footballMarginWins, footballGoalsFest, footballEuroHandicap, basketComebacks.")
     @PostMapping("/updateAllTeamsScoreByStrategy")
     public ResponseEntity<String> updateAllTeamsScoreByStrategy (@Valid @RequestParam  String strategy) {
-        List<Team> allTeams = teamRepository.findAll();
+        List<Team> allTeams = teamRepository.findAll().stream().filter(t -> t.getSport().equals("Football")).collect(Collectors.toList());
         for (int i=0; i< allTeams.size(); i++) {
             try {
                 teamService.updateTeamScore(allTeams.get(i).getName(), strategy, "Football");

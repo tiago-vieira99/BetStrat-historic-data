@@ -155,7 +155,7 @@ public class HockeyDataStatsController {
         return teamService.updateTeamScore(teamName, strategy, "Hockey");
     }
 
-    @ApiOperation(value = "updateAllTeamsScoreBystrategy", notes = "Strate0gy values: hockeyDraw, hockeyWinsMarginAny2, hockeyWinsMargin3, footballDrawHunter, footballMarginWins, footballGoalsFest, footballEuroHandicap, basketComebacks")
+    @ApiOperation(value = "updateAllTeamsScoreBystrategy", notes = "Strategy values: hockeyDraw, hockeyWinsMarginAny2, hockeyWinsMargin3, footballDrawHunter, footballMarginWins, footballGoalsFest, footballEuroHandicap, basketComebacks")
     @PostMapping("/updateAllTeamsScoreBystrategy")
     public ResponseEntity<String> updateAllTeamsScoreBystrategy (@Valid @RequestParam  String strategy) {
         List<Team> allTeams = teamRepository.findAll();

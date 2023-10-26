@@ -1,8 +1,11 @@
 package com.api.BetStrat.service.football;
 
 import com.api.BetStrat.constants.TeamScoreEnum;
+import com.api.BetStrat.entity.HistoricMatch;
 import com.api.BetStrat.entity.football.DrawSeasonInfo;
 import com.api.BetStrat.entity.Team;
+import com.api.BetStrat.entity.football.WinsMarginSeasonInfo;
+import com.api.BetStrat.repository.HistoricMatchRepository;
 import com.api.BetStrat.repository.football.DrawSeasonInfoRepository;
 import com.api.BetStrat.util.ScrappingUtil;
 import com.api.BetStrat.util.TeamDFhistoricData;
@@ -15,6 +18,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
@@ -31,6 +35,8 @@ import static com.api.BetStrat.constants.BetStratConstants.WINTER_SEASONS_LIST;
 import static com.api.BetStrat.constants.BetStratConstants.WORLDFOOTBALL_BASE_URL;
 import static com.api.BetStrat.constants.BetStratConstants.ZEROZERO_BASE_URL;
 import static com.api.BetStrat.constants.BetStratConstants.ZEROZERO_SEASON_CODES;
+import static com.api.BetStrat.util.Utils.calculateCoeffVariation;
+import static com.api.BetStrat.util.Utils.calculateSD;
 
 @Service
 @Transactional
@@ -40,6 +46,9 @@ public class DrawSeasonInfoService {
 
     @Autowired
     private DrawSeasonInfoRepository drawSeasonInfoRepository;
+
+    @Autowired
+    private HistoricMatchRepository historicMatchRepository;
 
     public DrawSeasonInfo insertDrawInfo(DrawSeasonInfo drawSeasonInfo) {
         LOGGER.info("Inserted " + drawSeasonInfo.getClass() + " for " + drawSeasonInfo.getTeamId().getName() + " and season " + drawSeasonInfo.getSeason());
@@ -58,46 +67,58 @@ public class DrawSeasonInfoService {
 
         for (String season : seasonsList) {
             if (!statsByTeam.stream().filter(s -> s.getSeason().equals(season)).findAny().isPresent()) {
-                String teamUrl = team.getUrl();
-                JSONArray scrappingData = null;
                 String newSeasonUrl = "";
 
-                if (teamUrl.contains(ZEROZERO_BASE_URL)) {
-                    String seasonZZCode = ZEROZERO_SEASON_CODES.get(season);
-                    newSeasonUrl = teamUrl.replaceAll("epoca_id=\\d+", "epoca_id=" + seasonZZCode);
-                    scrappingData = ScrappingUtil.getScrappingData(team.getName(), season, newSeasonUrl, false);
-                } else if (teamUrl.contains(FBREF_BASE_URL)) {
-                    String newSeason = "";
-                    if (season.contains("-")) {
-                        newSeason = season.split("-")[0] + "-20" + season.split("-")[1];
-                    } else {
-                        newSeason = season;
-                    }
-                    newSeasonUrl = teamUrl.split("/matchlogs")[0].substring(0, teamUrl.split("/matchlogs")[0].lastIndexOf('/')) + "/" + newSeason + "/matchlogs" + teamUrl.split("/matchlogs")[1];
-                    scrappingData = ScrappingUtil.getScrappingData(team.getName(), newSeason, newSeasonUrl, false);
-                } else if (teamUrl.contains(WORLDFOOTBALL_BASE_URL)) {
-                    String newSeason = "";
-                    if (season.contains("-")) {
-                        newSeason = "20" + season.split("-")[1];
-                    } else {
-                        newSeason = season;
-                    }
-                    newSeasonUrl = teamUrl + "/" + newSeason + "/3/";
-                    scrappingData = ScrappingUtil.getScrappingData(team.getName(), newSeason, newSeasonUrl, false);
+                List<HistoricMatch> teamMatchesBySeason = historicMatchRepository.getTeamMatchesBySeason(team, season);
+                String mainCompetition = Utils.findMainCompetition(teamMatchesBySeason);
+                List<HistoricMatch> filteredMatches = teamMatchesBySeason.stream().filter(t -> t.getCompetition().equals(mainCompetition)).collect(Collectors.toList());
+                filteredMatches.sort(new Utils.MatchesByDateSorter());
+
+                if (filteredMatches.size() == 0) {
+                    continue;
                 }
 
-                if (scrappingData != null) {
-                    TeamDFhistoricData teamDFhistoricData = new TeamDFhistoricData();
-                    try {
-                        DrawSeasonInfo drawSeasonInfo = teamDFhistoricData.buildSeasonDFStatsData(scrappingData);
-                        drawSeasonInfo.setSeason(season);
-                        drawSeasonInfo.setTeamId(team);
-                        drawSeasonInfo.setUrl(newSeasonUrl);
-                        insertDrawInfo(drawSeasonInfo);
-                    } catch (Exception e) {
-                        System.out.println(e.getMessage());
+                DrawSeasonInfo drawSeasonInfo = new DrawSeasonInfo();
+
+                ArrayList<Integer> noDrawsSequence = new ArrayList<>();
+                int count = 0;
+                for (HistoricMatch historicMatch : filteredMatches) {
+                    String res = historicMatch.getFtResult().split("\\(")[0];
+                    count++;
+                    int homeResult = Integer.parseInt(res.split(":")[0]);
+                    int awayResult = Integer.parseInt(res.split(":")[1]);
+                    if (homeResult == awayResult) {
+                        noDrawsSequence.add(count);
+                        count = 0;
                     }
                 }
+
+                int totalDraws = noDrawsSequence.size();
+
+                noDrawsSequence.add(count);
+                HistoricMatch lastMatch = filteredMatches.get(filteredMatches.size() - 1);
+                String lastResult = lastMatch.getFtResult().split("\\(")[0];
+                if (Integer.parseInt(lastResult.split(":")[0]) != Integer.parseInt(lastResult.split(":")[1])) {
+                    noDrawsSequence.add(-1);
+                }
+
+                if (totalDraws == 0) {
+                    drawSeasonInfo.setDrawRate(0);
+                } else {
+                    drawSeasonInfo.setDrawRate(Utils.beautifyDoubleValue(100*totalDraws/filteredMatches.size()));
+                }
+                drawSeasonInfo.setCompetition(mainCompetition);
+                drawSeasonInfo.setNoDrawsSequence(noDrawsSequence.toString());
+                drawSeasonInfo.setNumDraws(totalDraws);
+                drawSeasonInfo.setNumMatches(filteredMatches.size());
+
+                double stdDev =  Utils.beautifyDoubleValue(calculateSD(noDrawsSequence));
+                drawSeasonInfo.setStdDeviation(stdDev);
+                drawSeasonInfo.setCoefDeviation(Utils.beautifyDoubleValue(calculateCoeffVariation(stdDev, noDrawsSequence)));
+                drawSeasonInfo.setSeason(season);
+                drawSeasonInfo.setTeamId(team);
+                drawSeasonInfo.setUrl(newSeasonUrl);
+                insertDrawInfo(drawSeasonInfo);
             }
         }
     }

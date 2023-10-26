@@ -1,8 +1,11 @@
 package com.api.BetStrat.service.football;
 
 import com.api.BetStrat.constants.TeamScoreEnum;
+import com.api.BetStrat.entity.HistoricMatch;
 import com.api.BetStrat.entity.Team;
+import com.api.BetStrat.entity.football.EuroHandicapSeasonInfo;
 import com.api.BetStrat.entity.football.WinsMarginSeasonInfo;
+import com.api.BetStrat.repository.HistoricMatchRepository;
 import com.api.BetStrat.repository.football.WinsMarginSeasonInfoRepository;
 import com.api.BetStrat.util.ScrappingUtil;
 import com.api.BetStrat.util.TeamEHhistoricData;
@@ -14,6 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
@@ -30,6 +34,8 @@ import static com.api.BetStrat.constants.BetStratConstants.WINTER_SEASONS_LIST;
 import static com.api.BetStrat.constants.BetStratConstants.WORLDFOOTBALL_BASE_URL;
 import static com.api.BetStrat.constants.BetStratConstants.ZEROZERO_BASE_URL;
 import static com.api.BetStrat.constants.BetStratConstants.ZEROZERO_SEASON_CODES;
+import static com.api.BetStrat.util.Utils.calculateCoeffVariation;
+import static com.api.BetStrat.util.Utils.calculateSD;
 
 @Service
 @Transactional
@@ -39,6 +45,9 @@ public class WinsMarginSeasonInfoService {
 
     @Autowired
     private WinsMarginSeasonInfoRepository winsMarginSeasonInfoRepository;
+
+    @Autowired
+    private HistoricMatchRepository historicMatchRepository;
 
     public WinsMarginSeasonInfo insertWinsMarginInfo(WinsMarginSeasonInfo winsMarginSeasonInfo) {
         LOGGER.info("Inserted " + winsMarginSeasonInfo.getClass() + " for " + winsMarginSeasonInfo.getTeamId().getName() + " and season " + winsMarginSeasonInfo.getSeason());
@@ -57,46 +66,67 @@ public class WinsMarginSeasonInfoService {
 
         for (String season : seasonsList) {
             if (!statsByTeam.stream().filter(s -> s.getSeason().equals(season)).findAny().isPresent()) {
-                String teamUrl = team.getUrl();
-                JSONArray scrappingData = null;
                 String newSeasonUrl = "";
 
-                if (teamUrl.contains(ZEROZERO_BASE_URL)) {
-                    String seasonZZCode = ZEROZERO_SEASON_CODES.get(season);
-                    newSeasonUrl = teamUrl.replaceAll("epoca_id=\\d+", "epoca_id=" + seasonZZCode);
-                    scrappingData = ScrappingUtil.getScrappingData(team.getName(), season, newSeasonUrl, false);
-                } else if (teamUrl.contains(FBREF_BASE_URL)) {
-                    String newSeason = "";
-                    if (season.contains("-")) {
-                        newSeason = season.split("-")[0] + "-20" + season.split("-")[1];
-                    } else {
-                        newSeason = season;
-                    }
-                    newSeasonUrl = teamUrl.split("/matchlogs")[0].substring(0, teamUrl.split("/matchlogs")[0].lastIndexOf('/')) + "/" + newSeason + "/matchlogs" + teamUrl.split("/matchlogs")[1];
-                    scrappingData = ScrappingUtil.getScrappingData(team.getName(), newSeason, newSeasonUrl, false);
-                } else if (teamUrl.contains(WORLDFOOTBALL_BASE_URL)) {
-                    String newSeason = "";
-                    if (season.contains("-")) {
-                        newSeason = "20" + season.split("-")[1];
-                    } else {
-                        newSeason = season;
-                    }
-                    newSeasonUrl = teamUrl + "/" + newSeason + "/3/";
-                    scrappingData = ScrappingUtil.getScrappingData(team.getName(), newSeason, newSeasonUrl, false);
+                List<HistoricMatch> teamMatchesBySeason = historicMatchRepository.getTeamMatchesBySeason(team, season);
+                String mainCompetition = Utils.findMainCompetition(teamMatchesBySeason);
+                List<HistoricMatch> filteredMatches = teamMatchesBySeason.stream().filter(t -> t.getCompetition().equals(mainCompetition)).collect(Collectors.toList());
+                filteredMatches.sort(new Utils.MatchesByDateSorter());
+
+                if (filteredMatches.size() == 0) {
+                    continue;
                 }
 
-                if (scrappingData != null) {
-                    TeamEHhistoricData teamEHhistoricData = new TeamEHhistoricData();
-                    try {
-                        WinsMarginSeasonInfo winsMarginSeasonInfo = teamEHhistoricData.buildSeason12MarginWinStatsData(scrappingData, team.getName());
-                        winsMarginSeasonInfo.setSeason(season);
-                        winsMarginSeasonInfo.setTeamId(team);
-                        winsMarginSeasonInfo.setUrl(newSeasonUrl);
-                        insertWinsMarginInfo(winsMarginSeasonInfo);
-                    } catch (Exception e) {
-                        System.out.println(e.getMessage());
+                WinsMarginSeasonInfo winsMarginSeasonInfo = new WinsMarginSeasonInfo();
+
+                ArrayList<Integer> noMarginWinsSequence = new ArrayList<>();
+                int count = 0;
+                int totalWins= 0;
+                for (HistoricMatch historicMatch : filteredMatches) {
+                    String res = historicMatch.getFtResult().split("\\(")[0];
+                    count++;
+                    int homeResult = Integer.parseInt(res.split(":")[0]);
+                    int awayResult = Integer.parseInt(res.split(":")[1]);
+                    if ((historicMatch.getHomeTeam().equals(team.getName()) && homeResult>awayResult) || (historicMatch.getAwayTeam().equals(team.getName()) && homeResult<awayResult)) {
+                        totalWins++;
+                        if (Math.abs(homeResult - awayResult) == 1 || Math.abs(homeResult - awayResult) == 2) {
+                            noMarginWinsSequence.add(count);
+                            count = 0;
+                        }
                     }
                 }
+
+                int totalMarginWins = noMarginWinsSequence.size();
+
+                noMarginWinsSequence.add(count);
+                HistoricMatch lastMatch = filteredMatches.get(filteredMatches.size() - 1);
+                String lastResult = lastMatch.getFtResult().split("\\(")[0];
+                if (!((lastMatch.getHomeTeam().equals(team.getName()) && Integer.parseInt(lastResult.split(":")[0])>Integer.parseInt(lastResult.split(":")[1])) ||
+                        (lastMatch.getAwayTeam().equals(team.getName()) && Integer.parseInt(lastResult.split(":")[0])<Integer.parseInt(lastResult.split(":")[1]))) ||
+                        (Math.abs(Integer.parseInt(lastResult.split(":")[0]) - Integer.parseInt(lastResult.split(":")[1])) > 2)) {
+                    noMarginWinsSequence.add(-1);
+                }
+
+                if (totalWins == 0) {
+                    winsMarginSeasonInfo.setMarginWinsRate(0);
+                    winsMarginSeasonInfo.setWinsRate(0);
+                } else {
+                    winsMarginSeasonInfo.setMarginWinsRate(Utils.beautifyDoubleValue(100*totalMarginWins/totalWins));
+                    winsMarginSeasonInfo.setWinsRate(Utils.beautifyDoubleValue(100*totalWins/filteredMatches.size()));
+                }
+                winsMarginSeasonInfo.setCompetition(mainCompetition);
+                winsMarginSeasonInfo.setNoMarginWinsSequence(noMarginWinsSequence.toString());
+                winsMarginSeasonInfo.setNumMarginWins(totalMarginWins);
+                winsMarginSeasonInfo.setNumMatches(filteredMatches.size());
+                winsMarginSeasonInfo.setNumWins(totalWins);
+
+                double stdDev =  Utils.beautifyDoubleValue(calculateSD(noMarginWinsSequence));
+                winsMarginSeasonInfo.setStdDeviation(stdDev);
+                winsMarginSeasonInfo.setCoefDeviation(Utils.beautifyDoubleValue(calculateCoeffVariation(stdDev, noMarginWinsSequence)));
+                winsMarginSeasonInfo.setSeason(season);
+                winsMarginSeasonInfo.setTeamId(team);
+                winsMarginSeasonInfo.setUrl(newSeasonUrl);
+                insertWinsMarginInfo(winsMarginSeasonInfo);
             }
         }
     }
@@ -224,15 +254,15 @@ public class WinsMarginSeasonInfoService {
             marginWinsRates += statsByTeam.get(i).getMarginWinsRate();
         }
 
-        double avgDrawRate = Utils.beautifyDoubleValue(marginWinsRates / 3);
+        double avgMarginWinsRate = Utils.beautifyDoubleValue(marginWinsRates / 3);
 
-        if (isBetween(avgDrawRate,80,100)) {
+        if (isBetween(avgMarginWinsRate,80,100)) {
             return 100;
-        } else if(isBetween(avgDrawRate,70,80)) {
+        } else if(isBetween(avgMarginWinsRate,70,80)) {
             return 80;
-        } else if(isBetween(avgDrawRate,50,70)) {
+        } else if(isBetween(avgMarginWinsRate,50,70)) {
             return 60;
-        } else if(isBetween(avgDrawRate,0,50)) {
+        } else if(isBetween(avgMarginWinsRate,0,50)) {
             return 30;
         }
         return 0;
@@ -244,15 +274,15 @@ public class WinsMarginSeasonInfoService {
             marginWinsRates += statsByTeam.get(i).getMarginWinsRate();
         }
 
-        double avgDrawRate = Utils.beautifyDoubleValue(marginWinsRates / statsByTeam.size());
+        double avgMarginWinsRate = Utils.beautifyDoubleValue(marginWinsRates / statsByTeam.size());
 
-        if (isBetween(avgDrawRate,80,100)) {
+        if (isBetween(avgMarginWinsRate,80,100)) {
             return 100;
-        } else if(isBetween(avgDrawRate,70,80)) {
+        } else if(isBetween(avgMarginWinsRate,70,80)) {
             return 80;
-        } else if(isBetween(avgDrawRate,50,70)) {
+        } else if(isBetween(avgMarginWinsRate,50,70)) {
             return 60;
-        } else if(isBetween(avgDrawRate,0,50)) {
+        } else if(isBetween(avgMarginWinsRate,0,50)) {
             return 30;
         }
         return 0;
@@ -261,22 +291,22 @@ public class WinsMarginSeasonInfoService {
     private int calculateLast3SeasonsTotalWinsRateScore(List<WinsMarginSeasonInfo> statsByTeam) {
         double totalWinsRates = 0;
         for (int i=0; i<3; i++) {
-            totalWinsRates += statsByTeam.get(i).getMarginWinsRate();
+            totalWinsRates += statsByTeam.get(i).getWinsRate();
         }
 
-        double avgDrawRate = Utils.beautifyDoubleValue(totalWinsRates / 3);
+        double avgWinsRate = Utils.beautifyDoubleValue(totalWinsRates / 3);
 
-        if (isBetween(avgDrawRate,80,100)) {
+        if (isBetween(avgWinsRate,80,100)) {
             return 100;
-        } else if(isBetween(avgDrawRate,70,80)) {
+        } else if(isBetween(avgWinsRate,70,80)) {
             return 90;
-        } else if(isBetween(avgDrawRate,60,70)) {
+        } else if(isBetween(avgWinsRate,60,70)) {
             return 80;
-        } else if(isBetween(avgDrawRate,50,60)) {
+        } else if(isBetween(avgWinsRate,50,60)) {
             return 70;
-        } else if(isBetween(avgDrawRate,40,50)) {
+        } else if(isBetween(avgWinsRate,40,50)) {
             return 60;
-        } else if(isBetween(avgDrawRate,0,40)) {
+        } else if(isBetween(avgWinsRate,0,40)) {
             return 30;
         }
         return 0;
@@ -285,22 +315,22 @@ public class WinsMarginSeasonInfoService {
     private int calculateAllSeasonsTotalWinsRateScore(List<WinsMarginSeasonInfo> statsByTeam) {
         double totalWinsRates = 0;
         for (int i=0; i<statsByTeam.size(); i++) {
-            totalWinsRates += statsByTeam.get(i).getMarginWinsRate();
+            totalWinsRates += statsByTeam.get(i).getWinsRate();
         }
 
-        double avgDrawRate = Utils.beautifyDoubleValue(totalWinsRates / statsByTeam.size());
+        double avgWinsRate = Utils.beautifyDoubleValue(totalWinsRates / statsByTeam.size());
 
-        if (isBetween(avgDrawRate,80,100)) {
+        if (isBetween(avgWinsRate,80,100)) {
             return 100;
-        } else if(isBetween(avgDrawRate,70,80)) {
+        } else if(isBetween(avgWinsRate,70,80)) {
             return 90;
-        } else if(isBetween(avgDrawRate,60,70)) {
+        } else if(isBetween(avgWinsRate,60,70)) {
             return 80;
-        } else if(isBetween(avgDrawRate,50,60)) {
+        } else if(isBetween(avgWinsRate,50,60)) {
             return 70;
-        } else if(isBetween(avgDrawRate,40,50)) {
+        } else if(isBetween(avgWinsRate,40,50)) {
             return 60;
-        } else if(isBetween(avgDrawRate,0,40)) {
+        } else if(isBetween(avgWinsRate,0,40)) {
             return 30;
         }
         return 0;

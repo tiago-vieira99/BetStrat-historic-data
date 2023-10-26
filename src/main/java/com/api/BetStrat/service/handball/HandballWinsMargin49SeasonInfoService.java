@@ -174,15 +174,15 @@ public class HandballWinsMargin49SeasonInfoService {
             marginWinsRates += statsByTeam.get(i).getMarginWinsRate();
         }
 
-        double avgDrawRate = Utils.beautifyDoubleValue(marginWinsRates / 3);
+        double avgMarginWinsRate = Utils.beautifyDoubleValue(marginWinsRates / 3);
 
-        if (isBetween(avgDrawRate,80,100)) {
+        if (isBetween(avgMarginWinsRate,80,100)) {
             return 100;
-        } else if(isBetween(avgDrawRate,70,80)) {
+        } else if(isBetween(avgMarginWinsRate,70,80)) {
             return 80;
-        } else if(isBetween(avgDrawRate,50,70)) {
+        } else if(isBetween(avgMarginWinsRate,50,70)) {
             return 60;
-        } else if(isBetween(avgDrawRate,0,50)) {
+        } else if(isBetween(avgMarginWinsRate,0,50)) {
             return 30;
         }
         return 0;
@@ -194,15 +194,15 @@ public class HandballWinsMargin49SeasonInfoService {
             marginWinsRates += statsByTeam.get(i).getMarginWinsRate();
         }
 
-        double avgDrawRate = Utils.beautifyDoubleValue(marginWinsRates / statsByTeam.size());
+        double avgMarginWinsRate = Utils.beautifyDoubleValue(marginWinsRates / statsByTeam.size());
 
-        if (isBetween(avgDrawRate,80,100)) {
+        if (isBetween(avgMarginWinsRate,80,100)) {
             return 100;
-        } else if(isBetween(avgDrawRate,70,80)) {
+        } else if(isBetween(avgMarginWinsRate,70,80)) {
             return 80;
-        } else if(isBetween(avgDrawRate,50,70)) {
+        } else if(isBetween(avgMarginWinsRate,50,70)) {
             return 60;
-        } else if(isBetween(avgDrawRate,0,50)) {
+        } else if(isBetween(avgMarginWinsRate,0,50)) {
             return 30;
         }
         return 0;
@@ -211,22 +211,22 @@ public class HandballWinsMargin49SeasonInfoService {
     private int calculateLast3SeasonsTotalWinsRateScore(List<Handball49WinsMarginSeasonInfo> statsByTeam) {
         double totalWinsRates = 0;
         for (int i=0; i<3; i++) {
-            totalWinsRates += statsByTeam.get(i).getMarginWinsRate();
+            totalWinsRates += statsByTeam.get(i).getWinsRate();
         }
 
-        double avgDrawRate = Utils.beautifyDoubleValue(totalWinsRates / 3);
+        double avgWinsRate = Utils.beautifyDoubleValue(totalWinsRates / 3);
 
-        if (isBetween(avgDrawRate,80,100)) {
+        if (isBetween(avgWinsRate,80,100)) {
             return 100;
-        } else if(isBetween(avgDrawRate,70,80)) {
+        } else if(isBetween(avgWinsRate,70,80)) {
             return 90;
-        } else if(isBetween(avgDrawRate,60,70)) {
+        } else if(isBetween(avgWinsRate,60,70)) {
             return 80;
-        } else if(isBetween(avgDrawRate,50,60)) {
+        } else if(isBetween(avgWinsRate,50,60)) {
             return 70;
-        } else if(isBetween(avgDrawRate,40,50)) {
+        } else if(isBetween(avgWinsRate,40,50)) {
             return 60;
-        } else if(isBetween(avgDrawRate,0,40)) {
+        } else if(isBetween(avgWinsRate,0,40)) {
             return 30;
         }
         return 0;
@@ -235,22 +235,22 @@ public class HandballWinsMargin49SeasonInfoService {
     private int calculateAllSeasonsTotalWinsRateScore(List<Handball49WinsMarginSeasonInfo> statsByTeam) {
         double totalWinsRates = 0;
         for (int i=0; i<statsByTeam.size(); i++) {
-            totalWinsRates += statsByTeam.get(i).getMarginWinsRate();
+            totalWinsRates += statsByTeam.get(i).getWinsRate();
         }
 
-        double avgDrawRate = Utils.beautifyDoubleValue(totalWinsRates / statsByTeam.size());
+        double avgWinsRate = Utils.beautifyDoubleValue(totalWinsRates / statsByTeam.size());
 
-        if (isBetween(avgDrawRate,80,100)) {
+        if (isBetween(avgWinsRate,80,100)) {
             return 100;
-        } else if(isBetween(avgDrawRate,70,80)) {
+        } else if(isBetween(avgWinsRate,70,80)) {
             return 90;
-        } else if(isBetween(avgDrawRate,60,70)) {
+        } else if(isBetween(avgWinsRate,60,70)) {
             return 80;
-        } else if(isBetween(avgDrawRate,50,60)) {
+        } else if(isBetween(avgWinsRate,50,60)) {
             return 70;
-        } else if(isBetween(avgDrawRate,40,50)) {
+        } else if(isBetween(avgWinsRate,40,50)) {
             return 60;
-        } else if(isBetween(avgDrawRate,0,40)) {
+        } else if(isBetween(avgWinsRate,0,40)) {
             return 30;
         }
         return 0;

@@ -82,7 +82,7 @@ public class Utils {
 
     public static class MatchesByDateSorter implements Comparator<HistoricMatch> {
         private SimpleDateFormat[] dateFormats = {
-                new SimpleDateFormat("MM/dd/yyyy"),
+                new SimpleDateFormat("dd/MM/yyyy"),
                 new SimpleDateFormat("yyyy-MM-dd")
         };
 

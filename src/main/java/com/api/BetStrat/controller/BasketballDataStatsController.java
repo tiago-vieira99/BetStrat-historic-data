@@ -3,10 +3,8 @@ package com.api.BetStrat.controller;
 import com.api.BetStrat.entity.HistoricMatch;
 import com.api.BetStrat.entity.basketball.ComebackSeasonInfo;
 import com.api.BetStrat.entity.basketball.LongBasketWinsSeasonInfo;
-import com.api.BetStrat.entity.football.GoalsFestSeasonInfo;
 import com.api.BetStrat.entity.basketball.ShortBasketWinsSeasonInfo;
 import com.api.BetStrat.entity.Team;
-import com.api.BetStrat.entity.handball.Handball712WinsMarginSeasonInfo;
 import com.api.BetStrat.exception.StandardError;
 import com.api.BetStrat.repository.HistoricMatchRepository;
 import com.api.BetStrat.repository.TeamRepository;
@@ -14,7 +12,6 @@ import com.api.BetStrat.service.basketball.ComebackSeasonInfoService;
 import com.api.BetStrat.service.basketball.LongBasketWinsSeasonInfoService;
 import com.api.BetStrat.service.basketball.ShortBasketWinsSeasonInfoService;
 import com.api.BetStrat.service.TeamService;
-import com.api.BetStrat.util.BasketballScrappingData;
 import com.api.BetStrat.util.ScrappingUtil;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -39,19 +36,13 @@ import org.springframework.web.bind.annotation.RestController;
 
 import javax.validation.Valid;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static com.api.BetStrat.constants.BetStratConstants.FBREF_BASE_URL;
 import static com.api.BetStrat.constants.BetStratConstants.SUMMER_SEASONS_BEGIN_MONTH_LIST;
 import static com.api.BetStrat.constants.BetStratConstants.SUMMER_SEASONS_LIST;
 import static com.api.BetStrat.constants.BetStratConstants.WINTER_SEASONS_BEGIN_MONTH_LIST;
 import static com.api.BetStrat.constants.BetStratConstants.WINTER_SEASONS_LIST;
-import static com.api.BetStrat.constants.BetStratConstants.WORLDFOOTBALL_BASE_URL;
-import static com.api.BetStrat.constants.BetStratConstants.ZEROZERO_BASE_URL;
-import static com.api.BetStrat.constants.BetStratConstants.ZEROZERO_SEASON_CODES;
 import static com.sun.xml.internal.ws.spi.db.BindingContextFactory.LOGGER;
 
 @Slf4j
