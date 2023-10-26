@@ -34,6 +34,8 @@ import org.apache.http.impl.client.HttpClients;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.modelmapper.ModelMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -57,7 +59,6 @@ import static com.api.BetStrat.constants.BetStratConstants.WINTER_SEASONS_LIST;
 import static com.api.BetStrat.constants.BetStratConstants.WORLDFOOTBALL_BASE_URL;
 import static com.api.BetStrat.constants.BetStratConstants.ZEROZERO_BASE_URL;
 import static com.api.BetStrat.constants.BetStratConstants.ZEROZERO_SEASON_CODES;
-import static com.sun.xml.internal.ws.spi.db.BindingContextFactory.LOGGER;
 
 @Slf4j
 @Api("Historical Data Analysis for Handball")
@@ -65,6 +66,8 @@ import static com.sun.xml.internal.ws.spi.db.BindingContextFactory.LOGGER;
 @CrossOrigin
 @RequestMapping("/api/bhd/handball")
 public class HandballDataStatsController {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(HandballDataStatsController.class);
 
     @Autowired
     private TeamService teamService;
