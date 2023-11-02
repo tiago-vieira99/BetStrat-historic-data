@@ -2,10 +2,8 @@ package com.api.BetStrat.service.basketball;
 
 import com.api.BetStrat.constants.TeamScoreEnum;
 import com.api.BetStrat.entity.HistoricMatch;
-import com.api.BetStrat.entity.basketball.ComebackSeasonInfo;
 import com.api.BetStrat.entity.basketball.ShortBasketWinsSeasonInfo;
 import com.api.BetStrat.entity.Team;
-import com.api.BetStrat.entity.handball.Handball49WinsMarginSeasonInfo;
 import com.api.BetStrat.repository.HistoricMatchRepository;
 import com.api.BetStrat.repository.basketball.ShortWinsSeasonInfoRepository;
 import com.api.BetStrat.util.Utils;
@@ -47,7 +45,7 @@ public class ShortBasketWinsSeasonInfoService {
     }
 
     public void updateStatsDataInfo(Team team) {
-        List<ShortBasketWinsSeasonInfo> statsByTeam = shortWinsSeasonInfoRepository.getStatsByTeam(team);
+        List<ShortBasketWinsSeasonInfo> statsByTeam = shortWinsSeasonInfoRepository.getShortBasketWinsStatsByTeam(team);
         List<String> seasonsList = null;
 
         if (SUMMER_SEASONS_BEGIN_MONTH_LIST.contains(team.getBeginSeason())) {
@@ -117,7 +115,7 @@ public class ShortBasketWinsSeasonInfoService {
     }
 
     public Team updateTeamScore (Team teamByName) {
-        List<ShortBasketWinsSeasonInfo> statsByTeam = shortWinsSeasonInfoRepository.getStatsByTeam(teamByName);
+        List<ShortBasketWinsSeasonInfo> statsByTeam = shortWinsSeasonInfoRepository.getShortBasketWinsStatsByTeam(teamByName);
         Collections.sort(statsByTeam, new SortStatsDataBySeason());
         Collections.reverse(statsByTeam);
 

@@ -12,6 +12,7 @@ import lombok.Setter;
 import lombok.SneakyThrows;
 import lombok.ToString;
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -53,6 +54,13 @@ public class Handball49WinsMarginSeasonInfo implements Serializable {
     @CreationTimestamp
     @Column(name = "created_date")
     private Date created_date;
+
+    @ApiModelProperty(example = "dd-MM-yyyy hh:mm:ss")
+    @JsonFormat(pattern = "dd-MM-yyyy hh:mm:ss")
+    @Temporal(TemporalType.DATE)
+    @UpdateTimestamp
+    @Column(name = "updated_date")
+    private Date updated_date;
 
     @Column(name = "description")
     private String description;

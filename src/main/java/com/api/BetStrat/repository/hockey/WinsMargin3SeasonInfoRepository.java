@@ -17,8 +17,8 @@ import java.util.List;
 @RepositoryDefinition(domainClass = WinsMargin3SeasonInfo.class, idClass = Long.class)
 public interface WinsMargin3SeasonInfoRepository extends JpaRepository<WinsMargin3SeasonInfo, Long>, JpaSpecificationExecutor<WinsMargin3SeasonInfo> {
 
-    @Cacheable(value="List<WinsMargin3SeasonInfo>", key="{#root.methodName, #team}")
+    @Cacheable(value="List<WinsMargin3SeasonInfo>", key="{#root.methodName, #team.name}")
     @Query(value = "SELECT m FROM WinsMargin3SeasonInfo m WHERE m.teamId = ?1")
-    List<WinsMargin3SeasonInfo> getStatsByTeam(Team team);
+    List<WinsMargin3SeasonInfo> getHockeyWinsMargin3StatsByTeam(Team team);
 
 }

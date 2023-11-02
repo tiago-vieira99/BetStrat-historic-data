@@ -45,7 +45,7 @@ public class LongBasketWinsSeasonInfoService {
     }
 
     public void updateStatsDataInfo(Team team) {
-        List<LongBasketWinsSeasonInfo> statsByTeam = longWinsSeasonInfoRepository.getStatsByTeam(team);
+        List<LongBasketWinsSeasonInfo> statsByTeam = longWinsSeasonInfoRepository.getLongBasketWinsStatsByTeam(team);
         List<String> seasonsList = null;
 
         if (SUMMER_SEASONS_BEGIN_MONTH_LIST.contains(team.getBeginSeason())) {
@@ -115,7 +115,7 @@ public class LongBasketWinsSeasonInfoService {
     }
 
     public Team updateTeamScore (Team teamByName) {
-        List<LongBasketWinsSeasonInfo> statsByTeam = longWinsSeasonInfoRepository.getStatsByTeam(teamByName);
+        List<LongBasketWinsSeasonInfo> statsByTeam = longWinsSeasonInfoRepository.getLongBasketWinsStatsByTeam(teamByName);
         Collections.sort(statsByTeam, new SortStatsDataBySeason());
         Collections.reverse(statsByTeam);
 

@@ -1,7 +1,6 @@
 package com.api.BetStrat.repository.handball;
 
 import com.api.BetStrat.entity.Team;
-import com.api.BetStrat.entity.football.WinsMarginSeasonInfo;
 import com.api.BetStrat.entity.handball.Handball16WinsMarginSeasonInfo;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -18,8 +17,8 @@ import java.util.List;
 @RepositoryDefinition(domainClass = Handball16WinsMarginSeasonInfo.class, idClass = Long.class)
 public interface Handball16WinsMarginSeasonInfoRepository extends JpaRepository<Handball16WinsMarginSeasonInfo, Long>, JpaSpecificationExecutor<Handball16WinsMarginSeasonInfo> {
 
-    @Cacheable(value="List<Handball16WinsMarginSeasonInfo>", key="{#root.methodName, #team}")
+    @Cacheable(value="List<Handball16WinsMarginSeasonInfo>", key="{#root.methodName, #team.name}")
     @Query(value = "SELECT m FROM Handball16WinsMarginSeasonInfo m WHERE m.teamId = ?1")
-    List<Handball16WinsMarginSeasonInfo> getStatsByTeam(Team team);
+    List<Handball16WinsMarginSeasonInfo> getHandball16WinsMarginStatsByTeam(Team team);
 
 }

@@ -33,7 +33,7 @@ public class HockeyDrawSeasonInfoService {
     }
 
     public Team updateTeamScore (Team teamByName) {
-        List<HockeyDrawSeasonInfo> statsByTeam = hockeyDrawSeasonInfoRepository.getStatsByTeam(teamByName);
+        List<HockeyDrawSeasonInfo> statsByTeam = hockeyDrawSeasonInfoRepository.getHockeyDrawStatsByTeam(teamByName);
         Collections.sort(statsByTeam, new SortStatsDataBySeason());
         Collections.reverse(statsByTeam);
 

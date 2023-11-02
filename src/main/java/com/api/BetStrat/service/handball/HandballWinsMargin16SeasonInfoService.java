@@ -4,7 +4,6 @@ import com.api.BetStrat.constants.TeamScoreEnum;
 import com.api.BetStrat.entity.HistoricMatch;
 import com.api.BetStrat.entity.Team;
 import com.api.BetStrat.entity.handball.Handball16WinsMarginSeasonInfo;
-import com.api.BetStrat.entity.handball.Handball16WinsMarginSeasonInfo;
 import com.api.BetStrat.repository.HistoricMatchRepository;
 import com.api.BetStrat.repository.handball.Handball16WinsMarginSeasonInfoRepository;
 import com.api.BetStrat.util.Utils;
@@ -47,7 +46,7 @@ public class HandballWinsMargin16SeasonInfoService {
     }
 
     public void updateStatsDataInfo(Team team) {
-        List<Handball16WinsMarginSeasonInfo> statsByTeam = handball16WinsMarginSeasonInfoRepository.getStatsByTeam(team);
+        List<Handball16WinsMarginSeasonInfo> statsByTeam = handball16WinsMarginSeasonInfoRepository.getHandball16WinsMarginStatsByTeam(team);
         List<String> seasonsList = null;
 
         if (SUMMER_SEASONS_BEGIN_MONTH_LIST.contains(team.getBeginSeason())) {
@@ -117,7 +116,7 @@ public class HandballWinsMargin16SeasonInfoService {
     }
 
     public Team updateTeamScore (Team teamByName) {
-        List<Handball16WinsMarginSeasonInfo> statsByTeam = handball16WinsMarginSeasonInfoRepository.getStatsByTeam(teamByName);
+        List<Handball16WinsMarginSeasonInfo> statsByTeam = handball16WinsMarginSeasonInfoRepository.getHandball16WinsMarginStatsByTeam(teamByName);
         Collections.sort(statsByTeam, new SortStatsDataBySeason());
         Collections.reverse(statsByTeam);
 

@@ -4,14 +4,10 @@ import com.api.BetStrat.constants.TeamScoreEnum;
 import com.api.BetStrat.entity.HistoricMatch;
 import com.api.BetStrat.entity.football.DrawSeasonInfo;
 import com.api.BetStrat.entity.Team;
-import com.api.BetStrat.entity.football.WinsMarginSeasonInfo;
 import com.api.BetStrat.repository.HistoricMatchRepository;
 import com.api.BetStrat.repository.football.DrawSeasonInfoRepository;
-import com.api.BetStrat.util.ScrappingUtil;
-import com.api.BetStrat.util.TeamDFhistoricData;
 import com.api.BetStrat.util.Utils;
 import com.google.common.collect.ImmutableList;
-import org.json.JSONArray;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,15 +22,11 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static com.api.BetStrat.constants.BetStratConstants.FBREF_BASE_URL;
 import static com.api.BetStrat.constants.BetStratConstants.SEASONS_LIST;
 import static com.api.BetStrat.constants.BetStratConstants.SUMMER_SEASONS_BEGIN_MONTH_LIST;
 import static com.api.BetStrat.constants.BetStratConstants.SUMMER_SEASONS_LIST;
 import static com.api.BetStrat.constants.BetStratConstants.WINTER_SEASONS_BEGIN_MONTH_LIST;
 import static com.api.BetStrat.constants.BetStratConstants.WINTER_SEASONS_LIST;
-import static com.api.BetStrat.constants.BetStratConstants.WORLDFOOTBALL_BASE_URL;
-import static com.api.BetStrat.constants.BetStratConstants.ZEROZERO_BASE_URL;
-import static com.api.BetStrat.constants.BetStratConstants.ZEROZERO_SEASON_CODES;
 import static com.api.BetStrat.util.Utils.calculateCoeffVariation;
 import static com.api.BetStrat.util.Utils.calculateSD;
 
@@ -56,7 +48,7 @@ public class DrawSeasonInfoService {
     }
 
     public void updateStatsDataInfo(Team team) {
-        List<DrawSeasonInfo> statsByTeam = drawSeasonInfoRepository.getStatsByTeam(team);
+        List<DrawSeasonInfo> statsByTeam = drawSeasonInfoRepository.getFootballDrawStatsByTeam(team);
         List<String> seasonsList = null;
 
         if (SUMMER_SEASONS_BEGIN_MONTH_LIST.contains(team.getBeginSeason())) {
@@ -124,7 +116,7 @@ public class DrawSeasonInfoService {
     }
 
     public Team updateTeamScore (Team teamByName) {
-        List<DrawSeasonInfo> statsByTeam = drawSeasonInfoRepository.getStatsByTeam(teamByName);
+        List<DrawSeasonInfo> statsByTeam = drawSeasonInfoRepository.getFootballDrawStatsByTeam(teamByName);
         Collections.sort(statsByTeam, new SortStatsDataBySeason());
         Collections.reverse(statsByTeam);
 
@@ -150,7 +142,7 @@ public class DrawSeasonInfoService {
     }
 
     public LinkedHashMap<String, String> getSimulatedScorePartialSeasons(Team teamByName, int seasonsToDiscard) {
-        List<DrawSeasonInfo> statsByTeam = drawSeasonInfoRepository.getStatsByTeam(teamByName);
+        List<DrawSeasonInfo> statsByTeam = drawSeasonInfoRepository.getFootballDrawStatsByTeam(teamByName);
         LinkedHashMap<String, String> outMap = new LinkedHashMap<>();
         List<String> profits = ImmutableList.of("1","0,6","1,2","1,3","2","2,8","4,3","6,6","-20,4","-23,4","-19,8","-19,2","-15");
 

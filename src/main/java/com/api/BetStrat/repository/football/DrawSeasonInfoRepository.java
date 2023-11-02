@@ -17,8 +17,8 @@ import java.util.List;
 @RepositoryDefinition(domainClass = DrawSeasonInfo.class, idClass = Long.class)
 public interface DrawSeasonInfoRepository extends JpaRepository<DrawSeasonInfo, Long>, JpaSpecificationExecutor<DrawSeasonInfo> {
 
-    @Cacheable(value="List<DrawSeasonInfo>", key="{#root.methodName, #team}")
+    @Cacheable(value="List<DrawSeasonInfo>", key="{#root.methodName, #team.name}")
     @Query(value = "SELECT m FROM DrawSeasonInfo m WHERE m.teamId = ?1")
-    List<DrawSeasonInfo> getStatsByTeam(Team team);
+    List<DrawSeasonInfo> getFootballDrawStatsByTeam(Team team);
 
 }

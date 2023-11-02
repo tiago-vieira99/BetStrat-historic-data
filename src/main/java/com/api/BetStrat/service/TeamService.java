@@ -5,6 +5,7 @@ import com.api.BetStrat.entity.basketball.LongBasketWinsSeasonInfo;
 import com.api.BetStrat.entity.basketball.ShortBasketWinsSeasonInfo;
 import com.api.BetStrat.entity.football.DrawSeasonInfo;
 import com.api.BetStrat.entity.football.EuroHandicapSeasonInfo;
+import com.api.BetStrat.entity.football.FlipFlopOversUndersInfo;
 import com.api.BetStrat.entity.football.GoalsFestSeasonInfo;
 import com.api.BetStrat.entity.handball.Handball16WinsMarginSeasonInfo;
 import com.api.BetStrat.entity.handball.Handball49WinsMarginSeasonInfo;
@@ -19,6 +20,7 @@ import com.api.BetStrat.repository.basketball.LongWinsSeasonInfoRepository;
 import com.api.BetStrat.repository.basketball.ShortWinsSeasonInfoRepository;
 import com.api.BetStrat.repository.football.DrawSeasonInfoRepository;
 import com.api.BetStrat.repository.football.EuroHandicapSeasonInfoRepository;
+import com.api.BetStrat.repository.football.FlipFlopOversUndersInfoRepository;
 import com.api.BetStrat.repository.football.GoalsFestSeasonInfoRepository;
 import com.api.BetStrat.repository.handball.Handball16WinsMarginSeasonInfoRepository;
 import com.api.BetStrat.repository.handball.Handball49WinsMarginSeasonInfoRepository;
@@ -31,6 +33,7 @@ import com.api.BetStrat.service.basketball.LongBasketWinsSeasonInfoService;
 import com.api.BetStrat.service.basketball.ShortBasketWinsSeasonInfoService;
 import com.api.BetStrat.service.football.DrawSeasonInfoService;
 import com.api.BetStrat.service.football.EuroHandicapSeasonInfoService;
+import com.api.BetStrat.service.football.FlipFlopOversUndersInfoService;
 import com.api.BetStrat.service.football.GoalsFestSeasonInfoService;
 import com.api.BetStrat.service.football.WinsMarginSeasonInfoService;
 import com.api.BetStrat.service.handball.HandballWinsMargin16SeasonInfoService;
@@ -87,6 +90,12 @@ public class TeamService {
 
     @Autowired
     private EuroHandicapSeasonInfoRepository euroHandicapSeasonInfoRepository;
+
+    @Autowired
+    private FlipFlopOversUndersInfoService flipFlopOversUndersInfoService;
+
+    @Autowired
+    private FlipFlopOversUndersInfoRepository flipFlopOversUndersInfoRepository;
 
     @Autowired
     private GoalsFestSeasonInfoRepository goalsFestSeasonInfoRepository;
@@ -154,6 +163,9 @@ public class TeamService {
             case "footballEuroHandicap":
                 euroHandicapSeasonInfoService.updateStatsDataInfo(team);
                 break;
+            case "footballFlipFlop":
+                flipFlopOversUndersInfoService.updateStatsDataInfo(team);
+                break;
             default:
                 break;
         }
@@ -167,7 +179,7 @@ public class TeamService {
             throw new NotFoundException();
         }
 
-        List<HockeyDrawSeasonInfo> statsByTeam = hockeyDrawSeasonInfoRepository.getStatsByTeam(teamByName);
+        List<HockeyDrawSeasonInfo> statsByTeam = hockeyDrawSeasonInfoRepository.getHockeyDrawStatsByTeam(teamByName);
         return statsByTeam;
     }
 
@@ -177,7 +189,7 @@ public class TeamService {
             throw new NotFoundException();
         }
 
-        List<DrawSeasonInfo> statsByTeam = drawSeasonInfoRepository.getStatsByTeam(teamByName);
+        List<DrawSeasonInfo> statsByTeam = drawSeasonInfoRepository.getFootballDrawStatsByTeam(teamByName);
         return statsByTeam;
     }
 
@@ -187,7 +199,7 @@ public class TeamService {
             throw new NotFoundException();
         }
 
-        List<Handball49WinsMarginSeasonInfo> statsByTeam = handballWinsMargin49SeasonInfoRepository.getStatsByTeam(teamByName);
+        List<Handball49WinsMarginSeasonInfo> statsByTeam = handballWinsMargin49SeasonInfoRepository.getHandball49WinsMarginStatsByTeam(teamByName);
         return statsByTeam;
     }
 
@@ -197,7 +209,7 @@ public class TeamService {
             throw new NotFoundException();
         }
 
-        List<Handball16WinsMarginSeasonInfo> statsByTeam = handballWinsMargin16SeasonInfoRepository.getStatsByTeam(teamByName);
+        List<Handball16WinsMarginSeasonInfo> statsByTeam = handballWinsMargin16SeasonInfoRepository.getHandball16WinsMarginStatsByTeam(teamByName);
         return statsByTeam;
     }
 
@@ -207,7 +219,7 @@ public class TeamService {
             throw new NotFoundException();
         }
 
-        List<Handball712WinsMarginSeasonInfo> statsByTeam = handballWinsMargin712SeasonInfoRepository.getStatsByTeam(teamByName);
+        List<Handball712WinsMarginSeasonInfo> statsByTeam = handballWinsMargin712SeasonInfoRepository.getHandball712WinsMarginStatsByTeam(teamByName);
         return statsByTeam;
     }
 
@@ -217,7 +229,7 @@ public class TeamService {
             throw new NotFoundException();
         }
 
-        List<ComebackSeasonInfo> statsByTeam = comebackSeasonInfoRepository.getStatsByTeam(teamByName);
+        List<ComebackSeasonInfo> statsByTeam = comebackSeasonInfoRepository.getComebackStatsByTeam(teamByName);
         return statsByTeam;
     }
 
@@ -227,7 +239,7 @@ public class TeamService {
             throw new NotFoundException();
         }
 
-        List<ShortBasketWinsSeasonInfo> statsByTeam = shortWinsSeasonInfoRepository.getStatsByTeam(teamByName);
+        List<ShortBasketWinsSeasonInfo> statsByTeam = shortWinsSeasonInfoRepository.getShortBasketWinsStatsByTeam(teamByName);
         return statsByTeam;
     }
 
@@ -237,7 +249,7 @@ public class TeamService {
             throw new NotFoundException();
         }
 
-        List<LongBasketWinsSeasonInfo> statsByTeam = longWinsSeasonInfoRepository.getStatsByTeam(teamByName);
+        List<LongBasketWinsSeasonInfo> statsByTeam = longWinsSeasonInfoRepository.getLongBasketWinsStatsByTeam(teamByName);
         return statsByTeam;
     }
 
@@ -247,7 +259,7 @@ public class TeamService {
             throw new NotFoundException();
         }
 
-        List<WinsMarginSeasonInfo> statsByTeam = winsMarginSeasonInfoRepository.getStatsByTeam(teamByName);
+        List<WinsMarginSeasonInfo> statsByTeam = winsMarginSeasonInfoRepository.getFootballWinsMarginStatsByTeam(teamByName);
         return statsByTeam;
     }
 
@@ -257,7 +269,7 @@ public class TeamService {
             throw new NotFoundException();
         }
 
-        List<EuroHandicapSeasonInfo> statsByTeam = euroHandicapSeasonInfoRepository.getStatsByTeam(teamByName);
+        List<EuroHandicapSeasonInfo> statsByTeam = euroHandicapSeasonInfoRepository.getEuroHandicapStatsByTeam(teamByName);
         return statsByTeam;
     }
 
@@ -267,7 +279,17 @@ public class TeamService {
             throw new NotFoundException();
         }
 
-        List<GoalsFestSeasonInfo> statsByTeam = goalsFestSeasonInfoRepository.getStatsByTeam(teamByName);
+        List<GoalsFestSeasonInfo> statsByTeam = goalsFestSeasonInfoRepository.getGoalsFestStatsByTeam(teamByName);
+        return statsByTeam;
+    }
+
+    public List<FlipFlopOversUndersInfo> getTeamFlipFlopStats(String teamName) {
+        Team teamByName = teamRepository.getTeamByName(teamName);
+        if (null == teamByName) {
+            throw new NotFoundException();
+        }
+
+        List<FlipFlopOversUndersInfo> statsByTeam = flipFlopOversUndersInfoRepository.getFlipFlopStatsByTeam(teamByName);
         return statsByTeam;
     }
 
@@ -320,6 +342,12 @@ public class TeamService {
             case "footballEuroHandicap":
                 if (teamByName.getSport().equals("Football")) {
                     updatedTeam = euroHandicapSeasonInfoService.updateTeamScore(teamByName);
+                    teamRepository.save(updatedTeam);
+                }
+                break;
+            case "footballFlipFlop":
+                if (teamByName.getSport().equals("Football")) {
+                    updatedTeam = flipFlopOversUndersInfoService.updateTeamScore(teamByName);
                     teamRepository.save(updatedTeam);
                 }
                 break;

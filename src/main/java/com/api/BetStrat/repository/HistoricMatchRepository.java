@@ -21,6 +21,7 @@ public interface HistoricMatchRepository extends JpaRepository<HistoricMatch, Lo
     @Override
     List<HistoricMatch> findAll();
 
+    @Cacheable(value="List<HistoricMatch>", key="{#root.methodName, #team.name, #season}")
     @Query(value = "SELECT t FROM HistoricMatch t WHERE t.teamId = ?1 AND t.season = ?2")
     List<HistoricMatch> getTeamMatchesBySeason(Team team, String season);
 

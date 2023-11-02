@@ -6,11 +6,7 @@ import com.api.BetStrat.entity.football.EuroHandicapSeasonInfo;
 import com.api.BetStrat.entity.Team;
 import com.api.BetStrat.repository.HistoricMatchRepository;
 import com.api.BetStrat.repository.football.EuroHandicapSeasonInfoRepository;
-import com.api.BetStrat.util.ScrappingUtil;
-import com.api.BetStrat.util.TeamEHhistoricData;
 import com.api.BetStrat.util.Utils;
-import org.json.JSONArray;
-import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,15 +20,11 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static com.api.BetStrat.constants.BetStratConstants.FBREF_BASE_URL;
 import static com.api.BetStrat.constants.BetStratConstants.SEASONS_LIST;
 import static com.api.BetStrat.constants.BetStratConstants.SUMMER_SEASONS_BEGIN_MONTH_LIST;
 import static com.api.BetStrat.constants.BetStratConstants.SUMMER_SEASONS_LIST;
 import static com.api.BetStrat.constants.BetStratConstants.WINTER_SEASONS_BEGIN_MONTH_LIST;
 import static com.api.BetStrat.constants.BetStratConstants.WINTER_SEASONS_LIST;
-import static com.api.BetStrat.constants.BetStratConstants.WORLDFOOTBALL_BASE_URL;
-import static com.api.BetStrat.constants.BetStratConstants.ZEROZERO_BASE_URL;
-import static com.api.BetStrat.constants.BetStratConstants.ZEROZERO_SEASON_CODES;
 import static com.api.BetStrat.util.Utils.calculateCoeffVariation;
 import static com.api.BetStrat.util.Utils.calculateSD;
 
@@ -54,7 +46,7 @@ public class EuroHandicapSeasonInfoService {
     }
 
     public void updateStatsDataInfo(Team team) {
-        List<EuroHandicapSeasonInfo> statsByTeam = euroHandicapSeasonInfoRepository.getStatsByTeam(team);
+        List<EuroHandicapSeasonInfo> statsByTeam = euroHandicapSeasonInfoRepository.getEuroHandicapStatsByTeam(team);
         List<String> seasonsList = null;
 
         if (SUMMER_SEASONS_BEGIN_MONTH_LIST.contains(team.getBeginSeason())) {
@@ -131,7 +123,7 @@ public class EuroHandicapSeasonInfoService {
     }
 
     public Team updateTeamScore (Team teamByName) {
-        List<EuroHandicapSeasonInfo> statsByTeam = euroHandicapSeasonInfoRepository.getStatsByTeam(teamByName);
+        List<EuroHandicapSeasonInfo> statsByTeam = euroHandicapSeasonInfoRepository.getEuroHandicapStatsByTeam(teamByName);
         Collections.sort(statsByTeam, new SortStatsDataBySeason());
         Collections.reverse(statsByTeam);
 

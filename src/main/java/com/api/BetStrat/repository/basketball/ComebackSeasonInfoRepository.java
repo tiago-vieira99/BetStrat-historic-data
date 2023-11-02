@@ -17,8 +17,8 @@ import java.util.List;
 @RepositoryDefinition(domainClass = ComebackSeasonInfo.class, idClass = Long.class)
 public interface ComebackSeasonInfoRepository extends JpaRepository<ComebackSeasonInfo, Long>, JpaSpecificationExecutor<ComebackSeasonInfo> {
 
-    @Cacheable(value="List<ComebackSeasonInfo>", key="{#root.methodName, #team}")
+    @Cacheable(value="List<ComebackSeasonInfo>", key="{#root.methodName, #team.name}")
     @Query(value = "SELECT m FROM ComebackSeasonInfo m WHERE m.teamId = ?1")
-    List<ComebackSeasonInfo> getStatsByTeam(Team team);
+    List<ComebackSeasonInfo> getComebackStatsByTeam(Team team);
 
 }

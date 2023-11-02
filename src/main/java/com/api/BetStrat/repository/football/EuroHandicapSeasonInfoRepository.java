@@ -17,8 +17,8 @@ import java.util.List;
 @RepositoryDefinition(domainClass = EuroHandicapSeasonInfo.class, idClass = Long.class)
 public interface EuroHandicapSeasonInfoRepository extends JpaRepository<EuroHandicapSeasonInfo, Long>, JpaSpecificationExecutor<EuroHandicapSeasonInfo> {
 
-    @Cacheable(value="List<EuroHandicapSeasonInfo>", key="{#root.methodName, #team}")
+    @Cacheable(value="List<EuroHandicapSeasonInfo>", key="{#root.methodName, #team.name}")
     @Query(value = "SELECT m FROM EuroHandicapSeasonInfo m WHERE m.teamId = ?1")
-    List<EuroHandicapSeasonInfo> getStatsByTeam(Team team);
+    List<EuroHandicapSeasonInfo> getEuroHandicapStatsByTeam(Team team);
 
 }

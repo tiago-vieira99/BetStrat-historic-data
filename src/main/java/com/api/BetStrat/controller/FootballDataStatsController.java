@@ -3,6 +3,7 @@ package com.api.BetStrat.controller;
 import com.api.BetStrat.entity.HistoricMatch;
 import com.api.BetStrat.entity.football.DrawSeasonInfo;
 import com.api.BetStrat.entity.football.EuroHandicapSeasonInfo;
+import com.api.BetStrat.entity.football.FlipFlopOversUndersInfo;
 import com.api.BetStrat.entity.football.GoalsFestSeasonInfo;
 import com.api.BetStrat.entity.Team;
 import com.api.BetStrat.entity.football.WinsMarginSeasonInfo;
@@ -10,11 +11,13 @@ import com.api.BetStrat.exception.NotFoundException;
 import com.api.BetStrat.exception.StandardError;
 import com.api.BetStrat.repository.HistoricMatchRepository;
 import com.api.BetStrat.repository.football.DrawSeasonInfoRepository;
+import com.api.BetStrat.repository.football.FlipFlopOversUndersInfoRepository;
 import com.api.BetStrat.repository.football.GoalsFestSeasonInfoRepository;
 import com.api.BetStrat.repository.TeamRepository;
 import com.api.BetStrat.repository.football.WinsMarginSeasonInfoRepository;
 import com.api.BetStrat.service.football.DrawSeasonInfoService;
 import com.api.BetStrat.service.football.EuroHandicapSeasonInfoService;
+import com.api.BetStrat.service.football.FlipFlopOversUndersInfoService;
 import com.api.BetStrat.service.football.GoalsFestSeasonInfoService;
 import com.api.BetStrat.service.hockey.HockeyDrawSeasonInfoService;
 import com.api.BetStrat.service.TeamService;
@@ -96,6 +99,9 @@ public class FootballDataStatsController {
     private EuroHandicapSeasonInfoService euroHandicapSeasonInfoService;
 
     @Autowired
+    private FlipFlopOversUndersInfoService flipFlopOversUndersInfoService;
+
+    @Autowired
     private ModelMapper modelMapper;
 
     @Autowired
@@ -112,6 +118,9 @@ public class FootballDataStatsController {
 
     @Autowired
     private GoalsFestSeasonInfoRepository goalsFestSeasonInfoRepository;
+
+    @Autowired
+    private FlipFlopOversUndersInfoRepository flipFlopOversUndersInfoRepository;
 
     // one instance, reuse
     private final CloseableHttpClient httpClient = HttpClients.createDefault();
@@ -191,6 +200,21 @@ public class FootballDataStatsController {
         return ResponseEntity.ok().body(teamStats);
     }
 
+    @ApiOperation(value = "get Team Goals Fest Stats")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "OK", response = ArrayList.class),
+            @ApiResponse(code = 400, message = "Bad Request", response = StandardError.class),
+            @ApiResponse(code = 401, message = "Unauthorized", response = StandardError.class),
+            @ApiResponse(code = 403, message = "Forbidden", response = StandardError.class),
+            @ApiResponse(code = 404, message = "Not Found", response = StandardError.class),
+            @ApiResponse(code = 500, message = "Internal Server Error", response = StandardError.class),
+    })
+    @GetMapping("/team-flip-flop-stats/{teamName}")
+    public ResponseEntity<List<FlipFlopOversUndersInfo>> getTeamFlipFlopStats(@PathVariable("teamName") String teamName) {
+        List<FlipFlopOversUndersInfo> teamStats = teamService.getTeamFlipFlopStats(teamName);
+        return ResponseEntity.ok().body(teamStats);
+    }
+
     @PostMapping("/updateTeamScore/{teamName}")
     public Team updateTeamScore (@PathVariable("teamName") String teamName, @Valid @RequestParam  String strategy) {
         return teamService.updateTeamScore(teamName, strategy, "Football");
@@ -244,7 +268,7 @@ public class FootballDataStatsController {
         return ResponseEntity.ok().body(newOutMap);
     }
 
-    @ApiOperation(value = "updateAllTeamsStatsByStrategy", notes = "Strategy values: hockeyDraw, hockeyWinsMarginAny2, hockeyWinsMargin3, footballDrawHunter, footballMarginWins, footballGoalsFest, footballEuroHandicap, basketComebacks. \nData sources:  \n FBRef:\n" +
+    @ApiOperation(value = "updateAllTeamsStatsByStrategy", notes = "Strategy values: hockeyDraw, hockeyWinsMarginAny2, hockeyWinsMargin3, footballDrawHunter, footballMarginWins, footballGoalsFest, footballEuroHandicap, footballFlipFlop, basketComebacks. \nData sources:  \n FBRef:\n" +
             " \n https://fbref.com/en/squads/d48ad4ff/2022-2023/matchlogs/schedule/Napoli-Scores-and-Fixturesn" +
             " \n\n" +
             " \n ZZ:\n" +

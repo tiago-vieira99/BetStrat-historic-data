@@ -13,6 +13,7 @@ import lombok.Setter;
 import lombok.SneakyThrows;
 import lombok.ToString;
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 import org.springframework.context.annotation.Primary;
 
 import javax.persistence.*;
@@ -48,6 +49,13 @@ public class Team implements Serializable {
     @Column(name = "created_date")
     private Date created_date;
 
+    @ApiModelProperty(example = "dd-MM-yyyy hh:mm:ss")
+    @JsonFormat(pattern = "dd-MM-yyyy hh:mm:ss")
+    @Temporal(TemporalType.DATE)
+    @UpdateTimestamp
+    @Column(name = "updated_date")
+    private Date updated_date;
+
     @Column(name = "begin_season")
     private String beginSeason;
 
@@ -65,6 +73,9 @@ public class Team implements Serializable {
 
     @Column(name = "margin_wins_score")
     private String marginWinsScore;
+
+    @Column(name = "flip_flop_score")
+    private String flipFlopScore;
 
     @Column(name = "margin_wins_any2_score")
     private String marginWinsAny2Score;

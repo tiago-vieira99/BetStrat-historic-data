@@ -46,7 +46,7 @@ public class HandballWinsMargin712SeasonInfoService {
     }
 
     public void updateStatsDataInfo(Team team) {
-        List<Handball712WinsMarginSeasonInfo> statsByTeam = handball712WinsMarginSeasonInfoRepository.getStatsByTeam(team);
+        List<Handball712WinsMarginSeasonInfo> statsByTeam = handball712WinsMarginSeasonInfoRepository.getHandball712WinsMarginStatsByTeam(team);
         List<String> seasonsList = null;
 
         if (SUMMER_SEASONS_BEGIN_MONTH_LIST.contains(team.getBeginSeason())) {
@@ -116,7 +116,7 @@ public class HandballWinsMargin712SeasonInfoService {
     }
 
     public Team updateTeamScore (Team teamByName) {
-        List<Handball712WinsMarginSeasonInfo> statsByTeam = handball712WinsMarginSeasonInfoRepository.getStatsByTeam(teamByName);
+        List<Handball712WinsMarginSeasonInfo> statsByTeam = handball712WinsMarginSeasonInfoRepository.getHandball712WinsMarginStatsByTeam(teamByName);
         Collections.sort(statsByTeam, new SortStatsDataBySeason());
         Collections.reverse(statsByTeam);
 

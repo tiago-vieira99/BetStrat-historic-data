@@ -33,7 +33,7 @@ public class WinsMargin3SeasonInfoService {
     }
 
     public Team updateTeamScore (Team teamByName) {
-        List<WinsMargin3SeasonInfo> statsByTeam = WinsMargin3SeasonInfoRepository.getStatsByTeam(teamByName);
+        List<WinsMargin3SeasonInfo> statsByTeam = WinsMargin3SeasonInfoRepository.getHockeyWinsMargin3StatsByTeam(teamByName);
         Collections.sort(statsByTeam, new SortStatsDataBySeason());
         Collections.reverse(statsByTeam);
 

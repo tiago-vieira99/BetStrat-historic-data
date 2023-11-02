@@ -10,6 +10,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.SneakyThrows;
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
 import javax.persistence.*;
 import java.io.Serializable;
@@ -20,7 +21,7 @@ import java.util.Date;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "DrawSeasonInfo", uniqueConstraints = { @UniqueConstraint(name = "UniqueSeasonAndCompetitionForTeam", columnNames = { "teamID", "season", "competition" }) })
+@Table(name = "DrawSeasonInfo", uniqueConstraints = { @UniqueConstraint(name = "UniqueSeasonAndCompetitionForTeamDH", columnNames = { "teamID", "season", "competition" }) })
 public class DrawSeasonInfo implements Serializable {
     private static final long serialVersionUID = 1L;
 
@@ -39,6 +40,13 @@ public class DrawSeasonInfo implements Serializable {
     @CreationTimestamp
     @Column(name = "created_date")
     private Date created_date;
+
+    @ApiModelProperty(example = "dd-MM-yyyy hh:mm:ss")
+    @JsonFormat(pattern = "dd-MM-yyyy hh:mm:ss")
+    @Temporal(TemporalType.DATE)
+    @UpdateTimestamp
+    @Column(name = "updated_date")
+    private Date updated_date;
 
     @Column(name = "description")
     private String description;
