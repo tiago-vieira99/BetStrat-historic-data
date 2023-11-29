@@ -24,7 +24,7 @@ public interface TeamRepository extends JpaRepository<Team, Long>, JpaSpecificat
     @Query(value = "SELECT t FROM Team t WHERE t.name = ?1 ")
     Team getTeamByName(String name);
 
-    @Cacheable(value="Team", key="{'getTeamByName', #name}")
+    @Cacheable(value="Team", key="{'getTeamByNameAndSport', #name}")
     @Query(value = "SELECT t FROM Team t WHERE t.name = ?1 AND t.sport = ?2")
     Team getTeamByNameAndSport(String name, String sport);
 

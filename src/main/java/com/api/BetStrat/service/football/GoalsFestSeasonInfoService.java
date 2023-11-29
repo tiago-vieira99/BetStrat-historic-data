@@ -61,11 +61,9 @@ public class GoalsFestSeasonInfoService {
                 String newSeasonUrl = "";
 
                 List<HistoricMatch> teamMatchesBySeason = historicMatchRepository.getTeamMatchesBySeason(team, season);
-                String mainCompetition = Utils.findMainCompetition(teamMatchesBySeason);
-                List<HistoricMatch> filteredMatches = teamMatchesBySeason.stream().filter(t -> t.getCompetition().equals(mainCompetition)).collect(Collectors.toList());
-                filteredMatches.sort(new Utils.MatchesByDateSorter());
+                teamMatchesBySeason.sort(new Utils.MatchesByDateSorter());
 
-                if (filteredMatches.size() == 0) {
+                if (teamMatchesBySeason.size() == 0) {
                     continue;
                 }
 
@@ -73,7 +71,7 @@ public class GoalsFestSeasonInfoService {
 
                 ArrayList<Integer> noGoalsFestSequence = new ArrayList<>();
                 int count = 0;
-                for (HistoricMatch historicMatch : filteredMatches) {
+                for (HistoricMatch historicMatch : teamMatchesBySeason) {
                     String res = historicMatch.getFtResult().split("\\(")[0];
                     count++;
                     int homeResult = Integer.parseInt(res.split(":")[0]);
@@ -87,7 +85,7 @@ public class GoalsFestSeasonInfoService {
                 int totalGoalsFest = noGoalsFestSequence.size();
 
                 noGoalsFestSequence.add(count);
-                HistoricMatch lastMatch = filteredMatches.get(filteredMatches.size() - 1);
+                HistoricMatch lastMatch = teamMatchesBySeason.get(teamMatchesBySeason.size() - 1);
                 String lastResult = lastMatch.getFtResult().split("\\(")[0];
                 if (!(Integer.parseInt(lastResult.split(":")[0]) > 0 && Integer.parseInt(lastResult.split(":")[1]) > 0 &&
                         Integer.parseInt(lastResult.split(":")[0]) + Integer.parseInt(lastResult.split(":")[1]) > 2)) {
@@ -97,12 +95,12 @@ public class GoalsFestSeasonInfoService {
                 if (totalGoalsFest == 0) {
                     goalsFestSeasonInfo.setGoalsFestRate(0);
                 } else {
-                    goalsFestSeasonInfo.setGoalsFestRate(Utils.beautifyDoubleValue(100*totalGoalsFest/filteredMatches.size()));
+                    goalsFestSeasonInfo.setGoalsFestRate(Utils.beautifyDoubleValue(100*totalGoalsFest/teamMatchesBySeason.size()));
                 }
-                goalsFestSeasonInfo.setCompetition(mainCompetition);
+                goalsFestSeasonInfo.setCompetition("all");
                 goalsFestSeasonInfo.setNoGoalsFestSequence(noGoalsFestSequence.toString());
                 goalsFestSeasonInfo.setNumGoalsFest(totalGoalsFest);
-                goalsFestSeasonInfo.setNumMatches(filteredMatches.size());
+                goalsFestSeasonInfo.setNumMatches(teamMatchesBySeason.size());
 
                 double stdDev =  Utils.beautifyDoubleValue(calculateSD(noGoalsFestSequence));
                 goalsFestSeasonInfo.setStdDeviation(stdDev);

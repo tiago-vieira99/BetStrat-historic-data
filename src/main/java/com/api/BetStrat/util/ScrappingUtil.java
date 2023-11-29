@@ -1,16 +1,19 @@
 package com.api.BetStrat.util;
 
+import com.api.BetStrat.entity.Team;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.http.HttpEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
+import org.json.JSONObject;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -131,6 +134,80 @@ public class ScrappingUtil {
             e.printStackTrace();
         }
         return teamStatsDataObj;
+    }
+
+    @SneakyThrows
+    public static  JSONArray getLeagueTeamsScrappingData(String url) {
+        HttpPost request = new HttpPost(SCRAPPER_SERVICE_URL);
+        JSONArray teamStatsDataObj = null;
+
+        request.setURI(new URI(SCRAPPER_SERVICE_URL + "league-teams"));
+
+        // Set the request body
+        String requestBody = url;
+        StringEntity requestEntity = new StringEntity(requestBody);
+        request.setEntity(requestEntity);
+
+        // Set the Content-Type header
+        request.setHeader("Content-Type", "text/plain");
+
+        try (CloseableHttpResponse response = httpClient.execute(request)) {
+            HttpEntity entity = response.getEntity();
+
+            LOGGER.info("Response from ScappingService: " + response.getStatusLine().toString());
+
+            if (entity != null) {
+                // return it as a String
+                String result = EntityUtils.toString(entity);
+                if (result.contains("error")) {
+                    LOGGER.info(result);
+                }
+                teamStatsDataObj = new JSONArray(result);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        return teamStatsDataObj;
+    }
+
+    @SneakyThrows
+    public static JSONArray getLastNMatchesScrappingService(Team team, int numberLastMatches) {
+        HttpPost request = new HttpPost(SCRAPPER_SERVICE_URL);
+
+        String newSeason = "20" + CURRENT_SEASON.split("-")[1];
+
+        String newUrl = "";
+        if (team.getUrl().contains("world")) {
+            newUrl = team.getUrl() + "/" + newSeason + "/3/";
+        } else {
+            newUrl = team.getUrl();
+        }
+
+        String queryParams = "team=" + URLEncoder.encode(team.getName(), "UTF-8") + "&season=" + newSeason + "&allleagues=true";
+
+        request.setURI(new URI(SCRAPPER_SERVICE_URL + "last-matches/" + numberLastMatches + "?" + queryParams));
+        request.setEntity(new StringEntity(newUrl, ContentType.TEXT_PLAIN));
+        JSONArray lastNMatches = null;
+
+        try (CloseableHttpResponse response = httpClient.execute(request)) {
+            HttpEntity entity = response.getEntity();
+
+            LOGGER.info("Response from ScrappingService: " + response.getStatusLine().toString());
+
+            if (entity != null) {
+                // return it as a String
+                String result = EntityUtils.toString(entity);
+                lastNMatches = new JSONArray(result);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        return lastNMatches;
     }
 
     private static boolean isGoodHTMatch(String url) {

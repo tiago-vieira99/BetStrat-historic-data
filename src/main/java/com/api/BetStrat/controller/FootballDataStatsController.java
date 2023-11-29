@@ -24,6 +24,7 @@ import com.api.BetStrat.service.TeamService;
 import com.api.BetStrat.service.hockey.WinsMargin3SeasonInfoService;
 import com.api.BetStrat.service.hockey.WinsMarginAny2SeasonInfoService;
 import com.api.BetStrat.service.football.WinsMarginSeasonInfoService;
+import com.api.BetStrat.tasks.GetLastPlayedMatchTask;
 import com.api.BetStrat.util.ScrappingUtil;
 import com.api.BetStrat.util.TeamDFhistoricData;
 import com.api.BetStrat.util.TeamEHhistoricData;
@@ -37,6 +38,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 import org.modelmapper.ModelMapper;
 import org.slf4j.Logger;
@@ -55,8 +57,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import static com.api.BetStrat.constants.BetStratConstants.FBREF_BASE_URL;
+import static com.api.BetStrat.constants.BetStratConstants.LONG_STREAKS_LEAGUES_LIST;
 import static com.api.BetStrat.constants.BetStratConstants.SUMMER_SEASONS_BEGIN_MONTH_LIST;
 import static com.api.BetStrat.constants.BetStratConstants.SUMMER_SEASONS_LIST;
 import static com.api.BetStrat.constants.BetStratConstants.WINTER_SEASONS_BEGIN_MONTH_LIST;
@@ -230,7 +234,28 @@ public class FootballDataStatsController {
         team.setEndSeason(endSeason);
         team.setCountry(country);
         team.setSport("Football");
-        return teamService.insertTeam(team);
+        Team newTeam = teamService.insertTeam(team);
+
+        List<String> seasonsList = null;
+
+        if (SUMMER_SEASONS_BEGIN_MONTH_LIST.contains(team.getBeginSeason())) {
+            seasonsList = new ArrayList<>(SUMMER_SEASONS_LIST);
+        } else if (WINTER_SEASONS_BEGIN_MONTH_LIST.contains(team.getBeginSeason())) {
+            seasonsList = new ArrayList<>(WINTER_SEASONS_LIST);
+            seasonsList.add("2023-24");
+        }
+
+        for (String season : seasonsList) {
+            insertHistoricalMatches(newTeam.getId(), season);
+        }
+
+        updateTeamStatsByStrategy("footballDrawHunter", teamName);
+        updateTeamStatsByStrategy("footballMarginWins", teamName);
+        updateTeamStatsByStrategy("footballGoalsFest", teamName);
+        updateTeamStatsByStrategy("footballEuroHandicap", teamName);
+        updateTeamStatsByStrategy("footballFlipFlop", teamName);
+
+        return newTeam;
     }
 
     @ApiOperation(value = "updateAllTeamsScoreByStrategy", notes = "Strategy values: hockeyDraw, hockeyWinsMarginAny2, hockeyWinsMargin3, footballDrawHunter, footballMarginWins, footballGoalsFest, footballEuroHandicap, basketComebacks.")
@@ -289,7 +314,7 @@ public class FootballDataStatsController {
         return ResponseEntity.ok().body("OK");
     }
 
-    @ApiOperation(value = "updateTeamStatsByStrategy", notes = "Strategy values: hockeyDraw, hockeyWinsMarginAny2, hockeyWinsMargin3, footballDrawHunter, footballMarginWins, footballGoalsFest, footballEuroHandicap, basketComebacks. \nData sources:  \n FBRef:\n" +
+    @ApiOperation(value = "updateTeamStatsByStrategy", notes = "Strategy values: hockeyDraw, hockeyWinsMarginAny2, hockeyWinsMargin3, footballDrawHunter, footballMarginWins, footballGoalsFest, footballEuroHandicap, footballFlipFlop, basketComebacks. \nData sources:  \n FBRef:\n" +
             " \n https://fbref.com/en/squads/d48ad4ff/2022-2023/matchlogs/schedule/Napoli-Scores-and-Fixturesn" +
             " \n\n" +
             " \n ZZ:\n" +
@@ -634,6 +659,7 @@ public class FootballDataStatsController {
                 historicMatch.setHomeTeam(match.getString("homeTeam"));
                 historicMatch.setAwayTeam(match.getString("awayTeam"));
                 historicMatch.setFtResult(match.getString("ftResult"));
+                historicMatch.setHtResult(match.getString("htResult"));
                 historicMatch.setCompetition(match.getString("competition"));
                 historicMatch.setSport(team.getSport());
                 historicMatch.setSeason(season);
@@ -1041,5 +1067,40 @@ public class FootballDataStatsController {
         euroHandicapSeasonInfo.setCoefDeviation((Double) scrappedInfo.get("coefficientVariation"));
         euroHandicapSeasonInfo.setCompetition((String) scrappedInfo.get("competition"));
         return euroHandicapSeasonInfoService.insertEuroHandicapSeasonInfo(euroHandicapSeasonInfo);
+    }
+
+
+    @ApiOperation(value = "Trigger GetLastPlayedMatchTask")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "OK", response = String.class),
+            @ApiResponse(code = 400, message = "Bad Request", response = StandardError.class),
+            @ApiResponse(code = 401, message = "Unauthorized", response = StandardError.class),
+            @ApiResponse(code = 403, message = "Forbidden", response = StandardError.class),
+            @ApiResponse(code = 404, message = "Not Found", response = StandardError.class),
+            @ApiResponse(code = 500, message = "Internal Server Error", response = StandardError.class),
+    })
+    @PostMapping("/update-last-played-match")
+    public ResponseEntity<String> triggerGetLastPlayedMatchTask() {
+
+        List<String> teamsToGetLastMatch = new ArrayList<>();
+
+        for (String leagueUrl : LONG_STREAKS_LEAGUES_LIST) {
+            JSONArray leagueTeamsScrappingData = ScrappingUtil.getLeagueTeamsScrappingData(leagueUrl);
+            List<String> analysedTeams = IntStream.range(0, leagueTeamsScrappingData.length())
+                    .mapToObj(i -> {
+                        try {
+                            return leagueTeamsScrappingData.getString(i);
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                            return null;
+                        }
+                    })
+                    .collect(Collectors.toList());
+
+            teamsToGetLastMatch.addAll(analysedTeams);
+        }
+        GetLastPlayedMatchTask.run(teamRepository, historicMatchRepository, teamsToGetLastMatch);
+
+        return ResponseEntity.ok().body("triggered GetLastPlayedMatchTask");
     }
 }
