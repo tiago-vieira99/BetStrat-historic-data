@@ -174,7 +174,7 @@ public class TeamService {
     }
 
     public List<HockeyDrawSeasonInfo> getHockeyTeamDrawStats(String teamName) {
-        Team teamByName = teamRepository.getTeamByName(teamName);
+        Team teamByName = teamRepository.getTeamByNameAndSport(teamName, "Hockey");
         if (null == teamByName) {
             throw new NotFoundException();
         }
@@ -184,7 +184,7 @@ public class TeamService {
     }
 
     public List<DrawSeasonInfo> getTeamDrawStats(String teamName) {
-        Team teamByName = teamRepository.getTeamByName(teamName);
+        Team teamByName = teamRepository.getTeamByNameAndSport(teamName, "Football");
         if (null == teamByName) {
             throw new NotFoundException();
         }
@@ -254,7 +254,7 @@ public class TeamService {
     }
 
     public List<WinsMarginSeasonInfo> getTeamMarginWinStats(String teamName) {
-        Team teamByName = teamRepository.getTeamByName(teamName);
+        Team teamByName = teamRepository.getTeamByNameAndSport(teamName, "Football");
         if (null == teamByName) {
             throw new NotFoundException();
         }
@@ -264,7 +264,7 @@ public class TeamService {
     }
 
     public List<EuroHandicapSeasonInfo> getTeamEuroHandicapStats(String teamName) {
-        Team teamByName = teamRepository.getTeamByName(teamName);
+        Team teamByName = teamRepository.getTeamByNameAndSport(teamName, "Football");
         if (null == teamByName) {
             throw new NotFoundException();
         }
@@ -274,7 +274,7 @@ public class TeamService {
     }
 
     public List<GoalsFestSeasonInfo> getTeamGoalsFestStats(String teamName) {
-        Team teamByName = teamRepository.getTeamByName(teamName);
+        Team teamByName = teamRepository.getTeamByNameAndSport(teamName, "Football");
         if (null == teamByName) {
             throw new NotFoundException();
         }
@@ -284,7 +284,7 @@ public class TeamService {
     }
 
     public List<FlipFlopOversUndersInfo> getTeamFlipFlopStats(String teamName) {
-        Team teamByName = teamRepository.getTeamByName(teamName);
+        Team teamByName = teamRepository.getTeamByNameAndSport(teamName, "Football");
         if (null == teamByName) {
             throw new NotFoundException();
         }

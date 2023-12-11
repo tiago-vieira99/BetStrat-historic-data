@@ -17,8 +17,6 @@ import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.context.event.ApplicationReadyEvent;
-import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import java.time.Instant;
@@ -46,7 +44,7 @@ public class GetLastPlayedMatchTask {
     private HistoricMatchRepository historicMatchRepository;
 
     //@EventListener(ApplicationReadyEvent.class)
-    @Scheduled(cron = "0 0 4 */2 * *", zone="Europe/Lisbon") //every two days at 4am
+    @Scheduled(cron = "0 4 */2 * * *", zone="Europe/Lisbon") //every two days at 4am
     public void execCronn() {
 
         List<String> teamsToGetLastMatch = new ArrayList<>();

@@ -44,6 +44,7 @@ import org.modelmapper.ModelMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.repository.query.Param;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -607,8 +608,18 @@ public class FootballDataStatsController {
     }
 
     @GetMapping("/getHistoricMatches")
-    public List<HistoricMatch> getHistoricMatches(@Valid @RequestParam  Long teamId, @Valid @RequestParam  String season) {
-        return historicMatchRepository.getTeamMatchesBySeason(teamRepository.getOne(teamId), season);
+    public List<HistoricMatch> getHistoricMatches(@Valid @RequestParam(value = "teamId", required = false) Long teamId,
+                                                  @Valid @RequestParam  String season,
+                                                  @Valid @RequestParam(value = "teamName", required = false) String teamName) {
+
+        Team team = null;
+        if (teamId != null) {
+            team = teamRepository.getOne(teamId);
+        } else {
+            team = teamRepository.getTeamByNameAndSport(teamName, "Football");
+        }
+
+        return historicMatchRepository.getTeamMatchesBySeason(team, season);
     }
 
     @SneakyThrows
