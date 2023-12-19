@@ -1096,17 +1096,14 @@ public class FootballDataStatsController {
         List<String> teamsToGetLastMatch = new ArrayList<>();
 
         for (String leagueUrl : LONG_STREAKS_LEAGUES_LIST) {
-            JSONArray leagueTeamsScrappingData = ScrappingUtil.getLeagueTeamsScrappingData(leagueUrl);
-            List<String> analysedTeams = IntStream.range(0, leagueTeamsScrappingData.length())
-                    .mapToObj(i -> {
-                        try {
-                            return leagueTeamsScrappingData.getString(i);
-                        } catch (JSONException e) {
-                            e.printStackTrace();
-                            return null;
-                        }
-                    })
-                    .collect(Collectors.toList());
+            JSONObject leagueTeamsScrappingData = ScrappingUtil.getLeagueTeamsScrappingData(leagueUrl);
+
+            List<String> analysedTeams = new ArrayList<>();
+            while (leagueTeamsScrappingData.keys().hasNext()) {
+                String team = leagueTeamsScrappingData.keys().next().toString();
+                analysedTeams.add(team);
+                leagueTeamsScrappingData.remove(team);
+            }
 
             teamsToGetLastMatch.addAll(analysedTeams);
         }

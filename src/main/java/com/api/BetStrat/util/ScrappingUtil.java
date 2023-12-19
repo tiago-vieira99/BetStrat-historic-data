@@ -137,9 +137,9 @@ public class ScrappingUtil {
     }
 
     @SneakyThrows
-    public static  JSONArray getLeagueTeamsScrappingData(String url) {
+    public static JSONObject getLeagueTeamsScrappingData(String url) {
         HttpPost request = new HttpPost(SCRAPPER_SERVICE_URL);
-        JSONArray teamStatsDataObj = null;
+        JSONObject teamStatsDataObj = null;
 
         request.setURI(new URI(SCRAPPER_SERVICE_URL + "league-teams"));
 
@@ -162,7 +162,7 @@ public class ScrappingUtil {
                 if (result.contains("error")) {
                     LOGGER.info(result);
                 }
-                teamStatsDataObj = new JSONArray(result);
+                teamStatsDataObj = new JSONObject(result);
             }
         } catch (IOException e) {
             e.printStackTrace();
