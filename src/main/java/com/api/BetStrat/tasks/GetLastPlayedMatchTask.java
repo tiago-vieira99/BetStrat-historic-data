@@ -7,16 +7,23 @@ import com.api.BetStrat.exception.NoNextMatchException;
 import com.api.BetStrat.repository.HistoricMatchRepository;
 import com.api.BetStrat.repository.TeamRepository;
 import com.api.BetStrat.util.ScrappingUtil;
+import com.api.BetStrat.util.TelegramBotNotifications;
+import com.api.BetStrat.util.Utils;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
+import org.hibernate.exception.ConstraintViolationException;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.context.event.ApplicationReadyEvent;
+import org.springframework.context.event.EventListener;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import java.time.Instant;
@@ -43,7 +50,7 @@ public class GetLastPlayedMatchTask {
     @Autowired
     private HistoricMatchRepository historicMatchRepository;
 
-    //@EventListener(ApplicationReadyEvent.class)
+    @EventListener(ApplicationReadyEvent.class)
     @Scheduled(cron = "0 4 */2 * * *", zone="Europe/Lisbon") //every two days at 4am
     public void execCronn() {
 
@@ -68,34 +75,48 @@ public class GetLastPlayedMatchTask {
     public static void run(TeamRepository teamRepository, HistoricMatchRepository historicMatchRepository, List<String> teams) throws NoNextMatchException {
         LOGGER.info("GetLastPlayedMatchTask() at "+ Instant.now().toString());
 
+        int numNewMatches = 0;
+        String failedTeams = "";
+
         for (String t : teams) {
             Team team = teamRepository.getTeamByNameAndSport(t, "Football");
 
             if (team != null) {
-                JSONArray scrappingData = ScrappingUtil.getLastNMatchesScrappingService(team, 1);
+                JSONArray scrappingData = ScrappingUtil.getLastNMatchesScrappingService(team, 2);
                 if (scrappingData != null) {
                     for (int i = 0; i < scrappingData.length(); i++) {
-                        JSONObject match = (JSONObject) scrappingData.get(i);
                         HistoricMatch historicMatch = new HistoricMatch();
-                        historicMatch.setTeamId(team);
-                        historicMatch.setMatchDate(match.getString("date"));
-                        historicMatch.setHomeTeam(match.getString("homeTeam"));
-                        historicMatch.setAwayTeam(match.getString("awayTeam"));
-                        historicMatch.setFtResult(match.getString("ftResult"));
-                        historicMatch.setHtResult(match.getString("htResult"));
-                        historicMatch.setCompetition(match.getString("competition"));
-                        historicMatch.setSport(team.getSport());
-                        historicMatch.setSeason(CURRENT_SEASON);
                         try {
+                            JSONObject match = (JSONObject) scrappingData.get(i);
+                            historicMatch.setTeamId(team);
+                            historicMatch.setMatchDate(match.getString("date"));
+                            historicMatch.setHomeTeam(match.getString("homeTeam"));
+                            historicMatch.setAwayTeam(match.getString("awayTeam"));
+                            historicMatch.setFtResult(match.getString("ftResult"));
+                            historicMatch.setHtResult(match.getString("htResult"));
+                            historicMatch.setCompetition(match.getString("competition"));
+                            historicMatch.setSport(team.getSport());
+                            historicMatch.setSeason(CURRENT_SEASON);
+
                             historicMatchRepository.save(historicMatch);
                             log.info("Inserted match:  " + historicMatch.toString());
+                            numNewMatches++;
+                        } catch (DataIntegrityViolationException cerr) {
+                            log.debug("match:  " + historicMatch.toString() + " already exists!");
                         } catch (Exception e) {
-                            log.info("match:  " + historicMatch.toString() + "\nerror:  " + e.toString());
+                            log.error("match:  " + historicMatch.toString() + "\nerror:  " + e.toString());
+                            failedTeams += t + " | ";
                         }
                     }
+                } else {
+                    failedTeams += t + " | ";
                 }
             }
         }
+
+        String telegramMessage = String.format("ℹ number of new matches added: " + numNewMatches + "\nfailed: " + failedTeams);
+        Thread.sleep(1000);
+        TelegramBotNotifications.sendToTelegram(telegramMessage);
     }
 
 }

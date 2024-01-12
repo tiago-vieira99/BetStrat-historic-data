@@ -9,7 +9,7 @@ import java.util.Map;
 public class BetStratConstants {
 
     //Scrapping Service
-    public static final String SCRAPPER_SERVICE_URL = "http://4.227.170.56:8000/";
+    public static final String SCRAPPER_SERVICE_URL = "http://3.88.204.40:8000/";
 
     public static final String SOCCERSTATS_BASE_URL = "http://www.soccerstats.com/";
     public static final String FCSTATS_BASE_URL = "http://www.fcstats.com/";
@@ -22,7 +22,7 @@ public class BetStratConstants {
     public static final List<String> SEASONS_LIST = ImmutableList.of("2016","2016-17","2017","2017-18","2018","2018-19","2019","2019-20",
             "2020","2020-21","2021","2021-22","2022","2022-23");
 
-    public static final List<String> SUMMER_SEASONS_LIST = ImmutableList.of("2016","2017","2018","2019","2020","2021","2022");
+    public static final List<String> SUMMER_SEASONS_LIST = ImmutableList.of("2016","2017","2018","2019","2020","2021","2022","2023");
 
     public static final List<String> WINTER_SEASONS_LIST = ImmutableList.of("2016-17","2017-18","2018-19","2019-20","2020-21","2021-22","2022-23");
 
@@ -51,31 +51,31 @@ public class BetStratConstants {
         put("2023-24", "153");
     }};
 
-    public static final List<String> LONG_STREAKS_LEAGUES_LIST = ImmutableList.of("https://www.worldfootball.net/schedule/aut-bundesliga-2023-2024-spieltag/14/",
-            "https://www.worldfootball.net/schedule/bel-eerste-klasse-a-2023-2024-spieltag/15/",
-            "https://www.worldfootball.net/schedule/bul-parva-liga-2023-2024-spieltag/18/",
-            "https://www.worldfootball.net/schedule/cro-1-hnl-2023-2024-spieltag/16/",
-            "https://www.worldfootball.net/schedule/cyp-first-division-2023-2024-spieltag/12/",
-            "https://www.worldfootball.net/schedule/cze-1-fotbalova-liga-2023-2024-spieltag/16/",
-            "https://www.worldfootball.net/schedule/den-superligaen-2023-2024-spieltag/16/",
-            "https://www.worldfootball.net/schedule/eng-premier-league-2023-2024-spieltag/13/",
-            "https://www.worldfootball.net/schedule/fra-ligue-1-2023-2024-spieltag/13/",
-            "https://www.worldfootball.net/schedule/bundesliga-2023-2024-spieltag/12/",
-            "https://www.worldfootball.net/schedule/gre-super-league-2023-2024-spieltag/12/",
-            "https://www.worldfootball.net/schedule/hun-nb-i-2023-2024-spieltag/14/",
-            "https://www.worldfootball.net/schedule/isr-ligat-haal-2023-2024-spieltag/6/",
-            "https://www.worldfootball.net/schedule/ita-serie-a-2023-2024-spieltag/13/",
-            "https://www.worldfootball.net/schedule/ned-eredivisie-2023-2024-spieltag/13/",
-            "https://www.worldfootball.net/schedule/pol-ekstraklasa-2023-2024-spieltag/16/",
-            "https://www.worldfootball.net/schedule/por-primeira-liga-2023-2024-spieltag/12/",
-            "https://www.worldfootball.net/schedule/rou-liga-1-2023-2024-spieltag/17/",
-            "https://www.worldfootball.net/schedule/rus-premier-liga-2023-2024-spieltag/16/",
-            "https://www.worldfootball.net/schedule/sco-premiership-2023-2024-spieltag/14/",
-            "https://www.worldfootball.net/schedule/srb-super-liga-2023-2024-spieltag/16/",
-            "https://www.worldfootball.net/schedule/svk-super-liga-2023-2024-spieltag/15/",
-            "https://www.worldfootball.net/schedule/svn-prvaliga-2023-2024-spieltag/17/",
-            "https://www.worldfootball.net/schedule/esp-primera-division-2023-2024-spieltag/14/",
-            "https://www.worldfootball.net/schedule/sui-super-league-2023-2024-spieltag/15/",
-            "https://www.worldfootball.net/schedule/tur-sueperlig-2023-2024-spieltag/13/",
-            "https://www.worldfootball.net/schedule/ukr-premyer-liga-2023-2024-spieltag/15/");
+    public static final List<String> LONG_STREAKS_LEAGUES_LIST = ImmutableList.of("https://www.worldfootball.net/schedule/aut-bundesliga-2023-2024-spieltag/",
+            "https://www.worldfootball.net/schedule/bel-eerste-klasse-a-2023-2024-spieltag/",
+            "https://www.worldfootball.net/schedule/bul-parva-liga-2023-2024-spieltag/",
+            "https://www.worldfootball.net/schedule/cro-1-hnl-2023-2024-spieltag/",
+            "https://www.worldfootball.net/schedule/cyp-first-division-2023-2024-spieltag/",
+            "https://www.worldfootball.net/schedule/cze-1-fotbalova-liga-2023-2024-spieltag/",
+            "https://www.worldfootball.net/schedule/den-superligaen-2023-2024-spieltag/",
+            "https://www.worldfootball.net/schedule/eng-premier-league-2023-2024-spieltag/",
+            "https://www.worldfootball.net/schedule/fra-ligue-1-2023-2024-spieltag/",
+            "https://www.worldfootball.net/schedule/bundesliga-2023-2024-spieltag/",
+            "https://www.worldfootball.net/schedule/gre-super-league-2023-2024-spieltag/",
+            "https://www.worldfootball.net/schedule/hun-nb-i-2023-2024-spieltag/",
+            "https://www.worldfootball.net/schedule/isr-ligat-haal-2023-2024-spieltag/",
+            "https://www.worldfootball.net/schedule/ita-serie-a-2023-2024-spieltag/",
+            "https://www.worldfootball.net/schedule/ned-eredivisie-2023-2024-spieltag/",
+            "https://www.worldfootball.net/schedule/pol-ekstraklasa-2023-2024-spieltag/",
+            "https://www.worldfootball.net/schedule/por-primeira-liga-2023-2024-spieltag/",
+            "https://www.worldfootball.net/schedule/rou-liga-1-2023-2024-spieltag/",
+            "https://www.worldfootball.net/schedule/rus-premier-liga-2023-2024-spieltag/",
+            "https://www.worldfootball.net/schedule/sco-premiership-2023-2024-spieltag/",
+            "https://www.worldfootball.net/schedule/srb-super-liga-2023-2024-spieltag/",
+            "https://www.worldfootball.net/schedule/svk-super-liga-2023-2024-spieltag/",
+            "https://www.worldfootball.net/schedule/svn-prvaliga-2023-2024-spieltag/",
+            "https://www.worldfootball.net/schedule/esp-primera-division-2023-2024-spieltag/",
+            "https://www.worldfootball.net/schedule/sui-super-league-2023-2024-spieltag/",
+            "https://www.worldfootball.net/schedule/tur-sueperlig-2023-2024-spieltag/",
+            "https://www.worldfootball.net/schedule/ukr-premyer-liga-2023-2024-spieltag/");
 }

@@ -38,27 +38,23 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.json.JSONArray;
-import org.json.JSONException;
 import org.json.JSONObject;
 import org.modelmapper.ModelMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.repository.query.Param;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 import static com.api.BetStrat.constants.BetStratConstants.FBREF_BASE_URL;
 import static com.api.BetStrat.constants.BetStratConstants.LONG_STREAKS_LEAGUES_LIST;
@@ -237,24 +233,24 @@ public class FootballDataStatsController {
         team.setSport("Football");
         Team newTeam = teamService.insertTeam(team);
 
-        List<String> seasonsList = null;
-
-        if (SUMMER_SEASONS_BEGIN_MONTH_LIST.contains(team.getBeginSeason())) {
-            seasonsList = new ArrayList<>(SUMMER_SEASONS_LIST);
-        } else if (WINTER_SEASONS_BEGIN_MONTH_LIST.contains(team.getBeginSeason())) {
-            seasonsList = new ArrayList<>(WINTER_SEASONS_LIST);
-            seasonsList.add("2023-24");
-        }
-
-        for (String season : seasonsList) {
-            insertHistoricalMatches(newTeam.getId(), season);
-        }
-
-        updateTeamStatsByStrategy("footballDrawHunter", teamName);
-        updateTeamStatsByStrategy("footballMarginWins", teamName);
-        updateTeamStatsByStrategy("footballGoalsFest", teamName);
-        updateTeamStatsByStrategy("footballEuroHandicap", teamName);
-        updateTeamStatsByStrategy("footballFlipFlop", teamName);
+//        List<String> seasonsList = null;
+//
+//        if (SUMMER_SEASONS_BEGIN_MONTH_LIST.contains(team.getBeginSeason())) {
+//            seasonsList = new ArrayList<>(SUMMER_SEASONS_LIST);
+//        } else if (WINTER_SEASONS_BEGIN_MONTH_LIST.contains(team.getBeginSeason())) {
+//            seasonsList = new ArrayList<>(WINTER_SEASONS_LIST);
+//            seasonsList.add("2023-24");
+//        }
+//
+//        for (String season : seasonsList) {
+//            insertHistoricalMatches(newTeam.getId(), season);
+//        }
+//
+//        updateTeamStatsByStrategy("footballDrawHunter", teamName);
+//        updateTeamStatsByStrategy("footballMarginWins", teamName);
+//        updateTeamStatsByStrategy("footballGoalsFest", teamName);
+//        updateTeamStatsByStrategy("footballEuroHandicap", teamName);
+//        updateTeamStatsByStrategy("footballFlipFlop", teamName);
 
         return newTeam;
     }

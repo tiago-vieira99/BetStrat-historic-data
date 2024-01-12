@@ -1,6 +1,10 @@
 package com.api.BetStrat.controller;
 
+import com.api.BetStrat.entity.HistoricMatch;
+import com.api.BetStrat.entity.Team;
 import com.api.BetStrat.exception.StandardError;
+import com.api.BetStrat.repository.HistoricMatchRepository;
+import com.api.BetStrat.repository.TeamRepository;
 import com.api.BetStrat.util.ScrappingUtil;
 import com.api.BetStrat.util.TeamDrawFiboStatsByLeague;
 import com.api.BetStrat.util.Utils;
@@ -12,6 +16,7 @@ import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import lombok.SneakyThrows;
 import org.json.simple.JSONArray;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
@@ -28,11 +33,66 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Stack;
+import java.util.stream.Collectors;
+
+import static com.api.BetStrat.constants.BetStratConstants.SEASONS_LIST;
 
 @Api("for testing...")
 @RestController
 @RequestMapping("/api/betstrat/test")
 public class TestController {
+
+    @Autowired
+    private TeamRepository teamRepository;
+
+    @Autowired
+    private HistoricMatchRepository historicMatchRepository;
+
+    @ApiOperation(value = "get historic stats for over/under 2.5 goals")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "OK", response = String.class),
+            @ApiResponse(code = 400, message = "Bad Request", response = StandardError.class),
+            @ApiResponse(code = 401, message = "Unauthorized", response = StandardError.class),
+            @ApiResponse(code = 403, message = "Forbidden", response = StandardError.class),
+            @ApiResponse(code = 404, message = "Not Found", response = StandardError.class),
+            @ApiResponse(code = 500, message = "Internal Server Error", response = StandardError.class),
+    })
+    @GetMapping("/overunders-stats")
+    public HashMap<String, HashMap> overUnder25stats() {
+        HashMap<String, HashMap> dataMap = new HashMap<>();
+
+        List<Team> footballTeams = teamRepository.findAll().stream().filter(t -> t.getSport().equals("Football")).collect(Collectors.toList());
+
+
+        for (Team team : footballTeams) {
+            try {
+                HashMap<String, String> seasonStatsMap = new HashMap<>();
+                for (String season : SEASONS_LIST) {
+                    List<HistoricMatch> teamMatchesBySeason = historicMatchRepository.getTeamMatchesBySeason(team, season);
+
+                    if (!teamMatchesBySeason.isEmpty()) {
+                        String mainCompetition = Utils.findMainCompetition(teamMatchesBySeason);
+                        List<HistoricMatch> filteredMatches = teamMatchesBySeason.stream().filter(t -> t.getCompetition().equals(mainCompetition)).collect(Collectors.toList());
+//                        long numOvers = filteredMatches.stream().filter(m -> Integer.parseInt(m.getFtResult().split(":")[0]) > 0 && Integer.parseInt(m.getFtResult().split(":")[1]) > 0).count();
+//                        double oversRate = 100*numOvers/filteredMatches.size();
+                        long count = teamMatchesBySeason.stream().filter(m ->
+                                (Integer.parseInt(m.getFtResult().split(":")[0]) + Integer.parseInt(m.getFtResult().split(":")[1]) -
+                                        Integer.parseInt(m.getHtResult().split(":")[0]) - Integer.parseInt(m.getHtResult().split(":")[1])) <=
+                                        (Integer.parseInt(m.getHtResult().split(":")[0]) + Integer.parseInt(m.getHtResult().split(":")[1]))).count();
+                        double oversRate = 100*count/teamMatchesBySeason.size();
+                        seasonStatsMap.put(season, String.valueOf(oversRate));
+                    } else {
+                        System.out.println("no matches for " + season + " for " + team.getName());
+                    }
+                }
+                dataMap.put(team.getName(), seasonStatsMap);
+            } catch (Exception e) {
+                System.out.println(e.toString());
+            }
+        }
+
+        return dataMap;
+    }
 
     @ApiOperation(value = "for testing")
     @ApiResponses(value = {
