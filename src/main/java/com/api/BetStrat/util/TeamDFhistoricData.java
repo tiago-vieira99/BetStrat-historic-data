@@ -59,7 +59,7 @@ public class TeamDFhistoricData {
 
         drawSeasonInfo.setCompetition(selectedCompetition);
         drawSeasonInfo.setDrawRate(Utils.beautifyDoubleValue(100*totalDraws/allMatches.length()));
-        drawSeasonInfo.setNoDrawsSequence(noDrawsSequence.toString());
+        drawSeasonInfo.setNegativeSequence(noDrawsSequence.toString());
         drawSeasonInfo.setNumDraws(totalDraws);
         drawSeasonInfo.setNumMatches(allMatches.length());
 

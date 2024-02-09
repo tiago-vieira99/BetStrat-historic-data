@@ -56,7 +56,7 @@ public class TeamGoalsFestHistoricData {
 
         goalsFestSeasonInfo.setCompetition("all");
         goalsFestSeasonInfo.setGoalsFestRate(Utils.beautifyDoubleValue(100*totalGoalsFest/allMatches.length()));
-        goalsFestSeasonInfo.setNoGoalsFestSequence(noGoalsFestSequence.toString());
+        goalsFestSeasonInfo.setNegativeSequence(noGoalsFestSequence.toString());
         goalsFestSeasonInfo.setNumGoalsFest(totalGoalsFest);
         goalsFestSeasonInfo.setNumMatches(allMatches.length());
 

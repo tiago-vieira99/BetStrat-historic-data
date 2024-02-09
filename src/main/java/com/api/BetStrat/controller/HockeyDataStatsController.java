@@ -205,7 +205,7 @@ public class HockeyDataStatsController {
             drawSeasonInfo.setSeason(entry.getKey());
             drawSeasonInfo.setUrl(url);
 
-            drawSeasonInfo.setNoDrawsSequence((String) scrappedInfo.get("noDrawsSeq"));
+            drawSeasonInfo.setNegativeSequence((String) scrappedInfo.get("noDrawsSeq"));
             drawSeasonInfo.setStdDeviation((Double) scrappedInfo.get("standardDeviation"));
             drawSeasonInfo.setCoefDeviation((Double) scrappedInfo.get("coefficientVariation"));
             drawSeasonInfo.setCompetition((String) scrappedInfo.get("competition"));
@@ -288,7 +288,7 @@ public class HockeyDataStatsController {
                 hockeyDrawSeasonInfo.setSeason(seasonn);
 //                    hockeyDrawSeasonInfo.setUrl(url);
 
-                hockeyDrawSeasonInfo.setNoDrawsSequence((String) scrappedInfo.get("noDrawsSeq"));
+                hockeyDrawSeasonInfo.setNegativeSequence((String) scrappedInfo.get("noDrawsSeq"));
                 hockeyDrawSeasonInfo.setStdDeviation((Double) scrappedInfo.get("standardDeviation"));
                 hockeyDrawSeasonInfo.setCoefDeviation((Double) scrappedInfo.get("coefficientVariation"));
                 hockeyDrawSeasonInfo.setCompetition((String) scrappedInfo.get("competition"));
@@ -465,7 +465,7 @@ public class HockeyDataStatsController {
             hockeyDrawSeasonInfo.setSeason(entry.getKey());
             hockeyDrawSeasonInfo.setUrl(url);
 
-            hockeyDrawSeasonInfo.setNoDrawsSequence((String) scrappedInfo.get("noDrawsSeq"));
+            hockeyDrawSeasonInfo.setNegativeSequence((String) scrappedInfo.get("noDrawsSeq"));
             hockeyDrawSeasonInfo.setStdDeviation((Double) scrappedInfo.get("standardDeviation"));
             hockeyDrawSeasonInfo.setCoefDeviation((Double) scrappedInfo.get("coefficientVariation"));
             hockeyDrawSeasonInfo.setCompetition((String) scrappedInfo.get("competition"));
@@ -582,7 +582,7 @@ public class HockeyDataStatsController {
         drawSeasonInfo.setSeason(season);
         drawSeasonInfo.setUrl(url);
 
-        drawSeasonInfo.setNoDrawsSequence((String) scrappedInfo.get("noDrawsSeq"));
+        drawSeasonInfo.setNegativeSequence((String) scrappedInfo.get("noDrawsSeq"));
         drawSeasonInfo.setStdDeviation((Double) scrappedInfo.get("standardDeviation"));
         drawSeasonInfo.setCoefDeviation((Double) scrappedInfo.get("coefficientVariation"));
         drawSeasonInfo.setCompetition((String) scrappedInfo.get("competition"));
@@ -623,7 +623,7 @@ public class HockeyDataStatsController {
 
             winsMarginSeasonInfo.setWinsRate((Double) scrappedInfo.get("totalWinsRate"));
             winsMarginSeasonInfo.setMarginWinsRate((Double) scrappedInfo.get("marginWinsRate"));
-            winsMarginSeasonInfo.setNoMarginWinsSequence((String) scrappedInfo.get("noMarginWinsSeq"));
+            winsMarginSeasonInfo.setNegativeSequence((String) scrappedInfo.get("noMarginWinsSeq"));
             winsMarginSeasonInfo.setStdDeviation((Double) scrappedInfo.get("standardDeviation"));
             winsMarginSeasonInfo.setCoefDeviation((Double) scrappedInfo.get("coefficientVariation"));
             winsMarginSeasonInfo.setCompetition((String) scrappedInfo.get("competition"));
@@ -741,7 +741,7 @@ public class HockeyDataStatsController {
 
         winsMarginSeasonInfo.setWinsRate((Double) scrappedInfo.get("totalWinsRate"));
         winsMarginSeasonInfo.setMarginWinsRate((Double) scrappedInfo.get("marginWinsRate"));
-        winsMarginSeasonInfo.setNoMarginWinsSequence((String) scrappedInfo.get("noMarginWinsSeq"));
+        winsMarginSeasonInfo.setNegativeSequence((String) scrappedInfo.get("noMarginWinsSeq"));
         winsMarginSeasonInfo.setStdDeviation((Double) scrappedInfo.get("standardDeviation"));
         winsMarginSeasonInfo.setCoefDeviation((Double) scrappedInfo.get("coefficientVariation"));
         winsMarginSeasonInfo.setCompetition((String) scrappedInfo.get("competition"));

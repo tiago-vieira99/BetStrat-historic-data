@@ -106,7 +106,7 @@ public class EuroHandicapSeasonInfoService {
                     euroHandicapSeasonInfo.setWinsRate(Utils.beautifyDoubleValue(100*totalWins/filteredMatches.size()));
                 }
                 euroHandicapSeasonInfo.setCompetition(mainCompetition);
-                euroHandicapSeasonInfo.setNoMarginWinsSequence(noEuroHandicapsSequence.toString());
+                euroHandicapSeasonInfo.setNegativeSequence(noEuroHandicapsSequence.toString());
                 euroHandicapSeasonInfo.setNumMarginWins(totalMarginWins);
                 euroHandicapSeasonInfo.setNumMatches(filteredMatches.size());
                 euroHandicapSeasonInfo.setNumWins(totalWins);
@@ -250,7 +250,7 @@ public class EuroHandicapSeasonInfoService {
     private int calculateLast3SeasonsmaxSeqWOMarginWinsScore(List<EuroHandicapSeasonInfo> statsByTeam) {
         int maxValue = 0;
         for (int i=0; i<3; i++) {
-            String sequenceStr = statsByTeam.get(i).getNoMarginWinsSequence().replaceAll("[\\[\\]\\s]", "");
+            String sequenceStr = statsByTeam.get(i).getNegativeSequence().replaceAll("[\\[\\]\\s]", "");
             List<Integer> sequenceList = Arrays.asList(sequenceStr.split(",")).stream().map(Integer::parseInt).collect(Collectors.toList());
             if (Collections.max(sequenceList) > maxValue) {
                 maxValue = Collections.max(sequenceList);
@@ -274,7 +274,7 @@ public class EuroHandicapSeasonInfoService {
     private int calculateAllSeasonsmaxSeqWOMarginWinsScore(List<EuroHandicapSeasonInfo> statsByTeam) {
         int maxValue = 0;
         for (int i=0; i<statsByTeam.size(); i++) {
-            String sequenceStr = statsByTeam.get(i).getNoMarginWinsSequence().replaceAll("[\\[\\]\\s]", "");
+            String sequenceStr = statsByTeam.get(i).getNegativeSequence().replaceAll("[\\[\\]\\s]", "");
             List<Integer> sequenceList = Arrays.asList(sequenceStr.split(",")).stream().map(Integer::parseInt).collect(Collectors.toList());
             if (Collections.max(sequenceList) > maxValue) {
                 maxValue = Collections.max(sequenceList);

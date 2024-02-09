@@ -160,7 +160,7 @@ public class WinsMarginAny2SeasonInfoService {
     private int calculateLast3SeasonsmaxSeqWOMarginWinsScore(List<WinsMarginAny2SeasonInfo> statsByTeam) {
         int maxValue = 0;
         for (int i=0; i<3; i++) {
-            String sequenceStr = statsByTeam.get(i).getNoMarginWinsSequence().replaceAll("[\\[\\]\\s]", "");
+            String sequenceStr = statsByTeam.get(i).getNegativeSequence().replaceAll("[\\[\\]\\s]", "");
             List<Integer> sequenceList = Arrays.asList(sequenceStr.split(",")).stream().map(Integer::parseInt).collect(Collectors.toList());
             if (Collections.max(sequenceList) > maxValue) {
                 maxValue = Collections.max(sequenceList);
@@ -184,7 +184,7 @@ public class WinsMarginAny2SeasonInfoService {
     private int calculateAllSeasonsmaxSeqWOMarginWinsScore(List<WinsMarginAny2SeasonInfo> statsByTeam) {
         int maxValue = 0;
         for (int i=0; i<statsByTeam.size(); i++) {
-            String sequenceStr = statsByTeam.get(i).getNoMarginWinsSequence().replaceAll("[\\[\\]\\s]", "");
+            String sequenceStr = statsByTeam.get(i).getNegativeSequence().replaceAll("[\\[\\]\\s]", "");
             List<Integer> sequenceList = Arrays.asList(sequenceStr.split(",")).stream().map(Integer::parseInt).collect(Collectors.toList());
             if (Collections.max(sequenceList) > maxValue) {
                 maxValue = Collections.max(sequenceList);

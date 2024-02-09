@@ -97,7 +97,7 @@ public class ShortBasketWinsSeasonInfoService {
                     shortBasketWinsSeasonInfo.setShortWinsRate(Utils.beautifyDoubleValue(100 * totalShortWins / totalWins));
                     shortBasketWinsSeasonInfo.setWinsRate(Utils.beautifyDoubleValue(100*totalWins/ filteredMatches.size()));
                 }
-                shortBasketWinsSeasonInfo.setNoShortWinsSequence(noShortWinsSequence.toString());
+                shortBasketWinsSeasonInfo.setNegativeSequence(noShortWinsSequence.toString());
                 shortBasketWinsSeasonInfo.setNumShortWins(totalShortWins);
                 shortBasketWinsSeasonInfo.setNumMatches(filteredMatches.size());
                 shortBasketWinsSeasonInfo.setNumWins(totalWins);
@@ -249,7 +249,7 @@ public class ShortBasketWinsSeasonInfoService {
     private int calculateRecommendedLevelToStartSequence(List<ShortBasketWinsSeasonInfo> statsByTeam) {
         int maxValue = 0;
         for (int i = 0; i < 3; i++) {
-            String sequenceStr = statsByTeam.get(i).getNoShortWinsSequence().replaceAll("[\\[\\]\\s]", "");
+            String sequenceStr = statsByTeam.get(i).getNegativeSequence().replaceAll("[\\[\\]\\s]", "");
             List<Integer> sequenceList = Arrays.asList(sequenceStr.split(",")).stream().map(Integer::parseInt).collect(Collectors.toList());
             if (Collections.max(sequenceList) > maxValue) {
                 maxValue = Collections.max(sequenceList);
@@ -261,7 +261,7 @@ public class ShortBasketWinsSeasonInfoService {
     private int calculateLast3SeasonsmaxSeqWODrawScore(List<ShortBasketWinsSeasonInfo> statsByTeam) {
         int maxValue = 0;
         for (int i=0; i<3; i++) {
-            String sequenceStr = statsByTeam.get(i).getNoShortWinsSequence().replaceAll("[\\[\\]\\s]", "");
+            String sequenceStr = statsByTeam.get(i).getNegativeSequence().replaceAll("[\\[\\]\\s]", "");
             List<Integer> sequenceList = Arrays.asList(sequenceStr.split(",")).stream().map(Integer::parseInt).collect(Collectors.toList());
             if (Collections.max(sequenceList) > maxValue) {
                 maxValue = Collections.max(sequenceList);
@@ -285,7 +285,7 @@ public class ShortBasketWinsSeasonInfoService {
     private int calculateAllSeasonsmaxSeqWODrawScore(List<ShortBasketWinsSeasonInfo> statsByTeam) {
         int maxValue = 0;
         for (int i=0; i<statsByTeam.size(); i++) {
-            String sequenceStr = statsByTeam.get(i).getNoShortWinsSequence().replaceAll("[\\[\\]\\s]", "");
+            String sequenceStr = statsByTeam.get(i).getNegativeSequence().replaceAll("[\\[\\]\\s]", "");
             List<Integer> sequenceList = Arrays.asList(sequenceStr.split(",")).stream().map(Integer::parseInt).collect(Collectors.toList());
             if (Collections.max(sequenceList) > maxValue) {
                 maxValue = Collections.max(sequenceList);

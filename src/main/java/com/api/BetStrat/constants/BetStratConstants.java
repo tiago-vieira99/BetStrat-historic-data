@@ -9,13 +9,14 @@ import java.util.Map;
 public class BetStratConstants {
 
     //Scrapping Service
-    public static final String SCRAPPER_SERVICE_URL = "http://3.88.204.40:8000/";
+    public static final String SCRAPPER_SERVICE_URL = "http://localhost:8000/";
 
     public static final String SOCCERSTATS_BASE_URL = "http://www.soccerstats.com/";
     public static final String FCSTATS_BASE_URL = "http://www.fcstats.com/";
     public static final String ZEROZERO_BASE_URL = "zerozero.pt";
     public static final String FBREF_BASE_URL = "fbref.com";
     public static final String WORLDFOOTBALL_BASE_URL = "worldfootball.net";
+    public static final String API_SPORTS_BASE_URL = "api-sports";
 
     public static final String CURRENT_SEASON = "2023-24";
 

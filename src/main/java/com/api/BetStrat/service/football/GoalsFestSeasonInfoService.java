@@ -98,7 +98,7 @@ public class GoalsFestSeasonInfoService {
                     goalsFestSeasonInfo.setGoalsFestRate(Utils.beautifyDoubleValue(100*totalGoalsFest/teamMatchesBySeason.size()));
                 }
                 goalsFestSeasonInfo.setCompetition("all");
-                goalsFestSeasonInfo.setNoGoalsFestSequence(noGoalsFestSequence.toString());
+                goalsFestSeasonInfo.setNegativeSequence(noGoalsFestSequence.toString());
                 goalsFestSeasonInfo.setNumGoalsFest(totalGoalsFest);
                 goalsFestSeasonInfo.setNumMatches(teamMatchesBySeason.size());
 
@@ -170,9 +170,9 @@ public class GoalsFestSeasonInfoService {
 
             String finalScore = calculateFinalRating(totalScore);
             outMap.put("footballGoalsFest", finalScore);
-            outMap.put("sequence", statsByTeam.get(seasonsToDiscard-1).getNoGoalsFestSequence());
+            outMap.put("sequence", statsByTeam.get(seasonsToDiscard-1).getNegativeSequence());
             double balance = 0;
-            String[] seqArray = statsByTeam.get(seasonsToDiscard - 1).getNoGoalsFestSequence().replaceAll("\\[","").replaceAll("]","").split(",");
+            String[] seqArray = statsByTeam.get(seasonsToDiscard - 1).getNegativeSequence().replaceAll("\\[","").replaceAll("]","").split(",");
             for (int i=0; i<seqArray.length-2; i++) {
                 int excelBadRun = 0;
                 int accepBadRun = 0;
@@ -271,7 +271,7 @@ public class GoalsFestSeasonInfoService {
     private int calculateLast3SeasonsmaxSeqWOGoalsFestScore(List<GoalsFestSeasonInfo> statsByTeam) {
         int maxValue = 0;
         for (int i=0; i<3; i++) {
-            String sequenceStr = statsByTeam.get(i).getNoGoalsFestSequence().replaceAll("[\\[\\]\\s]", "");
+            String sequenceStr = statsByTeam.get(i).getNegativeSequence().replaceAll("[\\[\\]\\s]", "");
             List<Integer> sequenceList = Arrays.asList(sequenceStr.split(",")).stream().map(Integer::parseInt).collect(Collectors.toList());
             if (Collections.max(sequenceList) > maxValue) {
                 maxValue = Collections.max(sequenceList);
@@ -295,7 +295,7 @@ public class GoalsFestSeasonInfoService {
     private int calculateAllSeasonsmaxSeqWOGoalsFestScore(List<GoalsFestSeasonInfo> statsByTeam) {
         int maxValue = 0;
         for (int i=0; i<statsByTeam.size(); i++) {
-            String sequenceStr = statsByTeam.get(i).getNoGoalsFestSequence().replaceAll("[\\[\\]\\s]", "");
+            String sequenceStr = statsByTeam.get(i).getNegativeSequence().replaceAll("[\\[\\]\\s]", "");
             List<Integer> sequenceList = Arrays.asList(sequenceStr.split(",")).stream().map(Integer::parseInt).collect(Collectors.toList());
             if (Collections.max(sequenceList) > maxValue) {
                 maxValue = Collections.max(sequenceList);

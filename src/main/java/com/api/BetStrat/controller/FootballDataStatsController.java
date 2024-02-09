@@ -1,29 +1,29 @@
 package com.api.BetStrat.controller;
 
 import com.api.BetStrat.entity.HistoricMatch;
+import com.api.BetStrat.entity.Team;
 import com.api.BetStrat.entity.football.DrawSeasonInfo;
 import com.api.BetStrat.entity.football.EuroHandicapSeasonInfo;
 import com.api.BetStrat.entity.football.FlipFlopOversUndersInfo;
 import com.api.BetStrat.entity.football.GoalsFestSeasonInfo;
-import com.api.BetStrat.entity.Team;
 import com.api.BetStrat.entity.football.WinsMarginSeasonInfo;
 import com.api.BetStrat.exception.NotFoundException;
 import com.api.BetStrat.exception.StandardError;
 import com.api.BetStrat.repository.HistoricMatchRepository;
+import com.api.BetStrat.repository.TeamRepository;
 import com.api.BetStrat.repository.football.DrawSeasonInfoRepository;
 import com.api.BetStrat.repository.football.FlipFlopOversUndersInfoRepository;
 import com.api.BetStrat.repository.football.GoalsFestSeasonInfoRepository;
-import com.api.BetStrat.repository.TeamRepository;
 import com.api.BetStrat.repository.football.WinsMarginSeasonInfoRepository;
+import com.api.BetStrat.service.TeamService;
 import com.api.BetStrat.service.football.DrawSeasonInfoService;
 import com.api.BetStrat.service.football.EuroHandicapSeasonInfoService;
 import com.api.BetStrat.service.football.FlipFlopOversUndersInfoService;
 import com.api.BetStrat.service.football.GoalsFestSeasonInfoService;
+import com.api.BetStrat.service.football.WinsMarginSeasonInfoService;
 import com.api.BetStrat.service.hockey.HockeyDrawSeasonInfoService;
-import com.api.BetStrat.service.TeamService;
 import com.api.BetStrat.service.hockey.WinsMargin3SeasonInfoService;
 import com.api.BetStrat.service.hockey.WinsMarginAny2SeasonInfoService;
-import com.api.BetStrat.service.football.WinsMarginSeasonInfoService;
 import com.api.BetStrat.tasks.GetLastPlayedMatchTask;
 import com.api.BetStrat.util.ScrappingUtil;
 import com.api.BetStrat.util.TeamDFhistoricData;
@@ -44,7 +44,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 import javax.validation.Valid;
 import java.util.ArrayList;
@@ -56,12 +62,9 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import static com.api.BetStrat.constants.BetStratConstants.API_SPORTS_BASE_URL;
 import static com.api.BetStrat.constants.BetStratConstants.FBREF_BASE_URL;
 import static com.api.BetStrat.constants.BetStratConstants.LONG_STREAKS_LEAGUES_LIST;
-import static com.api.BetStrat.constants.BetStratConstants.SUMMER_SEASONS_BEGIN_MONTH_LIST;
-import static com.api.BetStrat.constants.BetStratConstants.SUMMER_SEASONS_LIST;
-import static com.api.BetStrat.constants.BetStratConstants.WINTER_SEASONS_BEGIN_MONTH_LIST;
-import static com.api.BetStrat.constants.BetStratConstants.WINTER_SEASONS_LIST;
 import static com.api.BetStrat.constants.BetStratConstants.WORLDFOOTBALL_BASE_URL;
 import static com.api.BetStrat.constants.BetStratConstants.ZEROZERO_BASE_URL;
 import static com.api.BetStrat.constants.BetStratConstants.ZEROZERO_SEASON_CODES;
@@ -358,7 +361,7 @@ public class FootballDataStatsController {
         drawSeasonInfo.setDrawRate(drawRate);
         drawSeasonInfo.setNumDraws(numDraws);
         drawSeasonInfo.setNumMatches(numMatches);
-        drawSeasonInfo.setNoDrawsSequence(noDrawsSeq);
+        drawSeasonInfo.setNegativeSequence(noDrawsSeq);
         drawSeasonInfo.setStdDeviation(stdDev);
         drawSeasonInfo.setCoefDeviation(coefDev);
         drawSeasonInfo.setCompetition(competition);
@@ -397,7 +400,7 @@ public class FootballDataStatsController {
 
         winsMarginSeasonInfo.setWinsRate(winsRate);
         winsMarginSeasonInfo.setMarginWinsRate(marginWinsRate);
-        winsMarginSeasonInfo.setNoMarginWinsSequence(noMarginWinsSeq);
+        winsMarginSeasonInfo.setNegativeSequence(noMarginWinsSeq);
         winsMarginSeasonInfo.setStdDeviation(stdDev);
         winsMarginSeasonInfo.setCoefDeviation(coefDev);
         winsMarginSeasonInfo.setCompetition(competition);
@@ -432,7 +435,7 @@ public class FootballDataStatsController {
         goalsFestSeasonInfo.setGoalsFestRate(goalsFestRate);
         goalsFestSeasonInfo.setNumGoalsFest(numGoalsFest);
         goalsFestSeasonInfo.setNumMatches(numMatches);
-        goalsFestSeasonInfo.setNoGoalsFestSequence(noGoalsFestSeq);
+        goalsFestSeasonInfo.setNegativeSequence(noGoalsFestSeq);
         goalsFestSeasonInfo.setStdDeviation(stdDev);
         goalsFestSeasonInfo.setCoefDeviation(coefDev);
         goalsFestSeasonInfo.setCompetition("all");
@@ -478,7 +481,7 @@ public class FootballDataStatsController {
             drawSeasonInfo.setSeason(entry.getKey());
             drawSeasonInfo.setUrl(url);
 
-            drawSeasonInfo.setNoDrawsSequence((String) scrappedInfo.get("noDrawsSeq"));
+            drawSeasonInfo.setNegativeSequence((String) scrappedInfo.get("noDrawsSeq"));
             drawSeasonInfo.setStdDeviation((Double) scrappedInfo.get("standardDeviation"));
             drawSeasonInfo.setCoefDeviation((Double) scrappedInfo.get("coefficientVariation"));
             drawSeasonInfo.setCompetition((String) scrappedInfo.get("competition"));
@@ -596,7 +599,7 @@ public class FootballDataStatsController {
         drawSeasonInfo.setSeason(season);
         drawSeasonInfo.setUrl(url);
 
-        drawSeasonInfo.setNoDrawsSequence((String) scrappedInfo.get("noDrawsSeq"));
+        drawSeasonInfo.setNegativeSequence((String) scrappedInfo.get("noDrawsSeq"));
         drawSeasonInfo.setStdDeviation((Double) scrappedInfo.get("standardDeviation"));
         drawSeasonInfo.setCoefDeviation((Double) scrappedInfo.get("coefficientVariation"));
         drawSeasonInfo.setCompetition((String) scrappedInfo.get("competition"));
@@ -654,6 +657,15 @@ public class FootballDataStatsController {
                 newSeason = season;
             }
             newSeasonUrl = teamUrl + "/" + newSeason + "/3/";
+            scrappingData = ScrappingUtil.getScrappingData(team.getName(), newSeason, newSeasonUrl, true);
+        } else if (teamUrl.contains(API_SPORTS_BASE_URL)) {
+            String newSeason = "";
+            if (season.contains("-")) {
+                newSeason = season.split("-")[0];
+            } else {
+                newSeason = season;
+            }
+            newSeasonUrl = teamUrl + "&season=" + newSeason;
             scrappingData = ScrappingUtil.getScrappingData(team.getName(), newSeason, newSeasonUrl, true);
         }
 
@@ -737,7 +749,7 @@ public class FootballDataStatsController {
             goalsFestSeasonInfo.setSeason(season);
             goalsFestSeasonInfo.setUrl(url);
 
-            goalsFestSeasonInfo.setNoGoalsFestSequence((String) scrappedInfo.get("noGoalsFestSeq"));
+            goalsFestSeasonInfo.setNegativeSequence((String) scrappedInfo.get("noGoalsFestSeq"));
             goalsFestSeasonInfo.setStdDeviation((Double) scrappedInfo.get("standardDeviation"));
             goalsFestSeasonInfo.setCoefDeviation((Double) scrappedInfo.get("coefficientVariation"));
             goalsFestSeasonInfo.setCompetition((String) scrappedInfo.get("competition"));
@@ -789,7 +801,7 @@ public class FootballDataStatsController {
 
             winsMarginSeasonInfo.setWinsRate((Double) scrappedInfo.get("totalWinsRate"));
             winsMarginSeasonInfo.setMarginWinsRate((Double) scrappedInfo.get("marginWinsRate"));
-            winsMarginSeasonInfo.setNoMarginWinsSequence((String) scrappedInfo.get("noMarginWinsSeq"));
+            winsMarginSeasonInfo.setNegativeSequence((String) scrappedInfo.get("noMarginWinsSeq"));
             winsMarginSeasonInfo.setStdDeviation((Double) scrappedInfo.get("standardDeviation"));
             winsMarginSeasonInfo.setCoefDeviation((Double) scrappedInfo.get("coefficientVariation"));
             winsMarginSeasonInfo.setCompetition((String) scrappedInfo.get("competition"));
@@ -907,7 +919,7 @@ public class FootballDataStatsController {
 
         winsMarginSeasonInfo.setWinsRate((Double) scrappedInfo.get("totalWinsRate"));
         winsMarginSeasonInfo.setMarginWinsRate((Double) scrappedInfo.get("marginWinsRate"));
-        winsMarginSeasonInfo.setNoMarginWinsSequence((String) scrappedInfo.get("noMarginWinsSeq"));
+        winsMarginSeasonInfo.setNegativeSequence((String) scrappedInfo.get("noMarginWinsSeq"));
         winsMarginSeasonInfo.setStdDeviation((Double) scrappedInfo.get("standardDeviation"));
         winsMarginSeasonInfo.setCoefDeviation((Double) scrappedInfo.get("coefficientVariation"));
         winsMarginSeasonInfo.setCompetition((String) scrappedInfo.get("competition"));
@@ -951,7 +963,7 @@ public class FootballDataStatsController {
 
             euroHandicapSeasonInfo.setWinsRate((Double) scrappedInfo.get("totalWinsRate"));
             euroHandicapSeasonInfo.setMarginWinsRate((Double) scrappedInfo.get("marginWinsRate"));
-            euroHandicapSeasonInfo.setNoMarginWinsSequence((String) scrappedInfo.get("noMarginWinsSeq"));
+            euroHandicapSeasonInfo.setNegativeSequence((String) scrappedInfo.get("noMarginWinsSeq"));
             euroHandicapSeasonInfo.setStdDeviation((Double) scrappedInfo.get("standardDeviation"));
             euroHandicapSeasonInfo.setCoefDeviation((Double) scrappedInfo.get("coefficientVariation"));
             euroHandicapSeasonInfo.setCompetition((String) scrappedInfo.get("competition"));
@@ -1069,7 +1081,7 @@ public class FootballDataStatsController {
 
         euroHandicapSeasonInfo.setWinsRate((Double) scrappedInfo.get("totalWinsRate"));
         euroHandicapSeasonInfo.setMarginWinsRate((Double) scrappedInfo.get("marginWinsRate"));
-        euroHandicapSeasonInfo.setNoMarginWinsSequence((String) scrappedInfo.get("noMarginWinsSeq"));
+        euroHandicapSeasonInfo.setNegativeSequence((String) scrappedInfo.get("noMarginWinsSeq"));
         euroHandicapSeasonInfo.setStdDeviation((Double) scrappedInfo.get("standardDeviation"));
         euroHandicapSeasonInfo.setCoefDeviation((Double) scrappedInfo.get("coefficientVariation"));
         euroHandicapSeasonInfo.setCompetition((String) scrappedInfo.get("competition"));

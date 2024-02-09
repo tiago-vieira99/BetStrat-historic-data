@@ -115,7 +115,7 @@ public class FlipFlopOversUndersInfoService {
                 flipFlopOversUndersInfo.setNumOvers(numOvers);
                 flipFlopOversUndersInfo.setNumUnders(numUnders);
                 flipFlopOversUndersInfo.setCompetition("all");
-                flipFlopOversUndersInfo.setFlipFlopsSequence(flipFlopsSequence.toString());
+                flipFlopOversUndersInfo.setNegativeSequence(flipFlopsSequence.toString());
                 flipFlopOversUndersInfo.setNumMatches(teamMatchesBySeason.size());
 
                 double stdDev =  Utils.beautifyDoubleValue(calculateSD(flipFlopsSequence));
@@ -274,7 +274,7 @@ public class FlipFlopOversUndersInfoService {
     private int calculateRecommendedLevelToStartSequence(List<FlipFlopOversUndersInfo> statsByTeam) {
         int maxValue = 0;
         for (int i = 0; i < 3; i++) {
-            String sequenceStr = statsByTeam.get(i).getFlipFlopsSequence().replaceAll("[\\[\\]\\s]", "");
+            String sequenceStr = statsByTeam.get(i).getNegativeSequence().replaceAll("[\\[\\]\\s]", "");
             List<Integer> sequenceList = Arrays.asList(sequenceStr.split(",")).stream().map(Integer::parseInt).collect(Collectors.toList());
             if (Collections.max(sequenceList) > maxValue) {
                 maxValue = Collections.max(sequenceList);
@@ -286,7 +286,7 @@ public class FlipFlopOversUndersInfoService {
     private int calculateLast3SeasonsmaxSeqWOFlipFlopScore(List<FlipFlopOversUndersInfo> statsByTeam) {
         int maxValue = 0;
         for (int i=0; i<3; i++) {
-            String sequenceStr = statsByTeam.get(i).getFlipFlopsSequence().replaceAll("[\\[\\]\\s]", "");
+            String sequenceStr = statsByTeam.get(i).getNegativeSequence().replaceAll("[\\[\\]\\s]", "");
             List<Integer> sequenceList = Arrays.asList(sequenceStr.split(",")).stream().map(Integer::parseInt).collect(Collectors.toList());
             if (Collections.max(sequenceList) > maxValue) {
                 maxValue = Collections.max(sequenceList);
@@ -310,7 +310,7 @@ public class FlipFlopOversUndersInfoService {
     private int calculateAllSeasonsmaxSeqWOFlipFlopScore(List<FlipFlopOversUndersInfo> statsByTeam) {
         int maxValue = 0;
         for (int i=0; i<statsByTeam.size(); i++) {
-            String sequenceStr = statsByTeam.get(i).getFlipFlopsSequence().replaceAll("[\\[\\]\\s]", "");
+            String sequenceStr = statsByTeam.get(i).getNegativeSequence().replaceAll("[\\[\\]\\s]", "");
             List<Integer> sequenceList = Arrays.asList(sequenceStr.split(",")).stream().map(Integer::parseInt).collect(Collectors.toList());
             if (Collections.max(sequenceList) > maxValue) {
                 maxValue = Collections.max(sequenceList);

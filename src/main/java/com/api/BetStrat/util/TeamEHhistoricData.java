@@ -64,7 +64,7 @@ public class TeamEHhistoricData {
 
         winsMarginSeasonInfo.setCompetition(selectedCompetition);
         winsMarginSeasonInfo.setMarginWinsRate(Utils.beautifyDoubleValue(100*totalMarginWins/totalWins));
-        winsMarginSeasonInfo.setNoMarginWinsSequence(noMarginWinsSequence.toString());
+        winsMarginSeasonInfo.setNegativeSequence(noMarginWinsSequence.toString());
         winsMarginSeasonInfo.setNumMarginWins(totalMarginWins);
         winsMarginSeasonInfo.setNumMatches(allMatches.length());
         winsMarginSeasonInfo.setNumWins(totalWins);
@@ -114,7 +114,7 @@ public class TeamEHhistoricData {
 
         euroHandicapSeasonInfo.setCompetition(selectedCompetition);
         euroHandicapSeasonInfo.setMarginWinsRate(Utils.beautifyDoubleValue(100*totalMarginWins/totalWins));
-        euroHandicapSeasonInfo.setNoMarginWinsSequence(noEuroHandicapsSequence.toString());
+        euroHandicapSeasonInfo.setNegativeSequence(noEuroHandicapsSequence.toString());
         euroHandicapSeasonInfo.setNumMarginWins(totalMarginWins);
         euroHandicapSeasonInfo.setNumMatches(allMatches.length());
         euroHandicapSeasonInfo.setNumWins(totalWins);

@@ -97,7 +97,7 @@ public class HandballWinsMargin712SeasonInfoService {
 
                 handball712WinsMarginSeasonInfo.setCompetition(mainCompetition);
                 handball712WinsMarginSeasonInfo.setMarginWinsRate(Utils.beautifyDoubleValue(100*totalMarginWins/totalWins));
-                handball712WinsMarginSeasonInfo.setNoMarginWinsSequence(noMarginWinsSequence.toString());
+                handball712WinsMarginSeasonInfo.setNegativeSequence(noMarginWinsSequence.toString());
                 handball712WinsMarginSeasonInfo.setNumMarginWins(totalMarginWins);
                 handball712WinsMarginSeasonInfo.setNumMatches(filteredMatches.size());
                 handball712WinsMarginSeasonInfo.setNumWins(totalWins);
@@ -251,7 +251,7 @@ public class HandballWinsMargin712SeasonInfoService {
     private int calculateLast3SeasonsmaxSeqWOMarginWinsScore(List<Handball712WinsMarginSeasonInfo> statsByTeam) {
         int maxValue = 0;
         for (int i=0; i<3; i++) {
-            String sequenceStr = statsByTeam.get(i).getNoMarginWinsSequence().replaceAll("[\\[\\]\\s]", "");
+            String sequenceStr = statsByTeam.get(i).getNegativeSequence().replaceAll("[\\[\\]\\s]", "");
             List<Integer> sequenceList = Arrays.asList(sequenceStr.split(",")).stream().map(Integer::parseInt).collect(Collectors.toList());
             if (Collections.max(sequenceList) > maxValue) {
                 maxValue = Collections.max(sequenceList);
@@ -275,7 +275,7 @@ public class HandballWinsMargin712SeasonInfoService {
     private int calculateAllSeasonsmaxSeqWOMarginWinsScore(List<Handball712WinsMarginSeasonInfo> statsByTeam) {
         int maxValue = 0;
         for (int i=0; i<statsByTeam.size(); i++) {
-            String sequenceStr = statsByTeam.get(i).getNoMarginWinsSequence().replaceAll("[\\[\\]\\s]", "");
+            String sequenceStr = statsByTeam.get(i).getNegativeSequence().replaceAll("[\\[\\]\\s]", "");
             List<Integer> sequenceList = Arrays.asList(sequenceStr.split(",")).stream().map(Integer::parseInt).collect(Collectors.toList());
             if (Collections.max(sequenceList) > maxValue) {
                 maxValue = Collections.max(sequenceList);

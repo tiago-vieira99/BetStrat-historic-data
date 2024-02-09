@@ -100,7 +100,7 @@ public class DrawSeasonInfoService {
                     drawSeasonInfo.setDrawRate(Utils.beautifyDoubleValue(100*totalDraws/filteredMatches.size()));
                 }
                 drawSeasonInfo.setCompetition(mainCompetition);
-                drawSeasonInfo.setNoDrawsSequence(noDrawsSequence.toString());
+                drawSeasonInfo.setNegativeSequence(noDrawsSequence.toString());
                 drawSeasonInfo.setNumDraws(totalDraws);
                 drawSeasonInfo.setNumMatches(filteredMatches.size());
 
@@ -173,9 +173,9 @@ public class DrawSeasonInfoService {
 
             String finalScore = calculateFinalRating(totalScore);
             outMap.put("footballDrawHunter", finalScore);
-            outMap.put("sequence", statsByTeam.get(seasonsToDiscard-1).getNoDrawsSequence());
+            outMap.put("sequence", statsByTeam.get(seasonsToDiscard-1).getNegativeSequence());
             double balance = 0;
-            String[] seqArray = statsByTeam.get(seasonsToDiscard - 1).getNoDrawsSequence().replaceAll("\\[","").replaceAll("]","").split(",");
+            String[] seqArray = statsByTeam.get(seasonsToDiscard - 1).getNegativeSequence().replaceAll("\\[","").replaceAll("]","").split(",");
             for (int i=0; i<seqArray.length-2; i++) {
                 int excelBadRun = 5;
                 int accepBadRun = 6;
@@ -263,7 +263,7 @@ public class DrawSeasonInfoService {
     private int calculateRecommendedLevelToStartSequence(List<DrawSeasonInfo> statsByTeam) {
         int maxValue = 0;
         for (int i = 0; i < 3; i++) {
-            String sequenceStr = statsByTeam.get(i).getNoDrawsSequence().replaceAll("[\\[\\]\\s]", "");
+            String sequenceStr = statsByTeam.get(i).getNegativeSequence().replaceAll("[\\[\\]\\s]", "");
             List<Integer> sequenceList = Arrays.asList(sequenceStr.split(",")).stream().map(Integer::parseInt).collect(Collectors.toList());
             if (Collections.max(sequenceList) > maxValue) {
                 maxValue = Collections.max(sequenceList);
@@ -275,7 +275,7 @@ public class DrawSeasonInfoService {
     private int calculateLast3SeasonsmaxSeqWODrawScore(List<DrawSeasonInfo> statsByTeam) {
         int maxValue = 0;
         for (int i=0; i<3; i++) {
-            String sequenceStr = statsByTeam.get(i).getNoDrawsSequence().replaceAll("[\\[\\]\\s]", "");
+            String sequenceStr = statsByTeam.get(i).getNegativeSequence().replaceAll("[\\[\\]\\s]", "");
             List<Integer> sequenceList = Arrays.asList(sequenceStr.split(",")).stream().map(Integer::parseInt).collect(Collectors.toList());
             if (Collections.max(sequenceList) > maxValue) {
                 maxValue = Collections.max(sequenceList);
@@ -305,7 +305,7 @@ public class DrawSeasonInfoService {
     private int calculateAllSeasonsmaxSeqWODrawScore(List<DrawSeasonInfo> statsByTeam) {
         int maxValue = 0;
         for (int i=0; i<statsByTeam.size(); i++) {
-            String sequenceStr = statsByTeam.get(i).getNoDrawsSequence().replaceAll("[\\[\\]\\s]", "");
+            String sequenceStr = statsByTeam.get(i).getNegativeSequence().replaceAll("[\\[\\]\\s]", "");
             List<Integer> sequenceList = Arrays.asList(sequenceStr.split(",")).stream().map(Integer::parseInt).collect(Collectors.toList());
             if (Collections.max(sequenceList) > maxValue) {
                 maxValue = Collections.max(sequenceList);

@@ -106,7 +106,7 @@ public class ComebackSeasonInfoService {
                     comebackSeasonInfo.setComebacksRate(Utils.beautifyDoubleValue(100 * totalComebacks / totalWins));
                     comebackSeasonInfo.setWinsRate(Utils.beautifyDoubleValue(100*totalWins/ filteredMatches.size()));
                 }
-                comebackSeasonInfo.setNoComebacksSequence(noComebacksSequence.toString());
+                comebackSeasonInfo.setNegativeSequence(noComebacksSequence.toString());
                 comebackSeasonInfo.setNumComebacks(totalComebacks);
                 comebackSeasonInfo.setNumMatches(filteredMatches.size());
                 comebackSeasonInfo.setNumWins(totalWins);
@@ -213,7 +213,7 @@ public class ComebackSeasonInfoService {
     private int calculateRecommendedLevelToStartSequence(List<ComebackSeasonInfo> statsByTeam) {
         int maxValue = 0;
         for (int i = 0; i < 3; i++) {
-            String sequenceStr = statsByTeam.get(i).getNoComebacksSequence().replaceAll("[\\[\\]\\s]", "");
+            String sequenceStr = statsByTeam.get(i).getNegativeSequence().replaceAll("[\\[\\]\\s]", "");
             List<Integer> sequenceList = Arrays.asList(sequenceStr.split(",")).stream().map(Integer::parseInt).collect(Collectors.toList());
             if (Collections.max(sequenceList) > maxValue) {
                 maxValue = Collections.max(sequenceList);
@@ -225,7 +225,7 @@ public class ComebackSeasonInfoService {
     private int calculateLast3SeasonsmaxSeqWOComebackScore(List<ComebackSeasonInfo> statsByTeam) {
         int maxValue = 0;
         for (int i=0; i<3; i++) {
-            String sequenceStr = statsByTeam.get(i).getNoComebacksSequence().replaceAll("[\\[\\]\\s]", "");
+            String sequenceStr = statsByTeam.get(i).getNegativeSequence().replaceAll("[\\[\\]\\s]", "");
             List<Integer> sequenceList = Arrays.asList(sequenceStr.split(",")).stream().map(Integer::parseInt).collect(Collectors.toList());
             if (Collections.max(sequenceList) > maxValue) {
                 maxValue = Collections.max(sequenceList);
@@ -255,7 +255,7 @@ public class ComebackSeasonInfoService {
     private int calculateAllSeasonsmaxSeqWOComebackScore(List<ComebackSeasonInfo> statsByTeam) {
         int maxValue = 0;
         for (int i=0; i<statsByTeam.size(); i++) {
-            String sequenceStr = statsByTeam.get(i).getNoComebacksSequence().replaceAll("[\\[\\]\\s]", "");
+            String sequenceStr = statsByTeam.get(i).getNegativeSequence().replaceAll("[\\[\\]\\s]", "");
             List<Integer> sequenceList = Arrays.asList(sequenceStr.split(",")).stream().map(Integer::parseInt).collect(Collectors.toList());
             if (Collections.max(sequenceList) > maxValue) {
                 maxValue = Collections.max(sequenceList);
