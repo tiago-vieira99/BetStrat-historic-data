@@ -16,6 +16,7 @@ public class BetStratConstants {
     public static final String ZEROZERO_BASE_URL = "zerozero.pt";
     public static final String FBREF_BASE_URL = "fbref.com";
     public static final String WORLDFOOTBALL_BASE_URL = "worldfootball.net";
+    public static final String API_SPORTS_BASE_URL = "api-sports";
 
     public static final String CURRENT_SEASON = "2023-24";
 

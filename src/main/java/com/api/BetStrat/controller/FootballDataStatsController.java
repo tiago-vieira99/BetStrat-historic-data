@@ -56,6 +56,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import static com.api.BetStrat.constants.BetStratConstants.API_SPORTS_BASE_URL;
 import static com.api.BetStrat.constants.BetStratConstants.FBREF_BASE_URL;
 import static com.api.BetStrat.constants.BetStratConstants.LONG_STREAKS_LEAGUES_LIST;
 import static com.api.BetStrat.constants.BetStratConstants.SUMMER_SEASONS_BEGIN_MONTH_LIST;
@@ -654,6 +655,15 @@ public class FootballDataStatsController {
                 newSeason = season;
             }
             newSeasonUrl = teamUrl + "/" + newSeason + "/3/";
+            scrappingData = ScrappingUtil.getScrappingData(team.getName(), newSeason, newSeasonUrl, true);
+        } else if (teamUrl.contains(API_SPORTS_BASE_URL)) {
+            String newSeason = "";
+            if (season.contains("-")) {
+                newSeason = season.split("-")[0];
+            } else {
+                newSeason = season;
+            }
+            newSeasonUrl = teamUrl + "&season=" + season;
             scrappingData = ScrappingUtil.getScrappingData(team.getName(), newSeason, newSeasonUrl, true);
         }
 
