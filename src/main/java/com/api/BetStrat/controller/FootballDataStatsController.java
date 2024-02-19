@@ -15,15 +15,8 @@ import com.api.BetStrat.repository.football.DrawSeasonInfoRepository;
 import com.api.BetStrat.repository.football.FlipFlopOversUndersInfoRepository;
 import com.api.BetStrat.repository.football.GoalsFestSeasonInfoRepository;
 import com.api.BetStrat.repository.football.WinsMarginSeasonInfoRepository;
+import com.api.BetStrat.service.StatsBySeasonService;
 import com.api.BetStrat.service.TeamService;
-import com.api.BetStrat.service.football.DrawSeasonInfoService;
-import com.api.BetStrat.service.football.EuroHandicapSeasonInfoService;
-import com.api.BetStrat.service.football.FlipFlopOversUndersInfoService;
-import com.api.BetStrat.service.football.GoalsFestSeasonInfoService;
-import com.api.BetStrat.service.football.WinsMarginSeasonInfoService;
-import com.api.BetStrat.service.hockey.HockeyDrawSeasonInfoService;
-import com.api.BetStrat.service.hockey.WinsMargin3SeasonInfoService;
-import com.api.BetStrat.service.hockey.WinsMarginAny2SeasonInfoService;
 import com.api.BetStrat.tasks.GetLastPlayedMatchTask;
 import com.api.BetStrat.util.ScrappingUtil;
 import com.api.BetStrat.util.TeamDFhistoricData;
@@ -82,28 +75,7 @@ public class FootballDataStatsController {
     private TeamService teamService;
 
     @Autowired
-    private DrawSeasonInfoService drawSeasonInfoService;
-
-    @Autowired
-    private GoalsFestSeasonInfoService goalsFestSeasonInfoService;
-
-    @Autowired
-    private HockeyDrawSeasonInfoService hockeyDrawSeasonInfoService;
-
-    @Autowired
-    private WinsMarginSeasonInfoService winsMarginSeasonInfoService;
-
-    @Autowired
-    private WinsMarginAny2SeasonInfoService winsMarginAny2SeasonInfoService;
-
-    @Autowired
-    private WinsMargin3SeasonInfoService winsMargin3SeasonInfoService;
-
-    @Autowired
-    private EuroHandicapSeasonInfoService euroHandicapSeasonInfoService;
-
-    @Autowired
-    private FlipFlopOversUndersInfoService flipFlopOversUndersInfoService;
+    private StatsBySeasonService statsBySeasonService;
 
     @Autowired
     private ModelMapper modelMapper;
@@ -366,7 +338,7 @@ public class FootballDataStatsController {
         drawSeasonInfo.setCoefDeviation(coefDev);
         drawSeasonInfo.setCompetition(competition);
 
-        return drawSeasonInfoService.insertDrawInfo(drawSeasonInfo);
+        return (DrawSeasonInfo) statsBySeasonService.insertStatsBySeasonInfo(drawSeasonInfo);
     }
 
     @PostMapping("/margin-wins-manually")
@@ -407,7 +379,7 @@ public class FootballDataStatsController {
 
         //teamService.updateTeamScore(teamName);
 
-        return winsMarginSeasonInfoService.insertWinsMarginInfo(winsMarginSeasonInfo);
+        return (WinsMarginSeasonInfo) statsBySeasonService.insertStatsBySeasonInfo(winsMarginSeasonInfo);
     }
 
     @PostMapping("/goals-fest-manually")
@@ -442,7 +414,7 @@ public class FootballDataStatsController {
 
         //teamService.updateTeamScore(teamName);
 
-        return goalsFestSeasonInfoService.insertGoalsFestInfo(goalsFestSeasonInfo);
+        return (GoalsFestSeasonInfo) statsBySeasonService.insertStatsBySeasonInfo(goalsFestSeasonInfo);
     }
 
     @PostMapping("/draw-stats-by-team-season-fcstats")
@@ -485,7 +457,7 @@ public class FootballDataStatsController {
             drawSeasonInfo.setStdDeviation((Double) scrappedInfo.get("standardDeviation"));
             drawSeasonInfo.setCoefDeviation((Double) scrappedInfo.get("coefficientVariation"));
             drawSeasonInfo.setCompetition((String) scrappedInfo.get("competition"));
-            drawSeasonInfoService.insertDrawInfo(drawSeasonInfo);
+            statsBySeasonService.insertStatsBySeasonInfo(drawSeasonInfo);
             returnMap.put(entry.getKey(), drawSeasonInfo);
         }
 
@@ -603,7 +575,7 @@ public class FootballDataStatsController {
         drawSeasonInfo.setStdDeviation((Double) scrappedInfo.get("standardDeviation"));
         drawSeasonInfo.setCoefDeviation((Double) scrappedInfo.get("coefficientVariation"));
         drawSeasonInfo.setCompetition((String) scrappedInfo.get("competition"));
-        return drawSeasonInfoService.insertDrawInfo(drawSeasonInfo);
+        return (DrawSeasonInfo) statsBySeasonService.insertStatsBySeasonInfo(drawSeasonInfo);
     }
 
     @GetMapping("/getHistoricMatches")
@@ -760,7 +732,7 @@ public class FootballDataStatsController {
         }
         GoalsFestSeasonInfo insertedData = null;
         try {
-            insertedData = goalsFestSeasonInfoService.insertGoalsFestInfo(goalsFestSeasonInfo);
+            insertedData = (GoalsFestSeasonInfo) statsBySeasonService.insertStatsBySeasonInfo(goalsFestSeasonInfo);
         } catch (Exception e) {
             log.error(e.toString());
         }
@@ -805,7 +777,7 @@ public class FootballDataStatsController {
             winsMarginSeasonInfo.setStdDeviation((Double) scrappedInfo.get("standardDeviation"));
             winsMarginSeasonInfo.setCoefDeviation((Double) scrappedInfo.get("coefficientVariation"));
             winsMarginSeasonInfo.setCompetition((String) scrappedInfo.get("competition"));
-            winsMarginSeasonInfoService.insertWinsMarginInfo(winsMarginSeasonInfo);
+            statsBySeasonService.insertStatsBySeasonInfo(winsMarginSeasonInfo);
             returnMap.put(entry.getKey(), winsMarginSeasonInfo);
         }
 
@@ -923,7 +895,7 @@ public class FootballDataStatsController {
         winsMarginSeasonInfo.setStdDeviation((Double) scrappedInfo.get("standardDeviation"));
         winsMarginSeasonInfo.setCoefDeviation((Double) scrappedInfo.get("coefficientVariation"));
         winsMarginSeasonInfo.setCompetition((String) scrappedInfo.get("competition"));
-        return winsMarginSeasonInfoService.insertWinsMarginInfo(winsMarginSeasonInfo);
+        return (WinsMarginSeasonInfo) statsBySeasonService.insertStatsBySeasonInfo(winsMarginSeasonInfo);
     }
 
 
@@ -967,7 +939,7 @@ public class FootballDataStatsController {
             euroHandicapSeasonInfo.setStdDeviation((Double) scrappedInfo.get("standardDeviation"));
             euroHandicapSeasonInfo.setCoefDeviation((Double) scrappedInfo.get("coefficientVariation"));
             euroHandicapSeasonInfo.setCompetition((String) scrappedInfo.get("competition"));
-            euroHandicapSeasonInfoService.insertEuroHandicapSeasonInfo(euroHandicapSeasonInfo);
+            statsBySeasonService.insertStatsBySeasonInfo(euroHandicapSeasonInfo);
             returnMap.put(entry.getKey(), euroHandicapSeasonInfo);
         }
 
@@ -1085,7 +1057,7 @@ public class FootballDataStatsController {
         euroHandicapSeasonInfo.setStdDeviation((Double) scrappedInfo.get("standardDeviation"));
         euroHandicapSeasonInfo.setCoefDeviation((Double) scrappedInfo.get("coefficientVariation"));
         euroHandicapSeasonInfo.setCompetition((String) scrappedInfo.get("competition"));
-        return euroHandicapSeasonInfoService.insertEuroHandicapSeasonInfo(euroHandicapSeasonInfo);
+        return (EuroHandicapSeasonInfo) statsBySeasonService.insertStatsBySeasonInfo(euroHandicapSeasonInfo);
     }
 
 

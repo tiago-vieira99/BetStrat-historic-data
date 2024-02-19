@@ -1,5 +1,6 @@
 package com.api.BetStrat.service;
 
+import com.api.BetStrat.entity.Team;
 import com.api.BetStrat.entity.basketball.ComebackSeasonInfo;
 import com.api.BetStrat.entity.basketball.LongBasketWinsSeasonInfo;
 import com.api.BetStrat.entity.basketball.ShortBasketWinsSeasonInfo;
@@ -7,14 +8,16 @@ import com.api.BetStrat.entity.football.DrawSeasonInfo;
 import com.api.BetStrat.entity.football.EuroHandicapSeasonInfo;
 import com.api.BetStrat.entity.football.FlipFlopOversUndersInfo;
 import com.api.BetStrat.entity.football.GoalsFestSeasonInfo;
+import com.api.BetStrat.entity.football.WinsMarginSeasonInfo;
 import com.api.BetStrat.entity.handball.Handball16WinsMarginSeasonInfo;
 import com.api.BetStrat.entity.handball.Handball49WinsMarginSeasonInfo;
 import com.api.BetStrat.entity.handball.Handball712WinsMarginSeasonInfo;
 import com.api.BetStrat.entity.hockey.HockeyDrawSeasonInfo;
-import com.api.BetStrat.entity.Team;
-import com.api.BetStrat.entity.football.WinsMarginSeasonInfo;
+import com.api.BetStrat.entity.hockey.WinsMargin3SeasonInfo;
+import com.api.BetStrat.entity.hockey.WinsMarginAny2SeasonInfo;
 import com.api.BetStrat.exception.NotFoundException;
 import com.api.BetStrat.repository.HistoricMatchRepository;
+import com.api.BetStrat.repository.TeamRepository;
 import com.api.BetStrat.repository.basketball.ComebackSeasonInfoRepository;
 import com.api.BetStrat.repository.basketball.LongWinsSeasonInfoRepository;
 import com.api.BetStrat.repository.basketball.ShortWinsSeasonInfoRepository;
@@ -22,12 +25,11 @@ import com.api.BetStrat.repository.football.DrawSeasonInfoRepository;
 import com.api.BetStrat.repository.football.EuroHandicapSeasonInfoRepository;
 import com.api.BetStrat.repository.football.FlipFlopOversUndersInfoRepository;
 import com.api.BetStrat.repository.football.GoalsFestSeasonInfoRepository;
+import com.api.BetStrat.repository.football.WinsMarginSeasonInfoRepository;
 import com.api.BetStrat.repository.handball.Handball16WinsMarginSeasonInfoRepository;
 import com.api.BetStrat.repository.handball.Handball49WinsMarginSeasonInfoRepository;
 import com.api.BetStrat.repository.handball.Handball712WinsMarginSeasonInfoRepository;
 import com.api.BetStrat.repository.hockey.HockeyDrawSeasonInfoRepository;
-import com.api.BetStrat.repository.TeamRepository;
-import com.api.BetStrat.repository.football.WinsMarginSeasonInfoRepository;
 import com.api.BetStrat.service.basketball.ComebackSeasonInfoService;
 import com.api.BetStrat.service.basketball.LongBasketWinsSeasonInfoService;
 import com.api.BetStrat.service.basketball.ShortBasketWinsSeasonInfoService;
@@ -59,19 +61,7 @@ public class TeamService {
     private static final Logger LOGGER = LoggerFactory.getLogger(TeamService.class);
 
     @Autowired
-    private DrawSeasonInfoService drawSeasonInfoService;
-
-    @Autowired
-    private HockeyDrawSeasonInfoService hockeyDrawSeasonInfoService;
-
-    @Autowired
-    private WinsMarginSeasonInfoService winsMarginSeasonInfoService;
-
-    @Autowired
-    private WinsMarginAny2SeasonInfoService winsMarginAny2SeasonInfoService;
-
-    @Autowired
-    private WinsMargin3SeasonInfoService winsMargin3SeasonInfoService;
+    private StatsBySeasonService statsBySeasonService;
 
     @Autowired
     private TeamRepository teamRepository;
@@ -86,22 +76,13 @@ public class TeamService {
     private WinsMarginSeasonInfoRepository winsMarginSeasonInfoRepository;
 
     @Autowired
-    private EuroHandicapSeasonInfoService euroHandicapSeasonInfoService;
-
-    @Autowired
     private EuroHandicapSeasonInfoRepository euroHandicapSeasonInfoRepository;
-
-    @Autowired
-    private FlipFlopOversUndersInfoService flipFlopOversUndersInfoService;
 
     @Autowired
     private FlipFlopOversUndersInfoRepository flipFlopOversUndersInfoRepository;
 
     @Autowired
     private GoalsFestSeasonInfoRepository goalsFestSeasonInfoRepository;
-
-    @Autowired
-    private GoalsFestSeasonInfoService goalsFestSeasonInfoService;
 
     @Autowired
     private ComebackSeasonInfoRepository comebackSeasonInfoRepository;
@@ -113,25 +94,7 @@ public class TeamService {
     private LongWinsSeasonInfoRepository longWinsSeasonInfoRepository;
 
     @Autowired
-    private ComebackSeasonInfoService comebackSeasonInfoService;
-
-    @Autowired
-    private ShortBasketWinsSeasonInfoService shortBasketWinsSeasonInfoService;
-
-    @Autowired
-    private LongBasketWinsSeasonInfoService longBasketWinsSeasonInfoService;
-
-    @Autowired
     private HistoricMatchRepository historicMatchRepository;
-
-    @Autowired
-    private HandballWinsMargin49SeasonInfoService handballWinsMargin49SeasonInfoService;
-
-    @Autowired
-    private HandballWinsMargin16SeasonInfoService handballWinsMargin16SeasonInfoService;
-
-    @Autowired
-    private HandballWinsMargin712SeasonInfoService handballWinsMargin712SeasonInfoService;
 
     @Autowired
     private Handball49WinsMarginSeasonInfoRepository handballWinsMargin49SeasonInfoRepository;
@@ -152,19 +115,19 @@ public class TeamService {
 
         switch (strategy) {
             case "footballDrawHunter":
-                drawSeasonInfoService.updateStatsDataInfo(team);
+                statsBySeasonService.updateStatsBySeasonInfo(team, DrawSeasonInfo.class);
                 break;
             case "footballMarginWins":
-                winsMarginSeasonInfoService.updateStatsDataInfo(team);
+                statsBySeasonService.updateStatsBySeasonInfo(team, WinsMarginSeasonInfo.class);
                 break;
             case "footballGoalsFest":
-                goalsFestSeasonInfoService.updateStatsDataInfo(team);
+                statsBySeasonService.updateStatsBySeasonInfo(team, GoalsFestSeasonInfo.class);
                 break;
             case "footballEuroHandicap":
-                euroHandicapSeasonInfoService.updateStatsDataInfo(team);
+                statsBySeasonService.updateStatsBySeasonInfo(team, EuroHandicapSeasonInfo.class);
                 break;
             case "footballFlipFlop":
-                flipFlopOversUndersInfoService.updateStatsDataInfo(team);
+                statsBySeasonService.updateStatsBySeasonInfo(team, FlipFlopOversUndersInfo.class);
                 break;
             default:
                 break;
@@ -305,85 +268,85 @@ public class TeamService {
         switch (strategy) {
             case "hockeyDraw":
                 if (teamByName.getSport().equals("Hockey")) {
-                    updatedTeam = hockeyDrawSeasonInfoService.updateTeamScore(teamByName);
+                    updatedTeam = statsBySeasonService.updateTeamScore(teamByName, HockeyDrawSeasonInfo.class);
                     teamRepository.save(updatedTeam);
                 }
                 break;
             case "hockeyWinsMarginAny2":
                 if (teamByName.getSport().equals("Hockey")) {
-                    updatedTeam = winsMarginAny2SeasonInfoService.updateTeamScore(teamByName);
+                    updatedTeam = statsBySeasonService.updateTeamScore(teamByName, WinsMarginAny2SeasonInfo.class);
                     teamRepository.save(updatedTeam);
                 }
                 break;
             case "hockeyWinsMargin3":
                 if (teamByName.getSport().equals("Hockey")) {
-                    updatedTeam = winsMargin3SeasonInfoService.updateTeamScore(teamByName);
+                    updatedTeam = statsBySeasonService.updateTeamScore(teamByName, WinsMargin3SeasonInfo.class);
                     teamRepository.save(updatedTeam);
                 }
                 break;
             case "footballDrawHunter":
                 if (teamByName.getSport().equals("Football")) {
-                    updatedTeam = drawSeasonInfoService.updateTeamScore(teamByName);
+                    updatedTeam = statsBySeasonService.updateTeamScore(teamByName, DrawSeasonInfo.class);
                     teamRepository.save(updatedTeam);
                 }
                 break;
             case "footballMarginWins":
                 if (teamByName.getSport().equals("Football")) {
-                    updatedTeam = winsMarginSeasonInfoService.updateTeamScore(teamByName);
+                    updatedTeam = statsBySeasonService.updateTeamScore(teamByName, WinsMarginSeasonInfo.class);
                     teamRepository.save(updatedTeam);
                 }
                 break;
             case "footballGoalsFest":
                 if (teamByName.getSport().equals("Football")) {
-                    updatedTeam = goalsFestSeasonInfoService.updateTeamScore(teamByName);
+                    updatedTeam = statsBySeasonService.updateTeamScore(teamByName, GoalsFestSeasonInfo.class);
                     teamRepository.save(updatedTeam);
                 }
                 break;
             case "footballEuroHandicap":
                 if (teamByName.getSport().equals("Football")) {
-                    updatedTeam = euroHandicapSeasonInfoService.updateTeamScore(teamByName);
+                    updatedTeam = statsBySeasonService.updateTeamScore(teamByName, EuroHandicapSeasonInfo.class);
                     teamRepository.save(updatedTeam);
                 }
                 break;
             case "footballFlipFlop":
                 if (teamByName.getSport().equals("Football")) {
-                    updatedTeam = flipFlopOversUndersInfoService.updateTeamScore(teamByName);
+                    updatedTeam = statsBySeasonService.updateTeamScore(teamByName, FlipFlopOversUndersInfo.class);
                     teamRepository.save(updatedTeam);
                 }
                 break;
             case "basketComebacks":
                 if (teamByName.getSport().equals("Basketball")) {
-                    updatedTeam = comebackSeasonInfoService.updateTeamScore(teamByName);
+                    updatedTeam = statsBySeasonService.updateTeamScore(teamByName, ComebackSeasonInfo.class);
                     teamRepository.save(updatedTeam);
                 }
                 break;
             case "basketShortWins":
                 if (teamByName.getSport().equals("Basketball")) {
-                    updatedTeam = shortBasketWinsSeasonInfoService.updateTeamScore(teamByName);
+                    updatedTeam = statsBySeasonService.updateTeamScore(teamByName, ShortBasketWinsSeasonInfo.class);
                     teamRepository.save(updatedTeam);
                 }
                 break;
             case "basketLongWins":
                 if (teamByName.getSport().equals("Basketball")) {
-                    updatedTeam = longBasketWinsSeasonInfoService.updateTeamScore(teamByName);
+                    updatedTeam = statsBySeasonService.updateTeamScore(teamByName, LongBasketWinsSeasonInfo.class);
                     teamRepository.save(updatedTeam);
                 }
                 break;
             case "handballmargin16wins":
                 if (teamByName.getSport().equals("Handball")) {
-                    updatedTeam = handballWinsMargin16SeasonInfoService.updateTeamScore(teamByName);
+                    updatedTeam = statsBySeasonService.updateTeamScore(teamByName, Handball16WinsMarginSeasonInfo.class);
                     teamRepository.save(updatedTeam);
                 }
                 break;
             case "handballmargin49wins":
                 if (teamByName.getSport().equals("Handball")) {
-                    updatedTeam = handballWinsMargin49SeasonInfoService.updateTeamScore(teamByName);
+                    updatedTeam = statsBySeasonService.updateTeamScore(teamByName, Handball49WinsMarginSeasonInfo.class);
                     teamRepository.save(updatedTeam);
                 }
                 break;
             case "handballmargin712wins":
                 if (teamByName.getSport().equals("Handball")) {
-                    updatedTeam = handballWinsMargin712SeasonInfoService.updateTeamScore(teamByName);
+                    updatedTeam = statsBySeasonService.updateTeamScore(teamByName, Handball712WinsMarginSeasonInfo.class);
                     teamRepository.save(updatedTeam);
                 }
                 break;
@@ -402,51 +365,51 @@ public class TeamService {
         switch (strategy) {
             case "hockeyDraw":
                 if (team.getSport().equals("Hockey")) {
-                    simulatedTeam = hockeyDrawSeasonInfoService.updateTeamScore(team);
+                    simulatedTeam = statsBySeasonService.updateTeamScore(team, HockeyDrawSeasonInfo.class);
                 }
                 break;
             case "hockeyWinsMarginAny2":
                 if (team.getSport().equals("Hockey")) {
-                    simulatedTeam = winsMarginAny2SeasonInfoService.updateTeamScore(team);
+                    simulatedTeam = statsBySeasonService.updateTeamScore(team, WinsMarginAny2SeasonInfo.class);
                 }
                 break;
             case "hockeyWinsMargin3":
                 if (team.getSport().equals("Hockey")) {
-                    simulatedTeam = winsMargin3SeasonInfoService.updateTeamScore(team);
+                    simulatedTeam = statsBySeasonService.updateTeamScore(team, WinsMargin3SeasonInfo.class);
                 }
                 break;
-            case "footballDrawHunter":
-                if (team.getSport().equals("Football")) {
-                    LinkedHashMap<String, String> simulatedScore = drawSeasonInfoService.getSimulatedScorePartialSeasons(team, seasonsToDiscard);
-                    outMap.put("beginSeason", team.getBeginSeason());
-                    outMap.put("endSeason", team.getEndSeason());
-                    outMap.putAll(simulatedScore);
-                }
-                break;
-            case "footballMarginWins":
-                if (team.getSport().equals("Football")) {
-                    LinkedHashMap<String, String> simulatedScore = winsMarginSeasonInfoService.getSimulatedScorePartialSeasons(team, seasonsToDiscard);
-                    outMap.put("beginSeason", team.getBeginSeason());
-                    outMap.put("endSeason", team.getEndSeason());
-                    outMap.putAll(simulatedScore);
-                }
-                break;
-            case "footballGoalsFest":
-                if (team.getSport().equals("Football")) {
-                    LinkedHashMap<String, String> simulatedScore = goalsFestSeasonInfoService.getSimulatedScorePartialSeasons(team, seasonsToDiscard);
-                    outMap.put("beginSeason", team.getBeginSeason());
-                    outMap.put("endSeason", team.getEndSeason());
-                    outMap.putAll(simulatedScore);
-                }
-                break;
+//            case "footballDrawHunter":
+//                if (team.getSport().equals("Football")) {
+//                    LinkedHashMap<String, String> simulatedScore = statsBySeasonService.getSimulatedScorePartialSeasons(team, seasonsToDiscard);
+//                    outMap.put("beginSeason", team.getBeginSeason());
+//                    outMap.put("endSeason", team.getEndSeason());
+//                    outMap.putAll(simulatedScore);
+//                }
+//                break;
+//            case "footballMarginWins":
+//                if (team.getSport().equals("Football")) {
+//                    LinkedHashMap<String, String> simulatedScore = statsBySeasonService.getSimulatedScorePartialSeasons(team, seasonsToDiscard);
+//                    outMap.put("beginSeason", team.getBeginSeason());
+//                    outMap.put("endSeason", team.getEndSeason());
+//                    outMap.putAll(simulatedScore);
+//                }
+//                break;
+//            case "footballGoalsFest":
+//                if (team.getSport().equals("Football")) {
+//                    LinkedHashMap<String, String> simulatedScore = goalsFestSeasonInfoService.getSimulatedScorePartialSeasons(team, seasonsToDiscard);
+//                    outMap.put("beginSeason", team.getBeginSeason());
+//                    outMap.put("endSeason", team.getEndSeason());
+//                    outMap.putAll(simulatedScore);
+//                }
+//                break;
             case "footballEuroHandicap":
                 if (team.getSport().equals("Football")) {
-                    simulatedTeam = euroHandicapSeasonInfoService.updateTeamScore(team);
+                    simulatedTeam = statsBySeasonService.updateTeamScore(team, EuroHandicapSeasonInfo.class);
                 }
                 break;
             case "basketComebacks":
                 if (team.getSport().equals("Basketball")) {
-                    simulatedTeam = comebackSeasonInfoService.updateTeamScore(team);
+                    simulatedTeam = statsBySeasonService.updateTeamScore(team, ComebackSeasonInfo.class);
                 }
                 break;
             default:

@@ -1,17 +1,13 @@
 package com.api.BetStrat.controller;
 
-import com.api.BetStrat.entity.football.DrawSeasonInfo;
-import com.api.BetStrat.entity.hockey.HockeyDrawSeasonInfo;
 import com.api.BetStrat.entity.Team;
+import com.api.BetStrat.entity.football.DrawSeasonInfo;
 import com.api.BetStrat.entity.football.WinsMarginSeasonInfo;
+import com.api.BetStrat.entity.hockey.HockeyDrawSeasonInfo;
 import com.api.BetStrat.exception.StandardError;
 import com.api.BetStrat.repository.TeamRepository;
-import com.api.BetStrat.service.football.DrawSeasonInfoService;
-import com.api.BetStrat.service.hockey.HockeyDrawSeasonInfoService;
+import com.api.BetStrat.service.StatsBySeasonService;
 import com.api.BetStrat.service.TeamService;
-import com.api.BetStrat.service.hockey.WinsMargin3SeasonInfoService;
-import com.api.BetStrat.service.hockey.WinsMarginAny2SeasonInfoService;
-import com.api.BetStrat.service.football.WinsMarginSeasonInfoService;
 import com.api.BetStrat.util.HockeyEurohockeyScrappingData;
 import com.api.BetStrat.util.TeamDFhistoricData;
 import com.api.BetStrat.util.TeamEHhistoricData;
@@ -67,19 +63,7 @@ public class HockeyDataStatsController {
     private TeamService teamService;
 
     @Autowired
-    private DrawSeasonInfoService drawSeasonInfoService;
-
-    @Autowired
-    private HockeyDrawSeasonInfoService hockeyDrawSeasonInfoService;
-
-    @Autowired
-    private WinsMarginSeasonInfoService winsMarginSeasonInfoService;
-
-    @Autowired
-    private WinsMarginAny2SeasonInfoService winsMarginAny2SeasonInfoService;
-
-    @Autowired
-    private WinsMargin3SeasonInfoService winsMargin3SeasonInfoService;
+    private StatsBySeasonService statsBySeasonService;
 
     @Autowired
     private ModelMapper modelMapper;
@@ -209,7 +193,7 @@ public class HockeyDataStatsController {
             drawSeasonInfo.setStdDeviation((Double) scrappedInfo.get("standardDeviation"));
             drawSeasonInfo.setCoefDeviation((Double) scrappedInfo.get("coefficientVariation"));
             drawSeasonInfo.setCompetition((String) scrappedInfo.get("competition"));
-            drawSeasonInfoService.insertDrawInfo(drawSeasonInfo);
+            statsBySeasonService.insertStatsBySeasonInfo(drawSeasonInfo);
             returnMap.put(entry.getKey(), drawSeasonInfo);
         }
 
@@ -293,7 +277,7 @@ public class HockeyDataStatsController {
                 hockeyDrawSeasonInfo.setCoefDeviation((Double) scrappedInfo.get("coefficientVariation"));
                 hockeyDrawSeasonInfo.setCompetition((String) scrappedInfo.get("competition"));
                 try {
-                    hockeyDrawSeasonInfoService.insertDrawInfo(hockeyDrawSeasonInfo);
+                    statsBySeasonService.insertStatsBySeasonInfo(hockeyDrawSeasonInfo);
                 } catch (DataIntegrityViolationException er) {
                     log.error(er.toString());
                 }
@@ -469,7 +453,7 @@ public class HockeyDataStatsController {
             hockeyDrawSeasonInfo.setStdDeviation((Double) scrappedInfo.get("standardDeviation"));
             hockeyDrawSeasonInfo.setCoefDeviation((Double) scrappedInfo.get("coefficientVariation"));
             hockeyDrawSeasonInfo.setCompetition((String) scrappedInfo.get("competition"));
-            hockeyDrawSeasonInfoService.insertDrawInfo(hockeyDrawSeasonInfo);
+            statsBySeasonService.insertStatsBySeasonInfo(hockeyDrawSeasonInfo);
             returnMap.put(entry.getKey(), hockeyDrawSeasonInfo);
         }
 
@@ -586,7 +570,7 @@ public class HockeyDataStatsController {
         drawSeasonInfo.setStdDeviation((Double) scrappedInfo.get("standardDeviation"));
         drawSeasonInfo.setCoefDeviation((Double) scrappedInfo.get("coefficientVariation"));
         drawSeasonInfo.setCompetition((String) scrappedInfo.get("competition"));
-        return drawSeasonInfoService.insertDrawInfo(drawSeasonInfo);
+        return (DrawSeasonInfo) statsBySeasonService.insertStatsBySeasonInfo(drawSeasonInfo);
     }
 
     @PostMapping("/margin-wins-stats-by-team-season-fcstats")
@@ -627,7 +611,7 @@ public class HockeyDataStatsController {
             winsMarginSeasonInfo.setStdDeviation((Double) scrappedInfo.get("standardDeviation"));
             winsMarginSeasonInfo.setCoefDeviation((Double) scrappedInfo.get("coefficientVariation"));
             winsMarginSeasonInfo.setCompetition((String) scrappedInfo.get("competition"));
-            winsMarginSeasonInfoService.insertWinsMarginInfo(winsMarginSeasonInfo);
+            statsBySeasonService.insertStatsBySeasonInfo(winsMarginSeasonInfo);
             returnMap.put(entry.getKey(), winsMarginSeasonInfo);
         }
 
@@ -745,6 +729,6 @@ public class HockeyDataStatsController {
         winsMarginSeasonInfo.setStdDeviation((Double) scrappedInfo.get("standardDeviation"));
         winsMarginSeasonInfo.setCoefDeviation((Double) scrappedInfo.get("coefficientVariation"));
         winsMarginSeasonInfo.setCompetition((String) scrappedInfo.get("competition"));
-        return winsMarginSeasonInfoService.insertWinsMarginInfo(winsMarginSeasonInfo);
+        return (WinsMarginSeasonInfo) statsBySeasonService.insertStatsBySeasonInfo(winsMarginSeasonInfo);
     }
 }

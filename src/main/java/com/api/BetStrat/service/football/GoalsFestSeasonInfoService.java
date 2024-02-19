@@ -6,6 +6,7 @@ import com.api.BetStrat.entity.Team;
 import com.api.BetStrat.entity.football.GoalsFestSeasonInfo;
 import com.api.BetStrat.repository.HistoricMatchRepository;
 import com.api.BetStrat.repository.football.GoalsFestSeasonInfoRepository;
+import com.api.BetStrat.service.SeasonInfoInterface;
 import com.api.BetStrat.util.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,7 +32,7 @@ import static com.api.BetStrat.util.Utils.calculateSD;
 
 @Service
 @Transactional
-public class GoalsFestSeasonInfoService {
+public class GoalsFestSeasonInfoService implements SeasonInfoInterface<GoalsFestSeasonInfo> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(GoalsFestSeasonInfoService.class);
 
@@ -41,12 +42,13 @@ public class GoalsFestSeasonInfoService {
     @Autowired
     private HistoricMatchRepository historicMatchRepository;
 
-    public GoalsFestSeasonInfo insertGoalsFestInfo(GoalsFestSeasonInfo goalsFestSeasonInfo) {
+
+    public GoalsFestSeasonInfo insertStatsBySeasonInfo(GoalsFestSeasonInfo goalsFestSeasonInfo) {
         LOGGER.info("Inserted " + goalsFestSeasonInfo.getClass() + " for " + goalsFestSeasonInfo.getTeamId().getName() + " and season " + goalsFestSeasonInfo.getSeason());
         return goalsFestSeasonInfoRepository.save(goalsFestSeasonInfo);
     }
 
-    public void updateStatsDataInfo(Team team) {
+    public void updateStatsBySeasonInfo(Team team, Class<GoalsFestSeasonInfo> className) {
         List<GoalsFestSeasonInfo> statsByTeam = goalsFestSeasonInfoRepository.getGoalsFestStatsByTeam(team);
         List<String> seasonsList = null;
 
@@ -108,12 +110,12 @@ public class GoalsFestSeasonInfoService {
                 goalsFestSeasonInfo.setSeason(season);
                 goalsFestSeasonInfo.setTeamId(team);
                 goalsFestSeasonInfo.setUrl(newSeasonUrl);
-                insertGoalsFestInfo(goalsFestSeasonInfo);
+                insertStatsBySeasonInfo(goalsFestSeasonInfo);
             }
         }
     }
 
-    public Team updateTeamScore (Team teamByName) {
+    public Team updateTeamScore(Team teamByName, Class<GoalsFestSeasonInfo> className) {
         List<GoalsFestSeasonInfo> statsByTeam = goalsFestSeasonInfoRepository.getGoalsFestStatsByTeam(teamByName);
         Collections.sort(statsByTeam, new SortStatsDataBySeason());
         Collections.reverse(statsByTeam);
@@ -121,10 +123,10 @@ public class GoalsFestSeasonInfoService {
         if (statsByTeam.size() < 3 || statsByTeam.stream().filter(s -> s.getNumMatches() < 15).findAny().isPresent()) {
             teamByName.setGoalsFestScore(TeamScoreEnum.INSUFFICIENT_DATA.getValue());
         } else {
-            int last3SeasonsGoalsFestRateScore = calculateLast3SeasonsGoalsFestRateScore(statsByTeam);
-            int allSeasonsGoalsFestRateScore = calculateAllSeasonsGoalsFestRateScore(statsByTeam);
-            int last3SeasonsmaxSeqWOGoalsFestScore = calculateLast3SeasonsmaxSeqWOGoalsFestScore(statsByTeam);
-            int allSeasonsmaxSeqWOGoalsFestScore = calculateAllSeasonsmaxSeqWOGoalsFestScore(statsByTeam);
+            int last3SeasonsGoalsFestRateScore = calculateLast3SeasonsRateScore(statsByTeam);
+            int allSeasonsGoalsFestRateScore = calculateAllSeasonsRateScore(statsByTeam);
+            int last3SeasonsmaxSeqWOGoalsFestScore = calculateLast3SeasonsMaxSeqWOGreenScore(statsByTeam);
+            int allSeasonsmaxSeqWOGoalsFestScore = calculateAllSeasonsMaxSeqWOGreenScore(statsByTeam);
             int last3SeasonsStdDevScore = calculateLast3SeasonsStdDevScore(statsByTeam);
             int allSeasonsStdDevScore = calculateAllSeasonsStdDevScore(statsByTeam);
 //            int totalMatchesScore = calculateLeagueMatchesScore(statsByTeam.get(0).getNumMatches());
@@ -133,7 +135,7 @@ public class GoalsFestSeasonInfoService {
                     0.2*last3SeasonsmaxSeqWOGoalsFestScore + 0.1*allSeasonsmaxSeqWOGoalsFestScore +
                     0.3*last3SeasonsStdDevScore + 0.1*allSeasonsStdDevScore);
 
-            teamByName.setGoalsFestScore(calculateFinalRating(totalScore));
+            teamByName.setGoalsFestScore(calculateFinalRating(totalScore, null));
         }
 
         return teamByName;
@@ -156,10 +158,10 @@ public class GoalsFestSeasonInfoService {
                 !filteredStats.get(2).getSeason().equals(WINTER_SEASONS_LIST.get(WINTER_SEASONS_LIST.size()-3-seasonsToDiscard))) {
             outMap.put("footballGoalsFest", TeamScoreEnum.INSUFFICIENT_DATA.getValue());
         } else {
-            int last3SeasonsGoalsFestRateScore = calculateLast3SeasonsGoalsFestRateScore(filteredStats);
-            int allSeasonsGoalsFestRateScore = calculateAllSeasonsGoalsFestRateScore(filteredStats);
-            int last3SeasonsmaxSeqWOGoalsFestScore = calculateLast3SeasonsmaxSeqWOGoalsFestScore(filteredStats);
-            int allSeasonsmaxSeqWOGoalsFestScore = calculateAllSeasonsmaxSeqWOGoalsFestScore(filteredStats);
+            int last3SeasonsGoalsFestRateScore = calculateLast3SeasonsRateScore(filteredStats);
+            int allSeasonsGoalsFestRateScore = calculateAllSeasonsRateScore(filteredStats);
+            int last3SeasonsmaxSeqWOGoalsFestScore = calculateLast3SeasonsMaxSeqWOGreenScore(filteredStats);
+            int allSeasonsmaxSeqWOGoalsFestScore = calculateAllSeasonsMaxSeqWOGreenScore(filteredStats);
             int last3SeasonsStdDevScore = calculateLast3SeasonsStdDevScore(filteredStats);
             int allSeasonsStdDevScore = calculateAllSeasonsStdDevScore(filteredStats);
 //            int totalMatchesScore = calculateLeagueMatchesScore(statsByTeam.get(0).getNumMatches());
@@ -168,7 +170,7 @@ public class GoalsFestSeasonInfoService {
                     0.2*last3SeasonsmaxSeqWOGoalsFestScore + 0.1*allSeasonsmaxSeqWOGoalsFestScore +
                     0.3*last3SeasonsStdDevScore + 0.1*allSeasonsStdDevScore);
 
-            String finalScore = calculateFinalRating(totalScore);
+            String finalScore = calculateFinalRating(totalScore, null);
             outMap.put("footballGoalsFest", finalScore);
             outMap.put("sequence", statsByTeam.get(seasonsToDiscard-1).getNegativeSequence());
             double balance = 0;
@@ -207,7 +209,7 @@ public class GoalsFestSeasonInfoService {
         return outMap;
     }
 
-    private String calculateFinalRating(double score) {
+    public String calculateFinalRating(double score, Class<GoalsFestSeasonInfo> className) {
         if (isBetween(score,85,150)) {
             return TeamScoreEnum.EXCELLENT.getValue() + " (" + score + ")";
         } else if(isBetween(score,65,85)) {
@@ -220,7 +222,7 @@ public class GoalsFestSeasonInfoService {
         return "";
     }
 
-    private int calculateLast3SeasonsGoalsFestRateScore(List<GoalsFestSeasonInfo> statsByTeam) {
+    public int calculateLast3SeasonsRateScore(List<GoalsFestSeasonInfo> statsByTeam) {
         double GoalsFestRates = 0;
         for (int i=0; i<3; i++) {
             GoalsFestRates += statsByTeam.get(i).getGoalsFestRate();
@@ -244,7 +246,7 @@ public class GoalsFestSeasonInfoService {
         return 0;
     }
 
-    private int calculateAllSeasonsGoalsFestRateScore(List<GoalsFestSeasonInfo> statsByTeam) {
+    public int calculateAllSeasonsRateScore(List<GoalsFestSeasonInfo> statsByTeam) {
         double GoalsFestRates = 0;
         for (int i=0; i<statsByTeam.size(); i++) {
             GoalsFestRates += statsByTeam.get(i).getGoalsFestRate();
@@ -268,7 +270,7 @@ public class GoalsFestSeasonInfoService {
         return 0;
     }
 
-    private int calculateLast3SeasonsmaxSeqWOGoalsFestScore(List<GoalsFestSeasonInfo> statsByTeam) {
+    public int calculateLast3SeasonsMaxSeqWOGreenScore(List<GoalsFestSeasonInfo> statsByTeam) {
         int maxValue = 0;
         for (int i=0; i<3; i++) {
             String sequenceStr = statsByTeam.get(i).getNegativeSequence().replaceAll("[\\[\\]\\s]", "");
@@ -292,7 +294,7 @@ public class GoalsFestSeasonInfoService {
         return 0;
     }
 
-    private int calculateAllSeasonsmaxSeqWOGoalsFestScore(List<GoalsFestSeasonInfo> statsByTeam) {
+    public int calculateAllSeasonsMaxSeqWOGreenScore(List<GoalsFestSeasonInfo> statsByTeam) {
         int maxValue = 0;
         for (int i=0; i<statsByTeam.size(); i++) {
             String sequenceStr = statsByTeam.get(i).getNegativeSequence().replaceAll("[\\[\\]\\s]", "");
@@ -316,7 +318,17 @@ public class GoalsFestSeasonInfoService {
         return 0;
     }
 
-    private int calculateLast3SeasonsStdDevScore(List<GoalsFestSeasonInfo> statsByTeam) {
+    @Override
+    public int calculateLast3SeasonsTotalWinsRateScore(List<GoalsFestSeasonInfo> statsByTeam) {
+        return 0;
+    }
+
+    @Override
+    public int calculateAllSeasonsTotalWinsRateScore(List<GoalsFestSeasonInfo> statsByTeam) {
+        return 0;
+    }
+
+    public int calculateLast3SeasonsStdDevScore(List<GoalsFestSeasonInfo> statsByTeam) {
         double sumStdDev = 0;
         for (int i=0; i<3; i++) {
             sumStdDev += statsByTeam.get(i).getStdDeviation();
@@ -338,7 +350,7 @@ public class GoalsFestSeasonInfoService {
         return 0;
     }
 
-    private int calculateAllSeasonsStdDevScore(List<GoalsFestSeasonInfo> statsByTeam) {
+    public int calculateAllSeasonsStdDevScore(List<GoalsFestSeasonInfo> statsByTeam) {
         double sumStdDev = 0;
         for (int i=0; i<statsByTeam.size(); i++) {
             sumStdDev += statsByTeam.get(i).getStdDeviation();

@@ -4,6 +4,7 @@ import com.api.BetStrat.constants.TeamScoreEnum;
 import com.api.BetStrat.entity.Team;
 import com.api.BetStrat.entity.hockey.WinsMargin3SeasonInfo;
 import com.api.BetStrat.repository.hockey.WinsMargin3SeasonInfoRepository;
+import com.api.BetStrat.service.SeasonInfoInterface;
 import com.api.BetStrat.util.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,18 +22,18 @@ import static com.api.BetStrat.constants.BetStratConstants.SEASONS_LIST;
 
 @Service
 @Transactional
-public class WinsMargin3SeasonInfoService {
+public class WinsMargin3SeasonInfoService implements SeasonInfoInterface<WinsMargin3SeasonInfo> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(WinsMargin3SeasonInfoService.class);
 
     @Autowired
     private WinsMargin3SeasonInfoRepository WinsMargin3SeasonInfoRepository;
 
-    public WinsMargin3SeasonInfo insertWinsMarginInfo(WinsMargin3SeasonInfo WinsMargin3SeasonInfo) {
+    public WinsMargin3SeasonInfo insertStatsBySeasonInfo(WinsMargin3SeasonInfo WinsMargin3SeasonInfo) {
         return WinsMargin3SeasonInfoRepository.save(WinsMargin3SeasonInfo);
     }
 
-    public Team updateTeamScore (Team teamByName) {
+    public Team updateTeamScore(Team teamByName, Class<WinsMargin3SeasonInfo> className) {
         List<WinsMargin3SeasonInfo> statsByTeam = WinsMargin3SeasonInfoRepository.getHockeyWinsMargin3StatsByTeam(teamByName);
         Collections.sort(statsByTeam, new SortStatsDataBySeason());
         Collections.reverse(statsByTeam);
@@ -40,12 +41,12 @@ public class WinsMargin3SeasonInfoService {
         if (statsByTeam.size() < 3) {
             teamByName.setMarginWins3Score(TeamScoreEnum.INSUFFICIENT_DATA.getValue());
         } else {
-            int last3SeasonsMarginWinsRateScore = calculateLast3SeasonsMarginWinsRateScore(statsByTeam);
-            int allSeasonsMarginWinsRateScore = calculateAllSeasonsMarginWinsRateScore(statsByTeam);
+            int last3SeasonsMarginWinsRateScore = calculateLast3SeasonsRateScore(statsByTeam);
+            int allSeasonsMarginWinsRateScore = calculateAllSeasonsRateScore(statsByTeam);
             int last3SeasonsTotalWinsRateScore = calculateLast3SeasonsTotalWinsRateScore(statsByTeam);
             int allSeasonsTotalWinsRateScore = calculateAllSeasonsTotalWinsRateScore(statsByTeam);
-            int last3SeasonsmaxSeqWOMarginWinsScore = calculateLast3SeasonsmaxSeqWOMarginWinsScore(statsByTeam);
-            int allSeasonsmaxSeqWOMarginWinsScore = calculateAllSeasonsmaxSeqWOMarginWinsScore(statsByTeam);
+            int last3SeasonsmaxSeqWOMarginWinsScore = calculateLast3SeasonsMaxSeqWOGreenScore(statsByTeam);
+            int allSeasonsmaxSeqWOMarginWinsScore = calculateAllSeasonsMaxSeqWOGreenScore(statsByTeam);
             int last3SeasonsStdDevScore = calculateLast3SeasonsStdDevScore(statsByTeam);
             int allSeasonsStdDevScore = calculateAllSeasonsStdDevScore(statsByTeam);
             int totalMatchesScore = calculateLeagueMatchesScore(statsByTeam.get(0).getNumMatches());
@@ -58,13 +59,13 @@ public class WinsMargin3SeasonInfoService {
 
             double totalScore = Utils.beautifyDoubleValue(0.70*last3SeasonsScore + 0.25*allSeasonsScore + 0.05*totalMatchesScore);
 
-            teamByName.setMarginWins3Score(calculateFinalRating(totalScore));
+            teamByName.setMarginWins3Score(calculateFinalRating(totalScore, null));
         }
 
         return teamByName;
     }
 
-    private String calculateFinalRating(double score) {
+    public String calculateFinalRating(double score, Class<WinsMargin3SeasonInfo> className) {
         if (isBetween(score,85,150)) {
             return TeamScoreEnum.EXCELLENT.getValue() + " (" + score + ")";
         } else if(isBetween(score,65,85)) {
@@ -77,7 +78,7 @@ public class WinsMargin3SeasonInfoService {
         return "";
     }
 
-    private int calculateLast3SeasonsMarginWinsRateScore(List<WinsMargin3SeasonInfo> statsByTeam) {
+    public int calculateLast3SeasonsRateScore(List<WinsMargin3SeasonInfo> statsByTeam) {
         double marginWinsRates = 0;
         for (int i=0; i<3; i++) {
             marginWinsRates += statsByTeam.get(i).getMarginWinsRate();
@@ -97,7 +98,7 @@ public class WinsMargin3SeasonInfoService {
         return 0;
     }
 
-    private int calculateAllSeasonsMarginWinsRateScore(List<WinsMargin3SeasonInfo> statsByTeam) {
+    public int calculateAllSeasonsRateScore(List<WinsMargin3SeasonInfo> statsByTeam) {
         double marginWinsRates = 0;
         for (int i=0; i<statsByTeam.size(); i++) {
             marginWinsRates += statsByTeam.get(i).getMarginWinsRate();
@@ -117,7 +118,7 @@ public class WinsMargin3SeasonInfoService {
         return 0;
     }
 
-    private int calculateLast3SeasonsTotalWinsRateScore(List<WinsMargin3SeasonInfo> statsByTeam) {
+    public int calculateLast3SeasonsTotalWinsRateScore(List<WinsMargin3SeasonInfo> statsByTeam) {
         double totalWinsRates = 0;
         for (int i=0; i<3; i++) {
             totalWinsRates += statsByTeam.get(i).getMarginWinsRate();
@@ -137,7 +138,7 @@ public class WinsMargin3SeasonInfoService {
         return 0;
     }
 
-    private int calculateAllSeasonsTotalWinsRateScore(List<WinsMargin3SeasonInfo> statsByTeam) {
+    public int calculateAllSeasonsTotalWinsRateScore(List<WinsMargin3SeasonInfo> statsByTeam) {
         double totalWinsRates = 0;
         for (int i=0; i<statsByTeam.size(); i++) {
             totalWinsRates += statsByTeam.get(i).getMarginWinsRate();
@@ -157,7 +158,7 @@ public class WinsMargin3SeasonInfoService {
         return 0;
     }
 
-    private int calculateLast3SeasonsmaxSeqWOMarginWinsScore(List<WinsMargin3SeasonInfo> statsByTeam) {
+    public int calculateLast3SeasonsMaxSeqWOGreenScore(List<WinsMargin3SeasonInfo> statsByTeam) {
         int maxValue = 0;
         for (int i=0; i<3; i++) {
             String sequenceStr = statsByTeam.get(i).getNegativeSequence().replaceAll("[\\[\\]\\s]", "");
@@ -181,7 +182,7 @@ public class WinsMargin3SeasonInfoService {
         return 0;
     }
 
-    private int calculateAllSeasonsmaxSeqWOMarginWinsScore(List<WinsMargin3SeasonInfo> statsByTeam) {
+    public int calculateAllSeasonsMaxSeqWOGreenScore(List<WinsMargin3SeasonInfo> statsByTeam) {
         int maxValue = 0;
         for (int i=0; i<statsByTeam.size(); i++) {
             String sequenceStr = statsByTeam.get(i).getNegativeSequence().replaceAll("[\\[\\]\\s]", "");
@@ -205,7 +206,7 @@ public class WinsMargin3SeasonInfoService {
         return 0;
     }
 
-    private int calculateLast3SeasonsStdDevScore(List<WinsMargin3SeasonInfo> statsByTeam) {
+    public int calculateLast3SeasonsStdDevScore(List<WinsMargin3SeasonInfo> statsByTeam) {
         double sumStdDev = 0;
         for (int i=0; i<3; i++) {
             sumStdDev += statsByTeam.get(i).getStdDeviation();
@@ -227,7 +228,7 @@ public class WinsMargin3SeasonInfoService {
         return 0;
     }
 
-    private int calculateAllSeasonsStdDevScore(List<WinsMargin3SeasonInfo> statsByTeam) {
+    public int calculateAllSeasonsStdDevScore(List<WinsMargin3SeasonInfo> statsByTeam) {
         double sumStdDev = 0;
         for (int i=0; i<statsByTeam.size(); i++) {
             sumStdDev += statsByTeam.get(i).getStdDeviation();
@@ -247,6 +248,11 @@ public class WinsMargin3SeasonInfoService {
             return 30;
         }
         return 0;
+    }
+
+    @Override
+    public void updateStatsBySeasonInfo(Team team, Class<WinsMargin3SeasonInfo> className) {
+
     }
 
     private int calculateLeagueMatchesScore(int totalMatches) {

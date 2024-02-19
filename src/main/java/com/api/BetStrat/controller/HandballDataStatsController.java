@@ -11,17 +11,8 @@ import com.api.BetStrat.repository.TeamRepository;
 import com.api.BetStrat.repository.football.DrawSeasonInfoRepository;
 import com.api.BetStrat.repository.football.GoalsFestSeasonInfoRepository;
 import com.api.BetStrat.repository.football.WinsMarginSeasonInfoRepository;
+import com.api.BetStrat.service.StatsBySeasonService;
 import com.api.BetStrat.service.TeamService;
-import com.api.BetStrat.service.football.DrawSeasonInfoService;
-import com.api.BetStrat.service.football.EuroHandicapSeasonInfoService;
-import com.api.BetStrat.service.football.GoalsFestSeasonInfoService;
-import com.api.BetStrat.service.football.WinsMarginSeasonInfoService;
-import com.api.BetStrat.service.handball.HandballWinsMargin16SeasonInfoService;
-import com.api.BetStrat.service.handball.HandballWinsMargin49SeasonInfoService;
-import com.api.BetStrat.service.handball.HandballWinsMargin712SeasonInfoService;
-import com.api.BetStrat.service.hockey.HockeyDrawSeasonInfoService;
-import com.api.BetStrat.service.hockey.WinsMargin3SeasonInfoService;
-import com.api.BetStrat.service.hockey.WinsMarginAny2SeasonInfoService;
 import com.api.BetStrat.util.ScrappingUtil;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -73,34 +64,7 @@ public class HandballDataStatsController {
     private TeamService teamService;
 
     @Autowired
-    private DrawSeasonInfoService drawSeasonInfoService;
-
-    @Autowired
-    private GoalsFestSeasonInfoService goalsFestSeasonInfoService;
-
-    @Autowired
-    private HockeyDrawSeasonInfoService hockeyDrawSeasonInfoService;
-
-    @Autowired
-    private WinsMarginSeasonInfoService winsMarginSeasonInfoService;
-
-    @Autowired
-    private WinsMarginAny2SeasonInfoService winsMarginAny2SeasonInfoService;
-
-    @Autowired
-    private WinsMargin3SeasonInfoService winsMargin3SeasonInfoService;
-
-    @Autowired
-    private EuroHandicapSeasonInfoService euroHandicapSeasonInfoService;
-
-    @Autowired
-    private HandballWinsMargin49SeasonInfoService handballWinsMargin49SeasonInfoService;
-
-    @Autowired
-    private HandballWinsMargin16SeasonInfoService handballWinsMargin16SeasonInfoService;
-
-    @Autowired
-    private HandballWinsMargin712SeasonInfoService handballWinsMargin712SeasonInfoService;
+    private StatsBySeasonService statsBySeasonService;
 
     @Autowired
     private ModelMapper modelMapper;
@@ -303,7 +267,7 @@ public class HandballDataStatsController {
     public void updateHistoricalStatsData(@Valid @RequestParam Long teamId) {
         Team team = teamRepository.getOne(teamId);
 
-        handballWinsMargin49SeasonInfoService.updateStatsDataInfo(team);
+//        handballWinsMargin49SeasonInfoService.updateStatsBySeasonInfo(team);
 
     }
 

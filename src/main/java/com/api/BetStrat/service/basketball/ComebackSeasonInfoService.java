@@ -6,6 +6,7 @@ import com.api.BetStrat.entity.basketball.ComebackSeasonInfo;
 import com.api.BetStrat.entity.Team;
 import com.api.BetStrat.repository.HistoricMatchRepository;
 import com.api.BetStrat.repository.basketball.ComebackSeasonInfoRepository;
+import com.api.BetStrat.service.SeasonInfoInterface;
 import com.api.BetStrat.util.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,7 +31,7 @@ import static com.api.BetStrat.util.Utils.calculateSD;
 
 @Service
 @Transactional
-public class ComebackSeasonInfoService {
+public class ComebackSeasonInfoService implements SeasonInfoInterface<ComebackSeasonInfo> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ComebackSeasonInfoService.class);
 
@@ -40,11 +41,11 @@ public class ComebackSeasonInfoService {
     @Autowired
     private ComebackSeasonInfoRepository comebackSeasonInfoRepository;
 
-    public ComebackSeasonInfo insertComebackInfo(ComebackSeasonInfo ComebackSeasonInfo) {
+    public ComebackSeasonInfo insertStatsBySeasonInfo(ComebackSeasonInfo ComebackSeasonInfo) {
         return comebackSeasonInfoRepository.save(ComebackSeasonInfo);
     }
 
-    public void updateStatsDataInfo(Team team) {
+    public void updateStatsBySeasonInfo(Team team, Class<ComebackSeasonInfo> className) {
         List<ComebackSeasonInfo> statsByTeam = comebackSeasonInfoRepository.getComebackStatsByTeam(team);
         List<String> seasonsList = null;
 
@@ -118,12 +119,12 @@ public class ComebackSeasonInfoService {
                 comebackSeasonInfo.setSeason(season);
                 comebackSeasonInfo.setTeamId(team);
                 comebackSeasonInfo.setUrl(team.getUrl());
-                insertComebackInfo(comebackSeasonInfo);
+                insertStatsBySeasonInfo(comebackSeasonInfo);
             }
         }
     }
 
-    public Team updateTeamScore (Team teamByName) {
+    public Team updateTeamScore (Team teamByName, Class<ComebackSeasonInfo> className) {
         List<ComebackSeasonInfo> statsByTeam = comebackSeasonInfoRepository.getComebackStatsByTeam(teamByName);
         Collections.sort(statsByTeam, new SortStatsDataBySeason());
         Collections.reverse(statsByTeam);
@@ -131,10 +132,10 @@ public class ComebackSeasonInfoService {
         if (statsByTeam.size() < 3) {
             teamByName.setBasketComebackScore(TeamScoreEnum.INSUFFICIENT_DATA.getValue());
         } else {
-            int last3SeasonsComebackRateScore = calculateLast3SeasonsComebackRateScore(statsByTeam);
-            int allSeasonsComebackRateScore = calculateAllSeasonsComebackRateScore(statsByTeam);
-            int last3SeasonsmaxSeqWOComebackScore = calculateLast3SeasonsmaxSeqWOComebackScore(statsByTeam);
-            int allSeasonsmaxSeqWOComebackScore = calculateAllSeasonsmaxSeqWOComebackScore(statsByTeam);
+            int last3SeasonsComebackRateScore = calculateLast3SeasonsRateScore(statsByTeam);
+            int allSeasonsComebackRateScore = calculateAllSeasonsRateScore(statsByTeam);
+            int last3SeasonsmaxSeqWOComebackScore = calculateLast3SeasonsMaxSeqWOGreenScore(statsByTeam);
+            int allSeasonsmaxSeqWOComebackScore = calculateAllSeasonsMaxSeqWOGreenScore(statsByTeam);
             int last3SeasonsStdDevScore = calculateLast3SeasonsStdDevScore(statsByTeam);
             int allSeasonsStdDevScore = calculateAllSeasonsStdDevScore(statsByTeam);
             int totalMatchesScore = calculateLeagueMatchesScore(statsByTeam.get(0).getNumMatches());
@@ -143,13 +144,13 @@ public class ComebackSeasonInfoService {
                     0.15*last3SeasonsmaxSeqWOComebackScore + 0.05*allSeasonsmaxSeqWOComebackScore +
                     0.3*last3SeasonsStdDevScore + 0.1*allSeasonsStdDevScore + 0.05*totalMatchesScore);
 
-            teamByName.setBasketComebackScore(calculateFinalRating(totalScore));
+            teamByName.setBasketComebackScore(calculateFinalRating(totalScore, null));
         }
 
         return teamByName;
     }
 
-    private String calculateFinalRating(double score) {
+    public String calculateFinalRating(double score, Class<ComebackSeasonInfo> className) {
         if (isBetween(score,90,150)) {
             return TeamScoreEnum.EXCELLENT.getValue() + " (" + score + ")";
         } else if(isBetween(score,65,90)) {
@@ -162,7 +163,17 @@ public class ComebackSeasonInfoService {
         return "";
     }
 
-    private int calculateLast3SeasonsComebackRateScore(List<ComebackSeasonInfo> statsByTeam) {
+    @Override
+    public int calculateLast3SeasonsTotalWinsRateScore(List<ComebackSeasonInfo> statsByTeam) {
+        return 0;
+    }
+
+    @Override
+    public int calculateAllSeasonsTotalWinsRateScore(List<ComebackSeasonInfo> statsByTeam) {
+        return 0;
+    }
+
+    public int calculateLast3SeasonsRateScore(List<ComebackSeasonInfo> statsByTeam) {
         double sumComebackRates = 0;
         for (int i=0; i<3; i++) {
             sumComebackRates += statsByTeam.get(i).getComebacksRate();
@@ -186,7 +197,7 @@ public class ComebackSeasonInfoService {
         return 0;
     }
 
-    private int calculateAllSeasonsComebackRateScore(List<ComebackSeasonInfo> statsByTeam) {
+    public int calculateAllSeasonsRateScore(List<ComebackSeasonInfo> statsByTeam) {
         double sumComebackRates = 0;
         for (int i=0; i<statsByTeam.size(); i++) {
             sumComebackRates += statsByTeam.get(i).getComebacksRate();
@@ -222,7 +233,7 @@ public class ComebackSeasonInfoService {
         return maxValue-6 < 0 ? 0 : maxValue-6;
     }
 
-    private int calculateLast3SeasonsmaxSeqWOComebackScore(List<ComebackSeasonInfo> statsByTeam) {
+    public int calculateLast3SeasonsMaxSeqWOGreenScore(List<ComebackSeasonInfo> statsByTeam) {
         int maxValue = 0;
         for (int i=0; i<3; i++) {
             String sequenceStr = statsByTeam.get(i).getNegativeSequence().replaceAll("[\\[\\]\\s]", "");
@@ -252,7 +263,7 @@ public class ComebackSeasonInfoService {
         return 0;
     }
 
-    private int calculateAllSeasonsmaxSeqWOComebackScore(List<ComebackSeasonInfo> statsByTeam) {
+    public int calculateAllSeasonsMaxSeqWOGreenScore(List<ComebackSeasonInfo> statsByTeam) {
         int maxValue = 0;
         for (int i=0; i<statsByTeam.size(); i++) {
             String sequenceStr = statsByTeam.get(i).getNegativeSequence().replaceAll("[\\[\\]\\s]", "");
@@ -282,7 +293,7 @@ public class ComebackSeasonInfoService {
         return 0;
     }
 
-    private int calculateLast3SeasonsStdDevScore(List<ComebackSeasonInfo> statsByTeam) {
+    public int calculateLast3SeasonsStdDevScore(List<ComebackSeasonInfo> statsByTeam) {
         double sumStdDev = 0;
         for (int i=0; i<3; i++) {
             sumStdDev += statsByTeam.get(i).getStdDeviation();
@@ -310,7 +321,7 @@ public class ComebackSeasonInfoService {
         return 0;
     }
 
-    private int calculateAllSeasonsStdDevScore(List<ComebackSeasonInfo> statsByTeam) {
+    public int calculateAllSeasonsStdDevScore(List<ComebackSeasonInfo> statsByTeam) {
         double sumStdDev = 0;
         for (int i=0; i<statsByTeam.size(); i++) {
             sumStdDev += statsByTeam.get(i).getStdDeviation();

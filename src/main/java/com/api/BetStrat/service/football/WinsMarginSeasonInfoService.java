@@ -6,6 +6,7 @@ import com.api.BetStrat.entity.Team;
 import com.api.BetStrat.entity.football.WinsMarginSeasonInfo;
 import com.api.BetStrat.repository.HistoricMatchRepository;
 import com.api.BetStrat.repository.football.WinsMarginSeasonInfoRepository;
+import com.api.BetStrat.service.SeasonInfoInterface;
 import com.api.BetStrat.util.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,7 +32,7 @@ import static com.api.BetStrat.util.Utils.calculateSD;
 
 @Service
 @Transactional
-public class WinsMarginSeasonInfoService {
+public class WinsMarginSeasonInfoService implements SeasonInfoInterface<WinsMarginSeasonInfo> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(WinsMarginSeasonInfoService.class);
 
@@ -41,12 +42,12 @@ public class WinsMarginSeasonInfoService {
     @Autowired
     private HistoricMatchRepository historicMatchRepository;
 
-    public WinsMarginSeasonInfo insertWinsMarginInfo(WinsMarginSeasonInfo winsMarginSeasonInfo) {
+    public WinsMarginSeasonInfo insertStatsBySeasonInfo(WinsMarginSeasonInfo winsMarginSeasonInfo) {
         LOGGER.info("Inserted " + winsMarginSeasonInfo.getClass() + " for " + winsMarginSeasonInfo.getTeamId().getName() + " and season " + winsMarginSeasonInfo.getSeason());
         return winsMarginSeasonInfoRepository.save(winsMarginSeasonInfo);
     }
 
-    public void updateStatsDataInfo(Team team) {
+    public void updateStatsBySeasonInfo(Team team, Class<WinsMarginSeasonInfo> className) {
         List<WinsMarginSeasonInfo> statsByTeam = winsMarginSeasonInfoRepository.getFootballWinsMarginStatsByTeam(team);
         List<String> seasonsList = null;
 
@@ -118,12 +119,12 @@ public class WinsMarginSeasonInfoService {
                 winsMarginSeasonInfo.setSeason(season);
                 winsMarginSeasonInfo.setTeamId(team);
                 winsMarginSeasonInfo.setUrl(newSeasonUrl);
-                insertWinsMarginInfo(winsMarginSeasonInfo);
+                insertStatsBySeasonInfo(winsMarginSeasonInfo);
             }
         }
     }
 
-    public Team updateTeamScore (Team teamByName) {
+    public Team updateTeamScore(Team teamByName, Class<WinsMarginSeasonInfo> className) {
         List<WinsMarginSeasonInfo> statsByTeam = winsMarginSeasonInfoRepository.getFootballWinsMarginStatsByTeam(teamByName);
         Collections.sort(statsByTeam, new SortStatsDataBySeason());
         Collections.reverse(statsByTeam);
@@ -131,12 +132,12 @@ public class WinsMarginSeasonInfoService {
         if (statsByTeam.size() < 3) {
             teamByName.setMarginWinsScore(TeamScoreEnum.INSUFFICIENT_DATA.getValue());
         } else {
-            int last3SeasonsMarginWinsRateScore = calculateLast3SeasonsMarginWinsRateScore(statsByTeam);
-            int allSeasonsMarginWinsRateScore = calculateAllSeasonsMarginWinsRateScore(statsByTeam);
+            int last3SeasonsMarginWinsRateScore = calculateLast3SeasonsRateScore(statsByTeam);
+            int allSeasonsMarginWinsRateScore = calculateAllSeasonsRateScore(statsByTeam);
             int last3SeasonsTotalWinsRateScore = calculateLast3SeasonsTotalWinsRateScore(statsByTeam);
             int allSeasonsTotalWinsRateScore = calculateAllSeasonsTotalWinsRateScore(statsByTeam);
-            int last3SeasonsmaxSeqWOMarginWinsScore = calculateLast3SeasonsmaxSeqWOMarginWinsScore(statsByTeam);
-            int allSeasonsmaxSeqWOMarginWinsScore = calculateAllSeasonsmaxSeqWOMarginWinsScore(statsByTeam);
+            int last3SeasonsmaxSeqWOMarginWinsScore = calculateLast3SeasonsMaxSeqWOGreenScore(statsByTeam);
+            int allSeasonsmaxSeqWOMarginWinsScore = calculateAllSeasonsMaxSeqWOGreenScore(statsByTeam);
             int last3SeasonsStdDevScore = calculateLast3SeasonsStdDevScore(statsByTeam);
             int allSeasonsStdDevScore = calculateAllSeasonsStdDevScore(statsByTeam);
             int totalMatchesScore = calculateLeagueMatchesScore(statsByTeam.get(0).getNumMatches());
@@ -149,7 +150,7 @@ public class WinsMarginSeasonInfoService {
 
             double totalScore = Utils.beautifyDoubleValue(0.75*last3SeasonsScore + 0.20*allSeasonsScore + 0.05*totalMatchesScore);
 
-            teamByName.setMarginWinsScore(calculateFinalRating(totalScore));
+            teamByName.setMarginWinsScore(calculateFinalRating(totalScore, null));
         }
 
         return teamByName;
@@ -185,12 +186,12 @@ public class WinsMarginSeasonInfoService {
                 return outMap;
             }
 
-            int last3SeasonsMarginWinsRateScore = calculateLast3SeasonsMarginWinsRateScore(filteredStats);
-            int allSeasonsMarginWinsRateScore = calculateAllSeasonsMarginWinsRateScore(filteredStats);
+            int last3SeasonsMarginWinsRateScore = calculateLast3SeasonsRateScore(filteredStats);
+            int allSeasonsMarginWinsRateScore = calculateAllSeasonsRateScore(filteredStats);
             int last3SeasonsTotalWinsRateScore = calculateLast3SeasonsTotalWinsRateScore(filteredStats);
             int allSeasonsTotalWinsRateScore = calculateAllSeasonsTotalWinsRateScore(filteredStats);
-            int last3SeasonsmaxSeqWOMarginWinsScore = calculateLast3SeasonsmaxSeqWOMarginWinsScore(filteredStats);
-            int allSeasonsmaxSeqWOMarginWinsScore = calculateAllSeasonsmaxSeqWOMarginWinsScore(filteredStats);
+            int last3SeasonsmaxSeqWOMarginWinsScore = calculateLast3SeasonsMaxSeqWOGreenScore(filteredStats);
+            int allSeasonsmaxSeqWOMarginWinsScore = calculateAllSeasonsMaxSeqWOGreenScore(filteredStats);
             int last3SeasonsStdDevScore = calculateLast3SeasonsStdDevScore(filteredStats);
             int allSeasonsStdDevScore = calculateAllSeasonsStdDevScore(filteredStats);
             int totalMatchesScore = calculateLeagueMatchesScore(filteredStats.get(0).getNumMatches());
@@ -203,7 +204,7 @@ public class WinsMarginSeasonInfoService {
 
             double totalScore = Utils.beautifyDoubleValue(0.75*last3SeasonsScore + 0.20*allSeasonsScore + 0.05*totalMatchesScore);
 
-            String finalScore = calculateFinalRating(totalScore);
+            String finalScore = calculateFinalRating(totalScore, null);
             outMap.put("footballMarginWins", finalScore);
             outMap.put("sequence", statsByTeam.get(seasonsToDiscard-1).getNegativeSequence());
             double balance = 0;
@@ -227,7 +228,7 @@ public class WinsMarginSeasonInfoService {
         return outMap;
     }
 
-    private String calculateFinalRating(double score) {
+    public String calculateFinalRating(double score, Class<WinsMarginSeasonInfo> className) {
         if (isBetween(score,85,150)) {
             return TeamScoreEnum.EXCELLENT.getValue() + " (" + score + ")";
         } else if(isBetween(score,65,85)) {
@@ -240,7 +241,7 @@ public class WinsMarginSeasonInfoService {
         return "";
     }
 
-    private int calculateLast3SeasonsMarginWinsRateScore(List<WinsMarginSeasonInfo> statsByTeam) {
+    public int calculateLast3SeasonsRateScore(List<WinsMarginSeasonInfo> statsByTeam) {
         double marginWinsRates = 0;
         for (int i=0; i<3; i++) {
             marginWinsRates += statsByTeam.get(i).getMarginWinsRate();
@@ -260,7 +261,7 @@ public class WinsMarginSeasonInfoService {
         return 0;
     }
 
-    private int calculateAllSeasonsMarginWinsRateScore(List<WinsMarginSeasonInfo> statsByTeam) {
+    public int calculateAllSeasonsRateScore(List<WinsMarginSeasonInfo> statsByTeam) {
         double marginWinsRates = 0;
         for (int i=0; i<statsByTeam.size(); i++) {
             marginWinsRates += statsByTeam.get(i).getMarginWinsRate();
@@ -280,7 +281,7 @@ public class WinsMarginSeasonInfoService {
         return 0;
     }
 
-    private int calculateLast3SeasonsTotalWinsRateScore(List<WinsMarginSeasonInfo> statsByTeam) {
+    public int calculateLast3SeasonsTotalWinsRateScore(List<WinsMarginSeasonInfo> statsByTeam) {
         double totalWinsRates = 0;
         for (int i=0; i<3; i++) {
             totalWinsRates += statsByTeam.get(i).getWinsRate();
@@ -304,7 +305,7 @@ public class WinsMarginSeasonInfoService {
         return 0;
     }
 
-    private int calculateAllSeasonsTotalWinsRateScore(List<WinsMarginSeasonInfo> statsByTeam) {
+    public int calculateAllSeasonsTotalWinsRateScore(List<WinsMarginSeasonInfo> statsByTeam) {
         double totalWinsRates = 0;
         for (int i=0; i<statsByTeam.size(); i++) {
             totalWinsRates += statsByTeam.get(i).getWinsRate();
@@ -328,7 +329,7 @@ public class WinsMarginSeasonInfoService {
         return 0;
     }
 
-    private int calculateLast3SeasonsmaxSeqWOMarginWinsScore(List<WinsMarginSeasonInfo> statsByTeam) {
+    public int calculateLast3SeasonsMaxSeqWOGreenScore(List<WinsMarginSeasonInfo> statsByTeam) {
         int maxValue = 0;
         for (int i=0; i<3; i++) {
             String sequenceStr = statsByTeam.get(i).getNegativeSequence().replaceAll("[\\[\\]\\s]", "");
@@ -352,7 +353,7 @@ public class WinsMarginSeasonInfoService {
         return 0;
     }
 
-    private int calculateAllSeasonsmaxSeqWOMarginWinsScore(List<WinsMarginSeasonInfo> statsByTeam) {
+    public int calculateAllSeasonsMaxSeqWOGreenScore(List<WinsMarginSeasonInfo> statsByTeam) {
         int maxValue = 0;
         for (int i=0; i<statsByTeam.size(); i++) {
             String sequenceStr = statsByTeam.get(i).getNegativeSequence().replaceAll("[\\[\\]\\s]", "");
@@ -376,7 +377,7 @@ public class WinsMarginSeasonInfoService {
         return 0;
     }
 
-    private int calculateLast3SeasonsStdDevScore(List<WinsMarginSeasonInfo> statsByTeam) {
+    public int calculateLast3SeasonsStdDevScore(List<WinsMarginSeasonInfo> statsByTeam) {
         double sumStdDev = 0;
         for (int i=0; i<3; i++) {
             sumStdDev += statsByTeam.get(i).getStdDeviation();
@@ -398,7 +399,7 @@ public class WinsMarginSeasonInfoService {
         return 0;
     }
 
-    private int calculateAllSeasonsStdDevScore(List<WinsMarginSeasonInfo> statsByTeam) {
+    public int calculateAllSeasonsStdDevScore(List<WinsMarginSeasonInfo> statsByTeam) {
         double sumStdDev = 0;
         for (int i=0; i<statsByTeam.size(); i++) {
             sumStdDev += statsByTeam.get(i).getStdDeviation();

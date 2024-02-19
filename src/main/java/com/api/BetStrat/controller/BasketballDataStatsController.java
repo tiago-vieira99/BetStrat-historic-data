@@ -1,16 +1,14 @@
 package com.api.BetStrat.controller;
 
 import com.api.BetStrat.entity.HistoricMatch;
+import com.api.BetStrat.entity.Team;
 import com.api.BetStrat.entity.basketball.ComebackSeasonInfo;
 import com.api.BetStrat.entity.basketball.LongBasketWinsSeasonInfo;
 import com.api.BetStrat.entity.basketball.ShortBasketWinsSeasonInfo;
-import com.api.BetStrat.entity.Team;
 import com.api.BetStrat.exception.StandardError;
 import com.api.BetStrat.repository.HistoricMatchRepository;
 import com.api.BetStrat.repository.TeamRepository;
-import com.api.BetStrat.service.basketball.ComebackSeasonInfoService;
-import com.api.BetStrat.service.basketball.LongBasketWinsSeasonInfoService;
-import com.api.BetStrat.service.basketball.ShortBasketWinsSeasonInfoService;
+import com.api.BetStrat.service.StatsBySeasonService;
 import com.api.BetStrat.service.TeamService;
 import com.api.BetStrat.util.ScrappingUtil;
 import io.swagger.annotations.Api;
@@ -59,13 +57,7 @@ public class BasketballDataStatsController {
     private TeamService teamService;
 
     @Autowired
-    private ComebackSeasonInfoService comebackSeasonInfoService;
-
-    @Autowired
-    private ShortBasketWinsSeasonInfoService shortBasketWinsSeasonInfoService;
-
-    @Autowired
-    private LongBasketWinsSeasonInfoService longBasketWinsSeasonInfoService;
+    private StatsBySeasonService statsBySeasonService;
 
     @Autowired
     private ModelMapper modelMapper;
@@ -226,7 +218,7 @@ public class BasketballDataStatsController {
 
         List<Team> allTeams = teamRepository.findAll().stream().filter(t -> t.getSport().equals("Basketball")).collect(Collectors.toList());
         for (Team team : allTeams) {
-            longBasketWinsSeasonInfoService.updateStatsDataInfo(team);
+//            longBasketWinsSeasonInfoService.updateStatsBySeasonInfo(team);
 //            comebackSeasonInfoService.updateStatsDataInfo(team);
 //            shortBasketWinsSeasonInfoService.updateStatsDataInfo(team);
         }

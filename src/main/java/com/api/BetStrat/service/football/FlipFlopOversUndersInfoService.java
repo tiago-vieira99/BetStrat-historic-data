@@ -6,6 +6,7 @@ import com.api.BetStrat.entity.Team;
 import com.api.BetStrat.entity.football.FlipFlopOversUndersInfo;
 import com.api.BetStrat.repository.HistoricMatchRepository;
 import com.api.BetStrat.repository.football.FlipFlopOversUndersInfoRepository;
+import com.api.BetStrat.service.SeasonInfoInterface;
 import com.api.BetStrat.util.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,7 +31,7 @@ import static com.api.BetStrat.util.Utils.calculateSD;
 
 @Service
 @Transactional
-public class FlipFlopOversUndersInfoService {
+public class FlipFlopOversUndersInfoService implements SeasonInfoInterface<FlipFlopOversUndersInfo> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(FlipFlopOversUndersInfoService.class);
 
@@ -40,12 +41,12 @@ public class FlipFlopOversUndersInfoService {
     @Autowired
     private HistoricMatchRepository historicMatchRepository;
 
-    public FlipFlopOversUndersInfo insertFlipFlopsInfo(FlipFlopOversUndersInfo drawSeasonInfo) {
+    public FlipFlopOversUndersInfo insertStatsBySeasonInfo(FlipFlopOversUndersInfo drawSeasonInfo) {
         LOGGER.info("Inserted " + drawSeasonInfo.getClass() + " for " + drawSeasonInfo.getTeamId().getName() + " and season " + drawSeasonInfo.getSeason());
         return flipFlopOversUndersInfoRepository.save(drawSeasonInfo);
     }
 
-    public void updateStatsDataInfo(Team team) {
+    public void updateStatsBySeasonInfo(Team team, Class<FlipFlopOversUndersInfo> className) {
         List<FlipFlopOversUndersInfo> statsByTeam = flipFlopOversUndersInfoRepository.getFlipFlopStatsByTeam(team);
         List<String> seasonsList = null;
 
@@ -124,12 +125,12 @@ public class FlipFlopOversUndersInfoService {
                 flipFlopOversUndersInfo.setSeason(season);
                 flipFlopOversUndersInfo.setTeamId(team);
                 flipFlopOversUndersInfo.setUrl(newSeasonUrl);
-                insertFlipFlopsInfo(flipFlopOversUndersInfo);
+                insertStatsBySeasonInfo(flipFlopOversUndersInfo);
             }
         }
     }
 
-    public Team updateTeamScore (Team teamByName) {
+    public Team updateTeamScore(Team teamByName, Class<FlipFlopOversUndersInfo> className) {
         List<FlipFlopOversUndersInfo> statsByTeam = flipFlopOversUndersInfoRepository.getFlipFlopStatsByTeam(teamByName);
         Collections.sort(statsByTeam, new SortStatsDataBySeason());
         Collections.reverse(statsByTeam);
@@ -137,10 +138,10 @@ public class FlipFlopOversUndersInfoService {
         if (statsByTeam.size() < 3) {
             teamByName.setDrawsHunterScore(TeamScoreEnum.INSUFFICIENT_DATA.getValue());
         } else {
-            int last3SeasonsOversRateScore = calculateLast3SeasonsOversRateScore(statsByTeam);
-            int allSeasonsOversRateScore = calculateAllSeasonsOversRateScore(statsByTeam);
-            int last3SeasonsmaxSeqWOFlipFlopScore = calculateLast3SeasonsmaxSeqWOFlipFlopScore(statsByTeam);
-            int allSeasonsmaxSeqWOFlipFlopScore = calculateAllSeasonsmaxSeqWOFlipFlopScore(statsByTeam);
+            int last3SeasonsOversRateScore = calculateLast3SeasonsRateScore(statsByTeam);
+            int allSeasonsOversRateScore = calculateAllSeasonsRateScore(statsByTeam);
+            int last3SeasonsmaxSeqWOFlipFlopScore = calculateLast3SeasonsMaxSeqWOGreenScore(statsByTeam);
+            int allSeasonsmaxSeqWOFlipFlopScore = calculateAllSeasonsMaxSeqWOGreenScore(statsByTeam);
             int last3SeasonsStdDevScore = calculateLast3SeasonsStdDevScore(statsByTeam);
             int allSeasonsStdDevScore = calculateAllSeasonsStdDevScore(statsByTeam);
             int totalMatchesScore = calculateLeagueMatchesScore(statsByTeam.get(0).getNumMatches());
@@ -149,7 +150,7 @@ public class FlipFlopOversUndersInfoService {
                     0.15*last3SeasonsmaxSeqWOFlipFlopScore + 0.05*allSeasonsmaxSeqWOFlipFlopScore +
                     0.3*last3SeasonsStdDevScore + 0.1*allSeasonsStdDevScore + 0.05*totalMatchesScore);
 
-            teamByName.setFlipFlopScore(calculateFinalRating(totalScore));
+            teamByName.setFlipFlopScore(calculateFinalRating(totalScore, null));
         }
 
         return teamByName;
@@ -213,7 +214,7 @@ public class FlipFlopOversUndersInfoService {
 //        return outMap;
 //    }
 
-    private String calculateFinalRating(double score) {
+    public String calculateFinalRating(double score, Class<FlipFlopOversUndersInfo> className) {
         if (isBetween(score,90,150)) {
             return TeamScoreEnum.EXCELLENT.getValue() + " (" + score + ")";
         } else if(isBetween(score,65,90)) {
@@ -226,7 +227,7 @@ public class FlipFlopOversUndersInfoService {
         return "";
     }
 
-    private int calculateLast3SeasonsOversRateScore(List<FlipFlopOversUndersInfo> statsByTeam) {
+    public int calculateLast3SeasonsRateScore(List<FlipFlopOversUndersInfo> statsByTeam) {
         double sumOversRates = 0;
         for (int i=0; i<3; i++) {
             sumOversRates += statsByTeam.get(i).getOversRate();
@@ -249,7 +250,7 @@ public class FlipFlopOversUndersInfoService {
     }
 
     //the more closest to 50%, the best
-    private int calculateAllSeasonsOversRateScore(List<FlipFlopOversUndersInfo> statsByTeam) {
+    public int calculateAllSeasonsRateScore(List<FlipFlopOversUndersInfo> statsByTeam) {
         double sumOversRates = 0;
         for (int i=0; i<statsByTeam.size(); i++) {
             sumOversRates += statsByTeam.get(i).getOversRate();
@@ -271,6 +272,16 @@ public class FlipFlopOversUndersInfoService {
         return 0;
     }
 
+    @Override
+    public int calculateLast3SeasonsTotalWinsRateScore(List<FlipFlopOversUndersInfo> statsByTeam) {
+        return 0;
+    }
+
+    @Override
+    public int calculateAllSeasonsTotalWinsRateScore(List<FlipFlopOversUndersInfo> statsByTeam) {
+        return 0;
+    }
+
     private int calculateRecommendedLevelToStartSequence(List<FlipFlopOversUndersInfo> statsByTeam) {
         int maxValue = 0;
         for (int i = 0; i < 3; i++) {
@@ -283,7 +294,7 @@ public class FlipFlopOversUndersInfoService {
         return maxValue-6 < 0 ? 0 : maxValue-6;
     }
 
-    private int calculateLast3SeasonsmaxSeqWOFlipFlopScore(List<FlipFlopOversUndersInfo> statsByTeam) {
+    public int calculateLast3SeasonsMaxSeqWOGreenScore(List<FlipFlopOversUndersInfo> statsByTeam) {
         int maxValue = 0;
         for (int i=0; i<3; i++) {
             String sequenceStr = statsByTeam.get(i).getNegativeSequence().replaceAll("[\\[\\]\\s]", "");
@@ -307,7 +318,7 @@ public class FlipFlopOversUndersInfoService {
         return 0;
     }
 
-    private int calculateAllSeasonsmaxSeqWOFlipFlopScore(List<FlipFlopOversUndersInfo> statsByTeam) {
+    public int calculateAllSeasonsMaxSeqWOGreenScore(List<FlipFlopOversUndersInfo> statsByTeam) {
         int maxValue = 0;
         for (int i=0; i<statsByTeam.size(); i++) {
             String sequenceStr = statsByTeam.get(i).getNegativeSequence().replaceAll("[\\[\\]\\s]", "");
@@ -331,7 +342,7 @@ public class FlipFlopOversUndersInfoService {
         return 0;
     }
 
-    private int calculateLast3SeasonsStdDevScore(List<FlipFlopOversUndersInfo> statsByTeam) {
+    public int calculateLast3SeasonsStdDevScore(List<FlipFlopOversUndersInfo> statsByTeam) {
         double sumStdDev = 0;
         for (int i=0; i<3; i++) {
             sumStdDev += statsByTeam.get(i).getStdDeviation();
@@ -359,7 +370,7 @@ public class FlipFlopOversUndersInfoService {
         return 0;
     }
 
-    private int calculateAllSeasonsStdDevScore(List<FlipFlopOversUndersInfo> statsByTeam) {
+    public int calculateAllSeasonsStdDevScore(List<FlipFlopOversUndersInfo> statsByTeam) {
         double sumStdDev = 0;
         for (int i=0; i<statsByTeam.size(); i++) {
             sumStdDev += statsByTeam.get(i).getStdDeviation();
