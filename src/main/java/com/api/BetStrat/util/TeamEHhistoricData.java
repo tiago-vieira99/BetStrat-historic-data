@@ -1,7 +1,7 @@
 package com.api.BetStrat.util;
 
-import com.api.BetStrat.entity.football.EuroHandicapSeasonInfo;
-import com.api.BetStrat.entity.football.WinsMarginSeasonInfo;
+import com.api.BetStrat.entity.football.EuroHandicapSeasonStats;
+import com.api.BetStrat.entity.football.WinsMarginSeasonStats;
 import com.google.common.base.Splitter;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -28,8 +28,8 @@ public class TeamEHhistoricData {
     private double mean = this.mean;
 
     @SneakyThrows
-    public WinsMarginSeasonInfo buildSeason12MarginWinStatsData(JSONArray allMatches, String teamName) {
-        WinsMarginSeasonInfo winsMarginSeasonInfo = new WinsMarginSeasonInfo();
+    public WinsMarginSeasonStats buildSeason12MarginWinStatsData(JSONArray allMatches, String teamName) {
+        WinsMarginSeasonStats winsMarginSeasonInfo = new WinsMarginSeasonStats();
 
         ArrayList<Integer> noMarginWinsSequence = new ArrayList<>();
         int count = 0;
@@ -78,8 +78,8 @@ public class TeamEHhistoricData {
     }
 
     @SneakyThrows
-    public EuroHandicapSeasonInfo buildSeasonEuroHandicapStatsData(JSONArray allMatches, String teamName) {
-        EuroHandicapSeasonInfo euroHandicapSeasonInfo = new EuroHandicapSeasonInfo();
+    public EuroHandicapSeasonStats buildSeasonEuroHandicapStatsData(JSONArray allMatches, String teamName) {
+        EuroHandicapSeasonStats euroHandicapSeasonInfo = new EuroHandicapSeasonStats();
 
         ArrayList<Integer> noEuroHandicapsSequence = new ArrayList<>();
         int count = 0;

@@ -2,11 +2,11 @@ package com.api.BetStrat.service.basketball;
 
 import com.api.BetStrat.constants.TeamScoreEnum;
 import com.api.BetStrat.entity.HistoricMatch;
-import com.api.BetStrat.entity.basketball.ComebackSeasonInfo;
+import com.api.BetStrat.entity.basketball.ComebackSeasonStats;
 import com.api.BetStrat.entity.Team;
 import com.api.BetStrat.repository.HistoricMatchRepository;
 import com.api.BetStrat.repository.basketball.ComebackSeasonInfoRepository;
-import com.api.BetStrat.service.SeasonInfoInterface;
+import com.api.BetStrat.service.StrategySeasonStatsInterface;
 import com.api.BetStrat.util.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,9 +31,9 @@ import static com.api.BetStrat.util.Utils.calculateSD;
 
 @Service
 @Transactional
-public class ComebackSeasonInfoService implements SeasonInfoInterface<ComebackSeasonInfo> {
+public class ComebackStrategySeasonStatsService implements StrategySeasonStatsInterface<ComebackSeasonStats> {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(ComebackSeasonInfoService.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ComebackStrategySeasonStatsService.class);
 
     @Autowired
     private HistoricMatchRepository historicMatchRepository;
@@ -41,12 +41,17 @@ public class ComebackSeasonInfoService implements SeasonInfoInterface<ComebackSe
     @Autowired
     private ComebackSeasonInfoRepository comebackSeasonInfoRepository;
 
-    public ComebackSeasonInfo insertStatsBySeasonInfo(ComebackSeasonInfo ComebackSeasonInfo) {
-        return comebackSeasonInfoRepository.save(ComebackSeasonInfo);
+    public ComebackSeasonStats insertStrategySeasonStats(ComebackSeasonStats strategySeasonStats) {
+        return comebackSeasonInfoRepository.save(strategySeasonStats);
     }
 
-    public void updateStatsBySeasonInfo(Team team, Class<ComebackSeasonInfo> className) {
-        List<ComebackSeasonInfo> statsByTeam = comebackSeasonInfoRepository.getComebackStatsByTeam(team);
+    @Override
+    public List<ComebackSeasonStats> getStatsByStrategyAndTeam(Team team, String strategyName) {
+        return comebackSeasonInfoRepository.getComebackStatsByTeam(team);
+    }
+
+    public void updateStrategySeasonStats(Team team, Class<ComebackSeasonStats> className) {
+        List<ComebackSeasonStats> statsByTeam = comebackSeasonInfoRepository.getComebackStatsByTeam(team);
         List<String> seasonsList = null;
 
         if (SUMMER_SEASONS_BEGIN_MONTH_LIST.contains(team.getBeginSeason())) {
@@ -63,7 +68,7 @@ public class ComebackSeasonInfoService implements SeasonInfoInterface<ComebackSe
                 List<HistoricMatch> filteredMatches = teamMatchesBySeason.stream().filter(t -> t.getCompetition().equals(mainCompetition)).collect(Collectors.toList());
 //                filteredMatches.sort(new Utils.MatchesByDateSorter());
 
-                ComebackSeasonInfo comebackSeasonInfo = new ComebackSeasonInfo();
+                ComebackSeasonStats comebackSeasonInfo = new ComebackSeasonStats();
                 LOGGER.info("Insert " + comebackSeasonInfo.getClass() + " for " + team.getName() + " and season " + season);
                 ArrayList<Integer> noComebacksSequence = new ArrayList<>();
                 int count = 0;
@@ -119,13 +124,13 @@ public class ComebackSeasonInfoService implements SeasonInfoInterface<ComebackSe
                 comebackSeasonInfo.setSeason(season);
                 comebackSeasonInfo.setTeamId(team);
                 comebackSeasonInfo.setUrl(team.getUrl());
-                insertStatsBySeasonInfo(comebackSeasonInfo);
+                insertStrategySeasonStats(comebackSeasonInfo);
             }
         }
     }
 
-    public Team updateTeamScore (Team teamByName, Class<ComebackSeasonInfo> className) {
-        List<ComebackSeasonInfo> statsByTeam = comebackSeasonInfoRepository.getComebackStatsByTeam(teamByName);
+    public Team updateTeamScore (Team teamByName, Class<ComebackSeasonStats> className) {
+        List<ComebackSeasonStats> statsByTeam = comebackSeasonInfoRepository.getComebackStatsByTeam(teamByName);
         Collections.sort(statsByTeam, new SortStatsDataBySeason());
         Collections.reverse(statsByTeam);
 
@@ -150,7 +155,7 @@ public class ComebackSeasonInfoService implements SeasonInfoInterface<ComebackSe
         return teamByName;
     }
 
-    public String calculateFinalRating(double score, Class<ComebackSeasonInfo> className) {
+    public String calculateFinalRating(double score, Class<ComebackSeasonStats> className) {
         if (isBetween(score,90,150)) {
             return TeamScoreEnum.EXCELLENT.getValue() + " (" + score + ")";
         } else if(isBetween(score,65,90)) {
@@ -164,16 +169,16 @@ public class ComebackSeasonInfoService implements SeasonInfoInterface<ComebackSe
     }
 
     @Override
-    public int calculateLast3SeasonsTotalWinsRateScore(List<ComebackSeasonInfo> statsByTeam) {
+    public int calculateLast3SeasonsTotalWinsRateScore(List<ComebackSeasonStats> statsByTeam) {
         return 0;
     }
 
     @Override
-    public int calculateAllSeasonsTotalWinsRateScore(List<ComebackSeasonInfo> statsByTeam) {
+    public int calculateAllSeasonsTotalWinsRateScore(List<ComebackSeasonStats> statsByTeam) {
         return 0;
     }
 
-    public int calculateLast3SeasonsRateScore(List<ComebackSeasonInfo> statsByTeam) {
+    public int calculateLast3SeasonsRateScore(List<ComebackSeasonStats> statsByTeam) {
         double sumComebackRates = 0;
         for (int i=0; i<3; i++) {
             sumComebackRates += statsByTeam.get(i).getComebacksRate();
@@ -197,7 +202,7 @@ public class ComebackSeasonInfoService implements SeasonInfoInterface<ComebackSe
         return 0;
     }
 
-    public int calculateAllSeasonsRateScore(List<ComebackSeasonInfo> statsByTeam) {
+    public int calculateAllSeasonsRateScore(List<ComebackSeasonStats> statsByTeam) {
         double sumComebackRates = 0;
         for (int i=0; i<statsByTeam.size(); i++) {
             sumComebackRates += statsByTeam.get(i).getComebacksRate();
@@ -221,7 +226,7 @@ public class ComebackSeasonInfoService implements SeasonInfoInterface<ComebackSe
         return 0;
     }
 
-    private int calculateRecommendedLevelToStartSequence(List<ComebackSeasonInfo> statsByTeam) {
+    private int calculateRecommendedLevelToStartSequence(List<ComebackSeasonStats> statsByTeam) {
         int maxValue = 0;
         for (int i = 0; i < 3; i++) {
             String sequenceStr = statsByTeam.get(i).getNegativeSequence().replaceAll("[\\[\\]\\s]", "");
@@ -233,7 +238,7 @@ public class ComebackSeasonInfoService implements SeasonInfoInterface<ComebackSe
         return maxValue-6 < 0 ? 0 : maxValue-6;
     }
 
-    public int calculateLast3SeasonsMaxSeqWOGreenScore(List<ComebackSeasonInfo> statsByTeam) {
+    public int calculateLast3SeasonsMaxSeqWOGreenScore(List<ComebackSeasonStats> statsByTeam) {
         int maxValue = 0;
         for (int i=0; i<3; i++) {
             String sequenceStr = statsByTeam.get(i).getNegativeSequence().replaceAll("[\\[\\]\\s]", "");
@@ -263,7 +268,7 @@ public class ComebackSeasonInfoService implements SeasonInfoInterface<ComebackSe
         return 0;
     }
 
-    public int calculateAllSeasonsMaxSeqWOGreenScore(List<ComebackSeasonInfo> statsByTeam) {
+    public int calculateAllSeasonsMaxSeqWOGreenScore(List<ComebackSeasonStats> statsByTeam) {
         int maxValue = 0;
         for (int i=0; i<statsByTeam.size(); i++) {
             String sequenceStr = statsByTeam.get(i).getNegativeSequence().replaceAll("[\\[\\]\\s]", "");
@@ -293,7 +298,7 @@ public class ComebackSeasonInfoService implements SeasonInfoInterface<ComebackSe
         return 0;
     }
 
-    public int calculateLast3SeasonsStdDevScore(List<ComebackSeasonInfo> statsByTeam) {
+    public int calculateLast3SeasonsStdDevScore(List<ComebackSeasonStats> statsByTeam) {
         double sumStdDev = 0;
         for (int i=0; i<3; i++) {
             sumStdDev += statsByTeam.get(i).getStdDeviation();
@@ -321,7 +326,7 @@ public class ComebackSeasonInfoService implements SeasonInfoInterface<ComebackSe
         return 0;
     }
 
-    public int calculateAllSeasonsStdDevScore(List<ComebackSeasonInfo> statsByTeam) {
+    public int calculateAllSeasonsStdDevScore(List<ComebackSeasonStats> statsByTeam) {
         double sumStdDev = 0;
         for (int i=0; i<statsByTeam.size(); i++) {
             sumStdDev += statsByTeam.get(i).getStdDeviation();
@@ -368,10 +373,10 @@ public class ComebackSeasonInfoService implements SeasonInfoInterface<ComebackSe
         return lower <= x && x < upper;
     }
 
-    static class SortStatsDataBySeason implements Comparator<ComebackSeasonInfo> {
+    static class SortStatsDataBySeason implements Comparator<ComebackSeasonStats> {
 
         @Override
-        public int compare(ComebackSeasonInfo a, ComebackSeasonInfo b) {
+        public int compare(ComebackSeasonStats a, ComebackSeasonStats b) {
             return Integer.valueOf(SEASONS_LIST.indexOf(a.getSeason()))
                     .compareTo(Integer.valueOf(SEASONS_LIST.indexOf(b.getSeason())));
         }

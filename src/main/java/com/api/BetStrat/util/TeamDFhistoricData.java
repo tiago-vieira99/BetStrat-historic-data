@@ -1,6 +1,6 @@
 package com.api.BetStrat.util;
 
-import com.api.BetStrat.entity.football.DrawSeasonInfo;
+import com.api.BetStrat.entity.football.DrawSeasonStats;
 import com.google.common.base.Splitter;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -32,8 +32,8 @@ public class TeamDFhistoricData {
     private double mean = this.mean;
 
     @SneakyThrows
-    public DrawSeasonInfo buildSeasonDFStatsData(JSONArray allMatches) {
-        DrawSeasonInfo drawSeasonInfo = new DrawSeasonInfo();
+    public DrawSeasonStats buildSeasonDFStatsData(JSONArray allMatches) {
+        DrawSeasonStats drawSeasonInfo = new DrawSeasonStats();
 
         ArrayList<Integer> noDrawsSequence = new ArrayList<>();
         int count = 0;

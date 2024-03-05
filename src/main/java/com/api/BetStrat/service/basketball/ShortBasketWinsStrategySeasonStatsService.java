@@ -2,11 +2,11 @@ package com.api.BetStrat.service.basketball;
 
 import com.api.BetStrat.constants.TeamScoreEnum;
 import com.api.BetStrat.entity.HistoricMatch;
+import com.api.BetStrat.entity.basketball.ShortBasketWinsSeasonStats;
 import com.api.BetStrat.entity.Team;
-import com.api.BetStrat.entity.basketball.LongBasketWinsSeasonInfo;
 import com.api.BetStrat.repository.HistoricMatchRepository;
-import com.api.BetStrat.repository.basketball.LongWinsSeasonInfoRepository;
-import com.api.BetStrat.service.SeasonInfoInterface;
+import com.api.BetStrat.repository.basketball.ShortWinsSeasonInfoRepository;
+import com.api.BetStrat.service.StrategySeasonStatsInterface;
 import com.api.BetStrat.util.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,22 +31,27 @@ import static com.api.BetStrat.util.Utils.calculateSD;
 
 @Service
 @Transactional
-public class LongBasketWinsSeasonInfoService implements SeasonInfoInterface<LongBasketWinsSeasonInfo> {
+public class ShortBasketWinsStrategySeasonStatsService implements StrategySeasonStatsInterface<ShortBasketWinsSeasonStats> {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(LongBasketWinsSeasonInfoService.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ShortBasketWinsStrategySeasonStatsService.class);
 
     @Autowired
-    private LongWinsSeasonInfoRepository longWinsSeasonInfoRepository;
+    private ShortWinsSeasonInfoRepository shortWinsSeasonInfoRepository;
 
     @Autowired
     private HistoricMatchRepository historicMatchRepository;
 
-    public LongBasketWinsSeasonInfo insertStatsBySeasonInfo(LongBasketWinsSeasonInfo LongBasketWinsSeasonInfo) {
-        return longWinsSeasonInfoRepository.save(LongBasketWinsSeasonInfo);
+    public ShortBasketWinsSeasonStats insertStrategySeasonStats(ShortBasketWinsSeasonStats strategySeasonStats) {
+        return shortWinsSeasonInfoRepository.save(strategySeasonStats);
     }
 
-    public void updateStatsBySeasonInfo(Team team, Class<LongBasketWinsSeasonInfo> className) {
-        List<LongBasketWinsSeasonInfo> statsByTeam = longWinsSeasonInfoRepository.getLongBasketWinsStatsByTeam(team);
+    @Override
+    public List<ShortBasketWinsSeasonStats> getStatsByStrategyAndTeam(Team team, String strategyName) {
+        return shortWinsSeasonInfoRepository.getShortBasketWinsStatsByTeam(team);
+    }
+
+    public void updateStrategySeasonStats(Team team, Class<ShortBasketWinsSeasonStats> className) {
+        List<ShortBasketWinsSeasonStats> statsByTeam = shortWinsSeasonInfoRepository.getShortBasketWinsStatsByTeam(team);
         List<String> seasonsList = null;
 
         if (SUMMER_SEASONS_BEGIN_MONTH_LIST.contains(team.getBeginSeason())) {
@@ -63,9 +68,9 @@ public class LongBasketWinsSeasonInfoService implements SeasonInfoInterface<Long
                 List<HistoricMatch> filteredMatches = teamMatchesBySeason.stream().filter(t -> t.getCompetition().equals(mainCompetition)).collect(Collectors.toList());
 //                filteredMatches.sort(new Utils.MatchesByDateSorter());
 
-                LongBasketWinsSeasonInfo longBasketWinsSeasonInfo = new LongBasketWinsSeasonInfo();
-                LOGGER.info("Insert " + longBasketWinsSeasonInfo.getClass() + " for " + team.getName() + " and season " + season);
-                ArrayList<Integer> noLongWinsSequence = new ArrayList<>();
+                ShortBasketWinsSeasonStats shortBasketWinsSeasonInfo = new ShortBasketWinsSeasonStats();
+                LOGGER.info("Insert " + shortBasketWinsSeasonInfo.getClass() + " for " + team.getName() + " and season " + season);
+                ArrayList<Integer> noShortWinsSequence = new ArrayList<>();
                 int count = 0;
                 int totalWins= 0;
                 for (HistoricMatch historicMatch : filteredMatches) {
@@ -76,52 +81,52 @@ public class LongBasketWinsSeasonInfoService implements SeasonInfoInterface<Long
 
                     if ((historicMatch.getHomeTeam().equals(team.getName()) && homeFTResult > awayFTResult) || (historicMatch.getAwayTeam().equals(team.getName()) && homeFTResult < awayFTResult)) {
                         totalWins++;
-                        if (Math.abs(homeFTResult - awayFTResult) >= 11) {
-                            noLongWinsSequence.add(count);
+                        if (Math.abs(homeFTResult - awayFTResult) < 11) {
+                            noShortWinsSequence.add(count);
                             count = 0;
                         }
                     }
                 }
 
-                int totalLongWins = noLongWinsSequence.size();
+                int totalShortWins = noShortWinsSequence.size();
 
-                noLongWinsSequence.add(count);
-                if (noLongWinsSequence.get(noLongWinsSequence.size()-1) != 0) {
-                    noLongWinsSequence.add(-1);
+                noShortWinsSequence.add(count);
+                if (noShortWinsSequence.get(noShortWinsSequence.size()-1) != 0) {
+                    noShortWinsSequence.add(-1);
                 }
 
-                longBasketWinsSeasonInfo.setCompetition(mainCompetition);
+                shortBasketWinsSeasonInfo.setCompetition(mainCompetition);
                 if (totalWins == 0) {
-                    longBasketWinsSeasonInfo.setLongWinsRate(0);
-                    longBasketWinsSeasonInfo.setWinsRate(0);
+                    shortBasketWinsSeasonInfo.setShortWinsRate(0);
+                    shortBasketWinsSeasonInfo.setWinsRate(0);
                 } else {
-                    longBasketWinsSeasonInfo.setLongWinsRate(Utils.beautifyDoubleValue(100 * totalLongWins / totalWins));
-                    longBasketWinsSeasonInfo.setWinsRate(Utils.beautifyDoubleValue(100*totalWins/ filteredMatches.size()));
+                    shortBasketWinsSeasonInfo.setShortWinsRate(Utils.beautifyDoubleValue(100 * totalShortWins / totalWins));
+                    shortBasketWinsSeasonInfo.setWinsRate(Utils.beautifyDoubleValue(100*totalWins/ filteredMatches.size()));
                 }
-                longBasketWinsSeasonInfo.setNegativeSequence(noLongWinsSequence.toString());
-                longBasketWinsSeasonInfo.setNumLongWins(totalLongWins);
-                longBasketWinsSeasonInfo.setNumMatches(filteredMatches.size());
-                longBasketWinsSeasonInfo.setNumWins(totalWins);
+                shortBasketWinsSeasonInfo.setNegativeSequence(noShortWinsSequence.toString());
+                shortBasketWinsSeasonInfo.setNumShortWins(totalShortWins);
+                shortBasketWinsSeasonInfo.setNumMatches(filteredMatches.size());
+                shortBasketWinsSeasonInfo.setNumWins(totalWins);
 
-                double stdDev =  Utils.beautifyDoubleValue(calculateSD(noLongWinsSequence));
-                longBasketWinsSeasonInfo.setStdDeviation(stdDev);
-                longBasketWinsSeasonInfo.setCoefDeviation(Utils.beautifyDoubleValue(calculateCoeffVariation(stdDev, noLongWinsSequence)));
+                double stdDev =  Utils.beautifyDoubleValue(calculateSD(noShortWinsSequence));
+                shortBasketWinsSeasonInfo.setStdDeviation(stdDev);
+                shortBasketWinsSeasonInfo.setCoefDeviation(Utils.beautifyDoubleValue(calculateCoeffVariation(stdDev, noShortWinsSequence)));
 
-                longBasketWinsSeasonInfo.setSeason(season);
-                longBasketWinsSeasonInfo.setTeamId(team);
-                longBasketWinsSeasonInfo.setUrl(team.getUrl());
-                insertStatsBySeasonInfo(longBasketWinsSeasonInfo);
+                shortBasketWinsSeasonInfo.setSeason(season);
+                shortBasketWinsSeasonInfo.setTeamId(team);
+                shortBasketWinsSeasonInfo.setUrl(team.getUrl());
+                insertStrategySeasonStats(shortBasketWinsSeasonInfo);
             }
         }
     }
 
-    public Team updateTeamScore(Team teamByName, Class<LongBasketWinsSeasonInfo> className) {
-        List<LongBasketWinsSeasonInfo> statsByTeam = longWinsSeasonInfoRepository.getLongBasketWinsStatsByTeam(teamByName);
+    public Team updateTeamScore(Team teamByName, Class<ShortBasketWinsSeasonStats> className) {
+        List<ShortBasketWinsSeasonStats> statsByTeam = shortWinsSeasonInfoRepository.getShortBasketWinsStatsByTeam(teamByName);
         Collections.sort(statsByTeam, new SortStatsDataBySeason());
         Collections.reverse(statsByTeam);
 
         if (statsByTeam.size() < 3) {
-            teamByName.setBasketLongWinsScore(TeamScoreEnum.INSUFFICIENT_DATA.getValue());
+            teamByName.setBasketShortWinsScore(TeamScoreEnum.INSUFFICIENT_DATA.getValue());
         } else {
             int last3SeasonsMarginWinsRateScore = calculateLast3SeasonsRateScore(statsByTeam);
             int allSeasonsMarginWinsRateScore = calculateAllSeasonsRateScore(statsByTeam);
@@ -140,13 +145,13 @@ public class LongBasketWinsSeasonInfoService implements SeasonInfoInterface<Long
 
             double totalScore = Utils.beautifyDoubleValue(0.75*last3SeasonsScore + 0.25*allSeasonsScore);
 
-            teamByName.setBasketLongWinsScore(calculateFinalRating(totalScore, null));
+            teamByName.setBasketShortWinsScore(calculateFinalRating(totalScore, null));
         }
 
         return teamByName;
     }
 
-    public String calculateFinalRating(double score, Class<LongBasketWinsSeasonInfo> className) {
+    public String calculateFinalRating(double score, Class<ShortBasketWinsSeasonStats> className) {
         if (isBetween(score,85,150)) {
             return TeamScoreEnum.EXCELLENT.getValue() + " (" + score + ")";
         } else if(isBetween(score,65,85)) {
@@ -159,47 +164,47 @@ public class LongBasketWinsSeasonInfoService implements SeasonInfoInterface<Long
         return "";
     }
 
-    public int calculateLast3SeasonsRateScore(List<LongBasketWinsSeasonInfo> statsByTeam) {
-        double sumLongWinsRates = 0;
+    public int calculateLast3SeasonsRateScore(List<ShortBasketWinsSeasonStats> statsByTeam) {
+        double sumShortWinsRates = 0;
         for (int i=0; i<3; i++) {
-            sumLongWinsRates += statsByTeam.get(i).getNumLongWins();
+            sumShortWinsRates += statsByTeam.get(i).getNumShortWins();
         }
 
-        double avgLongWinsRate = Utils.beautifyDoubleValue(sumLongWinsRates / 3);
+        double avgShortWinsRate = Utils.beautifyDoubleValue(sumShortWinsRates / 3);
 
-        if (isBetween(avgLongWinsRate,65,100)) {
+        if (isBetween(avgShortWinsRate,65,100)) {
             return 100;
-        } else if(isBetween(avgLongWinsRate,55,65)) {
+        } else if(isBetween(avgShortWinsRate,55,65)) {
             return 80;
-        } else if(isBetween(avgLongWinsRate,45,55)) {
+        } else if(isBetween(avgShortWinsRate,45,55)) {
             return 60;
-        } else if(isBetween(avgLongWinsRate,0,55)) {
+        } else if(isBetween(avgShortWinsRate,0,55)) {
             return 30;
         }
         return 0;
     }
 
-    public int calculateAllSeasonsRateScore(List<LongBasketWinsSeasonInfo> statsByTeam) {
-        double sumLongWinsRates = 0;
+    public int calculateAllSeasonsRateScore(List<ShortBasketWinsSeasonStats> statsByTeam) {
+        double sumShortWinsRates = 0;
         for (int i=0; i<statsByTeam.size(); i++) {
-            sumLongWinsRates += statsByTeam.get(i).getLongWinsRate();
+            sumShortWinsRates += statsByTeam.get(i).getShortWinsRate();
         }
 
-        double avgLongWinsRate = Utils.beautifyDoubleValue(sumLongWinsRates / statsByTeam.size());
+        double avgShortWinsRate = Utils.beautifyDoubleValue(sumShortWinsRates / statsByTeam.size());
 
-        if (isBetween(avgLongWinsRate,65,100)) {
+        if (isBetween(avgShortWinsRate,65,100)) {
             return 100;
-        } else if(isBetween(avgLongWinsRate,55,65)) {
+        } else if(isBetween(avgShortWinsRate,55,65)) {
             return 80;
-        } else if(isBetween(avgLongWinsRate,45,55)) {
+        } else if(isBetween(avgShortWinsRate,45,55)) {
             return 60;
-        } else if(isBetween(avgLongWinsRate,0,55)) {
+        } else if(isBetween(avgShortWinsRate,0,55)) {
             return 30;
         }
         return 0;
     }
 
-    public int calculateLast3SeasonsTotalWinsRateScore(List<LongBasketWinsSeasonInfo> statsByTeam) {
+    public int calculateLast3SeasonsTotalWinsRateScore(List<ShortBasketWinsSeasonStats> statsByTeam) {
         double totalWinsRates = 0;
         for (int i=0; i<3; i++) {
             totalWinsRates += statsByTeam.get(i).getWinsRate();
@@ -223,7 +228,7 @@ public class LongBasketWinsSeasonInfoService implements SeasonInfoInterface<Long
         return 0;
     }
 
-    public int calculateAllSeasonsTotalWinsRateScore(List<LongBasketWinsSeasonInfo> statsByTeam) {
+    public int calculateAllSeasonsTotalWinsRateScore(List<ShortBasketWinsSeasonStats> statsByTeam) {
         double totalWinsRates = 0;
         for (int i=0; i<statsByTeam.size(); i++) {
             totalWinsRates += statsByTeam.get(i).getWinsRate();
@@ -247,7 +252,7 @@ public class LongBasketWinsSeasonInfoService implements SeasonInfoInterface<Long
         return 0;
     }
 
-    private int calculateRecommendedLevelToStartSequence(List<LongBasketWinsSeasonInfo> statsByTeam) {
+    private int calculateRecommendedLevelToStartSequence(List<ShortBasketWinsSeasonStats> statsByTeam) {
         int maxValue = 0;
         for (int i = 0; i < 3; i++) {
             String sequenceStr = statsByTeam.get(i).getNegativeSequence().replaceAll("[\\[\\]\\s]", "");
@@ -259,7 +264,7 @@ public class LongBasketWinsSeasonInfoService implements SeasonInfoInterface<Long
         return maxValue-6 < 0 ? 0 : maxValue-6;
     }
 
-    public int calculateLast3SeasonsMaxSeqWOGreenScore(List<LongBasketWinsSeasonInfo> statsByTeam) {
+    public int calculateLast3SeasonsMaxSeqWOGreenScore(List<ShortBasketWinsSeasonStats> statsByTeam) {
         int maxValue = 0;
         for (int i=0; i<3; i++) {
             String sequenceStr = statsByTeam.get(i).getNegativeSequence().replaceAll("[\\[\\]\\s]", "");
@@ -283,7 +288,7 @@ public class LongBasketWinsSeasonInfoService implements SeasonInfoInterface<Long
         return 0;
     }
 
-    public int calculateAllSeasonsMaxSeqWOGreenScore(List<LongBasketWinsSeasonInfo> statsByTeam) {
+    public int calculateAllSeasonsMaxSeqWOGreenScore(List<ShortBasketWinsSeasonStats> statsByTeam) {
         int maxValue = 0;
         for (int i=0; i<statsByTeam.size(); i++) {
             String sequenceStr = statsByTeam.get(i).getNegativeSequence().replaceAll("[\\[\\]\\s]", "");
@@ -307,7 +312,7 @@ public class LongBasketWinsSeasonInfoService implements SeasonInfoInterface<Long
         return 0;
     }
 
-    public int calculateLast3SeasonsStdDevScore(List<LongBasketWinsSeasonInfo> statsByTeam) {
+    public int calculateLast3SeasonsStdDevScore(List<ShortBasketWinsSeasonStats> statsByTeam) {
         double sumStdDev = 0;
         for (int i=0; i<3; i++) {
             sumStdDev += statsByTeam.get(i).getStdDeviation();
@@ -329,7 +334,7 @@ public class LongBasketWinsSeasonInfoService implements SeasonInfoInterface<Long
         return 0;
     }
 
-    public int calculateAllSeasonsStdDevScore(List<LongBasketWinsSeasonInfo> statsByTeam) {
+    public int calculateAllSeasonsStdDevScore(List<ShortBasketWinsSeasonStats> statsByTeam) {
         double sumStdDev = 0;
         for (int i=0; i<statsByTeam.size(); i++) {
             sumStdDev += statsByTeam.get(i).getStdDeviation();
@@ -370,10 +375,10 @@ public class LongBasketWinsSeasonInfoService implements SeasonInfoInterface<Long
         return lower <= x && x < upper;
     }
 
-    static class SortStatsDataBySeason implements Comparator<LongBasketWinsSeasonInfo> {
+    static class SortStatsDataBySeason implements Comparator<ShortBasketWinsSeasonStats> {
 
         @Override
-        public int compare(LongBasketWinsSeasonInfo a, LongBasketWinsSeasonInfo b) {
+        public int compare(ShortBasketWinsSeasonStats a, ShortBasketWinsSeasonStats b) {
             return Integer.valueOf(SEASONS_LIST.indexOf(a.getSeason()))
                     .compareTo(Integer.valueOf(SEASONS_LIST.indexOf(b.getSeason())));
         }

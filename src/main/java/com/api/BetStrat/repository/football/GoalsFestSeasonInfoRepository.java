@@ -1,6 +1,6 @@
 package com.api.BetStrat.repository.football;
 
-import com.api.BetStrat.entity.football.GoalsFestSeasonInfo;
+import com.api.BetStrat.entity.football.GoalsFestSeasonStats;
 import com.api.BetStrat.entity.Team;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -14,11 +14,11 @@ import java.util.List;
 
 @Repository
 @Transactional
-@RepositoryDefinition(domainClass = GoalsFestSeasonInfo.class, idClass = Long.class)
-public interface GoalsFestSeasonInfoRepository extends JpaRepository<GoalsFestSeasonInfo, Long>, JpaSpecificationExecutor<GoalsFestSeasonInfo> {
+@RepositoryDefinition(domainClass = GoalsFestSeasonStats.class, idClass = Long.class)
+public interface GoalsFestSeasonInfoRepository extends JpaRepository<GoalsFestSeasonStats, Long>, JpaSpecificationExecutor<GoalsFestSeasonStats> {
 
-    @Cacheable(value="List<GoalsFestSeasonInfo>", key="{#root.methodName, #team.name}")
-    @Query(value = "SELECT m FROM GoalsFestSeasonInfo m WHERE m.teamId = ?1")
-    List<GoalsFestSeasonInfo> getGoalsFestStatsByTeam(Team team);
+    @Cacheable(value="List<GoalsFestSeasonStats>", key="{#root.methodName, #team.name}")
+    @Query(value = "SELECT m FROM GoalsFestSeasonStats m WHERE m.teamId = ?1")
+    List<GoalsFestSeasonStats> getGoalsFestStatsByTeam(Team team);
 
 }

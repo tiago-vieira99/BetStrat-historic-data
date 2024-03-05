@@ -1,25 +1,24 @@
-package com.api.BetStrat.entity.handball;
+package com.api.BetStrat.entity.football;
 
-import com.api.BetStrat.entity.StatsBySeasonInfo;
+import com.api.BetStrat.entity.StrategySeasonStats;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import lombok.ToString;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
-@ToString
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "Handball16WinsMarginSeasonInfo",  uniqueConstraints = { @UniqueConstraint(name = "UniqueSeasonAndCompetitionForTeamWM", columnNames = { "teamID", "season", "competition" }) })
-public class Handball16WinsMarginSeasonInfo extends StatsBySeasonInfo {
+@Table(name = "EuroHandicapSeasonStats",  uniqueConstraints = { @UniqueConstraint(name = "UniqueSeasonAndCompetitionForTeamEH", columnNames = { "teamID", "season", "competition" }) })
+public class EuroHandicapSeasonStats extends StrategySeasonStats {
+    private static final long serialVersionUID = 1L;
 
     @Column(name = "winsRate")
     private double winsRate;

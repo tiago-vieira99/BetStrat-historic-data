@@ -1,10 +1,10 @@
 package com.api.BetStrat.service.hockey;
 
 import com.api.BetStrat.constants.TeamScoreEnum;
-import com.api.BetStrat.entity.hockey.HockeyDrawSeasonInfo;
+import com.api.BetStrat.entity.hockey.HockeyDrawSeasonStats;
 import com.api.BetStrat.entity.Team;
 import com.api.BetStrat.repository.hockey.HockeyDrawSeasonInfoRepository;
-import com.api.BetStrat.service.SeasonInfoInterface;
+import com.api.BetStrat.service.StrategySeasonStatsInterface;
 import com.api.BetStrat.util.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,19 +22,24 @@ import static com.api.BetStrat.constants.BetStratConstants.SEASONS_LIST;
 
 @Service
 @Transactional
-public class HockeyDrawSeasonInfoService implements SeasonInfoInterface<HockeyDrawSeasonInfo> {
+public class HockeyDrawStrategySeasonStatsService implements StrategySeasonStatsInterface<HockeyDrawSeasonStats> {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(HockeyDrawSeasonInfoService.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(HockeyDrawStrategySeasonStatsService.class);
 
     @Autowired
     private HockeyDrawSeasonInfoRepository hockeyDrawSeasonInfoRepository;
 
-    public HockeyDrawSeasonInfo insertStatsBySeasonInfo(HockeyDrawSeasonInfo drawSeasonInfo) {
-        return hockeyDrawSeasonInfoRepository.save(drawSeasonInfo);
+    public HockeyDrawSeasonStats insertStrategySeasonStats(HockeyDrawSeasonStats strategySeasonStats) {
+        return hockeyDrawSeasonInfoRepository.save(strategySeasonStats);
     }
 
-    public void updateStatsBySeasonInfo(Team teamByName, Class<HockeyDrawSeasonInfo> className) {
-        List<HockeyDrawSeasonInfo> statsByTeam = hockeyDrawSeasonInfoRepository.getHockeyDrawStatsByTeam(teamByName);
+    @Override
+    public List<HockeyDrawSeasonStats> getStatsByStrategyAndTeam(Team team, String strategyName) {
+        return hockeyDrawSeasonInfoRepository.getHockeyDrawStatsByTeam(team);
+    }
+
+    public void updateStrategySeasonStats(Team teamByName, Class<HockeyDrawSeasonStats> className) {
+        List<HockeyDrawSeasonStats> statsByTeam = hockeyDrawSeasonInfoRepository.getHockeyDrawStatsByTeam(teamByName);
         Collections.sort(statsByTeam, new SortStatsDataBySeason());
         Collections.reverse(statsByTeam);
 
@@ -59,7 +64,7 @@ public class HockeyDrawSeasonInfoService implements SeasonInfoInterface<HockeyDr
 //        return teamByName;
     }
 
-    public String calculateFinalRating(double score, Class<HockeyDrawSeasonInfo> className) {
+    public String calculateFinalRating(double score, Class<HockeyDrawSeasonStats> className) {
         if (isBetween(score,90,150)) {
             return TeamScoreEnum.EXCELLENT.getValue() + " (" + score + ")";
         } else if(isBetween(score,65,90)) {
@@ -72,7 +77,7 @@ public class HockeyDrawSeasonInfoService implements SeasonInfoInterface<HockeyDr
         return "";
     }
 
-    public int calculateLast3SeasonsRateScore(List<HockeyDrawSeasonInfo> statsByTeam) {
+    public int calculateLast3SeasonsRateScore(List<HockeyDrawSeasonStats> statsByTeam) {
         double sumDrawRates = 0;
         for (int i=0; i<3; i++) {
             sumDrawRates += statsByTeam.get(i).getDrawRate();
@@ -96,7 +101,7 @@ public class HockeyDrawSeasonInfoService implements SeasonInfoInterface<HockeyDr
         return 0;
     }
 
-    public int calculateAllSeasonsRateScore(List<HockeyDrawSeasonInfo> statsByTeam) {
+    public int calculateAllSeasonsRateScore(List<HockeyDrawSeasonStats> statsByTeam) {
         double sumDrawRates = 0;
         for (int i=0; i<statsByTeam.size(); i++) {
             sumDrawRates += statsByTeam.get(i).getDrawRate();
@@ -120,7 +125,7 @@ public class HockeyDrawSeasonInfoService implements SeasonInfoInterface<HockeyDr
         return 0;
     }
 
-    private int calculateRecommendedLevelToStartSequence(List<HockeyDrawSeasonInfo> statsByTeam) {
+    private int calculateRecommendedLevelToStartSequence(List<HockeyDrawSeasonStats> statsByTeam) {
         int maxValue = 0;
         for (int i = 0; i < 3; i++) {
             String sequenceStr = statsByTeam.get(i).getNegativeSequence().replaceAll("[\\[\\]\\s]", "");
@@ -132,7 +137,7 @@ public class HockeyDrawSeasonInfoService implements SeasonInfoInterface<HockeyDr
         return maxValue-6 < 0 ? 0 : maxValue-6;
     }
 
-    public int calculateLast3SeasonsMaxSeqWOGreenScore(List<HockeyDrawSeasonInfo> statsByTeam) {
+    public int calculateLast3SeasonsMaxSeqWOGreenScore(List<HockeyDrawSeasonStats> statsByTeam) {
         int maxValue = 0;
         for (int i=0; i<3; i++) {
             String sequenceStr = statsByTeam.get(i).getNegativeSequence().replaceAll("[\\[\\]\\s]", "");
@@ -162,7 +167,7 @@ public class HockeyDrawSeasonInfoService implements SeasonInfoInterface<HockeyDr
         return 0;
     }
 
-    public int calculateAllSeasonsMaxSeqWOGreenScore(List<HockeyDrawSeasonInfo> statsByTeam) {
+    public int calculateAllSeasonsMaxSeqWOGreenScore(List<HockeyDrawSeasonStats> statsByTeam) {
         int maxValue = 0;
         for (int i=0; i<statsByTeam.size(); i++) {
             String sequenceStr = statsByTeam.get(i).getNegativeSequence().replaceAll("[\\[\\]\\s]", "");
@@ -192,7 +197,7 @@ public class HockeyDrawSeasonInfoService implements SeasonInfoInterface<HockeyDr
         return 0;
     }
 
-    public int calculateLast3SeasonsStdDevScore(List<HockeyDrawSeasonInfo> statsByTeam) {
+    public int calculateLast3SeasonsStdDevScore(List<HockeyDrawSeasonStats> statsByTeam) {
         double sumStdDev = 0;
         for (int i=0; i<3; i++) {
             sumStdDev += statsByTeam.get(i).getStdDeviation();
@@ -220,7 +225,7 @@ public class HockeyDrawSeasonInfoService implements SeasonInfoInterface<HockeyDr
         return 0;
     }
 
-    public int calculateAllSeasonsStdDevScore(List<HockeyDrawSeasonInfo> statsByTeam) {
+    public int calculateAllSeasonsStdDevScore(List<HockeyDrawSeasonStats> statsByTeam) {
         double sumStdDev = 0;
         for (int i=0; i<statsByTeam.size(); i++) {
             sumStdDev += statsByTeam.get(i).getStdDeviation();
@@ -249,17 +254,17 @@ public class HockeyDrawSeasonInfoService implements SeasonInfoInterface<HockeyDr
     }
 
     @Override
-    public Team updateTeamScore(Team team, Class<HockeyDrawSeasonInfo> className) {
+    public Team updateTeamScore(Team team, Class<HockeyDrawSeasonStats> className) {
         return null;
     }
 
     @Override
-    public int calculateLast3SeasonsTotalWinsRateScore(List<HockeyDrawSeasonInfo> statsByTeam) {
+    public int calculateLast3SeasonsTotalWinsRateScore(List<HockeyDrawSeasonStats> statsByTeam) {
         return 0;
     }
 
     @Override
-    public int calculateAllSeasonsTotalWinsRateScore(List<HockeyDrawSeasonInfo> statsByTeam) {
+    public int calculateAllSeasonsTotalWinsRateScore(List<HockeyDrawSeasonStats> statsByTeam) {
         return 0;
     }
 
@@ -282,10 +287,10 @@ public class HockeyDrawSeasonInfoService implements SeasonInfoInterface<HockeyDr
         return lower <= x && x < upper;
     }
 
-    static class SortStatsDataBySeason implements Comparator<HockeyDrawSeasonInfo> {
+    static class SortStatsDataBySeason implements Comparator<HockeyDrawSeasonStats> {
 
         @Override
-        public int compare(HockeyDrawSeasonInfo a, HockeyDrawSeasonInfo b) {
+        public int compare(HockeyDrawSeasonStats a, HockeyDrawSeasonStats b) {
             return Integer.valueOf(SEASONS_LIST.indexOf(a.getSeason()))
                     .compareTo(Integer.valueOf(SEASONS_LIST.indexOf(b.getSeason())));
         }

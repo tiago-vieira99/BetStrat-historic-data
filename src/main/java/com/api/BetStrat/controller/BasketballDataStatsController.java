@@ -2,13 +2,13 @@ package com.api.BetStrat.controller;
 
 import com.api.BetStrat.entity.HistoricMatch;
 import com.api.BetStrat.entity.Team;
-import com.api.BetStrat.entity.basketball.ComebackSeasonInfo;
-import com.api.BetStrat.entity.basketball.LongBasketWinsSeasonInfo;
-import com.api.BetStrat.entity.basketball.ShortBasketWinsSeasonInfo;
+import com.api.BetStrat.entity.basketball.ComebackSeasonStats;
+import com.api.BetStrat.entity.basketball.LongBasketWinsSeasonStats;
+import com.api.BetStrat.entity.basketball.ShortBasketWinsSeasonStats;
 import com.api.BetStrat.exception.StandardError;
 import com.api.BetStrat.repository.HistoricMatchRepository;
 import com.api.BetStrat.repository.TeamRepository;
-import com.api.BetStrat.service.StatsBySeasonService;
+import com.api.BetStrat.service.StrategySeasonStatsService;
 import com.api.BetStrat.service.TeamService;
 import com.api.BetStrat.util.ScrappingUtil;
 import io.swagger.annotations.Api;
@@ -57,7 +57,7 @@ public class BasketballDataStatsController {
     private TeamService teamService;
 
     @Autowired
-    private StatsBySeasonService statsBySeasonService;
+    private StrategySeasonStatsService statsBySeasonService;
 
     @Autowired
     private ModelMapper modelMapper;
@@ -97,8 +97,8 @@ public class BasketballDataStatsController {
             @ApiResponse(code = 500, message = "Internal Server Error", response = StandardError.class),
     })
     @GetMapping("/team-comebackwins-stats/{teamName}")
-    public ResponseEntity<List<ComebackSeasonInfo>> getComebackWinsTeamStats(@PathVariable("teamName") String teamName) {
-        List<ComebackSeasonInfo> teamStats = teamService.getTeamComebackWinsStats(teamName);
+    public ResponseEntity<List<ComebackSeasonStats>> getComebackWinsTeamStats(@PathVariable("teamName") String teamName) {
+        List<ComebackSeasonStats> teamStats = teamService.getTeamComebackWinsStats(teamName);
         return ResponseEntity.ok().body(teamStats);
     }
 
@@ -112,8 +112,8 @@ public class BasketballDataStatsController {
             @ApiResponse(code = 500, message = "Internal Server Error", response = StandardError.class),
     })
     @GetMapping("/team-shortwins-stats/{teamName}")
-    public ResponseEntity<List<ShortBasketWinsSeasonInfo>> getShortWinsTeamStats(@PathVariable("teamName") String teamName) {
-        List<ShortBasketWinsSeasonInfo> teamStats = teamService.getTeamShortWinsStats(teamName);
+    public ResponseEntity<List<ShortBasketWinsSeasonStats>> getShortWinsTeamStats(@PathVariable("teamName") String teamName) {
+        List<ShortBasketWinsSeasonStats> teamStats = teamService.getTeamShortWinsStats(teamName);
         return ResponseEntity.ok().body(teamStats);
     }
 
@@ -127,8 +127,8 @@ public class BasketballDataStatsController {
             @ApiResponse(code = 500, message = "Internal Server Error", response = StandardError.class),
     })
     @GetMapping("/team-longwins-stats/{teamName}")
-    public ResponseEntity<List<LongBasketWinsSeasonInfo>> getLongWinsTeamStats(@PathVariable("teamName") String teamName) {
-        List<LongBasketWinsSeasonInfo> teamStats = teamService.getTeamLongWinsStats(teamName);
+    public ResponseEntity<List<LongBasketWinsSeasonStats>> getLongWinsTeamStats(@PathVariable("teamName") String teamName) {
+        List<LongBasketWinsSeasonStats> teamStats = teamService.getTeamLongWinsStats(teamName);
         return ResponseEntity.ok().body(teamStats);
     }
 

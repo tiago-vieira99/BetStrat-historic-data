@@ -3,10 +3,10 @@ package com.api.BetStrat.service.football;
 import com.api.BetStrat.constants.TeamScoreEnum;
 import com.api.BetStrat.entity.HistoricMatch;
 import com.api.BetStrat.entity.Team;
-import com.api.BetStrat.entity.football.FlipFlopOversUndersInfo;
+import com.api.BetStrat.entity.football.FlipFlopOversUndersStats;
 import com.api.BetStrat.repository.HistoricMatchRepository;
 import com.api.BetStrat.repository.football.FlipFlopOversUndersInfoRepository;
-import com.api.BetStrat.service.SeasonInfoInterface;
+import com.api.BetStrat.service.StrategySeasonStatsInterface;
 import com.api.BetStrat.util.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,9 +31,9 @@ import static com.api.BetStrat.util.Utils.calculateSD;
 
 @Service
 @Transactional
-public class FlipFlopOversUndersInfoService implements SeasonInfoInterface<FlipFlopOversUndersInfo> {
+public class FlipFlopOversUndersStatsServiceStrategy implements StrategySeasonStatsInterface<FlipFlopOversUndersStats> {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(FlipFlopOversUndersInfoService.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(FlipFlopOversUndersStatsServiceStrategy.class);
 
     @Autowired
     private FlipFlopOversUndersInfoRepository flipFlopOversUndersInfoRepository;
@@ -41,13 +41,18 @@ public class FlipFlopOversUndersInfoService implements SeasonInfoInterface<FlipF
     @Autowired
     private HistoricMatchRepository historicMatchRepository;
 
-    public FlipFlopOversUndersInfo insertStatsBySeasonInfo(FlipFlopOversUndersInfo drawSeasonInfo) {
-        LOGGER.info("Inserted " + drawSeasonInfo.getClass() + " for " + drawSeasonInfo.getTeamId().getName() + " and season " + drawSeasonInfo.getSeason());
-        return flipFlopOversUndersInfoRepository.save(drawSeasonInfo);
+    public FlipFlopOversUndersStats insertStrategySeasonStats(FlipFlopOversUndersStats strategySeasonStats) {
+        LOGGER.info("Inserted " + strategySeasonStats.getClass() + " for " + strategySeasonStats.getTeamId().getName() + " and season " + strategySeasonStats.getSeason());
+        return flipFlopOversUndersInfoRepository.save(strategySeasonStats);
     }
 
-    public void updateStatsBySeasonInfo(Team team, Class<FlipFlopOversUndersInfo> className) {
-        List<FlipFlopOversUndersInfo> statsByTeam = flipFlopOversUndersInfoRepository.getFlipFlopStatsByTeam(team);
+    @Override
+    public List<FlipFlopOversUndersStats> getStatsByStrategyAndTeam(Team team, String strategyName) {
+        return flipFlopOversUndersInfoRepository.getFlipFlopStatsByTeam(team);
+    }
+
+    public void updateStrategySeasonStats(Team team, Class<FlipFlopOversUndersStats> className) {
+        List<FlipFlopOversUndersStats> statsByTeam = flipFlopOversUndersInfoRepository.getFlipFlopStatsByTeam(team);
         List<String> seasonsList = null;
 
         if (SUMMER_SEASONS_BEGIN_MONTH_LIST.contains(team.getBeginSeason())) {
@@ -67,7 +72,7 @@ public class FlipFlopOversUndersInfoService implements SeasonInfoInterface<FlipF
                     continue;
                 }
 
-                FlipFlopOversUndersInfo flipFlopOversUndersInfo = new FlipFlopOversUndersInfo();
+                FlipFlopOversUndersStats flipFlopOversUndersInfo = new FlipFlopOversUndersStats();
 
                 ArrayList<Integer> flipFlopsSequence = new ArrayList<>();
                 int count = 0;
@@ -125,13 +130,13 @@ public class FlipFlopOversUndersInfoService implements SeasonInfoInterface<FlipF
                 flipFlopOversUndersInfo.setSeason(season);
                 flipFlopOversUndersInfo.setTeamId(team);
                 flipFlopOversUndersInfo.setUrl(newSeasonUrl);
-                insertStatsBySeasonInfo(flipFlopOversUndersInfo);
+                insertStrategySeasonStats(flipFlopOversUndersInfo);
             }
         }
     }
 
-    public Team updateTeamScore(Team teamByName, Class<FlipFlopOversUndersInfo> className) {
-        List<FlipFlopOversUndersInfo> statsByTeam = flipFlopOversUndersInfoRepository.getFlipFlopStatsByTeam(teamByName);
+    public Team updateTeamScore(Team teamByName, Class<FlipFlopOversUndersStats> className) {
+        List<FlipFlopOversUndersStats> statsByTeam = flipFlopOversUndersInfoRepository.getFlipFlopStatsByTeam(teamByName);
         Collections.sort(statsByTeam, new SortStatsDataBySeason());
         Collections.reverse(statsByTeam);
 
@@ -214,7 +219,7 @@ public class FlipFlopOversUndersInfoService implements SeasonInfoInterface<FlipF
 //        return outMap;
 //    }
 
-    public String calculateFinalRating(double score, Class<FlipFlopOversUndersInfo> className) {
+    public String calculateFinalRating(double score, Class<FlipFlopOversUndersStats> className) {
         if (isBetween(score,90,150)) {
             return TeamScoreEnum.EXCELLENT.getValue() + " (" + score + ")";
         } else if(isBetween(score,65,90)) {
@@ -227,7 +232,7 @@ public class FlipFlopOversUndersInfoService implements SeasonInfoInterface<FlipF
         return "";
     }
 
-    public int calculateLast3SeasonsRateScore(List<FlipFlopOversUndersInfo> statsByTeam) {
+    public int calculateLast3SeasonsRateScore(List<FlipFlopOversUndersStats> statsByTeam) {
         double sumOversRates = 0;
         for (int i=0; i<3; i++) {
             sumOversRates += statsByTeam.get(i).getOversRate();
@@ -250,7 +255,7 @@ public class FlipFlopOversUndersInfoService implements SeasonInfoInterface<FlipF
     }
 
     //the more closest to 50%, the best
-    public int calculateAllSeasonsRateScore(List<FlipFlopOversUndersInfo> statsByTeam) {
+    public int calculateAllSeasonsRateScore(List<FlipFlopOversUndersStats> statsByTeam) {
         double sumOversRates = 0;
         for (int i=0; i<statsByTeam.size(); i++) {
             sumOversRates += statsByTeam.get(i).getOversRate();
@@ -273,16 +278,16 @@ public class FlipFlopOversUndersInfoService implements SeasonInfoInterface<FlipF
     }
 
     @Override
-    public int calculateLast3SeasonsTotalWinsRateScore(List<FlipFlopOversUndersInfo> statsByTeam) {
+    public int calculateLast3SeasonsTotalWinsRateScore(List<FlipFlopOversUndersStats> statsByTeam) {
         return 0;
     }
 
     @Override
-    public int calculateAllSeasonsTotalWinsRateScore(List<FlipFlopOversUndersInfo> statsByTeam) {
+    public int calculateAllSeasonsTotalWinsRateScore(List<FlipFlopOversUndersStats> statsByTeam) {
         return 0;
     }
 
-    private int calculateRecommendedLevelToStartSequence(List<FlipFlopOversUndersInfo> statsByTeam) {
+    private int calculateRecommendedLevelToStartSequence(List<FlipFlopOversUndersStats> statsByTeam) {
         int maxValue = 0;
         for (int i = 0; i < 3; i++) {
             String sequenceStr = statsByTeam.get(i).getNegativeSequence().replaceAll("[\\[\\]\\s]", "");
@@ -294,7 +299,7 @@ public class FlipFlopOversUndersInfoService implements SeasonInfoInterface<FlipF
         return maxValue-6 < 0 ? 0 : maxValue-6;
     }
 
-    public int calculateLast3SeasonsMaxSeqWOGreenScore(List<FlipFlopOversUndersInfo> statsByTeam) {
+    public int calculateLast3SeasonsMaxSeqWOGreenScore(List<FlipFlopOversUndersStats> statsByTeam) {
         int maxValue = 0;
         for (int i=0; i<3; i++) {
             String sequenceStr = statsByTeam.get(i).getNegativeSequence().replaceAll("[\\[\\]\\s]", "");
@@ -318,7 +323,7 @@ public class FlipFlopOversUndersInfoService implements SeasonInfoInterface<FlipF
         return 0;
     }
 
-    public int calculateAllSeasonsMaxSeqWOGreenScore(List<FlipFlopOversUndersInfo> statsByTeam) {
+    public int calculateAllSeasonsMaxSeqWOGreenScore(List<FlipFlopOversUndersStats> statsByTeam) {
         int maxValue = 0;
         for (int i=0; i<statsByTeam.size(); i++) {
             String sequenceStr = statsByTeam.get(i).getNegativeSequence().replaceAll("[\\[\\]\\s]", "");
@@ -342,7 +347,7 @@ public class FlipFlopOversUndersInfoService implements SeasonInfoInterface<FlipF
         return 0;
     }
 
-    public int calculateLast3SeasonsStdDevScore(List<FlipFlopOversUndersInfo> statsByTeam) {
+    public int calculateLast3SeasonsStdDevScore(List<FlipFlopOversUndersStats> statsByTeam) {
         double sumStdDev = 0;
         for (int i=0; i<3; i++) {
             sumStdDev += statsByTeam.get(i).getStdDeviation();
@@ -370,7 +375,7 @@ public class FlipFlopOversUndersInfoService implements SeasonInfoInterface<FlipF
         return 0;
     }
 
-    public int calculateAllSeasonsStdDevScore(List<FlipFlopOversUndersInfo> statsByTeam) {
+    public int calculateAllSeasonsStdDevScore(List<FlipFlopOversUndersStats> statsByTeam) {
         double sumStdDev = 0;
         for (int i=0; i<statsByTeam.size(); i++) {
             sumStdDev += statsByTeam.get(i).getStdDeviation();
@@ -417,10 +422,10 @@ public class FlipFlopOversUndersInfoService implements SeasonInfoInterface<FlipF
         return lower <= x && x < upper;
     }
 
-    static class SortStatsDataBySeason implements Comparator<FlipFlopOversUndersInfo> {
+    static class SortStatsDataBySeason implements Comparator<FlipFlopOversUndersStats> {
 
         @Override
-        public int compare(FlipFlopOversUndersInfo a, FlipFlopOversUndersInfo b) {
+        public int compare(FlipFlopOversUndersStats a, FlipFlopOversUndersStats b) {
             return Integer.valueOf(SEASONS_LIST.indexOf(a.getSeason()))
                     .compareTo(Integer.valueOf(SEASONS_LIST.indexOf(b.getSeason())));
         }

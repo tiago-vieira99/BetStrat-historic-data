@@ -1,7 +1,7 @@
 package com.api.BetStrat.repository.football;
 
 import com.api.BetStrat.entity.Team;
-import com.api.BetStrat.entity.football.WinsMarginSeasonInfo;
+import com.api.BetStrat.entity.football.WinsMarginSeasonStats;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
@@ -14,11 +14,11 @@ import java.util.List;
 
 @Repository
 @Transactional
-@RepositoryDefinition(domainClass = WinsMarginSeasonInfo.class, idClass = Long.class)
-public interface WinsMarginSeasonInfoRepository extends JpaRepository<WinsMarginSeasonInfo, Long>, JpaSpecificationExecutor<WinsMarginSeasonInfo> {
+@RepositoryDefinition(domainClass = WinsMarginSeasonStats.class, idClass = Long.class)
+public interface WinsMarginSeasonInfoRepository extends JpaRepository<WinsMarginSeasonStats, Long>, JpaSpecificationExecutor<WinsMarginSeasonStats> {
 
-    @Cacheable(value="List<WinsMarginSeasonInfo>", key="{#root.methodName, #team.name}")
-    @Query(value = "SELECT m FROM WinsMarginSeasonInfo m WHERE m.teamId = ?1")
-    List<WinsMarginSeasonInfo> getFootballWinsMarginStatsByTeam(Team team);
+    @Cacheable(value="List<WinsMarginSeasonStats>", key="{#root.methodName, #team.name}")
+    @Query(value = "SELECT m FROM WinsMarginSeasonStats m WHERE m.teamId = ?1")
+    List<WinsMarginSeasonStats> getFootballWinsMarginStatsByTeam(Team team);
 
 }

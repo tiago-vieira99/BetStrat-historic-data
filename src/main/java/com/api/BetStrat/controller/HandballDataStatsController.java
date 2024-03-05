@@ -2,16 +2,16 @@ package com.api.BetStrat.controller;
 
 import com.api.BetStrat.entity.HistoricMatch;
 import com.api.BetStrat.entity.Team;
-import com.api.BetStrat.entity.handball.Handball16WinsMarginSeasonInfo;
-import com.api.BetStrat.entity.handball.Handball49WinsMarginSeasonInfo;
-import com.api.BetStrat.entity.handball.Handball712WinsMarginSeasonInfo;
+import com.api.BetStrat.entity.handball.Handball16WinsMarginSeasonStats;
+import com.api.BetStrat.entity.handball.Handball49WinsMarginSeasonStats;
+import com.api.BetStrat.entity.handball.Handball712WinsMarginSeasonStats;
 import com.api.BetStrat.exception.StandardError;
 import com.api.BetStrat.repository.HistoricMatchRepository;
 import com.api.BetStrat.repository.TeamRepository;
 import com.api.BetStrat.repository.football.DrawSeasonInfoRepository;
 import com.api.BetStrat.repository.football.GoalsFestSeasonInfoRepository;
 import com.api.BetStrat.repository.football.WinsMarginSeasonInfoRepository;
-import com.api.BetStrat.service.StatsBySeasonService;
+import com.api.BetStrat.service.StrategySeasonStatsService;
 import com.api.BetStrat.service.TeamService;
 import com.api.BetStrat.util.ScrappingUtil;
 import io.swagger.annotations.Api;
@@ -64,7 +64,7 @@ public class HandballDataStatsController {
     private TeamService teamService;
 
     @Autowired
-    private StatsBySeasonService statsBySeasonService;
+    private StrategySeasonStatsService statsBySeasonService;
 
     @Autowired
     private ModelMapper modelMapper;
@@ -227,8 +227,8 @@ public class HandballDataStatsController {
             @ApiResponse(code = 500, message = "Internal Server Error", response = StandardError.class),
     })
     @GetMapping("/team-margin16wins-stats/{teamName}")
-    public ResponseEntity<List<Handball16WinsMarginSeasonInfo>> getMargin16WinsTeamStats(@PathVariable("teamName") String teamName) {
-        List<Handball16WinsMarginSeasonInfo> teamStats = teamService.getTeamMargin16WinsStats(teamName);
+    public ResponseEntity<List<Handball16WinsMarginSeasonStats>> getMargin16WinsTeamStats(@PathVariable("teamName") String teamName) {
+        List<Handball16WinsMarginSeasonStats> teamStats = teamService.getTeamMargin16WinsStats(teamName);
         return ResponseEntity.ok().body(teamStats);
     }
 
@@ -242,8 +242,8 @@ public class HandballDataStatsController {
             @ApiResponse(code = 500, message = "Internal Server Error", response = StandardError.class),
     })
     @GetMapping("/team-margin49wins-stats/{teamName}")
-    public ResponseEntity<List<Handball49WinsMarginSeasonInfo>> getMargin49WinsTeamStats(@PathVariable("teamName") String teamName) {
-        List<Handball49WinsMarginSeasonInfo> teamStats = teamService.getTeamMargin49WinsStats(teamName);
+    public ResponseEntity<List<Handball49WinsMarginSeasonStats>> getMargin49WinsTeamStats(@PathVariable("teamName") String teamName) {
+        List<Handball49WinsMarginSeasonStats> teamStats = teamService.getTeamMargin49WinsStats(teamName);
         return ResponseEntity.ok().body(teamStats);
     }
 
@@ -257,8 +257,8 @@ public class HandballDataStatsController {
             @ApiResponse(code = 500, message = "Internal Server Error", response = StandardError.class),
     })
     @GetMapping("/team-margin712wins-stats/{teamName}")
-    public ResponseEntity<List<Handball712WinsMarginSeasonInfo>> getMargin712WinsTeamStats(@PathVariable("teamName") String teamName) {
-        List<Handball712WinsMarginSeasonInfo> teamStats = teamService.getTeamMargin712WinsStats(teamName);
+    public ResponseEntity<List<Handball712WinsMarginSeasonStats>> getMargin712WinsTeamStats(@PathVariable("teamName") String teamName) {
+        List<Handball712WinsMarginSeasonStats> teamStats = teamService.getTeamMargin712WinsStats(teamName);
         return ResponseEntity.ok().body(teamStats);
     }
 

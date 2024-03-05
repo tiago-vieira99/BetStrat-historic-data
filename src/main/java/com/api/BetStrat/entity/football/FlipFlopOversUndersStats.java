@@ -1,6 +1,6 @@
 package com.api.BetStrat.entity.football;
 
-import com.api.BetStrat.entity.StatsBySeasonInfo;
+import com.api.BetStrat.entity.StrategySeasonStats;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -16,8 +16,8 @@ import javax.persistence.UniqueConstraint;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "FlipFlopOversUndersInfo", uniqueConstraints = { @UniqueConstraint(name = "UniqueSeasonAndCompetitionForTeamFF", columnNames = { "teamID", "season", "competition" }) })
-public class FlipFlopOversUndersInfo extends StatsBySeasonInfo {
+@Table(name = "FlipFlopOversUndersStats", uniqueConstraints = { @UniqueConstraint(name = "UniqueSeasonAndCompetitionForTeamFF", columnNames = { "teamID", "season", "competition" }) })
+public class FlipFlopOversUndersStats extends StrategySeasonStats {
 
     @Column(name = "oversRate")
     private double oversRate;

@@ -1,7 +1,6 @@
 package com.api.BetStrat.util;
 
 import com.api.BetStrat.entity.HistoricMatch;
-import com.api.BetStrat.entity.handball.Handball16WinsMarginSeasonInfo;
 import lombok.SneakyThrows;
 
 import java.text.DecimalFormat;
@@ -15,8 +14,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
-
-import static com.api.BetStrat.constants.BetStratConstants.SEASONS_LIST;
 
 public class Utils {
 

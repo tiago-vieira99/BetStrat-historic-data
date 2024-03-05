@@ -2,11 +2,11 @@ package com.api.BetStrat.service.football;
 
 import com.api.BetStrat.constants.TeamScoreEnum;
 import com.api.BetStrat.entity.HistoricMatch;
-import com.api.BetStrat.entity.football.EuroHandicapSeasonInfo;
+import com.api.BetStrat.entity.football.EuroHandicapSeasonStats;
 import com.api.BetStrat.entity.Team;
 import com.api.BetStrat.repository.HistoricMatchRepository;
 import com.api.BetStrat.repository.football.EuroHandicapSeasonInfoRepository;
-import com.api.BetStrat.service.SeasonInfoInterface;
+import com.api.BetStrat.service.StrategySeasonStatsInterface;
 import com.api.BetStrat.util.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,9 +31,9 @@ import static com.api.BetStrat.util.Utils.calculateSD;
 
 @Service
 @Transactional
-public class EuroHandicapSeasonInfoService implements SeasonInfoInterface<EuroHandicapSeasonInfo> {
+public class EuroHandicapStrategySeasonStatsService implements StrategySeasonStatsInterface<EuroHandicapSeasonStats> {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(EuroHandicapSeasonInfoService.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(EuroHandicapStrategySeasonStatsService.class);
 
     @Autowired
     private EuroHandicapSeasonInfoRepository euroHandicapSeasonInfoRepository;
@@ -41,13 +41,18 @@ public class EuroHandicapSeasonInfoService implements SeasonInfoInterface<EuroHa
     @Autowired
     private HistoricMatchRepository historicMatchRepository;
 
-    public EuroHandicapSeasonInfo insertStatsBySeasonInfo(EuroHandicapSeasonInfo euroHandicapSeasonInfo) {
-        LOGGER.info("Inserted " + euroHandicapSeasonInfo.getClass() + " for " + euroHandicapSeasonInfo.getTeamId().getName() + " and season " + euroHandicapSeasonInfo.getSeason());
-        return euroHandicapSeasonInfoRepository.save(euroHandicapSeasonInfo);
+    public EuroHandicapSeasonStats insertStrategySeasonStats(EuroHandicapSeasonStats strategySeasonStats) {
+        LOGGER.info("Inserted " + strategySeasonStats.getClass() + " for " + strategySeasonStats.getTeamId().getName() + " and season " + strategySeasonStats.getSeason());
+        return euroHandicapSeasonInfoRepository.save(strategySeasonStats);
     }
 
-    public void updateStatsBySeasonInfo(Team team, Class<EuroHandicapSeasonInfo> className) {
-        List<EuroHandicapSeasonInfo> statsByTeam = euroHandicapSeasonInfoRepository.getEuroHandicapStatsByTeam(team);
+    @Override
+    public List<EuroHandicapSeasonStats> getStatsByStrategyAndTeam(Team team, String strategyName) {
+        return euroHandicapSeasonInfoRepository.getEuroHandicapStatsByTeam(team);
+    }
+
+    public void updateStrategySeasonStats(Team team, Class<EuroHandicapSeasonStats> className) {
+        List<EuroHandicapSeasonStats> statsByTeam = euroHandicapSeasonInfoRepository.getEuroHandicapStatsByTeam(team);
         List<String> seasonsList = null;
 
         if (SUMMER_SEASONS_BEGIN_MONTH_LIST.contains(team.getBeginSeason())) {
@@ -69,7 +74,7 @@ public class EuroHandicapSeasonInfoService implements SeasonInfoInterface<EuroHa
                     continue;
                 }
 
-                EuroHandicapSeasonInfo euroHandicapSeasonInfo = new EuroHandicapSeasonInfo();
+                EuroHandicapSeasonStats euroHandicapSeasonInfo = new EuroHandicapSeasonStats();
 
                 ArrayList<Integer> noEuroHandicapsSequence = new ArrayList<>();
                 int count = 0;
@@ -118,13 +123,13 @@ public class EuroHandicapSeasonInfoService implements SeasonInfoInterface<EuroHa
                 euroHandicapSeasonInfo.setSeason(season);
                 euroHandicapSeasonInfo.setTeamId(team);
                 euroHandicapSeasonInfo.setUrl(newSeasonUrl);
-                insertStatsBySeasonInfo(euroHandicapSeasonInfo);
+                insertStrategySeasonStats(euroHandicapSeasonInfo);
             }
         }
     }
 
-    public Team updateTeamScore (Team teamByName, Class<EuroHandicapSeasonInfo> className) {
-        List<EuroHandicapSeasonInfo> statsByTeam = euroHandicapSeasonInfoRepository.getEuroHandicapStatsByTeam(teamByName);
+    public Team updateTeamScore (Team teamByName, Class<EuroHandicapSeasonStats> className) {
+        List<EuroHandicapSeasonStats> statsByTeam = euroHandicapSeasonInfoRepository.getEuroHandicapStatsByTeam(teamByName);
         Collections.sort(statsByTeam, new SortStatsDataBySeason());
         Collections.reverse(statsByTeam);
 
@@ -155,7 +160,7 @@ public class EuroHandicapSeasonInfoService implements SeasonInfoInterface<EuroHa
         return teamByName;
     }
 
-    public String calculateFinalRating(double score, Class<EuroHandicapSeasonInfo> className) {
+    public String calculateFinalRating(double score, Class<EuroHandicapSeasonStats> className) {
         if (isBetween(score,85,150)) {
             return TeamScoreEnum.EXCELLENT.getValue() + " (" + score + ")";
         } else if(isBetween(score,65,85)) {
@@ -168,7 +173,7 @@ public class EuroHandicapSeasonInfoService implements SeasonInfoInterface<EuroHa
         return "";
     }
 
-    public int calculateLast3SeasonsRateScore(List<EuroHandicapSeasonInfo> statsByTeam) {
+    public int calculateLast3SeasonsRateScore(List<EuroHandicapSeasonStats> statsByTeam) {
         double marginWinsRates = 0;
         for (int i=0; i<3; i++) {
             marginWinsRates += statsByTeam.get(i).getMarginWinsRate();
@@ -188,7 +193,7 @@ public class EuroHandicapSeasonInfoService implements SeasonInfoInterface<EuroHa
         return 0;
     }
 
-    public int calculateAllSeasonsRateScore(List<EuroHandicapSeasonInfo> statsByTeam) {
+    public int calculateAllSeasonsRateScore(List<EuroHandicapSeasonStats> statsByTeam) {
         double marginWinsRates = 0;
         for (int i=0; i<statsByTeam.size(); i++) {
             marginWinsRates += statsByTeam.get(i).getMarginWinsRate();
@@ -208,7 +213,7 @@ public class EuroHandicapSeasonInfoService implements SeasonInfoInterface<EuroHa
         return 0;
     }
 
-    public int calculateLast3SeasonsTotalWinsRateScore(List<EuroHandicapSeasonInfo> statsByTeam) {
+    public int calculateLast3SeasonsTotalWinsRateScore(List<EuroHandicapSeasonStats> statsByTeam) {
         double totalWinsRates = 0;
         for (int i=0; i<3; i++) {
             totalWinsRates += statsByTeam.get(i).getWinsRate();
@@ -228,7 +233,7 @@ public class EuroHandicapSeasonInfoService implements SeasonInfoInterface<EuroHa
         return 0;
     }
 
-    public int calculateAllSeasonsTotalWinsRateScore(List<EuroHandicapSeasonInfo> statsByTeam) {
+    public int calculateAllSeasonsTotalWinsRateScore(List<EuroHandicapSeasonStats> statsByTeam) {
         double totalWinsRates = 0;
         for (int i=0; i<statsByTeam.size(); i++) {
             totalWinsRates += statsByTeam.get(i).getWinsRate();
@@ -248,7 +253,7 @@ public class EuroHandicapSeasonInfoService implements SeasonInfoInterface<EuroHa
         return 0;
     }
 
-    public int calculateLast3SeasonsMaxSeqWOGreenScore(List<EuroHandicapSeasonInfo> statsByTeam) {
+    public int calculateLast3SeasonsMaxSeqWOGreenScore(List<EuroHandicapSeasonStats> statsByTeam) {
         int maxValue = 0;
         for (int i=0; i<3; i++) {
             String sequenceStr = statsByTeam.get(i).getNegativeSequence().replaceAll("[\\[\\]\\s]", "");
@@ -272,7 +277,7 @@ public class EuroHandicapSeasonInfoService implements SeasonInfoInterface<EuroHa
         return 0;
     }
 
-    public int calculateAllSeasonsMaxSeqWOGreenScore(List<EuroHandicapSeasonInfo> statsByTeam) {
+    public int calculateAllSeasonsMaxSeqWOGreenScore(List<EuroHandicapSeasonStats> statsByTeam) {
         int maxValue = 0;
         for (int i=0; i<statsByTeam.size(); i++) {
             String sequenceStr = statsByTeam.get(i).getNegativeSequence().replaceAll("[\\[\\]\\s]", "");
@@ -296,7 +301,7 @@ public class EuroHandicapSeasonInfoService implements SeasonInfoInterface<EuroHa
         return 0;
     }
 
-    public int calculateLast3SeasonsStdDevScore(List<EuroHandicapSeasonInfo> statsByTeam) {
+    public int calculateLast3SeasonsStdDevScore(List<EuroHandicapSeasonStats> statsByTeam) {
         double sumStdDev = 0;
         for (int i=0; i<3; i++) {
             sumStdDev += statsByTeam.get(i).getStdDeviation();
@@ -318,7 +323,7 @@ public class EuroHandicapSeasonInfoService implements SeasonInfoInterface<EuroHa
         return 0;
     }
 
-    public int calculateAllSeasonsStdDevScore(List<EuroHandicapSeasonInfo> statsByTeam) {
+    public int calculateAllSeasonsStdDevScore(List<EuroHandicapSeasonStats> statsByTeam) {
         double sumStdDev = 0;
         for (int i=0; i<statsByTeam.size(); i++) {
             sumStdDev += statsByTeam.get(i).getStdDeviation();
@@ -359,10 +364,10 @@ public class EuroHandicapSeasonInfoService implements SeasonInfoInterface<EuroHa
         return lower <= x && x < upper;
     }
 
-    static class SortStatsDataBySeason implements Comparator<EuroHandicapSeasonInfo> {
+    static class SortStatsDataBySeason implements Comparator<EuroHandicapSeasonStats> {
 
         @Override
-        public int compare(EuroHandicapSeasonInfo a, EuroHandicapSeasonInfo b) {
+        public int compare(EuroHandicapSeasonStats a, EuroHandicapSeasonStats b) {
             return Integer.valueOf(SEASONS_LIST.indexOf(a.getSeason()))
                     .compareTo(Integer.valueOf(SEASONS_LIST.indexOf(b.getSeason())));
         }

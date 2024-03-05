@@ -1,15 +1,17 @@
 package com.api.BetStrat.service;
 
-import com.api.BetStrat.entity.StatsBySeasonInfo;
+import com.api.BetStrat.entity.StrategySeasonStats;
 import com.api.BetStrat.entity.Team;
 
 import java.util.List;
 
-public interface SeasonInfoInterface<T extends StatsBySeasonInfo> {
+public interface StrategySeasonStatsInterface<T extends StrategySeasonStats> {
 
-    T insertStatsBySeasonInfo(T statsBySeasonInfo);
+    T insertStrategySeasonStats(T strategySeasonStats);
 
-    void updateStatsBySeasonInfo(Team team, Class<T> className);
+    List<T> getStatsByStrategyAndTeam(Team team, String strategyName);
+
+    void updateStrategySeasonStats(Team team, Class<T> className);
 
     Team updateTeamScore(Team team, Class<T> className);
 

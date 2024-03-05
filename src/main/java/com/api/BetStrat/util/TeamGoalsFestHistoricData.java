@@ -1,6 +1,6 @@
 package com.api.BetStrat.util;
 
-import com.api.BetStrat.entity.football.GoalsFestSeasonInfo;
+import com.api.BetStrat.entity.football.GoalsFestSeasonStats;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.json.JSONArray;
@@ -27,8 +27,8 @@ public class TeamGoalsFestHistoricData {
     private double mean = this.mean;
 
     @SneakyThrows
-    public GoalsFestSeasonInfo buildSeasonGoalsFestStatsData(JSONArray allMatches) {
-        GoalsFestSeasonInfo goalsFestSeasonInfo = new GoalsFestSeasonInfo();
+    public GoalsFestSeasonStats buildSeasonGoalsFestStatsData(JSONArray allMatches) {
+        GoalsFestSeasonStats goalsFestSeasonInfo = new GoalsFestSeasonStats();
 
         ArrayList<Integer> noGoalsFestSequence = new ArrayList<>();
         int count = 0;

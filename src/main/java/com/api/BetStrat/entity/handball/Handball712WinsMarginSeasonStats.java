@@ -1,6 +1,6 @@
 package com.api.BetStrat.entity.handball;
 
-import com.api.BetStrat.entity.StatsBySeasonInfo;
+import com.api.BetStrat.entity.StrategySeasonStats;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -18,8 +18,8 @@ import javax.persistence.UniqueConstraint;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "Handball712WinsMarginSeasonInfo",  uniqueConstraints = { @UniqueConstraint(name = "UniqueSeasonAndCompetitionForTeamWM", columnNames = { "teamID", "season", "competition" }) })
-public class Handball712WinsMarginSeasonInfo extends StatsBySeasonInfo {
+@Table(name = "Handball712WinsMarginSeasonStats",  uniqueConstraints = { @UniqueConstraint(name = "UniqueSeasonAndCompetitionForTeamWM", columnNames = { "teamID", "season", "competition" }) })
+public class Handball712WinsMarginSeasonStats extends StrategySeasonStats {
 
     @Column(name = "winsRate")
     private double winsRate;

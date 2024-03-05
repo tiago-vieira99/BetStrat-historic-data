@@ -9,7 +9,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 @Slf4j
 @EnableScheduling
 @SpringBootApplication
-@EnableCaching
+//@EnableCaching
 public class BetStratHistoricDataApplication {
 
 	public static void main(String[] args) {

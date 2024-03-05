@@ -1,12 +1,9 @@
 package com.api.BetStrat.entity;
 
-import com.api.BetStrat.entity.Team;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.annotations.ApiModelProperty;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.SneakyThrows;
 import org.hibernate.annotations.CreationTimestamp;
@@ -28,7 +25,7 @@ import java.util.Date;
 @Setter
 @Getter
 @MappedSuperclass
-public abstract class StatsBySeasonInfo implements Serializable {
+public abstract class StrategySeasonStats implements Serializable {
     private static final long serialVersionUID = 1L;
 
     @Id

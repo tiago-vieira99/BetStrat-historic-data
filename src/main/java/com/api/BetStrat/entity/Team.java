@@ -68,44 +68,128 @@ public class Team implements Serializable {
     @Column(name = "draws_hunter_score")
     private String drawsHunterScore;
 
+    @Column(name = "draws_hunter_max_red_run")
+    private Integer drawsHunterScoreMaxRedRun;
+
+    @Column(name = "draws_hunter_avg_red_run")
+    private Integer drawsHunterScoreAvgRedRun;
+
     @Column(name = "euro_handicap_score")
     private String euroHandicapScore;
+
+    @Column(name = "euro_handicap_max_red_run")
+    private Integer euroHandicapScoreMaxRedRun;
+
+    @Column(name = "euro_handicap_avg_red_run")
+    private Integer euroHandicapScoreAvgRedRun;
 
     @Column(name = "margin_wins_score")
     private String marginWinsScore;
 
+    @Column(name = "margin_wins_max_red_run")
+    private Integer marginWinsScoreMaxRedRun;
+
+    @Column(name = "margin_wins_avg_red_run")
+    private Integer marginWinsScoreAvgRedRun;
+
     @Column(name = "flip_flop_score")
     private String flipFlopScore;
+
+    @Column(name = "flip_flop_max_red_run")
+    private Integer flipFlopScoreMaxRedRun;
+
+    @Column(name = "flip_flop_avg_red_run")
+    private Integer flipFlopScoreAvgRedRun;
 
     @Column(name = "margin_wins_any2_score")
     private String marginWinsAny2Score;
 
+    @Column(name = "margin_wins_any2_max_red_run")
+    private Integer marginWinsAny2ScoreMaxRedRun;
+
+    @Column(name = "margin_wins_any2_avg_red_run")
+    private Integer marginWinsAny2ScoreAvgRedRun;
+
     @Column(name = "margin_wins_3_score")
     private String marginWins3Score;
+
+    @Column(name = "margin_wins_3_max_red_run")
+    private Integer marginWins3ScoreMaxRedRun;
+
+    @Column(name = "margin_wins_3_avg_red_run")
+    private Integer marginWins3ScoreAvgRedRun;
 
     @Column(name = "goals_fest_score")
     private String goalsFestScore;
 
+    @Column(name = "goals_fest_max_red_run")
+    private Integer goalsFestScoreMaxRedRun;
+
+    @Column(name = "goals_fest_avg_red_run")
+    private Integer goalsFestScoreAvgRedRun;
+
     @Column(name = "hockey_draws_hunter_score")
     private String hockeyDrawsHunterScore;
+
+    @Column(name = "hockey_draws_max_red_run")
+    private Integer hockeyDrawsScoreMaxRedRun;
+
+    @Column(name = "hockey_draws_avg_red_run")
+    private Integer hockeyDrawsScoreAvgRedRun;
 
     @Column(name = "basket_comeback_score")
     private String basketComebackScore;
 
+    @Column(name = "basket_comeback_max_red_run")
+    private Integer basketComebackScoreMaxRedRun;
+
+    @Column(name = "basket_comeback_avg_red_run")
+    private Integer basketComebackScoreAvgRedRun;
+
     @Column(name = "basket_short_wins_score")
     private String basketShortWinsScore;
+
+    @Column(name = "basket_short_wins_max_red_run")
+    private Integer basketShortWinsScoreMaxRedRun;
+
+    @Column(name = "basket_short_wins_avg_red_run")
+    private Integer basketShortWinsScoreAvgRedRun;
 
     @Column(name = "basket_long_wins_score")
     private String basketLongWinsScore;
 
+    @Column(name = "basket_long_wins_max_red_run")
+    private Integer basketLongWinsScoreMaxRedRun;
+
+    @Column(name = "basket_long_wins_avg_red_run")
+    private Integer basketLongWinsScoreAvgRedRun;
+
     @Column(name = "handball_16margin_wins_score")
     private String handball16MarginWinsScore;
+
+    @Column(name = "handball_16margin_wins_max_red_run")
+    private Integer handball16MarginWinsScoreMaxRedRun;
+
+    @Column(name = "handball_16margin_wins_avg_red_run")
+    private Integer handball16MarginWinsScoreAvgRedRun;
 
     @Column(name = "handball_49margin_wins_score")
     private String handball49MarginWinsScore;
 
+    @Column(name = "handball_49margin_wins_max_red_run")
+    private Integer handball49MarginWinsScoreMaxRedRun;
+
+    @Column(name = "handball_49margin_wins_avg_red_run")
+    private Integer handball49MarginWinsScoreAvgRedRun;
+
     @Column(name = "handball_712margin_wins_score")
     private String handball712MarginWinsScore;
+
+    @Column(name = "handball_712margin_wins_max_red_run")
+    private Integer handball712MarginWinsScoreMaxRedRun;
+
+    @Column(name = "handball_712margin_wins_avg_red_run")
+    private Integer handball712MarginWinsScoreAvgRedRun;
 
     @Column(name = "sport")
     private String sport;

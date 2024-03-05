@@ -45,7 +45,7 @@ public class GetLastPlayedMatchTask {
     @Autowired
     private HistoricMatchRepository historicMatchRepository;
 
-    @EventListener(ApplicationReadyEvent.class)
+//    @EventListener(ApplicationReadyEvent.class)
     @Scheduled(cron = "0 0 4 1/2 * ?", zone="Europe/Lisbon") //every two days at 4am
     public void execCronn() {
 

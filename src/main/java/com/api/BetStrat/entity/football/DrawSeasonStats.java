@@ -1,6 +1,6 @@
 package com.api.BetStrat.entity.football;
 
-import com.api.BetStrat.entity.StatsBySeasonInfo;
+import com.api.BetStrat.entity.StrategySeasonStats;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -13,8 +13,8 @@ import javax.persistence.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "DrawSeasonInfo", uniqueConstraints = { @UniqueConstraint(name = "UniqueSeasonAndCompetitionForTeamDH", columnNames = { "teamID", "season", "competition" }) })
-public class DrawSeasonInfo extends StatsBySeasonInfo {
+@Table(name = "DrawSeasonStats", uniqueConstraints = { @UniqueConstraint(name = "UniqueSeasonAndCompetitionForTeamDH", columnNames = { "teamID", "season", "competition" }) })
+public class DrawSeasonStats extends StrategySeasonStats {
 
     @Column(name = "drawRate")
     private double drawRate;

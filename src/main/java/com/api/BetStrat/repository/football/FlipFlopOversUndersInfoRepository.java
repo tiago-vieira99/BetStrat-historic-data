@@ -1,7 +1,7 @@
 package com.api.BetStrat.repository.football;
 
 import com.api.BetStrat.entity.Team;
-import com.api.BetStrat.entity.football.FlipFlopOversUndersInfo;
+import com.api.BetStrat.entity.football.FlipFlopOversUndersStats;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
@@ -14,11 +14,11 @@ import java.util.List;
 
 @Repository
 @Transactional
-@RepositoryDefinition(domainClass = FlipFlopOversUndersInfo.class, idClass = Long.class)
-public interface FlipFlopOversUndersInfoRepository extends JpaRepository<FlipFlopOversUndersInfo, Long>, JpaSpecificationExecutor<FlipFlopOversUndersInfo> {
+@RepositoryDefinition(domainClass = FlipFlopOversUndersStats.class, idClass = Long.class)
+public interface FlipFlopOversUndersInfoRepository extends JpaRepository<FlipFlopOversUndersStats, Long>, JpaSpecificationExecutor<FlipFlopOversUndersStats> {
 
-    @Cacheable(value="List<FlipFlopOversUndersInfo>", key="{#root.methodName, #team.name}")
-    @Query(value = "SELECT m FROM FlipFlopOversUndersInfo m WHERE m.teamId = ?1")
-    List<FlipFlopOversUndersInfo> getFlipFlopStatsByTeam(Team team);
+    @Cacheable(value="List<FlipFlopOversUndersStats>", key="{#root.methodName, #team.name}")
+    @Query(value = "SELECT m FROM FlipFlopOversUndersStats m WHERE m.teamId = ?1")
+    List<FlipFlopOversUndersStats> getFlipFlopStatsByTeam(Team team);
 
 }
