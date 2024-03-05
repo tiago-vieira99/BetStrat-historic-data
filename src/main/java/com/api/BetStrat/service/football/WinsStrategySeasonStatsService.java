@@ -1,11 +1,12 @@
-package com.api.BetStrat.service.handball;
+package com.api.BetStrat.service.football;
 
 import com.api.BetStrat.constants.TeamScoreEnum;
 import com.api.BetStrat.entity.HistoricMatch;
 import com.api.BetStrat.entity.Team;
-import com.api.BetStrat.entity.handball.Handball49WinsMarginSeasonStats;
+import com.api.BetStrat.entity.football.WinsSeasonStats;
+import com.api.BetStrat.entity.football.WinsSeasonStats;
 import com.api.BetStrat.repository.HistoricMatchRepository;
-import com.api.BetStrat.repository.handball.Handball49WinsMarginSeasonInfoRepository;
+import com.api.BetStrat.repository.football.WinsSeasonInfoRepository;
 import com.api.BetStrat.service.StrategyScoreCalculator;
 import com.api.BetStrat.service.StrategySeasonStatsInterface;
 import com.api.BetStrat.util.Utils;
@@ -19,6 +20,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -32,30 +34,30 @@ import static com.api.BetStrat.util.Utils.calculateSD;
 
 @Service
 @Transactional
-public class HandballWinsMargin49StrategySeasonStatsService extends StrategyScoreCalculator<Handball49WinsMarginSeasonStats> implements StrategySeasonStatsInterface<Handball49WinsMarginSeasonStats> {
+public class WinsStrategySeasonStatsService extends StrategyScoreCalculator<WinsSeasonStats> implements StrategySeasonStatsInterface<WinsSeasonStats> {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(HandballWinsMargin49StrategySeasonStatsService.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(WinsStrategySeasonStatsService.class);
 
     @Autowired
-    private Handball49WinsMarginSeasonInfoRepository handball49WinsMarginSeasonInfoRepository;
+    private WinsSeasonInfoRepository winsSeasonInfoRepository;
 
     @Autowired
     private HistoricMatchRepository historicMatchRepository;
 
     @Override
-    public Handball49WinsMarginSeasonStats insertStrategySeasonStats(Handball49WinsMarginSeasonStats strategySeasonStats) {
+    public WinsSeasonStats insertStrategySeasonStats(WinsSeasonStats strategySeasonStats) {
         LOGGER.info("Inserted " + strategySeasonStats.getClass() + " for " + strategySeasonStats.getTeamId().getName() + " and season " + strategySeasonStats.getSeason());
-        return handball49WinsMarginSeasonInfoRepository.save(strategySeasonStats);
+        return winsSeasonInfoRepository.save(strategySeasonStats);
     }
 
     @Override
-    public List<Handball49WinsMarginSeasonStats> getStatsByStrategyAndTeam(Team team, String strategyName) {
-        return handball49WinsMarginSeasonInfoRepository.getHandball49WinsMarginStatsByTeam(team);
+    public List<WinsSeasonStats> getStatsByStrategyAndTeam(Team team, String strategyName) {
+        return winsSeasonInfoRepository.getFootballWinsStatsByTeam(team);
     }
 
     @Override
     public void updateStrategySeasonStats(Team team, String strategyName) {
-        List<Handball49WinsMarginSeasonStats> statsByTeam = handball49WinsMarginSeasonInfoRepository.getHandball49WinsMarginStatsByTeam(team);
+        List<WinsSeasonStats> statsByTeam = winsSeasonInfoRepository.getFootballWinsStatsByTeam(team);
         List<String> seasonsList = null;
 
         if (SUMMER_SEASONS_BEGIN_MONTH_LIST.contains(team.getBeginSeason())) {
@@ -66,92 +68,86 @@ public class HandballWinsMargin49StrategySeasonStatsService extends StrategyScor
 
         for (String season : seasonsList) {
             if (!statsByTeam.stream().filter(s -> s.getSeason().equals(season)).findAny().isPresent()) {
+                String newSeasonUrl = "";
 
                 List<HistoricMatch> teamMatchesBySeason = historicMatchRepository.getTeamMatchesBySeason(team, season);
                 String mainCompetition = Utils.findMainCompetition(teamMatchesBySeason);
                 List<HistoricMatch> filteredMatches = teamMatchesBySeason.stream().filter(t -> t.getCompetition().equals(mainCompetition)).collect(Collectors.toList());
                 filteredMatches.sort(new Utils.MatchesByDateSorter());
 
-                Handball49WinsMarginSeasonStats handball49WinsMarginSeasonInfo = new Handball49WinsMarginSeasonStats();
+                if (filteredMatches.size() == 0) {
+                    continue;
+                }
 
-                ArrayList<Integer> noMarginWinsSequence = new ArrayList<>();
+                WinsSeasonStats winsSeasonInfo = new WinsSeasonStats();
+
+                ArrayList<Integer> noWinsSequence = new ArrayList<>();
                 int count = 0;
                 int totalWins= 0;
                 for (HistoricMatch historicMatch : filteredMatches) {
-                    String res = historicMatch.getFtResult();
+                    String res = historicMatch.getFtResult().split("\\(")[0];
                     count++;
                     int homeResult = Integer.parseInt(res.split(":")[0]);
-                    int awayResult = 0;
-                    if (res.contains("(")){
-                        awayResult = homeResult;
-                    } else {
-                        awayResult = Integer.parseInt(res.split(":")[1]);
-                    }
-
-                    if ((historicMatch.getHomeTeam().equals(team.getName()) && homeResult > awayResult) || (historicMatch.getAwayTeam().equals(team.getName()) && homeResult < awayResult)) {
+                    int awayResult = Integer.parseInt(res.split(":")[1]);
+                    if ((historicMatch.getHomeTeam().equals(team.getName()) && homeResult>awayResult) || (historicMatch.getAwayTeam().equals(team.getName()) && homeResult<awayResult)) {
                         totalWins++;
-                        if (Math.abs(homeResult - awayResult) <= 9 && Math.abs(homeResult - awayResult) >= 4) {
-                            noMarginWinsSequence.add(count);
-                            count = 0;
-                        }
+                        noWinsSequence.add(count);
+                        count = 0;
                     }
                 }
 
-                int totalMarginWins = noMarginWinsSequence.size();
-
-                noMarginWinsSequence.add(count);
-                if (noMarginWinsSequence.get(noMarginWinsSequence.size()-1) != 0) {
-                    noMarginWinsSequence.add(-1);
+                noWinsSequence.add(count);
+                HistoricMatch lastMatch = filteredMatches.get(filteredMatches.size() - 1);
+                String lastResult = lastMatch.getFtResult().split("\\(")[0];
+                if (!((lastMatch.getHomeTeam().equals(team.getName()) && Integer.parseInt(lastResult.split(":")[0])>Integer.parseInt(lastResult.split(":")[1])) ||
+                        (lastMatch.getAwayTeam().equals(team.getName()) && Integer.parseInt(lastResult.split(":")[0])<Integer.parseInt(lastResult.split(":")[1])))) {
+                    noWinsSequence.add(-1);
                 }
 
-                handball49WinsMarginSeasonInfo.setCompetition(mainCompetition);
-                handball49WinsMarginSeasonInfo.setMarginWinsRate(Utils.beautifyDoubleValue(100*totalMarginWins/totalWins));
-                handball49WinsMarginSeasonInfo.setNegativeSequence(noMarginWinsSequence.toString());
-                handball49WinsMarginSeasonInfo.setNumMarginWins(totalMarginWins);
-                handball49WinsMarginSeasonInfo.setNumMatches(filteredMatches.size());
-                handball49WinsMarginSeasonInfo.setNumWins(totalWins);
-                handball49WinsMarginSeasonInfo.setWinsRate(Utils.beautifyDoubleValue(100*totalWins/ filteredMatches.size()));
+                if (totalWins == 0) {
+                    winsSeasonInfo.setWinsRate(0);
+                } else {
+                    winsSeasonInfo.setWinsRate(Utils.beautifyDoubleValue(100*totalWins/filteredMatches.size()));
+                }
+                winsSeasonInfo.setCompetition(mainCompetition);
+                winsSeasonInfo.setNegativeSequence(noWinsSequence.toString());
+                winsSeasonInfo.setNumMatches(filteredMatches.size());
+                winsSeasonInfo.setNumWins(totalWins);
 
-                double stdDev =  Utils.beautifyDoubleValue(calculateSD(noMarginWinsSequence));
-                handball49WinsMarginSeasonInfo.setStdDeviation(stdDev);
-                handball49WinsMarginSeasonInfo.setCoefDeviation(Utils.beautifyDoubleValue(calculateCoeffVariation(stdDev, noMarginWinsSequence)));
-
-                handball49WinsMarginSeasonInfo.setSeason(season);
-                handball49WinsMarginSeasonInfo.setTeamId(team);
-                handball49WinsMarginSeasonInfo.setUrl(team.getUrl());
-                insertStrategySeasonStats(handball49WinsMarginSeasonInfo);
+                double stdDev =  Utils.beautifyDoubleValue(calculateSD(noWinsSequence));
+                winsSeasonInfo.setStdDeviation(stdDev);
+                winsSeasonInfo.setCoefDeviation(Utils.beautifyDoubleValue(calculateCoeffVariation(stdDev, noWinsSequence)));
+                winsSeasonInfo.setSeason(season);
+                winsSeasonInfo.setTeamId(team);
+                winsSeasonInfo.setUrl(newSeasonUrl);
+                insertStrategySeasonStats(winsSeasonInfo);
             }
         }
     }
 
     @Override
     public Team updateTeamScore(Team teamByName) {
-        List<Handball49WinsMarginSeasonStats> statsByTeam = handball49WinsMarginSeasonInfoRepository.getHandball49WinsMarginStatsByTeam(teamByName);
+        List<WinsSeasonStats> statsByTeam = winsSeasonInfoRepository.getFootballWinsStatsByTeam(teamByName);
         Collections.sort(statsByTeam, new SortStatsDataBySeason());
         Collections.reverse(statsByTeam);
 
         if (statsByTeam.size() < 3) {
-            teamByName.setHandball49MarginWinsScore(TeamScoreEnum.INSUFFICIENT_DATA.getValue());
+            teamByName.setWinsScore(TeamScoreEnum.INSUFFICIENT_DATA.getValue());
         } else {
-            int last3SeasonsMarginWinsRateScore = calculateLast3SeasonsRateScore(statsByTeam);
-            int allSeasonsMarginWinsRateScore = calculateAllSeasonsRateScore(statsByTeam);
             int last3SeasonsTotalWinsRateScore = calculateLast3SeasonsTotalWinsRateScore(statsByTeam);
             int allSeasonsTotalWinsRateScore = calculateAllSeasonsTotalWinsRateScore(statsByTeam);
-            int last3SeasonsmaxSeqWOMarginWinsScore = calculateLast3SeasonsMaxSeqWOGreenScore(statsByTeam);
-            int allSeasonsmaxSeqWOMarginWinsScore = calculateAllSeasonsMaxSeqWOGreenScore(statsByTeam);
+            int last3SeasonsmaxSeqWOWinsScore = calculateLast3SeasonsMaxSeqWOGreenScore(statsByTeam);
+            int allSeasonsmaxSeqWOWinsScore = calculateAllSeasonsMaxSeqWOGreenScore(statsByTeam);
             int last3SeasonsStdDevScore = calculateLast3SeasonsStdDevScore(statsByTeam);
             int allSeasonsStdDevScore = calculateAllSeasonsStdDevScore(statsByTeam);
             int totalMatchesScore = calculateLeagueMatchesScore(statsByTeam.get(0).getNumMatches());
 
-            double last3SeasonsWinsAvg = (last3SeasonsTotalWinsRateScore + last3SeasonsMarginWinsRateScore) / 2;
-            double allSeasonsWinsAvg = (allSeasonsTotalWinsRateScore + allSeasonsMarginWinsRateScore) / 2;
-
-            double last3SeasonsScore = Utils.beautifyDoubleValue(0.3*last3SeasonsWinsAvg + 0.4*last3SeasonsmaxSeqWOMarginWinsScore + 0.3*last3SeasonsStdDevScore);
-            double allSeasonsScore = Utils.beautifyDoubleValue(0.3*allSeasonsWinsAvg + 0.4*allSeasonsmaxSeqWOMarginWinsScore + 0.3*allSeasonsStdDevScore);
+            double last3SeasonsScore = Utils.beautifyDoubleValue(0.3*last3SeasonsTotalWinsRateScore + 0.4*last3SeasonsmaxSeqWOWinsScore + 0.3*last3SeasonsStdDevScore);
+            double allSeasonsScore = Utils.beautifyDoubleValue(0.3*allSeasonsTotalWinsRateScore + 0.4*allSeasonsmaxSeqWOWinsScore + 0.3*allSeasonsStdDevScore);
 
             double totalScore = Utils.beautifyDoubleValue(0.75*last3SeasonsScore + 0.20*allSeasonsScore + 0.05*totalMatchesScore);
 
-            teamByName.setHandball49MarginWinsScore(calculateFinalRating(totalScore));
+            teamByName.setWinsScore(calculateFinalRating(totalScore));
         }
 
         return teamByName;
@@ -162,49 +158,49 @@ public class HandballWinsMargin49StrategySeasonStatsService extends StrategyScor
     }
 
     @Override
-    public int calculateLast3SeasonsRateScore(List<Handball49WinsMarginSeasonStats> statsByTeam) {
-        double marginWinsRates = 0;
+    public int calculateLast3SeasonsRateScore(List<WinsSeasonStats> statsByTeam) {
+        double winsRates = 0;
         for (int i=0; i<3; i++) {
-            marginWinsRates += statsByTeam.get(i).getMarginWinsRate();
+            winsRates += statsByTeam.get(i).getWinsRate();
         }
 
-        double avgMarginWinsRate = Utils.beautifyDoubleValue(marginWinsRates / 3);
+        double avgWinsRate = Utils.beautifyDoubleValue(winsRates / 3);
 
-        if (isBetween(avgMarginWinsRate,80,100)) {
+        if (isBetween(avgWinsRate,80,100)) {
             return 100;
-        } else if(isBetween(avgMarginWinsRate,70,80)) {
+        } else if(isBetween(avgWinsRate,70,80)) {
             return 80;
-        } else if(isBetween(avgMarginWinsRate,50,70)) {
+        } else if(isBetween(avgWinsRate,50,70)) {
             return 60;
-        } else if(isBetween(avgMarginWinsRate,0,50)) {
+        } else if(isBetween(avgWinsRate,0,50)) {
             return 30;
         }
         return 0;
     }
 
     @Override
-    public int calculateAllSeasonsRateScore(List<Handball49WinsMarginSeasonStats> statsByTeam) {
-        double marginWinsRates = 0;
+    public int calculateAllSeasonsRateScore(List<WinsSeasonStats> statsByTeam) {
+        double winsRates = 0;
         for (int i=0; i<statsByTeam.size(); i++) {
-            marginWinsRates += statsByTeam.get(i).getMarginWinsRate();
+            winsRates += statsByTeam.get(i).getWinsRate();
         }
 
-        double avgMarginWinsRate = Utils.beautifyDoubleValue(marginWinsRates / statsByTeam.size());
+        double avgWinsRate = Utils.beautifyDoubleValue(winsRates / statsByTeam.size());
 
-        if (isBetween(avgMarginWinsRate,80,100)) {
+        if (isBetween(avgWinsRate,80,100)) {
             return 100;
-        } else if(isBetween(avgMarginWinsRate,70,80)) {
+        } else if(isBetween(avgWinsRate,70,80)) {
             return 80;
-        } else if(isBetween(avgMarginWinsRate,50,70)) {
+        } else if(isBetween(avgWinsRate,50,70)) {
             return 60;
-        } else if(isBetween(avgMarginWinsRate,0,50)) {
+        } else if(isBetween(avgWinsRate,0,50)) {
             return 30;
         }
         return 0;
     }
 
     @Override
-    public int calculateLast3SeasonsTotalWinsRateScore(List<Handball49WinsMarginSeasonStats> statsByTeam) {
+    public int calculateLast3SeasonsTotalWinsRateScore(List<WinsSeasonStats> statsByTeam) {
         double totalWinsRates = 0;
         for (int i=0; i<3; i++) {
             totalWinsRates += statsByTeam.get(i).getWinsRate();
@@ -229,7 +225,7 @@ public class HandballWinsMargin49StrategySeasonStatsService extends StrategyScor
     }
 
     @Override
-    public int calculateAllSeasonsTotalWinsRateScore(List<Handball49WinsMarginSeasonStats> statsByTeam) {
+    public int calculateAllSeasonsTotalWinsRateScore(List<WinsSeasonStats> statsByTeam) {
         double totalWinsRates = 0;
         for (int i=0; i<statsByTeam.size(); i++) {
             totalWinsRates += statsByTeam.get(i).getWinsRate();
@@ -254,7 +250,7 @@ public class HandballWinsMargin49StrategySeasonStatsService extends StrategyScor
     }
 
     @Override
-    public int calculateLast3SeasonsMaxSeqWOGreenScore(List<Handball49WinsMarginSeasonStats> statsByTeam) {
+    public int calculateLast3SeasonsMaxSeqWOGreenScore(List<WinsSeasonStats> statsByTeam) {
         int maxValue = 0;
         for (int i=0; i<3; i++) {
             String sequenceStr = statsByTeam.get(i).getNegativeSequence().replaceAll("[\\[\\]\\s]", "");
@@ -279,7 +275,7 @@ public class HandballWinsMargin49StrategySeasonStatsService extends StrategyScor
     }
 
     @Override
-    public int calculateAllSeasonsMaxSeqWOGreenScore(List<Handball49WinsMarginSeasonStats> statsByTeam) {
+    public int calculateAllSeasonsMaxSeqWOGreenScore(List<WinsSeasonStats> statsByTeam) {
         int maxValue = 0;
         for (int i=0; i<statsByTeam.size(); i++) {
             String sequenceStr = statsByTeam.get(i).getNegativeSequence().replaceAll("[\\[\\]\\s]", "");
@@ -304,7 +300,7 @@ public class HandballWinsMargin49StrategySeasonStatsService extends StrategyScor
     }
 
     @Override
-    public int calculateLast3SeasonsStdDevScore(List<Handball49WinsMarginSeasonStats> statsByTeam) {
+    public int calculateLast3SeasonsStdDevScore(List<WinsSeasonStats> statsByTeam) {
         double sumStdDev = 0;
         for (int i=0; i<3; i++) {
             sumStdDev += statsByTeam.get(i).getStdDeviation();
@@ -327,7 +323,7 @@ public class HandballWinsMargin49StrategySeasonStatsService extends StrategyScor
     }
 
     @Override
-    public int calculateAllSeasonsStdDevScore(List<Handball49WinsMarginSeasonStats> statsByTeam) {
+    public int calculateAllSeasonsStdDevScore(List<WinsSeasonStats> statsByTeam) {
         double sumStdDev = 0;
         for (int i=0; i<statsByTeam.size(); i++) {
             sumStdDev += statsByTeam.get(i).getStdDeviation();
@@ -368,10 +364,10 @@ public class HandballWinsMargin49StrategySeasonStatsService extends StrategyScor
         return lower <= x && x < upper;
     }
 
-    static class SortStatsDataBySeason implements Comparator<Handball49WinsMarginSeasonStats> {
+    static class SortStatsDataBySeason implements Comparator<WinsSeasonStats> {
 
         @Override
-        public int compare(Handball49WinsMarginSeasonStats a, Handball49WinsMarginSeasonStats b) {
+        public int compare(WinsSeasonStats a, WinsSeasonStats b) {
             return Integer.valueOf(SEASONS_LIST.indexOf(a.getSeason()))
                     .compareTo(Integer.valueOf(SEASONS_LIST.indexOf(b.getSeason())));
         }

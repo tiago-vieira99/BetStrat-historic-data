@@ -12,6 +12,7 @@ import com.api.BetStrat.service.football.EuroHandicapStrategySeasonStatsService;
 import com.api.BetStrat.service.football.FlipFlopOversUndersStatsServiceStrategy;
 import com.api.BetStrat.service.football.GoalsFestStrategySeasonStatsService;
 import com.api.BetStrat.service.football.WinsMarginStrategySeasonStatsService;
+import com.api.BetStrat.service.football.WinsStrategySeasonStatsService;
 import com.api.BetStrat.service.handball.HandballWinsMargin16StrategySeasonStatsService;
 import com.api.BetStrat.service.handball.HandballWinsMargin49StrategySeasonStatsService;
 import com.api.BetStrat.service.handball.HandballWinsMargin712StrategySeasonStatsService;
@@ -44,24 +45,25 @@ public class TeamService<T extends StrategySeasonStats> extends StrategyMappingP
     private HistoricMatchRepository historicMatchRepository;
 
 
-    public TeamService(ComebackStrategySeasonStatsService comebackSeasonInfoService,
-                                      LongBasketWinsStrategySeasonStatsService longBasketWinsSeasonInfoService,
-                                      ShortBasketWinsStrategySeasonStatsService shortBasketWinsSeasonInfoService,
-                                      DrawStrategySeasonStatsService drawSeasonInfoService,
-                                      EuroHandicapStrategySeasonStatsService euroHandicapSeasonInfoService,
+    public TeamService(ComebackStrategySeasonStatsService comebackStrategySeasonstatsService,
+                                      LongBasketWinsStrategySeasonStatsService longBasketWinsStrategySeasonstatsService,
+                                      ShortBasketWinsStrategySeasonStatsService shortBasketWinsStrategySeasonstatsService,
+                                      DrawStrategySeasonStatsService drawStrategySeasonstatsService,
+                                      EuroHandicapStrategySeasonStatsService euroHandicapStrategySeasonstatsService,
                                       FlipFlopOversUndersStatsServiceStrategy flipFlopOversUndersInfoService,
-                                      GoalsFestStrategySeasonStatsService goalsFestSeasonInfoService,
-                                      WinsMarginStrategySeasonStatsService winsMarginSeasonInfoService,
-                                      HandballWinsMargin16StrategySeasonStatsService handballWinsMargin16SeasonInfoService,
-                                      HandballWinsMargin49StrategySeasonStatsService handballWinsMargin49SeasonInfoService,
-                                      HandballWinsMargin712StrategySeasonStatsService handballWinsMargin712SeasonInfoService,
-                                      HockeyDrawStrategySeasonStatsService hockeyDrawSeasonInfoService,
-                                      WinsMargin3StrategySeasonStatsService winsMargin3SeasonInfoService,
-                                      WinsMarginAny2StrategySeasonStatsService winsMarginAny2SeasonInfoService) {
-        super(comebackSeasonInfoService, longBasketWinsSeasonInfoService, shortBasketWinsSeasonInfoService, drawSeasonInfoService, euroHandicapSeasonInfoService,
-                flipFlopOversUndersInfoService, goalsFestSeasonInfoService, winsMarginSeasonInfoService, handballWinsMargin16SeasonInfoService,
-                handballWinsMargin49SeasonInfoService, handballWinsMargin712SeasonInfoService, hockeyDrawSeasonInfoService, winsMargin3SeasonInfoService,
-                winsMarginAny2SeasonInfoService);
+                                      GoalsFestStrategySeasonStatsService goalsFestStrategySeasonstatsService,
+                                      WinsMarginStrategySeasonStatsService winsMarginStrategySeasonstatsService,
+                                      WinsStrategySeasonStatsService winsStrategySeasonStatsService,
+                                      HandballWinsMargin16StrategySeasonStatsService handballWinsMargin16StrategySeasonstatsService,
+                                      HandballWinsMargin49StrategySeasonStatsService handballWinsMargin49StrategySeasonstatsService,
+                                      HandballWinsMargin712StrategySeasonStatsService handballWinsMargin712StrategySeasonstatsService,
+                                      HockeyDrawStrategySeasonStatsService hockeyDrawStrategySeasonstatsService,
+                                      WinsMargin3StrategySeasonStatsService winsMargin3StrategySeasonstatsService,
+                                      WinsMarginAny2StrategySeasonStatsService winsMarginAny2StrategySeasonstatsService) {
+        super(comebackStrategySeasonstatsService, longBasketWinsStrategySeasonstatsService, shortBasketWinsStrategySeasonstatsService, drawStrategySeasonstatsService, euroHandicapStrategySeasonstatsService,
+                flipFlopOversUndersInfoService, goalsFestStrategySeasonstatsService, winsMarginStrategySeasonstatsService, winsStrategySeasonStatsService, handballWinsMargin16StrategySeasonstatsService,
+                handballWinsMargin49StrategySeasonstatsService, handballWinsMargin712StrategySeasonstatsService, hockeyDrawStrategySeasonstatsService, winsMargin3StrategySeasonstatsService,
+                winsMarginAny2StrategySeasonstatsService);
     }
 
 

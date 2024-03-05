@@ -102,7 +102,7 @@ public class FootballDataStatsController {
     }
 
     @ApiOperation(value = "get Team Stats by Strategy", notes = "Strategy values:\nDrawSeasonStats | EuroHandicapSeasonStats | FlipFlopOversUndersStats | GoalsFestSeasonStats " +
-            "| WinsMarginSeasonStats")
+            "| WinsMarginSeasonStats | WinsSeasonStats")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "OK", response = ArrayList.class),
             @ApiResponse(code = 400, message = "Bad Request", response = StandardError.class),
@@ -162,7 +162,7 @@ public class FootballDataStatsController {
     }
 
     @ApiOperation(value = "updateAllTeamsScoreByStrategy", notes = "Strategy values:\nDrawSeasonStats | EuroHandicapSeasonStats | FlipFlopOversUndersStats | GoalsFestSeasonStats " +
-            "| WinsMarginSeasonStats")
+            "| WinsMarginSeasonStats | WinsSeasonStats")
     @PostMapping("/updateAllTeamsScoreByStrategy")
     public ResponseEntity<String> updateAllTeamsScoreByStrategy (@Valid @RequestParam  String strategy) {
         List<Team> allTeams = teamRepository.findAll().stream().filter(t -> t.getSport().equals("Football")).collect(Collectors.toList());
@@ -177,7 +177,7 @@ public class FootballDataStatsController {
     }
 
     @ApiOperation(value = "simulateAllTeamsScoreByStrategyAndFilteredSeasons", notes = "Strategy values:\nDrawSeasonStats | EuroHandicapSeasonStats | FlipFlopOversUndersStats | GoalsFestSeasonStats " +
-            "| WinsMarginSeasonStats")
+            "| WinsMarginSeasonStats | WinsSeasonStats")
     @PostMapping("/simulateAllTeamsScoreByStrategyAndFilteredSeasons")
     public ResponseEntity<HashMap<String, HashMap>> simulateAllTeamsScoreByStrategyAndFilteredSeasons (@Valid @RequestParam  String strategy, @RequestParam @Valid int seasonsToDiscard) {
         List<Team> allTeams = teamRepository.findAll().stream().filter(t -> t.getSport().equals("Football")).collect(Collectors.toList());
@@ -199,7 +199,7 @@ public class FootballDataStatsController {
     }
 
     @ApiOperation(value = "updateAllTeamsStatsByStrategy", notes = "Strategy values:\nDrawSeasonStats | EuroHandicapSeasonStats | FlipFlopOversUndersStats | GoalsFestSeasonStats " +
-            "| WinsMarginSeasonStats \nData sources:  \n FBRef:\n" +
+            "| WinsMarginSeasonStats | WinsSeasonStats \nData sources:  \n FBRef:\n" +
             " \n https://fbref.com/en/squads/d48ad4ff/2022-2023/matchlogs/schedule/Napoli-Scores-and-Fixturesn" +
             " \n\n" +
             " \n ZZ:\n" +
@@ -221,7 +221,7 @@ public class FootballDataStatsController {
     }
 
     @ApiOperation(value = "updateTeamStatsByStrategy", notes = "Strategy values:\nDrawSeasonStats | EuroHandicapSeasonStats | FlipFlopOversUndersStats | GoalsFestSeasonStats " +
-            "| WinsMarginSeasonStats \nData sources:  \n FBRef:\n" +
+            "| WinsMarginSeasonStats | WinsSeasonStats \nData sources:  \n FBRef:\n" +
             " \n https://fbref.com/en/squads/d48ad4ff/2022-2023/matchlogs/schedule/Napoli-Scores-and-Fixturesn" +
             " \n\n" +
             " \n ZZ:\n" +

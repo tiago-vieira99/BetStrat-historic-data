@@ -209,18 +209,8 @@ public class DrawStrategySeasonStatsService extends StrategyScoreCalculator<Draw
         return outMap;
     }
 
-    @Override
     public String calculateFinalRating(double score) {
-        if (isBetween(score,90,150)) {
-            return TeamScoreEnum.EXCELLENT.getValue() + " (" + score + ")";
-        } else if(isBetween(score,65,90)) {
-            return TeamScoreEnum.ACCEPTABLE.getValue() + " (" + score + ")";
-        } else if(isBetween(score,50,65)) {
-            return TeamScoreEnum.RISKY.getValue() + " (" + score + ")";
-        } else if(isBetween(score,0,50)) {
-            return TeamScoreEnum.INAPT.getValue() + " (" + score + ")";
-        }
-        return "";
+        return super.calculateFinalRating(score);
     }
 
     @Override
