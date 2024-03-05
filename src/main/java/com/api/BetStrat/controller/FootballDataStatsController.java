@@ -112,7 +112,7 @@ public class FootballDataStatsController {
             @ApiResponse(code = 500, message = "Internal Server Error", response = StandardError.class),
     })
     @GetMapping("/stats/{strategy}/{teamName}")
-    public ResponseEntity<List<StrategySeasonStats>> getTeamMarginWinsStats(@PathVariable("teamName") String teamName, @PathVariable("strategy") String strategy) {
+    public ResponseEntity<List<StrategySeasonStats>> getStrategyStats(@PathVariable("teamName") String teamName, @PathVariable("strategy") String strategy) {
         Team team = teamRepository.getTeamByNameAndSport(teamName, "Football");
         List<StrategySeasonStats> statsByStrategyAndTeam = strategySeasonStatsService.getStatsByStrategyAndTeam(team, strategy);
         return ResponseEntity.ok().body(statsByStrategyAndTeam);
@@ -120,7 +120,11 @@ public class FootballDataStatsController {
 
     @PostMapping("/updateTeamScore/{teamName}")
     public Team updateTeamScore (@PathVariable("teamName") String teamName, @Valid @RequestParam  String strategy) {
-        return teamService.updateTeamScore(teamName, strategy, "Football");
+        Team teamByName = teamRepository.getTeamByNameAndSport(teamName, "Football");
+        if (null == teamByName) {
+            throw new NotFoundException();
+        }
+        return teamService.updateTeamScore(teamByName, strategy);
     }
 
     @PostMapping("/newTeam")
@@ -157,13 +161,14 @@ public class FootballDataStatsController {
         return newTeam;
     }
 
-    @ApiOperation(value = "updateAllTeamsScoreByStrategy", notes = "Strategy values: hockeyDraw, hockeyWinsMarginAny2, hockeyWinsMargin3, footballDrawHunter, footballMarginWins, footballGoalsFest, footballEuroHandicap, basketComebacks.")
+    @ApiOperation(value = "updateAllTeamsScoreByStrategy", notes = "Strategy values:\nDrawSeasonStats | EuroHandicapSeasonStats | FlipFlopOversUndersStats | GoalsFestSeasonStats " +
+            "| WinsMarginSeasonStats")
     @PostMapping("/updateAllTeamsScoreByStrategy")
     public ResponseEntity<String> updateAllTeamsScoreByStrategy (@Valid @RequestParam  String strategy) {
         List<Team> allTeams = teamRepository.findAll().stream().filter(t -> t.getSport().equals("Football")).collect(Collectors.toList());
         for (int i=0; i< allTeams.size(); i++) {
             try {
-                teamService.updateTeamScore(allTeams.get(i).getName(), strategy, "Football");
+                teamService.updateTeamScore(allTeams.get(i), strategy);
             } catch (NumberFormatException er) {
                 log.error(er.toString());
             }
@@ -171,7 +176,8 @@ public class FootballDataStatsController {
         return ResponseEntity.ok().body("OK");
     }
 
-    @ApiOperation(value = "simulateAllTeamsScoreByStrategyAndFilteredSeasons", notes = "Strategy values: hockeyDraw, hockeyWinsMarginAny2, hockeyWinsMargin3, footballDrawHunter, footballMarginWins, footballGoalsFest, footballEuroHandicap, basketComebacks.")
+    @ApiOperation(value = "simulateAllTeamsScoreByStrategyAndFilteredSeasons", notes = "Strategy values:\nDrawSeasonStats | EuroHandicapSeasonStats | FlipFlopOversUndersStats | GoalsFestSeasonStats " +
+            "| WinsMarginSeasonStats")
     @PostMapping("/simulateAllTeamsScoreByStrategyAndFilteredSeasons")
     public ResponseEntity<HashMap<String, HashMap>> simulateAllTeamsScoreByStrategyAndFilteredSeasons (@Valid @RequestParam  String strategy, @RequestParam @Valid int seasonsToDiscard) {
         List<Team> allTeams = teamRepository.findAll().stream().filter(t -> t.getSport().equals("Football")).collect(Collectors.toList());
@@ -192,7 +198,8 @@ public class FootballDataStatsController {
         return ResponseEntity.ok().body(newOutMap);
     }
 
-    @ApiOperation(value = "updateAllTeamsStatsByStrategy", notes = "Strategy values: hockeyDraw, hockeyWinsMarginAny2, hockeyWinsMargin3, footballDrawHunter, footballMarginWins, footballGoalsFest, footballEuroHandicap, footballFlipFlop, basketComebacks. \nData sources:  \n FBRef:\n" +
+    @ApiOperation(value = "updateAllTeamsStatsByStrategy", notes = "Strategy values:\nDrawSeasonStats | EuroHandicapSeasonStats | FlipFlopOversUndersStats | GoalsFestSeasonStats " +
+            "| WinsMarginSeasonStats \nData sources:  \n FBRef:\n" +
             " \n https://fbref.com/en/squads/d48ad4ff/2022-2023/matchlogs/schedule/Napoli-Scores-and-Fixturesn" +
             " \n\n" +
             " \n ZZ:\n" +
@@ -206,14 +213,15 @@ public class FootballDataStatsController {
 
         for (int i=0; i< allTeams.size(); i++) {
             log.info("handling " + allTeams.get(i).getName());
-            teamService.updateTeamStats(allTeams.get(i), strategy);
-            teamService.updateTeamScore(allTeams.get(i).getName(), strategy, "Football");
+            strategySeasonStatsService.updateStrategySeasonStats(allTeams.get(i), strategy);
+            teamService.updateTeamScore(allTeams.get(i), strategy);
         }
 
         return ResponseEntity.ok().body("OK");
     }
 
-    @ApiOperation(value = "updateTeamStatsByStrategy", notes = "Strategy values: hockeyDraw, hockeyWinsMarginAny2, hockeyWinsMargin3, footballDrawHunter, footballMarginWins, footballGoalsFest, footballEuroHandicap, footballFlipFlop, basketComebacks. \nData sources:  \n FBRef:\n" +
+    @ApiOperation(value = "updateTeamStatsByStrategy", notes = "Strategy values:\nDrawSeasonStats | EuroHandicapSeasonStats | FlipFlopOversUndersStats | GoalsFestSeasonStats " +
+            "| WinsMarginSeasonStats \nData sources:  \n FBRef:\n" +
             " \n https://fbref.com/en/squads/d48ad4ff/2022-2023/matchlogs/schedule/Napoli-Scores-and-Fixturesn" +
             " \n\n" +
             " \n ZZ:\n" +
@@ -223,13 +231,13 @@ public class FootballDataStatsController {
             " \n https://www.worldfootball.net/teams/fc-porto/")
     @PostMapping("/updateTeamStatsByStrategy")
     public ResponseEntity<String> updateTeamStatsByStrategy (@Valid @RequestParam  String strategy, @Valid @RequestParam  String teamName) {
-        Team teamByName = teamRepository.getTeamByName(teamName);
+        Team teamByName = teamRepository.getTeamByNameAndSport(teamName, "Football");
         if (teamByName == null) {
             throw new NotFoundException();
         }
 
-        teamService.updateTeamStats(teamByName, strategy);
-        teamService.updateTeamScore(teamByName.getName(), strategy, "Football");
+        strategySeasonStatsService.updateStrategySeasonStats(teamByName, strategy);
+        teamService.updateTeamScore(teamByName, strategy);
 
         return ResponseEntity.ok().body("OK");
     }

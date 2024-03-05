@@ -6,6 +6,7 @@ import com.api.BetStrat.entity.Team;
 import com.api.BetStrat.entity.handball.Handball49WinsMarginSeasonStats;
 import com.api.BetStrat.repository.HistoricMatchRepository;
 import com.api.BetStrat.repository.handball.Handball49WinsMarginSeasonInfoRepository;
+import com.api.BetStrat.service.StrategyScoreCalculator;
 import com.api.BetStrat.service.StrategySeasonStatsInterface;
 import com.api.BetStrat.util.Utils;
 import org.slf4j.Logger;
@@ -31,7 +32,7 @@ import static com.api.BetStrat.util.Utils.calculateSD;
 
 @Service
 @Transactional
-public class HandballWinsMargin49StrategySeasonStatsService implements StrategySeasonStatsInterface<Handball49WinsMarginSeasonStats> {
+public class HandballWinsMargin49StrategySeasonStatsService extends StrategyScoreCalculator<Handball49WinsMarginSeasonStats> implements StrategySeasonStatsInterface<Handball49WinsMarginSeasonStats> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(HandballWinsMargin49StrategySeasonStatsService.class);
 
@@ -41,6 +42,7 @@ public class HandballWinsMargin49StrategySeasonStatsService implements StrategyS
     @Autowired
     private HistoricMatchRepository historicMatchRepository;
 
+    @Override
     public Handball49WinsMarginSeasonStats insertStrategySeasonStats(Handball49WinsMarginSeasonStats strategySeasonStats) {
         LOGGER.info("Inserted " + strategySeasonStats.getClass() + " for " + strategySeasonStats.getTeamId().getName() + " and season " + strategySeasonStats.getSeason());
         return handball49WinsMarginSeasonInfoRepository.save(strategySeasonStats);
@@ -51,7 +53,8 @@ public class HandballWinsMargin49StrategySeasonStatsService implements StrategyS
         return handball49WinsMarginSeasonInfoRepository.getHandball49WinsMarginStatsByTeam(team);
     }
 
-    public void updateStrategySeasonStats(Team team, Class<Handball49WinsMarginSeasonStats> className) {
+    @Override
+    public void updateStrategySeasonStats(Team team, String strategyName) {
         List<Handball49WinsMarginSeasonStats> statsByTeam = handball49WinsMarginSeasonInfoRepository.getHandball49WinsMarginStatsByTeam(team);
         List<String> seasonsList = null;
 
@@ -121,7 +124,8 @@ public class HandballWinsMargin49StrategySeasonStatsService implements StrategyS
         }
     }
 
-    public Team updateTeamScore(Team teamByName, Class<Handball49WinsMarginSeasonStats> className) {
+    @Override
+    public Team updateTeamScore(Team teamByName) {
         List<Handball49WinsMarginSeasonStats> statsByTeam = handball49WinsMarginSeasonInfoRepository.getHandball49WinsMarginStatsByTeam(teamByName);
         Collections.sort(statsByTeam, new SortStatsDataBySeason());
         Collections.reverse(statsByTeam);
@@ -147,13 +151,14 @@ public class HandballWinsMargin49StrategySeasonStatsService implements StrategyS
 
             double totalScore = Utils.beautifyDoubleValue(0.75*last3SeasonsScore + 0.20*allSeasonsScore + 0.05*totalMatchesScore);
 
-            teamByName.setHandball49MarginWinsScore(calculateFinalRating(totalScore, null));
+            teamByName.setHandball49MarginWinsScore(calculateFinalRating(totalScore));
         }
 
         return teamByName;
     }
 
-    public String calculateFinalRating(double score, Class<Handball49WinsMarginSeasonStats> className) {
+    @Override
+    public String calculateFinalRating(double score) {
         if (isBetween(score,85,150)) {
             return TeamScoreEnum.EXCELLENT.getValue() + " (" + score + ")";
         } else if(isBetween(score,65,85)) {
@@ -166,6 +171,7 @@ public class HandballWinsMargin49StrategySeasonStatsService implements StrategyS
         return "";
     }
 
+    @Override
     public int calculateLast3SeasonsRateScore(List<Handball49WinsMarginSeasonStats> statsByTeam) {
         double marginWinsRates = 0;
         for (int i=0; i<3; i++) {
@@ -186,6 +192,7 @@ public class HandballWinsMargin49StrategySeasonStatsService implements StrategyS
         return 0;
     }
 
+    @Override
     public int calculateAllSeasonsRateScore(List<Handball49WinsMarginSeasonStats> statsByTeam) {
         double marginWinsRates = 0;
         for (int i=0; i<statsByTeam.size(); i++) {
@@ -206,6 +213,7 @@ public class HandballWinsMargin49StrategySeasonStatsService implements StrategyS
         return 0;
     }
 
+    @Override
     public int calculateLast3SeasonsTotalWinsRateScore(List<Handball49WinsMarginSeasonStats> statsByTeam) {
         double totalWinsRates = 0;
         for (int i=0; i<3; i++) {
@@ -230,6 +238,7 @@ public class HandballWinsMargin49StrategySeasonStatsService implements StrategyS
         return 0;
     }
 
+    @Override
     public int calculateAllSeasonsTotalWinsRateScore(List<Handball49WinsMarginSeasonStats> statsByTeam) {
         double totalWinsRates = 0;
         for (int i=0; i<statsByTeam.size(); i++) {
@@ -254,6 +263,7 @@ public class HandballWinsMargin49StrategySeasonStatsService implements StrategyS
         return 0;
     }
 
+    @Override
     public int calculateLast3SeasonsMaxSeqWOGreenScore(List<Handball49WinsMarginSeasonStats> statsByTeam) {
         int maxValue = 0;
         for (int i=0; i<3; i++) {
@@ -278,6 +288,7 @@ public class HandballWinsMargin49StrategySeasonStatsService implements StrategyS
         return 0;
     }
 
+    @Override
     public int calculateAllSeasonsMaxSeqWOGreenScore(List<Handball49WinsMarginSeasonStats> statsByTeam) {
         int maxValue = 0;
         for (int i=0; i<statsByTeam.size(); i++) {
@@ -302,6 +313,7 @@ public class HandballWinsMargin49StrategySeasonStatsService implements StrategyS
         return 0;
     }
 
+    @Override
     public int calculateLast3SeasonsStdDevScore(List<Handball49WinsMarginSeasonStats> statsByTeam) {
         double sumStdDev = 0;
         for (int i=0; i<3; i++) {
@@ -324,6 +336,7 @@ public class HandballWinsMargin49StrategySeasonStatsService implements StrategyS
         return 0;
     }
 
+    @Override
     public int calculateAllSeasonsStdDevScore(List<Handball49WinsMarginSeasonStats> statsByTeam) {
         double sumStdDev = 0;
         for (int i=0; i<statsByTeam.size(); i++) {

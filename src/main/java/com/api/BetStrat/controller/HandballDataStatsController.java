@@ -1,16 +1,12 @@
 package com.api.BetStrat.controller;
 
 import com.api.BetStrat.entity.HistoricMatch;
+import com.api.BetStrat.entity.StrategySeasonStats;
 import com.api.BetStrat.entity.Team;
-import com.api.BetStrat.entity.handball.Handball16WinsMarginSeasonStats;
-import com.api.BetStrat.entity.handball.Handball49WinsMarginSeasonStats;
-import com.api.BetStrat.entity.handball.Handball712WinsMarginSeasonStats;
+import com.api.BetStrat.exception.NotFoundException;
 import com.api.BetStrat.exception.StandardError;
 import com.api.BetStrat.repository.HistoricMatchRepository;
 import com.api.BetStrat.repository.TeamRepository;
-import com.api.BetStrat.repository.football.DrawSeasonInfoRepository;
-import com.api.BetStrat.repository.football.GoalsFestSeasonInfoRepository;
-import com.api.BetStrat.repository.football.WinsMarginSeasonInfoRepository;
 import com.api.BetStrat.service.StrategySeasonStatsService;
 import com.api.BetStrat.service.TeamService;
 import com.api.BetStrat.util.ScrappingUtil;
@@ -64,7 +60,7 @@ public class HandballDataStatsController {
     private TeamService teamService;
 
     @Autowired
-    private StrategySeasonStatsService statsBySeasonService;
+    private StrategySeasonStatsService strategySeasonStatsService;
 
     @Autowired
     private ModelMapper modelMapper;
@@ -75,14 +71,6 @@ public class HandballDataStatsController {
     @Autowired
     private HistoricMatchRepository historicMatchRepository;
 
-    @Autowired
-    private DrawSeasonInfoRepository drawSeasonInfoRepository;
-
-    @Autowired
-    private WinsMarginSeasonInfoRepository winsMarginSeasonInfoRepository;
-
-    @Autowired
-    private GoalsFestSeasonInfoRepository goalsFestSeasonInfoRepository;
 
     // one instance, reuse
     private final CloseableHttpClient httpClient = HttpClients.createDefault();
@@ -100,6 +88,22 @@ public class HandballDataStatsController {
     public ResponseEntity<List<Team>> getAllTeams() {
         List<Team> allTeams = teamRepository.findAll();
         return ResponseEntity.ok().body(allTeams.stream().filter(t -> t.getSport().equals("Handball")).collect(Collectors.toList()));
+    }
+
+    @ApiOperation(value = "get Team Stats by Strategy", notes = "Strategy values:\nHandball16WinsWinsMarginSeasonStats | Handball49WinsWinsMarginSeasonStats | Handball712WinsWinsMarginSeasonStats")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "OK", response = ArrayList.class),
+            @ApiResponse(code = 400, message = "Bad Request", response = StandardError.class),
+            @ApiResponse(code = 401, message = "Unauthorized", response = StandardError.class),
+            @ApiResponse(code = 403, message = "Forbidden", response = StandardError.class),
+            @ApiResponse(code = 404, message = "Not Found", response = StandardError.class),
+            @ApiResponse(code = 500, message = "Internal Server Error", response = StandardError.class),
+    })
+    @GetMapping("/stats/{strategy}/{teamName}")
+    public ResponseEntity<List<StrategySeasonStats>> getStrategyStats(@PathVariable("teamName") String teamName, @PathVariable("strategy") String strategy) {
+        Team team = teamRepository.getTeamByNameAndSport(teamName, "Handball");
+        List<StrategySeasonStats> statsByStrategyAndTeam = strategySeasonStatsService.getStatsByStrategyAndTeam(team, strategy);
+        return ResponseEntity.ok().body(statsByStrategyAndTeam);
     }
 
     @PostMapping("/newTeam")
@@ -200,66 +204,25 @@ public class HandballDataStatsController {
     @ApiOperation(value = "Strategy possible values: handballmargin16wins, handballmargin49wins, handballmargin712wins")
     @PostMapping("/updateTeamScore/{teamName}")
     public Team updateTeamScore (@PathVariable("teamName") String teamName, @Valid @RequestParam  String strategy) {
-        return teamService.updateTeamScore(teamName, strategy, "Handball");
+        Team teamByName = teamRepository.getTeamByNameAndSport(teamName, "Handball");
+        if (null == teamByName) {
+            throw new NotFoundException();
+        }
+        return teamService.updateTeamScore(teamByName, strategy);
     }
 
-    @ApiOperation(value = "updateAllTeamsScoreByStrategy", notes = "Strategy possible values: handballmargin16wins, handballmargin49wins, handballmargin712wins")
+    @ApiOperation(value = "updateAllTeamsScoreByStrategy", notes = "Strategy values:\nHandball16WinsWinsMarginSeasonStats | Handball49WinsWinsMarginSeasonStats | Handball712WinsWinsMarginSeasonStats")
     @PostMapping("/updateAllTeamsScoreByStrategy")
     public ResponseEntity<String> updateAllTeamsScoreByStrategy (@Valid @RequestParam  String strategy) {
         List<Team> allTeams = teamRepository.findAll().stream().filter(t -> t.getSport().equals("Handball")).collect(Collectors.toList());
         for (int i=0; i< allTeams.size(); i++) {
             try {
-                teamService.updateTeamScore(allTeams.get(i).getName(), strategy, "Handball");
+                teamService.updateTeamScore(allTeams.get(i), strategy);
             } catch (NumberFormatException er) {
                 log.error(er.toString());
             }
         }
         return ResponseEntity.ok().body("OK");
-    }
-
-    @ApiOperation(value = "get Team Margin 1-6 Wins Stats Info")
-    @ApiResponses(value = {
-            @ApiResponse(code = 200, message = "OK", response = ArrayList.class),
-            @ApiResponse(code = 400, message = "Bad Request", response = StandardError.class),
-            @ApiResponse(code = 401, message = "Unauthorized", response = StandardError.class),
-            @ApiResponse(code = 403, message = "Forbidden", response = StandardError.class),
-            @ApiResponse(code = 404, message = "Not Found", response = StandardError.class),
-            @ApiResponse(code = 500, message = "Internal Server Error", response = StandardError.class),
-    })
-    @GetMapping("/team-margin16wins-stats/{teamName}")
-    public ResponseEntity<List<Handball16WinsMarginSeasonStats>> getMargin16WinsTeamStats(@PathVariable("teamName") String teamName) {
-        List<Handball16WinsMarginSeasonStats> teamStats = teamService.getTeamMargin16WinsStats(teamName);
-        return ResponseEntity.ok().body(teamStats);
-    }
-
-    @ApiOperation(value = "get Team Margin 4-9 Wins Stats Info")
-    @ApiResponses(value = {
-            @ApiResponse(code = 200, message = "OK", response = ArrayList.class),
-            @ApiResponse(code = 400, message = "Bad Request", response = StandardError.class),
-            @ApiResponse(code = 401, message = "Unauthorized", response = StandardError.class),
-            @ApiResponse(code = 403, message = "Forbidden", response = StandardError.class),
-            @ApiResponse(code = 404, message = "Not Found", response = StandardError.class),
-            @ApiResponse(code = 500, message = "Internal Server Error", response = StandardError.class),
-    })
-    @GetMapping("/team-margin49wins-stats/{teamName}")
-    public ResponseEntity<List<Handball49WinsMarginSeasonStats>> getMargin49WinsTeamStats(@PathVariable("teamName") String teamName) {
-        List<Handball49WinsMarginSeasonStats> teamStats = teamService.getTeamMargin49WinsStats(teamName);
-        return ResponseEntity.ok().body(teamStats);
-    }
-
-    @ApiOperation(value = "get Team Margin 7-12 Wins Stats Info")
-    @ApiResponses(value = {
-            @ApiResponse(code = 200, message = "OK", response = ArrayList.class),
-            @ApiResponse(code = 400, message = "Bad Request", response = StandardError.class),
-            @ApiResponse(code = 401, message = "Unauthorized", response = StandardError.class),
-            @ApiResponse(code = 403, message = "Forbidden", response = StandardError.class),
-            @ApiResponse(code = 404, message = "Not Found", response = StandardError.class),
-            @ApiResponse(code = 500, message = "Internal Server Error", response = StandardError.class),
-    })
-    @GetMapping("/team-margin712wins-stats/{teamName}")
-    public ResponseEntity<List<Handball712WinsMarginSeasonStats>> getMargin712WinsTeamStats(@PathVariable("teamName") String teamName) {
-        List<Handball712WinsMarginSeasonStats> teamStats = teamService.getTeamMargin712WinsStats(teamName);
-        return ResponseEntity.ok().body(teamStats);
     }
 
     @SneakyThrows

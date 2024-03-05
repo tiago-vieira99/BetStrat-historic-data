@@ -6,6 +6,7 @@ import com.api.BetStrat.entity.football.DrawSeasonStats;
 import com.api.BetStrat.entity.Team;
 import com.api.BetStrat.repository.HistoricMatchRepository;
 import com.api.BetStrat.repository.football.DrawSeasonInfoRepository;
+import com.api.BetStrat.service.StrategyScoreCalculator;
 import com.api.BetStrat.service.StrategySeasonStatsInterface;
 import com.api.BetStrat.util.Utils;
 import com.google.common.collect.ImmutableList;
@@ -33,7 +34,7 @@ import static com.api.BetStrat.util.Utils.calculateSD;
 
 @Service
 @Transactional
-public class DrawStrategySeasonStatsService implements StrategySeasonStatsInterface<DrawSeasonStats> {
+public class DrawStrategySeasonStatsService extends StrategyScoreCalculator<DrawSeasonStats> implements StrategySeasonStatsInterface<DrawSeasonStats> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DrawStrategySeasonStatsService.class);
 
@@ -43,6 +44,7 @@ public class DrawStrategySeasonStatsService implements StrategySeasonStatsInterf
     @Autowired
     private HistoricMatchRepository historicMatchRepository;
 
+    @Override
     public DrawSeasonStats insertStrategySeasonStats(DrawSeasonStats strategySeasonStats) {
         LOGGER.info("Inserted " + strategySeasonStats.getClass() + " for " + strategySeasonStats.getTeamId().getName() + " and season " + strategySeasonStats.getSeason());
         return drawSeasonInfoRepository.save(strategySeasonStats);
@@ -53,7 +55,8 @@ public class DrawStrategySeasonStatsService implements StrategySeasonStatsInterf
         return drawSeasonInfoRepository.getFootballDrawStatsByTeam(team);
     }
 
-    public void updateStrategySeasonStats(Team team, Class<DrawSeasonStats> className) {
+    @Override
+    public void updateStrategySeasonStats(Team team, String strategyName) {
         List<DrawSeasonStats> statsByTeam = drawSeasonInfoRepository.getFootballDrawStatsByTeam(team);
         List<String> seasonsList = null;
 
@@ -121,7 +124,8 @@ public class DrawStrategySeasonStatsService implements StrategySeasonStatsInterf
         }
     }
 
-    public Team updateTeamScore (Team team, Class<DrawSeasonStats> className) {
+    @Override
+    public Team updateTeamScore (Team team) {
         List<DrawSeasonStats> statsByTeam = drawSeasonInfoRepository.getFootballDrawStatsByTeam(team);
         Collections.sort(statsByTeam, new SortStatsDataBySeason());
         Collections.reverse(statsByTeam);
@@ -141,7 +145,7 @@ public class DrawStrategySeasonStatsService implements StrategySeasonStatsInterf
                     0.15*last3SeasonsmaxSeqWODrawScore + 0.05*allSeasonsmaxSeqWODrawScore +
                     0.3*last3SeasonsStdDevScore + 0.1*allSeasonsStdDevScore + 0.05*totalMatchesScore);
 
-            team.setDrawsHunterScore(calculateFinalRating(totalScore, null));
+            team.setDrawsHunterScore(calculateFinalRating(totalScore));
         }
 
         return team;
@@ -177,7 +181,7 @@ public class DrawStrategySeasonStatsService implements StrategySeasonStatsInterf
                     0.15*last3SeasonsmaxSeqWODrawScore + 0.05*allSeasonsmaxSeqWODrawScore +
                     0.3*last3SeasonsStdDevScore + 0.1*allSeasonsStdDevScore + 0.05*totalMatchesScore);
 
-            String finalScore = calculateFinalRating(totalScore, null);
+            String finalScore = calculateFinalRating(totalScore);
             outMap.put("footballDrawHunter", finalScore);
             outMap.put("sequence", statsByTeam.get(seasonsToDiscard-1).getNegativeSequence());
             double balance = 0;
@@ -205,7 +209,8 @@ public class DrawStrategySeasonStatsService implements StrategySeasonStatsInterf
         return outMap;
     }
 
-    public String calculateFinalRating(double score, Class<DrawSeasonStats> className) {
+    @Override
+    public String calculateFinalRating(double score) {
         if (isBetween(score,90,150)) {
             return TeamScoreEnum.EXCELLENT.getValue() + " (" + score + ")";
         } else if(isBetween(score,65,90)) {
@@ -218,30 +223,33 @@ public class DrawStrategySeasonStatsService implements StrategySeasonStatsInterf
         return "";
     }
 
+    @Override
     public int calculateLast3SeasonsRateScore(List<DrawSeasonStats> statsByTeam) {
+        int result = 0;
         double sumDrawRates = 0;
-        for (int i=0; i<3; i++) {
+        for (int i = 0; i < 3; i++) {
             sumDrawRates += statsByTeam.get(i).getDrawRate();
         }
 
         double avgDrawRate = Utils.beautifyDoubleValue(sumDrawRates / 3);
 
-        if (isBetween(avgDrawRate,35,100)) {
-            return 100;
-        } else if(isBetween(avgDrawRate,30,35)) {
-            return 90;
-        } else if(isBetween(avgDrawRate,27,30)) {
-            return 80;
-        } else if(isBetween(avgDrawRate,25,27)) {
-            return 60;
-        } else if(isBetween(avgDrawRate,20,25)) {
-            return 50;
-        } else if(isBetween(avgDrawRate,0,20)) {
-            return 30;
+        if (isBetween(avgDrawRate, 35, 100)) {
+            result = 100;
+        } else if (isBetween(avgDrawRate, 30, 35)) {
+            result = 90;
+        } else if (isBetween(avgDrawRate, 27, 30)) {
+            result = 80;
+        } else if (isBetween(avgDrawRate, 25, 27)) {
+            result = 60;
+        } else if (isBetween(avgDrawRate, 20, 25)) {
+            result = 50;
+        } else if (isBetween(avgDrawRate, 0, 20)) {
+            result = 30;
         }
-        return 0;
+        return result;
     }
 
+    @Override
     public int calculateAllSeasonsRateScore(List<DrawSeasonStats> statsByTeam) {
         double sumDrawRates = 0;
         for (int i=0; i<statsByTeam.size(); i++) {
@@ -288,6 +296,7 @@ public class DrawStrategySeasonStatsService implements StrategySeasonStatsInterf
         return 0;
     }
 
+    @Override
     public int calculateLast3SeasonsMaxSeqWOGreenScore(List<DrawSeasonStats> statsByTeam) {
         int maxValue = 0;
         for (int i=0; i<3; i++) {
@@ -318,6 +327,7 @@ public class DrawStrategySeasonStatsService implements StrategySeasonStatsInterf
         return 0;
     }
 
+    @Override
     public int calculateAllSeasonsMaxSeqWOGreenScore(List<DrawSeasonStats> statsByTeam) {
         int maxValue = 0;
         for (int i=0; i<statsByTeam.size(); i++) {
@@ -348,6 +358,7 @@ public class DrawStrategySeasonStatsService implements StrategySeasonStatsInterf
         return 0;
     }
 
+    @Override
     public int calculateLast3SeasonsStdDevScore(List<DrawSeasonStats> statsByTeam) {
         double sumStdDev = 0;
         for (int i=0; i<3; i++) {
@@ -376,6 +387,7 @@ public class DrawStrategySeasonStatsService implements StrategySeasonStatsInterf
         return 0;
     }
 
+    @Override
     public int calculateAllSeasonsStdDevScore(List<DrawSeasonStats> statsByTeam) {
         double sumStdDev = 0;
         for (int i=0; i<statsByTeam.size(); i++) {

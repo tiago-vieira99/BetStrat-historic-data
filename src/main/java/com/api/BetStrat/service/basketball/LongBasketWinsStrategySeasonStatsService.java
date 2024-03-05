@@ -6,6 +6,7 @@ import com.api.BetStrat.entity.Team;
 import com.api.BetStrat.entity.basketball.LongBasketWinsSeasonStats;
 import com.api.BetStrat.repository.HistoricMatchRepository;
 import com.api.BetStrat.repository.basketball.LongWinsSeasonInfoRepository;
+import com.api.BetStrat.service.StrategyScoreCalculator;
 import com.api.BetStrat.service.StrategySeasonStatsInterface;
 import com.api.BetStrat.util.Utils;
 import org.slf4j.Logger;
@@ -31,7 +32,7 @@ import static com.api.BetStrat.util.Utils.calculateSD;
 
 @Service
 @Transactional
-public class LongBasketWinsStrategySeasonStatsService implements StrategySeasonStatsInterface<LongBasketWinsSeasonStats> {
+public class LongBasketWinsStrategySeasonStatsService extends StrategyScoreCalculator<LongBasketWinsSeasonStats> implements StrategySeasonStatsInterface<LongBasketWinsSeasonStats> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(LongBasketWinsStrategySeasonStatsService.class);
 
@@ -41,6 +42,7 @@ public class LongBasketWinsStrategySeasonStatsService implements StrategySeasonS
     @Autowired
     private HistoricMatchRepository historicMatchRepository;
 
+    @Override
     public LongBasketWinsSeasonStats insertStrategySeasonStats(LongBasketWinsSeasonStats strategySeasonStats) {
         return longWinsSeasonInfoRepository.save(strategySeasonStats);
     }
@@ -50,7 +52,8 @@ public class LongBasketWinsStrategySeasonStatsService implements StrategySeasonS
         return longWinsSeasonInfoRepository.getLongBasketWinsStatsByTeam(team);
     }
 
-    public void updateStrategySeasonStats(Team team, Class<LongBasketWinsSeasonStats> className) {
+    @Override
+    public void updateStrategySeasonStats(Team team, String strategyName) {
         List<LongBasketWinsSeasonStats> statsByTeam = longWinsSeasonInfoRepository.getLongBasketWinsStatsByTeam(team);
         List<String> seasonsList = null;
 
@@ -120,7 +123,8 @@ public class LongBasketWinsStrategySeasonStatsService implements StrategySeasonS
         }
     }
 
-    public Team updateTeamScore(Team teamByName, Class<LongBasketWinsSeasonStats> className) {
+    @Override
+    public Team updateTeamScore(Team teamByName) {
         List<LongBasketWinsSeasonStats> statsByTeam = longWinsSeasonInfoRepository.getLongBasketWinsStatsByTeam(teamByName);
         Collections.sort(statsByTeam, new SortStatsDataBySeason());
         Collections.reverse(statsByTeam);
@@ -145,13 +149,14 @@ public class LongBasketWinsStrategySeasonStatsService implements StrategySeasonS
 
             double totalScore = Utils.beautifyDoubleValue(0.75*last3SeasonsScore + 0.25*allSeasonsScore);
 
-            teamByName.setBasketLongWinsScore(calculateFinalRating(totalScore, null));
+            teamByName.setBasketLongWinsScore(calculateFinalRating(totalScore));
         }
 
         return teamByName;
     }
 
-    public String calculateFinalRating(double score, Class<LongBasketWinsSeasonStats> className) {
+    @Override
+    public String calculateFinalRating(double score) {
         if (isBetween(score,85,150)) {
             return TeamScoreEnum.EXCELLENT.getValue() + " (" + score + ")";
         } else if(isBetween(score,65,85)) {
@@ -164,6 +169,7 @@ public class LongBasketWinsStrategySeasonStatsService implements StrategySeasonS
         return "";
     }
 
+    @Override
     public int calculateLast3SeasonsRateScore(List<LongBasketWinsSeasonStats> statsByTeam) {
         double sumLongWinsRates = 0;
         for (int i=0; i<3; i++) {
@@ -184,6 +190,7 @@ public class LongBasketWinsStrategySeasonStatsService implements StrategySeasonS
         return 0;
     }
 
+    @Override
     public int calculateAllSeasonsRateScore(List<LongBasketWinsSeasonStats> statsByTeam) {
         double sumLongWinsRates = 0;
         for (int i=0; i<statsByTeam.size(); i++) {
@@ -204,6 +211,7 @@ public class LongBasketWinsStrategySeasonStatsService implements StrategySeasonS
         return 0;
     }
 
+    @Override
     public int calculateLast3SeasonsTotalWinsRateScore(List<LongBasketWinsSeasonStats> statsByTeam) {
         double totalWinsRates = 0;
         for (int i=0; i<3; i++) {
@@ -228,6 +236,7 @@ public class LongBasketWinsStrategySeasonStatsService implements StrategySeasonS
         return 0;
     }
 
+    @Override
     public int calculateAllSeasonsTotalWinsRateScore(List<LongBasketWinsSeasonStats> statsByTeam) {
         double totalWinsRates = 0;
         for (int i=0; i<statsByTeam.size(); i++) {
@@ -264,6 +273,7 @@ public class LongBasketWinsStrategySeasonStatsService implements StrategySeasonS
         return maxValue-6 < 0 ? 0 : maxValue-6;
     }
 
+    @Override
     public int calculateLast3SeasonsMaxSeqWOGreenScore(List<LongBasketWinsSeasonStats> statsByTeam) {
         int maxValue = 0;
         for (int i=0; i<3; i++) {
@@ -288,6 +298,7 @@ public class LongBasketWinsStrategySeasonStatsService implements StrategySeasonS
         return 0;
     }
 
+    @Override
     public int calculateAllSeasonsMaxSeqWOGreenScore(List<LongBasketWinsSeasonStats> statsByTeam) {
         int maxValue = 0;
         for (int i=0; i<statsByTeam.size(); i++) {
@@ -312,6 +323,7 @@ public class LongBasketWinsStrategySeasonStatsService implements StrategySeasonS
         return 0;
     }
 
+    @Override
     public int calculateLast3SeasonsStdDevScore(List<LongBasketWinsSeasonStats> statsByTeam) {
         double sumStdDev = 0;
         for (int i=0; i<3; i++) {
@@ -334,6 +346,7 @@ public class LongBasketWinsStrategySeasonStatsService implements StrategySeasonS
         return 0;
     }
 
+    @Override
     public int calculateAllSeasonsStdDevScore(List<LongBasketWinsSeasonStats> statsByTeam) {
         double sumStdDev = 0;
         for (int i=0; i<statsByTeam.size(); i++) {

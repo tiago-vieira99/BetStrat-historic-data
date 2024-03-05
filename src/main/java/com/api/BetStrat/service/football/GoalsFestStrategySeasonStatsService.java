@@ -6,6 +6,7 @@ import com.api.BetStrat.entity.Team;
 import com.api.BetStrat.entity.football.GoalsFestSeasonStats;
 import com.api.BetStrat.repository.HistoricMatchRepository;
 import com.api.BetStrat.repository.football.GoalsFestSeasonInfoRepository;
+import com.api.BetStrat.service.StrategyScoreCalculator;
 import com.api.BetStrat.service.StrategySeasonStatsInterface;
 import com.api.BetStrat.util.Utils;
 import org.slf4j.Logger;
@@ -32,7 +33,7 @@ import static com.api.BetStrat.util.Utils.calculateSD;
 
 @Service
 @Transactional
-public class GoalsFestStrategySeasonStatsService implements StrategySeasonStatsInterface<GoalsFestSeasonStats> {
+public class GoalsFestStrategySeasonStatsService extends StrategyScoreCalculator<GoalsFestSeasonStats> implements StrategySeasonStatsInterface<GoalsFestSeasonStats> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(GoalsFestStrategySeasonStatsService.class);
 
@@ -42,7 +43,7 @@ public class GoalsFestStrategySeasonStatsService implements StrategySeasonStatsI
     @Autowired
     private HistoricMatchRepository historicMatchRepository;
 
-
+    @Override
     public GoalsFestSeasonStats insertStrategySeasonStats(GoalsFestSeasonStats strategySeasonStats) {
         LOGGER.info("Inserted " + strategySeasonStats.getClass() + " for " + strategySeasonStats.getTeamId().getName() + " and season " + strategySeasonStats.getSeason());
         return goalsFestSeasonInfoRepository.save(strategySeasonStats);
@@ -53,7 +54,8 @@ public class GoalsFestStrategySeasonStatsService implements StrategySeasonStatsI
         return goalsFestSeasonInfoRepository.getGoalsFestStatsByTeam(team);
     }
 
-    public void updateStrategySeasonStats(Team team, Class<GoalsFestSeasonStats> className) {
+    @Override
+    public void updateStrategySeasonStats(Team team, String strategyName) {
         List<GoalsFestSeasonStats> statsByTeam = goalsFestSeasonInfoRepository.getGoalsFestStatsByTeam(team);
         List<String> seasonsList = null;
 
@@ -120,7 +122,8 @@ public class GoalsFestStrategySeasonStatsService implements StrategySeasonStatsI
         }
     }
 
-    public Team updateTeamScore(Team teamByName, Class<GoalsFestSeasonStats> className) {
+    @Override
+    public Team updateTeamScore(Team teamByName) {
         List<GoalsFestSeasonStats> statsByTeam = goalsFestSeasonInfoRepository.getGoalsFestStatsByTeam(teamByName);
         Collections.sort(statsByTeam, new SortStatsDataBySeason());
         Collections.reverse(statsByTeam);
@@ -140,7 +143,7 @@ public class GoalsFestStrategySeasonStatsService implements StrategySeasonStatsI
                     0.2*last3SeasonsmaxSeqWOGoalsFestScore + 0.1*allSeasonsmaxSeqWOGoalsFestScore +
                     0.3*last3SeasonsStdDevScore + 0.1*allSeasonsStdDevScore);
 
-            teamByName.setGoalsFestScore(calculateFinalRating(totalScore, null));
+            teamByName.setGoalsFestScore(calculateFinalRating(totalScore));
         }
 
         return teamByName;
@@ -175,7 +178,7 @@ public class GoalsFestStrategySeasonStatsService implements StrategySeasonStatsI
                     0.2*last3SeasonsmaxSeqWOGoalsFestScore + 0.1*allSeasonsmaxSeqWOGoalsFestScore +
                     0.3*last3SeasonsStdDevScore + 0.1*allSeasonsStdDevScore);
 
-            String finalScore = calculateFinalRating(totalScore, null);
+            String finalScore = calculateFinalRating(totalScore);
             outMap.put("footballGoalsFest", finalScore);
             outMap.put("sequence", statsByTeam.get(seasonsToDiscard-1).getNegativeSequence());
             double balance = 0;
@@ -214,7 +217,8 @@ public class GoalsFestStrategySeasonStatsService implements StrategySeasonStatsI
         return outMap;
     }
 
-    public String calculateFinalRating(double score, Class<GoalsFestSeasonStats> className) {
+    @Override
+    public String calculateFinalRating(double score) {
         if (isBetween(score,85,150)) {
             return TeamScoreEnum.EXCELLENT.getValue() + " (" + score + ")";
         } else if(isBetween(score,65,85)) {
@@ -227,6 +231,7 @@ public class GoalsFestStrategySeasonStatsService implements StrategySeasonStatsI
         return "";
     }
 
+    @Override
     public int calculateLast3SeasonsRateScore(List<GoalsFestSeasonStats> statsByTeam) {
         double GoalsFestRates = 0;
         for (int i=0; i<3; i++) {
@@ -251,6 +256,7 @@ public class GoalsFestStrategySeasonStatsService implements StrategySeasonStatsI
         return 0;
     }
 
+    @Override
     public int calculateAllSeasonsRateScore(List<GoalsFestSeasonStats> statsByTeam) {
         double GoalsFestRates = 0;
         for (int i=0; i<statsByTeam.size(); i++) {
@@ -275,6 +281,7 @@ public class GoalsFestStrategySeasonStatsService implements StrategySeasonStatsI
         return 0;
     }
 
+    @Override
     public int calculateLast3SeasonsMaxSeqWOGreenScore(List<GoalsFestSeasonStats> statsByTeam) {
         int maxValue = 0;
         for (int i=0; i<3; i++) {
@@ -299,6 +306,7 @@ public class GoalsFestStrategySeasonStatsService implements StrategySeasonStatsI
         return 0;
     }
 
+    @Override
     public int calculateAllSeasonsMaxSeqWOGreenScore(List<GoalsFestSeasonStats> statsByTeam) {
         int maxValue = 0;
         for (int i=0; i<statsByTeam.size(); i++) {
@@ -333,6 +341,7 @@ public class GoalsFestStrategySeasonStatsService implements StrategySeasonStatsI
         return 0;
     }
 
+    @Override
     public int calculateLast3SeasonsStdDevScore(List<GoalsFestSeasonStats> statsByTeam) {
         double sumStdDev = 0;
         for (int i=0; i<3; i++) {
@@ -355,6 +364,7 @@ public class GoalsFestStrategySeasonStatsService implements StrategySeasonStatsI
         return 0;
     }
 
+    @Override
     public int calculateAllSeasonsStdDevScore(List<GoalsFestSeasonStats> statsByTeam) {
         double sumStdDev = 0;
         for (int i=0; i<statsByTeam.size(); i++) {

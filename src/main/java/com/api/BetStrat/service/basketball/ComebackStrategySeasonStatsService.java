@@ -6,6 +6,7 @@ import com.api.BetStrat.entity.basketball.ComebackSeasonStats;
 import com.api.BetStrat.entity.Team;
 import com.api.BetStrat.repository.HistoricMatchRepository;
 import com.api.BetStrat.repository.basketball.ComebackSeasonInfoRepository;
+import com.api.BetStrat.service.StrategyScoreCalculator;
 import com.api.BetStrat.service.StrategySeasonStatsInterface;
 import com.api.BetStrat.util.Utils;
 import org.slf4j.Logger;
@@ -31,7 +32,7 @@ import static com.api.BetStrat.util.Utils.calculateSD;
 
 @Service
 @Transactional
-public class ComebackStrategySeasonStatsService implements StrategySeasonStatsInterface<ComebackSeasonStats> {
+public class ComebackStrategySeasonStatsService extends StrategyScoreCalculator<ComebackSeasonStats> implements StrategySeasonStatsInterface<ComebackSeasonStats> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ComebackStrategySeasonStatsService.class);
 
@@ -41,6 +42,7 @@ public class ComebackStrategySeasonStatsService implements StrategySeasonStatsIn
     @Autowired
     private ComebackSeasonInfoRepository comebackSeasonInfoRepository;
 
+    @Override
     public ComebackSeasonStats insertStrategySeasonStats(ComebackSeasonStats strategySeasonStats) {
         return comebackSeasonInfoRepository.save(strategySeasonStats);
     }
@@ -50,7 +52,8 @@ public class ComebackStrategySeasonStatsService implements StrategySeasonStatsIn
         return comebackSeasonInfoRepository.getComebackStatsByTeam(team);
     }
 
-    public void updateStrategySeasonStats(Team team, Class<ComebackSeasonStats> className) {
+    @Override
+    public void updateStrategySeasonStats(Team team, String strategyName) {
         List<ComebackSeasonStats> statsByTeam = comebackSeasonInfoRepository.getComebackStatsByTeam(team);
         List<String> seasonsList = null;
 
@@ -129,7 +132,8 @@ public class ComebackStrategySeasonStatsService implements StrategySeasonStatsIn
         }
     }
 
-    public Team updateTeamScore (Team teamByName, Class<ComebackSeasonStats> className) {
+    @Override
+    public Team updateTeamScore (Team teamByName) {
         List<ComebackSeasonStats> statsByTeam = comebackSeasonInfoRepository.getComebackStatsByTeam(teamByName);
         Collections.sort(statsByTeam, new SortStatsDataBySeason());
         Collections.reverse(statsByTeam);
@@ -149,13 +153,14 @@ public class ComebackStrategySeasonStatsService implements StrategySeasonStatsIn
                     0.15*last3SeasonsmaxSeqWOComebackScore + 0.05*allSeasonsmaxSeqWOComebackScore +
                     0.3*last3SeasonsStdDevScore + 0.1*allSeasonsStdDevScore + 0.05*totalMatchesScore);
 
-            teamByName.setBasketComebackScore(calculateFinalRating(totalScore, null));
+            teamByName.setBasketComebackScore(calculateFinalRating(totalScore));
         }
 
         return teamByName;
     }
 
-    public String calculateFinalRating(double score, Class<ComebackSeasonStats> className) {
+    @Override
+    public String calculateFinalRating(double score) {
         if (isBetween(score,90,150)) {
             return TeamScoreEnum.EXCELLENT.getValue() + " (" + score + ")";
         } else if(isBetween(score,65,90)) {
@@ -178,6 +183,7 @@ public class ComebackStrategySeasonStatsService implements StrategySeasonStatsIn
         return 0;
     }
 
+    @Override
     public int calculateLast3SeasonsRateScore(List<ComebackSeasonStats> statsByTeam) {
         double sumComebackRates = 0;
         for (int i=0; i<3; i++) {
@@ -202,6 +208,7 @@ public class ComebackStrategySeasonStatsService implements StrategySeasonStatsIn
         return 0;
     }
 
+    @Override
     public int calculateAllSeasonsRateScore(List<ComebackSeasonStats> statsByTeam) {
         double sumComebackRates = 0;
         for (int i=0; i<statsByTeam.size(); i++) {
@@ -238,6 +245,7 @@ public class ComebackStrategySeasonStatsService implements StrategySeasonStatsIn
         return maxValue-6 < 0 ? 0 : maxValue-6;
     }
 
+    @Override
     public int calculateLast3SeasonsMaxSeqWOGreenScore(List<ComebackSeasonStats> statsByTeam) {
         int maxValue = 0;
         for (int i=0; i<3; i++) {
@@ -268,6 +276,7 @@ public class ComebackStrategySeasonStatsService implements StrategySeasonStatsIn
         return 0;
     }
 
+    @Override
     public int calculateAllSeasonsMaxSeqWOGreenScore(List<ComebackSeasonStats> statsByTeam) {
         int maxValue = 0;
         for (int i=0; i<statsByTeam.size(); i++) {
@@ -298,6 +307,7 @@ public class ComebackStrategySeasonStatsService implements StrategySeasonStatsIn
         return 0;
     }
 
+    @Override
     public int calculateLast3SeasonsStdDevScore(List<ComebackSeasonStats> statsByTeam) {
         double sumStdDev = 0;
         for (int i=0; i<3; i++) {
@@ -326,6 +336,7 @@ public class ComebackStrategySeasonStatsService implements StrategySeasonStatsIn
         return 0;
     }
 
+    @Override
     public int calculateAllSeasonsStdDevScore(List<ComebackSeasonStats> statsByTeam) {
         double sumStdDev = 0;
         for (int i=0; i<statsByTeam.size(); i++) {

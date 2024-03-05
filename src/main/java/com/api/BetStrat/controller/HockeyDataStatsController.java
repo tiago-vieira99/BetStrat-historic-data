@@ -1,9 +1,11 @@
 package com.api.BetStrat.controller;
 
+import com.api.BetStrat.entity.StrategySeasonStats;
 import com.api.BetStrat.entity.Team;
 import com.api.BetStrat.entity.football.DrawSeasonStats;
 import com.api.BetStrat.entity.football.WinsMarginSeasonStats;
 import com.api.BetStrat.entity.hockey.HockeyDrawSeasonStats;
+import com.api.BetStrat.exception.NotFoundException;
 import com.api.BetStrat.exception.StandardError;
 import com.api.BetStrat.repository.TeamRepository;
 import com.api.BetStrat.service.StrategySeasonStatsService;
@@ -63,7 +65,7 @@ public class HockeyDataStatsController {
     private TeamService teamService;
 
     @Autowired
-    private StrategySeasonStatsService statsBySeasonService;
+    private StrategySeasonStatsService strategySeasonStatsService;
 
     @Autowired
     private ModelMapper modelMapper;
@@ -89,7 +91,7 @@ public class HockeyDataStatsController {
         return ResponseEntity.ok().body(allTeams);
     }
 
-    @ApiOperation(value = "get Team Margin Wins Stats")
+    @ApiOperation(value = "get Team Stats by Strategy", notes = "Strategy values:\nHockeyDrawSeasonStats | WinsMargin3SeasonStats | WinsMarginAny2SeasonStats")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "OK", response = ArrayList.class),
             @ApiResponse(code = 400, message = "Bad Request", response = StandardError.class),
@@ -98,54 +100,29 @@ public class HockeyDataStatsController {
             @ApiResponse(code = 404, message = "Not Found", response = StandardError.class),
             @ApiResponse(code = 500, message = "Internal Server Error", response = StandardError.class),
     })
-    @GetMapping("/team-margin-wins-stats/{teamName}")
-    public ResponseEntity<List<WinsMarginSeasonStats>> getTeamMarginWinsStats(@PathVariable("teamName") String teamName) {
-        List<WinsMarginSeasonStats> teamStats = teamService.getTeamMarginWinStats(teamName);
-        return ResponseEntity.ok().body(teamStats);
-    }
-
-    @ApiOperation(value = "get Team Draw Stats")
-    @ApiResponses(value = {
-            @ApiResponse(code = 200, message = "OK", response = ArrayList.class),
-            @ApiResponse(code = 400, message = "Bad Request", response = StandardError.class),
-            @ApiResponse(code = 401, message = "Unauthorized", response = StandardError.class),
-            @ApiResponse(code = 403, message = "Forbidden", response = StandardError.class),
-            @ApiResponse(code = 404, message = "Not Found", response = StandardError.class),
-            @ApiResponse(code = 500, message = "Internal Server Error", response = StandardError.class),
-    })
-    @GetMapping("/team-draw-stats/{teamName}")
-    public ResponseEntity<List<DrawSeasonStats>> getTeamStats(@PathVariable("teamName") String teamName) {
-        List<DrawSeasonStats> teamStats = teamService.getTeamDrawStats(teamName);
-        return ResponseEntity.ok().body(teamStats);
-    }
-
-    @ApiOperation(value = "get Hockey Team Draw Stats")
-    @ApiResponses(value = {
-            @ApiResponse(code = 200, message = "OK", response = ArrayList.class),
-            @ApiResponse(code = 400, message = "Bad Request", response = StandardError.class),
-            @ApiResponse(code = 401, message = "Unauthorized", response = StandardError.class),
-            @ApiResponse(code = 403, message = "Forbidden", response = StandardError.class),
-            @ApiResponse(code = 404, message = "Not Found", response = StandardError.class),
-            @ApiResponse(code = 500, message = "Internal Server Error", response = StandardError.class),
-    })
-    @GetMapping("/team-hockey-draw-stats/{teamName}")
-    public ResponseEntity<List<HockeyDrawSeasonStats>> getHockeyTeamStats(@PathVariable("teamName") String teamName) {
-        List<HockeyDrawSeasonStats> teamStats = teamService.getHockeyTeamDrawStats(teamName);
-        return ResponseEntity.ok().body(teamStats);
+    @GetMapping("/stats/{strategy}/{teamName}")
+    public ResponseEntity<List<StrategySeasonStats>> getStrategyStats(@PathVariable("teamName") String teamName, @PathVariable("strategy") String strategy) {
+        Team team = teamRepository.getTeamByNameAndSport(teamName, "Hockey");
+        List<StrategySeasonStats> statsByStrategyAndTeam = strategySeasonStatsService.getStatsByStrategyAndTeam(team, strategy);
+        return ResponseEntity.ok().body(statsByStrategyAndTeam);
     }
 
     @PostMapping("/updateTeamScore/{teamName}")
     public Team updateTeamScore (@PathVariable("teamName") String teamName, @Valid @RequestParam  String strategy) {
-        return teamService.updateTeamScore(teamName, strategy, "Hockey");
+        Team teamByName = teamRepository.getTeamByNameAndSport(teamName, "Hockey");
+        if (null == teamByName) {
+            throw new NotFoundException();
+        }
+        return teamService.updateTeamScore(teamByName, strategy);
     }
 
-    @ApiOperation(value = "updateAllTeamsScoreBystrategy", notes = "Strategy values: hockeyDraw, hockeyWinsMarginAny2, hockeyWinsMargin3, footballDrawHunter, footballMarginWins, footballGoalsFest, footballEuroHandicap, basketComebacks")
+    @ApiOperation(value = "updateAllTeamsScoreBystrategy", notes = "Strategy values:\nHockeyDrawSeasonStats | WinsMargin3SeasonStats | WinsMarginAny2SeasonStats")
     @PostMapping("/updateAllTeamsScoreBystrategy")
     public ResponseEntity<String> updateAllTeamsScoreBystrategy (@Valid @RequestParam  String strategy) {
-        List<Team> allTeams = teamRepository.findAll();
+        List<Team> allTeams = teamRepository.findAll().stream().filter(t -> t.getSport().equals("Hockey")).collect(Collectors.toList());
         for (int i=0; i< allTeams.size(); i++) {
             try {
-                teamService.updateTeamScore(allTeams.get(i).getName(), strategy, "Hockey");
+                teamService.updateTeamScore(allTeams.get(i), strategy);
             } catch (NumberFormatException er) {
                 log.error(er.toString());
             }
@@ -164,7 +141,7 @@ public class HockeyDataStatsController {
         if (team == null) {
             team = new Team();
             team.setName(teamName);
-            team.setSport("Football");
+            team.setSport("Hockey");
             team.setBeginSeason(beginSeason);
             team.setEndSeason(endSeason);
             teamService.insertTeam(team);
@@ -193,7 +170,7 @@ public class HockeyDataStatsController {
             drawSeasonInfo.setStdDeviation((Double) scrappedInfo.get("standardDeviation"));
             drawSeasonInfo.setCoefDeviation((Double) scrappedInfo.get("coefficientVariation"));
             drawSeasonInfo.setCompetition((String) scrappedInfo.get("competition"));
-            statsBySeasonService.insertStrategySeasonStats(drawSeasonInfo);
+            strategySeasonStatsService.insertStrategySeasonStats(drawSeasonInfo);
             returnMap.put(entry.getKey(), drawSeasonInfo);
         }
 
@@ -277,7 +254,7 @@ public class HockeyDataStatsController {
                 hockeyDrawSeasonInfo.setCoefDeviation((Double) scrappedInfo.get("coefficientVariation"));
                 hockeyDrawSeasonInfo.setCompetition((String) scrappedInfo.get("competition"));
                 try {
-                    statsBySeasonService.insertStrategySeasonStats(hockeyDrawSeasonInfo);
+                    strategySeasonStatsService.insertStrategySeasonStats(hockeyDrawSeasonInfo);
                 } catch (DataIntegrityViolationException er) {
                     log.error(er.toString());
                 }
@@ -453,7 +430,7 @@ public class HockeyDataStatsController {
             hockeyDrawSeasonInfo.setStdDeviation((Double) scrappedInfo.get("standardDeviation"));
             hockeyDrawSeasonInfo.setCoefDeviation((Double) scrappedInfo.get("coefficientVariation"));
             hockeyDrawSeasonInfo.setCompetition((String) scrappedInfo.get("competition"));
-            statsBySeasonService.insertStrategySeasonStats(hockeyDrawSeasonInfo);
+            strategySeasonStatsService.insertStrategySeasonStats(hockeyDrawSeasonInfo);
             returnMap.put(entry.getKey(), hockeyDrawSeasonInfo);
         }
 
@@ -570,7 +547,7 @@ public class HockeyDataStatsController {
         drawSeasonInfo.setStdDeviation((Double) scrappedInfo.get("standardDeviation"));
         drawSeasonInfo.setCoefDeviation((Double) scrappedInfo.get("coefficientVariation"));
         drawSeasonInfo.setCompetition((String) scrappedInfo.get("competition"));
-        return (DrawSeasonStats) statsBySeasonService.insertStrategySeasonStats(drawSeasonInfo);
+        return (DrawSeasonStats) strategySeasonStatsService.insertStrategySeasonStats(drawSeasonInfo);
     }
 
     @PostMapping("/margin-wins-stats-by-team-season-fcstats")
@@ -611,7 +588,7 @@ public class HockeyDataStatsController {
             winsMarginSeasonInfo.setStdDeviation((Double) scrappedInfo.get("standardDeviation"));
             winsMarginSeasonInfo.setCoefDeviation((Double) scrappedInfo.get("coefficientVariation"));
             winsMarginSeasonInfo.setCompetition((String) scrappedInfo.get("competition"));
-            statsBySeasonService.insertStrategySeasonStats(winsMarginSeasonInfo);
+            strategySeasonStatsService.insertStrategySeasonStats(winsMarginSeasonInfo);
             returnMap.put(entry.getKey(), winsMarginSeasonInfo);
         }
 
@@ -729,6 +706,6 @@ public class HockeyDataStatsController {
         winsMarginSeasonInfo.setStdDeviation((Double) scrappedInfo.get("standardDeviation"));
         winsMarginSeasonInfo.setCoefDeviation((Double) scrappedInfo.get("coefficientVariation"));
         winsMarginSeasonInfo.setCompetition((String) scrappedInfo.get("competition"));
-        return (WinsMarginSeasonStats) statsBySeasonService.insertStrategySeasonStats(winsMarginSeasonInfo);
+        return (WinsMarginSeasonStats) strategySeasonStatsService.insertStrategySeasonStats(winsMarginSeasonInfo);
     }
 }

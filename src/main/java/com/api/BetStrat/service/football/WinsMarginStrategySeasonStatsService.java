@@ -6,6 +6,7 @@ import com.api.BetStrat.entity.Team;
 import com.api.BetStrat.entity.football.WinsMarginSeasonStats;
 import com.api.BetStrat.repository.HistoricMatchRepository;
 import com.api.BetStrat.repository.football.WinsMarginSeasonInfoRepository;
+import com.api.BetStrat.service.StrategyScoreCalculator;
 import com.api.BetStrat.service.StrategySeasonStatsInterface;
 import com.api.BetStrat.util.Utils;
 import org.slf4j.Logger;
@@ -32,7 +33,7 @@ import static com.api.BetStrat.util.Utils.calculateSD;
 
 @Service
 @Transactional
-public class WinsMarginStrategySeasonStatsService implements StrategySeasonStatsInterface<WinsMarginSeasonStats> {
+public class WinsMarginStrategySeasonStatsService extends StrategyScoreCalculator<WinsMarginSeasonStats> implements StrategySeasonStatsInterface<WinsMarginSeasonStats> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(WinsMarginStrategySeasonStatsService.class);
 
@@ -42,6 +43,7 @@ public class WinsMarginStrategySeasonStatsService implements StrategySeasonStats
     @Autowired
     private HistoricMatchRepository historicMatchRepository;
 
+    @Override
     public WinsMarginSeasonStats insertStrategySeasonStats(WinsMarginSeasonStats strategySeasonStats) {
         LOGGER.info("Inserted " + strategySeasonStats.getClass() + " for " + strategySeasonStats.getTeamId().getName() + " and season " + strategySeasonStats.getSeason());
         return winsMarginSeasonInfoRepository.save(strategySeasonStats);
@@ -52,7 +54,8 @@ public class WinsMarginStrategySeasonStatsService implements StrategySeasonStats
         return winsMarginSeasonInfoRepository.getFootballWinsMarginStatsByTeam(team);
     }
 
-    public void updateStrategySeasonStats(Team team, Class<WinsMarginSeasonStats> className) {
+    @Override
+    public void updateStrategySeasonStats(Team team, String strategyName) {
         List<WinsMarginSeasonStats> statsByTeam = winsMarginSeasonInfoRepository.getFootballWinsMarginStatsByTeam(team);
         List<String> seasonsList = null;
 
@@ -129,7 +132,8 @@ public class WinsMarginStrategySeasonStatsService implements StrategySeasonStats
         }
     }
 
-    public Team updateTeamScore(Team teamByName, Class<WinsMarginSeasonStats> className) {
+    @Override
+    public Team updateTeamScore(Team teamByName) {
         List<WinsMarginSeasonStats> statsByTeam = winsMarginSeasonInfoRepository.getFootballWinsMarginStatsByTeam(teamByName);
         Collections.sort(statsByTeam, new SortStatsDataBySeason());
         Collections.reverse(statsByTeam);
@@ -155,7 +159,7 @@ public class WinsMarginStrategySeasonStatsService implements StrategySeasonStats
 
             double totalScore = Utils.beautifyDoubleValue(0.75*last3SeasonsScore + 0.20*allSeasonsScore + 0.05*totalMatchesScore);
 
-            teamByName.setMarginWinsScore(calculateFinalRating(totalScore, null));
+            teamByName.setMarginWinsScore(calculateFinalRating(totalScore));
         }
 
         return teamByName;
@@ -209,7 +213,7 @@ public class WinsMarginStrategySeasonStatsService implements StrategySeasonStats
 
             double totalScore = Utils.beautifyDoubleValue(0.75*last3SeasonsScore + 0.20*allSeasonsScore + 0.05*totalMatchesScore);
 
-            String finalScore = calculateFinalRating(totalScore, null);
+            String finalScore = calculateFinalRating(totalScore);
             outMap.put("footballMarginWins", finalScore);
             outMap.put("sequence", statsByTeam.get(seasonsToDiscard-1).getNegativeSequence());
             double balance = 0;
@@ -233,7 +237,8 @@ public class WinsMarginStrategySeasonStatsService implements StrategySeasonStats
         return outMap;
     }
 
-    public String calculateFinalRating(double score, Class<WinsMarginSeasonStats> className) {
+    @Override
+    public String calculateFinalRating(double score) {
         if (isBetween(score,85,150)) {
             return TeamScoreEnum.EXCELLENT.getValue() + " (" + score + ")";
         } else if(isBetween(score,65,85)) {
@@ -246,6 +251,7 @@ public class WinsMarginStrategySeasonStatsService implements StrategySeasonStats
         return "";
     }
 
+    @Override
     public int calculateLast3SeasonsRateScore(List<WinsMarginSeasonStats> statsByTeam) {
         double marginWinsRates = 0;
         for (int i=0; i<3; i++) {
@@ -266,6 +272,7 @@ public class WinsMarginStrategySeasonStatsService implements StrategySeasonStats
         return 0;
     }
 
+    @Override
     public int calculateAllSeasonsRateScore(List<WinsMarginSeasonStats> statsByTeam) {
         double marginWinsRates = 0;
         for (int i=0; i<statsByTeam.size(); i++) {
@@ -286,6 +293,7 @@ public class WinsMarginStrategySeasonStatsService implements StrategySeasonStats
         return 0;
     }
 
+    @Override
     public int calculateLast3SeasonsTotalWinsRateScore(List<WinsMarginSeasonStats> statsByTeam) {
         double totalWinsRates = 0;
         for (int i=0; i<3; i++) {
@@ -310,6 +318,7 @@ public class WinsMarginStrategySeasonStatsService implements StrategySeasonStats
         return 0;
     }
 
+    @Override
     public int calculateAllSeasonsTotalWinsRateScore(List<WinsMarginSeasonStats> statsByTeam) {
         double totalWinsRates = 0;
         for (int i=0; i<statsByTeam.size(); i++) {
@@ -334,6 +343,7 @@ public class WinsMarginStrategySeasonStatsService implements StrategySeasonStats
         return 0;
     }
 
+    @Override
     public int calculateLast3SeasonsMaxSeqWOGreenScore(List<WinsMarginSeasonStats> statsByTeam) {
         int maxValue = 0;
         for (int i=0; i<3; i++) {
@@ -358,6 +368,7 @@ public class WinsMarginStrategySeasonStatsService implements StrategySeasonStats
         return 0;
     }
 
+    @Override
     public int calculateAllSeasonsMaxSeqWOGreenScore(List<WinsMarginSeasonStats> statsByTeam) {
         int maxValue = 0;
         for (int i=0; i<statsByTeam.size(); i++) {
@@ -382,6 +393,7 @@ public class WinsMarginStrategySeasonStatsService implements StrategySeasonStats
         return 0;
     }
 
+    @Override
     public int calculateLast3SeasonsStdDevScore(List<WinsMarginSeasonStats> statsByTeam) {
         double sumStdDev = 0;
         for (int i=0; i<3; i++) {
@@ -404,6 +416,7 @@ public class WinsMarginStrategySeasonStatsService implements StrategySeasonStats
         return 0;
     }
 
+    @Override
     public int calculateAllSeasonsStdDevScore(List<WinsMarginSeasonStats> statsByTeam) {
         double sumStdDev = 0;
         for (int i=0; i<statsByTeam.size(); i++) {
