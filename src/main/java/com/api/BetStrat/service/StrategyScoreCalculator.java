@@ -1,6 +1,6 @@
 package com.api.BetStrat.service;
 
-import com.api.BetStrat.constants.TeamScoreEnum;
+import com.api.BetStrat.enums.TeamScoreEnum;
 import com.api.BetStrat.entity.StrategySeasonStats;
 
 import java.util.List;

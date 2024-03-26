@@ -1,6 +1,7 @@
 package com.api.BetStrat.entity.basketball;
 
 import com.api.BetStrat.entity.StrategySeasonStats;
+import com.api.BetStrat.enums.StrategyDurationScaleEnum;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -30,5 +31,11 @@ public class ShortBasketWinsSeasonStats extends StrategySeasonStats {
 
     @Column(name = "num_wins")
     private int numWins;
+
+    @Override
+    public void maxSeqScale() {
+        // avg odds : 3 - 3.3 TODO
+        super.setMaxSeqScale(StrategyDurationScaleEnum.MEDIUM_LONG.getValue());
+    }
 
 }

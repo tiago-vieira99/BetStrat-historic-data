@@ -75,11 +75,16 @@ public abstract class StrategySeasonStats implements Serializable {
     @Column(name = "negative_sequence")
     private String negativeSequence;
 
+    @Column(name = "max_seq_scale")
+    private int maxSeqScale;
+
     @SneakyThrows
     @Override
     public String toString() {
         ObjectMapper mapper = new ObjectMapper();
         return mapper.writeValueAsString(this);
     }
+
+    public abstract void maxSeqScale();
 
 }

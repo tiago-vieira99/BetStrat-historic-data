@@ -1,4 +1,4 @@
-package com.api.BetStrat.constants;
+package com.api.BetStrat.enums;
 
 public enum TeamScoreEnum {
 

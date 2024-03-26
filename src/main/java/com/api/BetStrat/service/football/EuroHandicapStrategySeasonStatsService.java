@@ -1,6 +1,6 @@
 package com.api.BetStrat.service.football;
 
-import com.api.BetStrat.constants.TeamScoreEnum;
+import com.api.BetStrat.enums.TeamScoreEnum;
 import com.api.BetStrat.entity.HistoricMatch;
 import com.api.BetStrat.entity.football.EuroHandicapSeasonStats;
 import com.api.BetStrat.entity.Team;

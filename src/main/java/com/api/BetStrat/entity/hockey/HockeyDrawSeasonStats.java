@@ -1,6 +1,7 @@
 package com.api.BetStrat.entity.hockey;
 
 import com.api.BetStrat.entity.StrategySeasonStats;
+import com.api.BetStrat.enums.StrategyDurationScaleEnum;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -24,5 +25,11 @@ public class HockeyDrawSeasonStats extends StrategySeasonStats {
 
     @Column(name = "num_draws")
     private int numDraws;
+
+    @Override
+    public void maxSeqScale() {
+        // avg odds : 3 - 3.3 TODO
+        super.setMaxSeqScale(StrategyDurationScaleEnum.MEDIUM_LONG.getValue());
+    }
 
 }

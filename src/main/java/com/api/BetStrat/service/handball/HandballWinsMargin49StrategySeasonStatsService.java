@@ -1,6 +1,6 @@
 package com.api.BetStrat.service.handball;
 
-import com.api.BetStrat.constants.TeamScoreEnum;
+import com.api.BetStrat.enums.TeamScoreEnum;
 import com.api.BetStrat.entity.HistoricMatch;
 import com.api.BetStrat.entity.Team;
 import com.api.BetStrat.entity.handball.Handball49WinsMarginSeasonStats;

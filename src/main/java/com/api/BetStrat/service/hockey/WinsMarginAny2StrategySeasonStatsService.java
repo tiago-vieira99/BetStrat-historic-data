@@ -1,6 +1,6 @@
 package com.api.BetStrat.service.hockey;
 
-import com.api.BetStrat.constants.TeamScoreEnum;
+import com.api.BetStrat.enums.TeamScoreEnum;
 import com.api.BetStrat.entity.Team;
 import com.api.BetStrat.entity.hockey.WinsMarginAny2SeasonStats;
 import com.api.BetStrat.repository.hockey.WinsMarginAny2SeasonInfoRepository;
