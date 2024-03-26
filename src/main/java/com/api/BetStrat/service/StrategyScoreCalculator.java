@@ -7,6 +7,7 @@ import java.util.List;
 
 public abstract class StrategyScoreCalculator<T extends StrategySeasonStats> {
 
+    //TODO refactor
     public String calculateFinalRating(double score) {
         if (isBetween(score,85,150)) {
             return TeamScoreEnum.EXCELLENT.getValue() + " (" + score + ")";
