@@ -7,6 +7,7 @@ import com.api.BetStrat.repository.TeamRepository;
 import com.api.BetStrat.service.basketball.ComebackStrategySeasonStatsService;
 import com.api.BetStrat.service.basketball.LongBasketWinsStrategySeasonStatsService;
 import com.api.BetStrat.service.basketball.ShortBasketWinsStrategySeasonStatsService;
+import com.api.BetStrat.service.football.CleanSheetStrategySeasonStatsService;
 import com.api.BetStrat.service.football.DrawStrategySeasonStatsService;
 import com.api.BetStrat.service.football.EuroHandicapStrategySeasonStatsService;
 import com.api.BetStrat.service.football.FlipFlopOversUndersStatsServiceStrategy;
@@ -60,6 +61,7 @@ public class TeamService<T extends StrategySeasonStats> extends StrategyMappingP
                                       NoWinsStrategySeasonStatsService noWinsStrategySeasonStatsService,
                                       NoDrawStrategySeasonStatsService noDrawStrategySeasonStatsService,
                                       NoMarginWinsStrategySeasonStatsService noMarginWinsStrategySeasonStatsService,
+                                      CleanSheetStrategySeasonStatsService cleanSheetStrategySeasonStatsService,
                                       HandballWinsMargin16StrategySeasonStatsService handballWinsMargin16StrategySeasonstatsService,
                                       HandballWinsMargin49StrategySeasonStatsService handballWinsMargin49StrategySeasonstatsService,
                                       HandballWinsMargin712StrategySeasonStatsService handballWinsMargin712StrategySeasonstatsService,
@@ -68,7 +70,7 @@ public class TeamService<T extends StrategySeasonStats> extends StrategyMappingP
                                       WinsMarginAny2StrategySeasonStatsService winsMarginAny2StrategySeasonstatsService) {
         super(comebackStrategySeasonstatsService, longBasketWinsStrategySeasonstatsService, shortBasketWinsStrategySeasonstatsService, drawStrategySeasonstatsService, euroHandicapStrategySeasonstatsService,
                 flipFlopOversUndersInfoService, goalsFestStrategySeasonstatsService, winsMarginStrategySeasonstatsService, winsStrategySeasonStatsService, noWinsStrategySeasonStatsService,
-                noDrawStrategySeasonStatsService, noMarginWinsStrategySeasonStatsService, handballWinsMargin16StrategySeasonstatsService,
+                noDrawStrategySeasonStatsService, noMarginWinsStrategySeasonStatsService, cleanSheetStrategySeasonStatsService, handballWinsMargin16StrategySeasonstatsService,
                 handballWinsMargin49StrategySeasonstatsService, handballWinsMargin712StrategySeasonstatsService, hockeyDrawStrategySeasonstatsService, winsMargin3StrategySeasonstatsService,
                 winsMarginAny2StrategySeasonstatsService);
     }
