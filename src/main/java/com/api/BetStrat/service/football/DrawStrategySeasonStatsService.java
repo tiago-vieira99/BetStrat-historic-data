@@ -175,7 +175,7 @@ public class DrawStrategySeasonStatsService extends StrategyScoreCalculator<Draw
             int allSeasonsmaxSeqWODrawScore = calculateAllSeasonsMaxSeqWOGreenScore(filteredStats);
             int last3SeasonsStdDevScore = calculateLast3SeasonsStdDevScore(filteredStats);
             int allSeasonsStdDevScore = calculateAllSeasonsStdDevScore(filteredStats);
-            int totalMatchesScore = calculateLeagueMatchesScore(filteredStats.get(0).getNumMatches());
+            int totalMatchesScore = super.calculateLeagueMatchesScore(filteredStats.get(0).getNumMatches());
 
             double totalScore = Utils.beautifyDoubleValue(0.2*last3SeasonsDrawRateScore + 0.15*allSeasonsDrawRateScore +
                     0.15*last3SeasonsmaxSeqWODrawScore + 0.05*allSeasonsmaxSeqWODrawScore +
@@ -404,25 +404,6 @@ public class DrawStrategySeasonStatsService extends StrategyScoreCalculator<Draw
             return 30;
         }
         return 0;
-    }
-
-    private int calculateLeagueMatchesScore(int totalMatches) {
-        if (isBetween(totalMatches,0,31)) {
-            return 100;
-        } else if(isBetween(totalMatches,31,33)) {
-            return 90;
-        } else if(isBetween(totalMatches,33,35)) {
-            return 80;
-        } else if(isBetween(totalMatches,35,41)) {
-            return 60;
-        } else if(isBetween(totalMatches,41,50)) {
-            return 30;
-        }
-        return 0;
-    }
-
-    private static boolean isBetween(double x, double lower, double upper) {
-        return lower <= x && x < upper;
     }
 
     static class SortStatsDataBySeason implements Comparator<DrawSeasonStats> {

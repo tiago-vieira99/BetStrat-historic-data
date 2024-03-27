@@ -139,7 +139,7 @@ public class NoWinsStrategySeasonStatsService extends StrategyScoreCalculator<No
             int allSeasonsmaxSeqWOWinsScore = calculateAllSeasonsMaxSeqWOGreenScore(statsByTeam);
             int last3SeasonsStdDevScore = calculateLast3SeasonsStdDevScore(statsByTeam);
             int allSeasonsStdDevScore = calculateAllSeasonsStdDevScore(statsByTeam);
-            int totalMatchesScore = calculateLeagueMatchesScore(statsByTeam.get(0).getNumMatches());
+            int totalMatchesScore = super.calculateLeagueMatchesScore(statsByTeam.get(0).getNumMatches());
 
             double last3SeasonsScore = Utils.beautifyDoubleValue(0.3*last3SeasonsTotalWinsRateScore + 0.4*last3SeasonsmaxSeqWOWinsScore + 0.3*last3SeasonsStdDevScore);
             double allSeasonsScore = Utils.beautifyDoubleValue(0.3*allSeasonsTotalWinsRateScore + 0.4*allSeasonsmaxSeqWOWinsScore + 0.3*allSeasonsStdDevScore);
@@ -165,13 +165,13 @@ public class NoWinsStrategySeasonStatsService extends StrategyScoreCalculator<No
 
         double avgWinsRate = Utils.beautifyDoubleValue(winsRates / 3);
 
-        if (isBetween(avgWinsRate,80,100)) {
+        if (super.isBetween(avgWinsRate,80,100)) {
             return 100;
-        } else if(isBetween(avgWinsRate,70,80)) {
+        } else if(super.isBetween(avgWinsRate,70,80)) {
             return 80;
-        } else if(isBetween(avgWinsRate,50,70)) {
+        } else if(super.isBetween(avgWinsRate,50,70)) {
             return 60;
-        } else if(isBetween(avgWinsRate,0,50)) {
+        } else if(super.isBetween(avgWinsRate,0,50)) {
             return 30;
         }
         return 0;
@@ -186,13 +186,13 @@ public class NoWinsStrategySeasonStatsService extends StrategyScoreCalculator<No
 
         double avgWinsRate = Utils.beautifyDoubleValue(winsRates / statsByTeam.size());
 
-        if (isBetween(avgWinsRate,80,100)) {
+        if (super.isBetween(avgWinsRate,80,100)) {
             return 100;
-        } else if(isBetween(avgWinsRate,70,80)) {
+        } else if(super.isBetween(avgWinsRate,70,80)) {
             return 80;
-        } else if(isBetween(avgWinsRate,50,70)) {
+        } else if(super.isBetween(avgWinsRate,50,70)) {
             return 60;
-        } else if(isBetween(avgWinsRate,0,50)) {
+        } else if(super.isBetween(avgWinsRate,0,50)) {
             return 30;
         }
         return 0;
@@ -207,17 +207,17 @@ public class NoWinsStrategySeasonStatsService extends StrategyScoreCalculator<No
 
         double avgWinsRate = Utils.beautifyDoubleValue(totalWinsRates / 3);
 
-        if (isBetween(avgWinsRate,80,100)) {
+        if (super.isBetween(avgWinsRate,80,100)) {
             return 100;
-        } else if(isBetween(avgWinsRate,70,80)) {
+        } else if(super.isBetween(avgWinsRate,70,80)) {
             return 90;
-        } else if(isBetween(avgWinsRate,60,70)) {
+        } else if(super.isBetween(avgWinsRate,60,70)) {
             return 80;
-        } else if(isBetween(avgWinsRate,50,60)) {
+        } else if(super.isBetween(avgWinsRate,50,60)) {
             return 70;
-        } else if(isBetween(avgWinsRate,40,50)) {
+        } else if(super.isBetween(avgWinsRate,40,50)) {
             return 60;
-        } else if(isBetween(avgWinsRate,0,40)) {
+        } else if(super.isBetween(avgWinsRate,0,40)) {
             return 30;
         }
         return 0;
@@ -232,17 +232,17 @@ public class NoWinsStrategySeasonStatsService extends StrategyScoreCalculator<No
 
         double avgWinsRate = Utils.beautifyDoubleValue(totalWinsRates / statsByTeam.size());
 
-        if (isBetween(avgWinsRate,80,100)) {
+        if (super.isBetween(avgWinsRate,80,100)) {
             return 100;
-        } else if(isBetween(avgWinsRate,70,80)) {
+        } else if(super.isBetween(avgWinsRate,70,80)) {
             return 90;
-        } else if(isBetween(avgWinsRate,60,70)) {
+        } else if(super.isBetween(avgWinsRate,60,70)) {
             return 80;
-        } else if(isBetween(avgWinsRate,50,60)) {
+        } else if(super.isBetween(avgWinsRate,50,60)) {
             return 70;
-        } else if(isBetween(avgWinsRate,40,50)) {
+        } else if(super.isBetween(avgWinsRate,40,50)) {
             return 60;
-        } else if(isBetween(avgWinsRate,0,40)) {
+        } else if(super.isBetween(avgWinsRate,0,40)) {
             return 30;
         }
         return 0;
@@ -259,15 +259,15 @@ public class NoWinsStrategySeasonStatsService extends StrategyScoreCalculator<No
             }
         }
 
-        if (isBetween(maxValue,0,7)) {
+        if (super.isBetween(maxValue,0,7)) {
             return 100;
-        } else if(isBetween(maxValue,7,8)) {
+        } else if(super.isBetween(maxValue,7,8)) {
             return 90;
-        } else if(isBetween(maxValue,8,9)) {
+        } else if(super.isBetween(maxValue,8,9)) {
             return 70;
-        } else if(isBetween(maxValue,9,10)) {
+        } else if(super.isBetween(maxValue,9,10)) {
             return 50;
-        } else if(isBetween(maxValue,10,25)) {
+        } else if(super.isBetween(maxValue,10,25)) {
             return 30;
         }
         return 0;
@@ -284,15 +284,15 @@ public class NoWinsStrategySeasonStatsService extends StrategyScoreCalculator<No
             }
         }
 
-        if (isBetween(maxValue,0,7)) {
+        if (super.isBetween(maxValue,0,7)) {
             return 100;
-        } else if(isBetween(maxValue,7,8)) {
+        } else if(super.isBetween(maxValue,7,8)) {
             return 90;
-        } else if(isBetween(maxValue,8,9)) {
+        } else if(super.isBetween(maxValue,8,9)) {
             return 70;
-        } else if(isBetween(maxValue,9,10)) {
+        } else if(super.isBetween(maxValue,9,10)) {
             return 50;
-        } else if(isBetween(maxValue,10,25)) {
+        } else if(super.isBetween(maxValue,10,25)) {
             return 30;
         }
         return 0;
@@ -307,15 +307,15 @@ public class NoWinsStrategySeasonStatsService extends StrategyScoreCalculator<No
 
         double avgStdDev = Utils.beautifyDoubleValue(sumStdDev/3);
 
-        if (isBetween(avgStdDev,0,1.8)) {
+        if (super.isBetween(avgStdDev,0,1.8)) {
             return 100;
-        } else if(isBetween(avgStdDev,1.8,2.0)) {
+        } else if(super.isBetween(avgStdDev,1.8,2.0)) {
             return 80;
-        } else if(isBetween(avgStdDev,2.0,2.2)) {
+        } else if(super.isBetween(avgStdDev,2.0,2.2)) {
             return 70;
-        } else if(isBetween(avgStdDev,2.2,2.4)) {
+        } else if(super.isBetween(avgStdDev,2.2,2.4)) {
             return 50;
-        } else if(isBetween(avgStdDev,2.4,25)) {
+        } else if(super.isBetween(avgStdDev,2.4,25)) {
             return 30;
         }
         return 0;
@@ -330,37 +330,18 @@ public class NoWinsStrategySeasonStatsService extends StrategyScoreCalculator<No
 
         double avgStdDev = Utils.beautifyDoubleValue(sumStdDev/statsByTeam.size());
 
-        if (isBetween(avgStdDev,0,1.8)) {
+        if (super.isBetween(avgStdDev,0,1.8)) {
             return 100;
-        } else if(isBetween(avgStdDev,1.8,2.0)) {
+        } else if(super.isBetween(avgStdDev,1.8,2.0)) {
             return 80;
-        } else if(isBetween(avgStdDev,2.0,2.2)) {
+        } else if(super.isBetween(avgStdDev,2.0,2.2)) {
             return 70;
-        } else if(isBetween(avgStdDev,2.2,2.4)) {
+        } else if(super.isBetween(avgStdDev,2.2,2.4)) {
             return 50;
-        } else if(isBetween(avgStdDev,2.4,25)) {
+        } else if(super.isBetween(avgStdDev,2.4,25)) {
             return 30;
         }
         return 0;
-    }
-
-    private int calculateLeagueMatchesScore(int totalMatches) {
-        if (isBetween(totalMatches,0,31)) {
-            return 100;
-        } else if(isBetween(totalMatches,31,33)) {
-            return 90;
-        } else if(isBetween(totalMatches,33,35)) {
-            return 80;
-        } else if(isBetween(totalMatches,35,41)) {
-            return 60;
-        } else if(isBetween(totalMatches,41,50)) {
-            return 30;
-        }
-        return 0;
-    }
-
-    private static boolean isBetween(double x, double lower, double upper) {
-        return lower <= x && x < upper;
     }
 
     static class SortStatsDataBySeason implements Comparator<NoWinsSeasonStats> {

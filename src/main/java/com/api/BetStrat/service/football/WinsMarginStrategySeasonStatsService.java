@@ -429,25 +429,6 @@ public class WinsMarginStrategySeasonStatsService extends StrategyScoreCalculato
         return 0;
     }
 
-    private int calculateLeagueMatchesScore(int totalMatches) {
-        if (isBetween(totalMatches,0,31)) {
-            return 100;
-        } else if(isBetween(totalMatches,31,33)) {
-            return 90;
-        } else if(isBetween(totalMatches,33,35)) {
-            return 80;
-        } else if(isBetween(totalMatches,35,41)) {
-            return 60;
-        } else if(isBetween(totalMatches,41,50)) {
-            return 30;
-        }
-        return 0;
-    }
-
-    private static boolean isBetween(double x, double lower, double upper) {
-        return lower <= x && x < upper;
-    }
-
     static class SortStatsDataBySeason implements Comparator<WinsMarginSeasonStats> {
 
         @Override
