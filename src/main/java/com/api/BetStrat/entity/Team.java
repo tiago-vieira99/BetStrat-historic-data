@@ -146,6 +146,15 @@ public class Team implements Serializable {
     @Column(name = "clean_sheet_avg_red_run")
     private Integer cleanSheetScoreAvgRedRun;
 
+    @Column(name = "no_clean_sheet_score")
+    private String noCleanSheetScore;
+
+    @Column(name = "no_clean_sheet_max_red_run")
+    private Integer noCleanSheetScoreMaxRedRun;
+
+    @Column(name = "no_clean_sheet_avg_red_run")
+    private Integer noCleanSheetScoreAvgRedRun;
+
     @Column(name = "margin_wins_any2_score")
     private String marginWinsAny2Score;
 
