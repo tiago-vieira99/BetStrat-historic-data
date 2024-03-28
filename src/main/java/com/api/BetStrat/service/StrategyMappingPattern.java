@@ -11,6 +11,7 @@ import com.api.BetStrat.entity.football.FlipFlopOversUndersStats;
 import com.api.BetStrat.entity.football.GoalsFestSeasonStats;
 import com.api.BetStrat.entity.football.NoCleanSheetSeasonStats;
 import com.api.BetStrat.entity.football.NoDrawSeasonStats;
+import com.api.BetStrat.entity.football.NoGoalsFestSeasonStats;
 import com.api.BetStrat.entity.football.NoMarginWinsSeasonStats;
 import com.api.BetStrat.entity.football.NoWinsSeasonStats;
 import com.api.BetStrat.entity.football.WinsMarginSeasonStats;
@@ -31,6 +32,7 @@ import com.api.BetStrat.service.football.FlipFlopOversUndersStatsServiceStrategy
 import com.api.BetStrat.service.football.GoalsFestStrategySeasonStatsService;
 import com.api.BetStrat.service.football.NoCleanSheetStrategySeasonStatsService;
 import com.api.BetStrat.service.football.NoDrawStrategySeasonStatsService;
+import com.api.BetStrat.service.football.NoGoalsFestStrategySeasonStatsService;
 import com.api.BetStrat.service.football.NoMarginWinsStrategySeasonStatsService;
 import com.api.BetStrat.service.football.NoWinsStrategySeasonStatsService;
 import com.api.BetStrat.service.football.WinsMarginStrategySeasonStatsService;
@@ -63,6 +65,7 @@ public abstract class StrategyMappingPattern {
                                   EuroHandicapStrategySeasonStatsService euroHandicapStrategySeasonstatsService,
                                   FlipFlopOversUndersStatsServiceStrategy flipFlopOversUndersInfoService,
                                   GoalsFestStrategySeasonStatsService goalsFestStrategySeasonstatsService,
+                                  NoGoalsFestStrategySeasonStatsService noGoalsFestStrategySeasonstatsService,
                                   WinsMarginStrategySeasonStatsService winsMarginStrategySeasonstatsService,
                                   WinsStrategySeasonStatsService winsStrategySeasonStatsService,
                                   NoWinsStrategySeasonStatsService noWinsStrategySeasonStatsService,
@@ -95,6 +98,7 @@ public abstract class StrategyMappingPattern {
         serviceMap.put(NoMarginWinsSeasonStats.class, noMarginWinsStrategySeasonStatsService);
         serviceMap.put(CleanSheetSeasonStats.class, cleanSheetStrategySeasonStatsService);
         serviceMap.put(NoCleanSheetSeasonStats.class, noCleanSheetStrategySeasonStatsService);
+        serviceMap.put(NoGoalsFestSeasonStats.class, noGoalsFestStrategySeasonstatsService);
         // Handball Strategies
         serviceMap.put(Handball16WinsMarginSeasonStats.class, handballWinsMargin16StrategySeasonstatsService);
         serviceMap.put(Handball49WinsMarginSeasonStats.class, handballWinsMargin49StrategySeasonstatsService);

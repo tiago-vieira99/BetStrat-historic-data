@@ -182,6 +182,15 @@ public class Team implements Serializable {
     @Column(name = "goals_fest_avg_red_run")
     private Integer goalsFestScoreAvgRedRun;
 
+    @Column(name = "no_goals_fest_score")
+    private String noGoalsFestScore;
+
+    @Column(name = "no_goals_fest_max_red_run")
+    private Integer noGoalsFestScoreMaxRedRun;
+
+    @Column(name = "no_goals_fest_avg_red_run")
+    private Integer noGoalsFestScoreAvgRedRun;
+
     @Column(name = "hockey_draws_hunter_score")
     private String hockeyDrawsHunterScore;
 
