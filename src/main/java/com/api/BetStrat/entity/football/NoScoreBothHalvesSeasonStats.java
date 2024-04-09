@@ -17,14 +17,14 @@ import javax.persistence.UniqueConstraint;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "ScoreBothHalvesSeasonStats",  uniqueConstraints = { @UniqueConstraint(name = "UniqueSeasonAndCompetitionForTeamSBH", columnNames = { "teamID", "season", "competition" }) })
-public class ScoreBothHalvesSeasonStats extends StrategySeasonStats {
+@Table(name = "NoScoreBothHalvesSeasonStats",  uniqueConstraints = { @UniqueConstraint(name = "UniqueSeasonAndCompetitionForTeamNoSBH", columnNames = { "teamID", "season", "competition" }) })
+public class NoScoreBothHalvesSeasonStats extends StrategySeasonStats {
 
-    @Column(name = "score_both_halves_rate")
-    private double scoreBothHalvesRate;
+    @Column(name = "no_score_both_halves_rate")
+    private double noScoreBothHalvesRate;
 
-    @Column(name = "num_score_both_halves")
-    private int numScoreBothHalves;
+    @Column(name = "num_no_score_both_halves")
+    private int numNoScoreBothHalves;
 
     @Override
     public void maxSeqScale() {
