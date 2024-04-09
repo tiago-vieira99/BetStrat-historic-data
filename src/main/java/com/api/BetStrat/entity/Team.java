@@ -69,208 +69,217 @@ public class Team implements Serializable {
     private String drawsHunterScore;
 
     @Column(name = "draws_hunter_max_red_run")
-    private Integer drawsHunterScoreMaxRedRun;
+    private Integer drawsHunterMaxRedRun;
 
     @Column(name = "draws_hunter_avg_red_run")
-    private Integer drawsHunterScoreAvgRedRun;
+    private Integer drawsHunterAvgRedRun;
 
     @Column(name = "euro_handicap_score")
     private String euroHandicapScore;
 
     @Column(name = "euro_handicap_max_red_run")
-    private Integer euroHandicapScoreMaxRedRun;
+    private Integer euroHandicapMaxRedRun;
 
     @Column(name = "euro_handicap_avg_red_run")
-    private Integer euroHandicapScoreAvgRedRun;
+    private Integer euroHandicapAvgRedRun;
 
     @Column(name = "margin_wins_score")
     private String marginWinsScore;
 
     @Column(name = "margin_wins_max_red_run")
-    private Integer marginWinsScoreMaxRedRun;
+    private Integer marginWinsMaxRedRun;
 
     @Column(name = "margin_wins_avg_red_run")
-    private Integer marginWinsScoreAvgRedRun;
+    private Integer marginWinsAvgRedRun;
 
     @Column(name = "flip_flop_score")
     private String flipFlopScore;
 
     @Column(name = "flip_flop_max_red_run")
-    private Integer flipFlopScoreMaxRedRun;
+    private Integer flipFlopMaxRedRun;
 
     @Column(name = "flip_flop_avg_red_run")
-    private Integer flipFlopScoreAvgRedRun;
+    private Integer flipFlopAvgRedRun;
 
     @Column(name = "wins_score")
     private String winsScore;
 
     @Column(name = "wins_max_red_run")
-    private Integer winsScoreMaxRedRun;
+    private Integer winsMaxRedRun;
 
     @Column(name = "wins_avg_red_run")
-    private Integer winsScoreAvgRedRun;
+    private Integer winsAvgRedRun;
 
     @Column(name = "no_wins_score")
     private String noWinsScore;
 
     @Column(name = "no_wins_max_red_run")
-    private Integer noWinsScoreMaxRedRun;
+    private Integer noWinsMaxRedRun;
 
     @Column(name = "no_wins_avg_red_run")
-    private Integer noWinsScoreAvgRedRun;
+    private Integer noWinsAvgRedRun;
 
     @Column(name = "no_draws_score")
     private String noDrawsScore;
 
     @Column(name = "no_draws_max_red_run")
-    private Integer noDrawsScoreMaxRedRun;
+    private Integer noDrawsMaxRedRun;
 
     @Column(name = "no_draws_avg_red_run")
-    private Integer noDrawsScoreAvgRedRun;
+    private Integer noDrawsAvgRedRun;
 
     @Column(name = "no_margin_wins_score")
     private String noMarginWinsScore;
 
     @Column(name = "no_margin_wins_max_red_run")
-    private Integer noMarginWinsScoreMaxRedRun;
+    private Integer noMarginWinsMaxRedRun;
 
     @Column(name = "no_margin_wins_avg_red_run")
-    private Integer noMarginWinsScoreAvgRedRun;
+    private Integer noMarginWinsAvgRedRun;
 
     @Column(name = "clean_sheet_score")
     private String cleanSheetScore;
 
     @Column(name = "clean_sheet_max_red_run")
-    private Integer cleanSheetScoreMaxRedRun;
+    private Integer cleanSheetMaxRedRun;
 
     @Column(name = "clean_sheet_avg_red_run")
-    private Integer cleanSheetScoreAvgRedRun;
+    private Integer cleanSheetAvgRedRun;
 
     @Column(name = "no_clean_sheet_score")
     private String noCleanSheetScore;
 
     @Column(name = "no_clean_sheet_max_red_run")
-    private Integer noCleanSheetScoreMaxRedRun;
+    private Integer noCleanSheetMaxRedRun;
 
     @Column(name = "no_clean_sheet_avg_red_run")
-    private Integer noCleanSheetScoreAvgRedRun;
+    private Integer noCleanSheetAvgRedRun;
 
     @Column(name = "margin_wins_any2_score")
     private String marginWinsAny2Score;
 
     @Column(name = "margin_wins_any2_max_red_run")
-    private Integer marginWinsAny2ScoreMaxRedRun;
+    private Integer marginWinsAny2MaxRedRun;
 
     @Column(name = "margin_wins_any2_avg_red_run")
-    private Integer marginWinsAny2ScoreAvgRedRun;
+    private Integer marginWinsAny2AvgRedRun;
 
     @Column(name = "margin_wins_3_score")
     private String marginWins3Score;
 
     @Column(name = "margin_wins_3_max_red_run")
-    private Integer marginWins3ScoreMaxRedRun;
+    private Integer marginWins3MaxRedRun;
 
     @Column(name = "margin_wins_3_avg_red_run")
-    private Integer marginWins3ScoreAvgRedRun;
+    private Integer marginWins3AvgRedRun;
 
     @Column(name = "goals_fest_score")
     private String goalsFestScore;
 
     @Column(name = "goals_fest_max_red_run")
-    private Integer goalsFestScoreMaxRedRun;
+    private Integer goalsFestMaxRedRun;
 
     @Column(name = "goals_fest_avg_red_run")
-    private Integer goalsFestScoreAvgRedRun;
+    private Integer goalsFestAvgRedRun;
 
     @Column(name = "btts_score")
     private String bttsScore;
 
     @Column(name = "btts_max_red_run")
-    private Integer bttsScoreMaxRedRun;
+    private Integer bttsMaxRedRun;
 
     @Column(name = "btts_avg_red_run")
-    private Integer bttsScoreAvgRedRun;
+    private Integer bttsAvgRedRun;
 
     @Column(name = "no_btts_score")
     private String noBttsScore;
 
     @Column(name = "no_btts_max_red_run")
-    private Integer noBttsScoreMaxRedRun;
+    private Integer noBttsMaxRedRun;
 
     @Column(name = "no_btts_avg_red_run")
-    private Integer noBttsScoreAvgRedRun;
+    private Integer noBttsAvgRedRun;
+
+    @Column(name = "score_both_halves_score")
+    private String scoreBothHalvesScore;
+
+    @Column(name = "score_both_halves_max_red_run")
+    private Integer scoreBothHalvesMaxRedRun;
+
+    @Column(name = "score_both_halves_avg_red_run")
+    private Integer scoreBothHalvesAvgRedRun;
 
     @Column(name = "no_goals_fest_score")
     private String noGoalsFestScore;
 
     @Column(name = "no_goals_fest_max_red_run")
-    private Integer noGoalsFestScoreMaxRedRun;
+    private Integer noGoalsFestMaxRedRun;
 
     @Column(name = "no_goals_fest_avg_red_run")
-    private Integer noGoalsFestScoreAvgRedRun;
+    private Integer noGoalsFestAvgRedRun;
 
     @Column(name = "hockey_draws_hunter_score")
     private String hockeyDrawsHunterScore;
 
     @Column(name = "hockey_draws_max_red_run")
-    private Integer hockeyDrawsScoreMaxRedRun;
+    private Integer hockeyDrawsMaxRedRun;
 
     @Column(name = "hockey_draws_avg_red_run")
-    private Integer hockeyDrawsScoreAvgRedRun;
+    private Integer hockeyDrawsAvgRedRun;
 
     @Column(name = "basket_comeback_score")
     private String basketComebackScore;
 
     @Column(name = "basket_comeback_max_red_run")
-    private Integer basketComebackScoreMaxRedRun;
+    private Integer basketComebackMaxRedRun;
 
     @Column(name = "basket_comeback_avg_red_run")
-    private Integer basketComebackScoreAvgRedRun;
+    private Integer basketComebackAvgRedRun;
 
     @Column(name = "basket_short_wins_score")
     private String basketShortWinsScore;
 
     @Column(name = "basket_short_wins_max_red_run")
-    private Integer basketShortWinsScoreMaxRedRun;
+    private Integer basketShortWinsMaxRedRun;
 
     @Column(name = "basket_short_wins_avg_red_run")
-    private Integer basketShortWinsScoreAvgRedRun;
+    private Integer basketShortWinsAvgRedRun;
 
     @Column(name = "basket_long_wins_score")
     private String basketLongWinsScore;
 
     @Column(name = "basket_long_wins_max_red_run")
-    private Integer basketLongWinsScoreMaxRedRun;
+    private Integer basketLongWinsMaxRedRun;
 
     @Column(name = "basket_long_wins_avg_red_run")
-    private Integer basketLongWinsScoreAvgRedRun;
+    private Integer basketLongWinsAvgRedRun;
 
     @Column(name = "handball_16margin_wins_score")
     private String handball16MarginWinsScore;
 
     @Column(name = "handball_16margin_wins_max_red_run")
-    private Integer handball16MarginWinsScoreMaxRedRun;
+    private Integer handball16MarginWinsMaxRedRun;
 
     @Column(name = "handball_16margin_wins_avg_red_run")
-    private Integer handball16MarginWinsScoreAvgRedRun;
+    private Integer handball16MarginWinsAvgRedRun;
 
     @Column(name = "handball_49margin_wins_score")
     private String handball49MarginWinsScore;
 
     @Column(name = "handball_49margin_wins_max_red_run")
-    private Integer handball49MarginWinsScoreMaxRedRun;
+    private Integer handball49MarginWinsMaxRedRun;
 
     @Column(name = "handball_49margin_wins_avg_red_run")
-    private Integer handball49MarginWinsScoreAvgRedRun;
+    private Integer handball49MarginWinsAvgRedRun;
 
     @Column(name = "handball_712margin_wins_score")
     private String handball712MarginWinsScore;
 
     @Column(name = "handball_712margin_wins_max_red_run")
-    private Integer handball712MarginWinsScoreMaxRedRun;
+    private Integer handball712MarginWinsMaxRedRun;
 
     @Column(name = "handball_712margin_wins_avg_red_run")
-    private Integer handball712MarginWinsScoreAvgRedRun;
+    private Integer handball712MarginWinsAvgRedRun;
 
     @Column(name = "sport")
     private String sport;

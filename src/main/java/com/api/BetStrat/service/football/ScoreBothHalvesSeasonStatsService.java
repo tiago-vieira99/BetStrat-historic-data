@@ -2,11 +2,10 @@ package com.api.BetStrat.service.football;
 
 import com.api.BetStrat.entity.HistoricMatch;
 import com.api.BetStrat.entity.Team;
-import com.api.BetStrat.entity.football.NoWinsSeasonStats;
-import com.api.BetStrat.entity.football.WinsSeasonStats;
+import com.api.BetStrat.entity.football.ScoreBothHalvesSeasonStats;
 import com.api.BetStrat.enums.TeamScoreEnum;
 import com.api.BetStrat.repository.HistoricMatchRepository;
-import com.api.BetStrat.repository.football.NoWinsSeasonInfoRepository;
+import com.api.BetStrat.repository.football.ScoreBothHalvesSeasonInfoRepository;
 import com.api.BetStrat.service.StrategyScoreCalculator;
 import com.api.BetStrat.service.StrategySeasonStatsInterface;
 import com.api.BetStrat.util.Utils;
@@ -33,30 +32,30 @@ import static com.api.BetStrat.util.Utils.calculateSD;
 
 @Service
 @Transactional
-public class NoWinsStrategySeasonStatsService extends StrategyScoreCalculator<NoWinsSeasonStats> implements StrategySeasonStatsInterface<NoWinsSeasonStats> {
+public class ScoreBothHalvesSeasonStatsService extends StrategyScoreCalculator<ScoreBothHalvesSeasonStats> implements StrategySeasonStatsInterface<ScoreBothHalvesSeasonStats> {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(NoWinsStrategySeasonStatsService.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ScoreBothHalvesSeasonStatsService.class);
 
     @Autowired
-    private NoWinsSeasonInfoRepository noWinsSeasonInfoRepository;
+    private ScoreBothHalvesSeasonInfoRepository scoreBothHalvesSeasonInfoRepository;
 
     @Autowired
     private HistoricMatchRepository historicMatchRepository;
 
     @Override
-    public NoWinsSeasonStats insertStrategySeasonStats(NoWinsSeasonStats strategySeasonStats) {
+    public ScoreBothHalvesSeasonStats insertStrategySeasonStats(ScoreBothHalvesSeasonStats strategySeasonStats) {
         LOGGER.info("Inserted " + strategySeasonStats.getClass() + " for " + strategySeasonStats.getTeamId().getName() + " and season " + strategySeasonStats.getSeason());
-        return noWinsSeasonInfoRepository.save(strategySeasonStats);
+        return scoreBothHalvesSeasonInfoRepository.save(strategySeasonStats);
     }
 
     @Override
-    public List<NoWinsSeasonStats> getStatsByStrategyAndTeam(Team team, String strategyName) {
-        return noWinsSeasonInfoRepository.getFootballNoWinsStatsByTeam(team);
+    public List<ScoreBothHalvesSeasonStats> getStatsByStrategyAndTeam(Team team, String strategyName) {
+        return scoreBothHalvesSeasonInfoRepository.getFootballScoreBothHalvesStatsByTeam(team);
     }
 
     @Override
     public void updateStrategySeasonStats(Team team, String strategyName) {
-        List<NoWinsSeasonStats> statsByTeam = noWinsSeasonInfoRepository.getFootballNoWinsStatsByTeam(team);
+        List<ScoreBothHalvesSeasonStats> statsByTeam = scoreBothHalvesSeasonInfoRepository.getFootballScoreBothHalvesStatsByTeam(team);
         List<String> seasonsList = null;
 
         if (SUMMER_SEASONS_BEGIN_MONTH_LIST.contains(team.getBeginSeason())) {
@@ -78,17 +77,21 @@ public class NoWinsStrategySeasonStatsService extends StrategyScoreCalculator<No
                     continue;
                 }
 
-                NoWinsSeasonStats noWinsSeasonInfo = new NoWinsSeasonStats();
+                ScoreBothHalvesSeasonStats noWinsSeasonInfo = new ScoreBothHalvesSeasonStats();
 
                 ArrayList<Integer> negativeSequence = new ArrayList<>();
                 int count = 0;
                 int totalWins= 0;
                 for (HistoricMatch historicMatch : filteredMatches) {
-                    String res = historicMatch.getFtResult().split("\\(")[0];
+                    String ftRes = historicMatch.getFtResult().split("\\(")[0];
+                    String htRes = historicMatch.getHtResult().split("\\(")[0];
                     count++;
-                    int homeResult = Integer.parseInt(res.split(":")[0]);
-                    int awayResult = Integer.parseInt(res.split(":")[1]);
-                    if ((historicMatch.getHomeTeam().equals(team.getName()) && homeResult <= awayResult) || (historicMatch.getAwayTeam().equals(team.getName()) && homeResult >= awayResult)) {
+                    int homeHTResult = Integer.parseInt(htRes.split(":")[0]);
+                    int awayHTResult = Integer.parseInt(htRes.split(":")[1]);
+                    int home2HTResult = Math.abs(Integer.parseInt(ftRes.split(":")[0]) - homeHTResult);
+                    int away2HTResult = Math.abs(Integer.parseInt(ftRes.split(":")[1]) - awayHTResult);
+                    if ((historicMatch.getHomeTeam().equals(team.getName()) && homeHTResult > 0 && home2HTResult > 0) ||
+                            (historicMatch.getAwayTeam().equals(team.getName()) && 0 < awayHTResult && 0 < away2HTResult)) {
                         totalWins++;
                         negativeSequence.add(count);
                         count = 0;
@@ -97,21 +100,26 @@ public class NoWinsStrategySeasonStatsService extends StrategyScoreCalculator<No
 
                 negativeSequence.add(count);
                 HistoricMatch lastMatch = filteredMatches.get(filteredMatches.size() - 1);
-                String lastResult = lastMatch.getFtResult().split("\\(")[0];
-                if (!((lastMatch.getHomeTeam().equals(team.getName()) && Integer.parseInt(lastResult.split(":")[0]) <= Integer.parseInt(lastResult.split(":")[1])) ||
-                        (lastMatch.getAwayTeam().equals(team.getName()) && Integer.parseInt(lastResult.split(":")[0]) >= Integer.parseInt(lastResult.split(":")[1])))) {
+                String lastHTResult = lastMatch.getHtResult().split("\\(")[0];
+                String lastFTResult = lastMatch.getFtResult().split("\\(")[0];
+                int homeLastHTResult = Integer.parseInt(lastHTResult.split(":")[0]);
+                int awayLastHTResult = Integer.parseInt(lastHTResult.split(":")[1]);
+                int homeLast2HTResult = Integer.parseInt(lastFTResult.split(":")[0]);
+                int awayLast2HTResult = Integer.parseInt(lastFTResult.split(":")[1]);
+                if (!((lastMatch.getHomeTeam().equals(team.getName()) && homeLastHTResult > 0 && homeLast2HTResult > 0) ||
+                        (lastMatch.getAwayTeam().equals(team.getName()) && awayLastHTResult > 0 && awayLast2HTResult > 0))) {
                     negativeSequence.add(-1);
                 }
 
                 if (totalWins == 0) {
-                    noWinsSeasonInfo.setNoWinsRate(0);
+                    noWinsSeasonInfo.setScoreBothHalvesRate(0);
                 } else {
-                    noWinsSeasonInfo.setNoWinsRate(Utils.beautifyDoubleValue(100*totalWins/filteredMatches.size()));
+                    noWinsSeasonInfo.setScoreBothHalvesRate(Utils.beautifyDoubleValue(100*totalWins/filteredMatches.size()));
                 }
                 noWinsSeasonInfo.setCompetition(mainCompetition);
                 noWinsSeasonInfo.setNegativeSequence(negativeSequence.toString());
                 noWinsSeasonInfo.setNumMatches(filteredMatches.size());
-                noWinsSeasonInfo.setNumNoWins(totalWins);
+                noWinsSeasonInfo.setNumScoreBothHalves(totalWins);
 
                 double stdDev =  Utils.beautifyDoubleValue(calculateSD(negativeSequence));
                 noWinsSeasonInfo.setStdDeviation(stdDev);
@@ -126,7 +134,7 @@ public class NoWinsStrategySeasonStatsService extends StrategyScoreCalculator<No
 
     @Override
     public Team updateTeamScore(Team teamByName) {
-        List<NoWinsSeasonStats> statsByTeam = noWinsSeasonInfoRepository.getFootballNoWinsStatsByTeam(teamByName);
+        List<ScoreBothHalvesSeasonStats> statsByTeam = scoreBothHalvesSeasonInfoRepository.getFootballScoreBothHalvesStatsByTeam(teamByName);
         Collections.sort(statsByTeam, new SortStatsDataBySeason());
         Collections.reverse(statsByTeam);
 
@@ -157,10 +165,10 @@ public class NoWinsStrategySeasonStatsService extends StrategyScoreCalculator<No
     }
 
     @Override
-    public int calculateLast3SeasonsRateScore(List<NoWinsSeasonStats> statsByTeam) {
+    public int calculateLast3SeasonsRateScore(List<ScoreBothHalvesSeasonStats> statsByTeam) {
         double winsRates = 0;
         for (int i=0; i<3; i++) {
-            winsRates += statsByTeam.get(i).getNoWinsRate();
+            winsRates += statsByTeam.get(i).getScoreBothHalvesRate();
         }
 
         double avgWinsRate = Utils.beautifyDoubleValue(winsRates / 3);
@@ -178,10 +186,10 @@ public class NoWinsStrategySeasonStatsService extends StrategyScoreCalculator<No
     }
 
     @Override
-    public int calculateAllSeasonsRateScore(List<NoWinsSeasonStats> statsByTeam) {
+    public int calculateAllSeasonsRateScore(List<ScoreBothHalvesSeasonStats> statsByTeam) {
         double winsRates = 0;
         for (int i=0; i<statsByTeam.size(); i++) {
-            winsRates += statsByTeam.get(i).getNoWinsRate();
+            winsRates += statsByTeam.get(i).getScoreBothHalvesRate();
         }
 
         double avgWinsRate = Utils.beautifyDoubleValue(winsRates / statsByTeam.size());
@@ -199,10 +207,10 @@ public class NoWinsStrategySeasonStatsService extends StrategyScoreCalculator<No
     }
 
     @Override
-    public int calculateLast3SeasonsTotalWinsRateScore(List<NoWinsSeasonStats> statsByTeam) {
+    public int calculateLast3SeasonsTotalWinsRateScore(List<ScoreBothHalvesSeasonStats> statsByTeam) {
         double totalWinsRates = 0;
         for (int i=0; i<3; i++) {
-            totalWinsRates += statsByTeam.get(i).getNoWinsRate();
+            totalWinsRates += statsByTeam.get(i).getScoreBothHalvesRate();
         }
 
         double avgWinsRate = Utils.beautifyDoubleValue(totalWinsRates / 3);
@@ -224,10 +232,10 @@ public class NoWinsStrategySeasonStatsService extends StrategyScoreCalculator<No
     }
 
     @Override
-    public int calculateAllSeasonsTotalWinsRateScore(List<NoWinsSeasonStats> statsByTeam) {
+    public int calculateAllSeasonsTotalWinsRateScore(List<ScoreBothHalvesSeasonStats> statsByTeam) {
         double totalWinsRates = 0;
         for (int i=0; i<statsByTeam.size(); i++) {
-            totalWinsRates += statsByTeam.get(i).getNoWinsRate();
+            totalWinsRates += statsByTeam.get(i).getScoreBothHalvesRate();
         }
 
         double avgWinsRate = Utils.beautifyDoubleValue(totalWinsRates / statsByTeam.size());
@@ -249,7 +257,7 @@ public class NoWinsStrategySeasonStatsService extends StrategyScoreCalculator<No
     }
 
     @Override
-    public int calculateLast3SeasonsMaxSeqWOGreenScore(List<NoWinsSeasonStats> statsByTeam) {
+    public int calculateLast3SeasonsMaxSeqWOGreenScore(List<ScoreBothHalvesSeasonStats> statsByTeam) {
         int maxValue = 0;
         for (int i=0; i<3; i++) {
             String sequenceStr = statsByTeam.get(i).getNegativeSequence().replaceAll("[\\[\\]\\s]", "");
@@ -274,7 +282,7 @@ public class NoWinsStrategySeasonStatsService extends StrategyScoreCalculator<No
     }
 
     @Override
-    public int calculateAllSeasonsMaxSeqWOGreenScore(List<NoWinsSeasonStats> statsByTeam) {
+    public int calculateAllSeasonsMaxSeqWOGreenScore(List<ScoreBothHalvesSeasonStats> statsByTeam) {
         int maxValue = 0;
         for (int i=0; i<statsByTeam.size(); i++) {
             String sequenceStr = statsByTeam.get(i).getNegativeSequence().replaceAll("[\\[\\]\\s]", "");
@@ -299,7 +307,7 @@ public class NoWinsStrategySeasonStatsService extends StrategyScoreCalculator<No
     }
 
     @Override
-    public int calculateLast3SeasonsStdDevScore(List<NoWinsSeasonStats> statsByTeam) {
+    public int calculateLast3SeasonsStdDevScore(List<ScoreBothHalvesSeasonStats> statsByTeam) {
         double sumStdDev = 0;
         for (int i=0; i<3; i++) {
             sumStdDev += statsByTeam.get(i).getStdDeviation();
@@ -322,7 +330,7 @@ public class NoWinsStrategySeasonStatsService extends StrategyScoreCalculator<No
     }
 
     @Override
-    public int calculateAllSeasonsStdDevScore(List<NoWinsSeasonStats> statsByTeam) {
+    public int calculateAllSeasonsStdDevScore(List<ScoreBothHalvesSeasonStats> statsByTeam) {
         double sumStdDev = 0;
         for (int i=0; i<statsByTeam.size(); i++) {
             sumStdDev += statsByTeam.get(i).getStdDeviation();
@@ -344,10 +352,10 @@ public class NoWinsStrategySeasonStatsService extends StrategyScoreCalculator<No
         return 0;
     }
 
-    static class SortStatsDataBySeason implements Comparator<NoWinsSeasonStats> {
+    static class SortStatsDataBySeason implements Comparator<ScoreBothHalvesSeasonStats> {
 
         @Override
-        public int compare(NoWinsSeasonStats a, NoWinsSeasonStats b) {
+        public int compare(ScoreBothHalvesSeasonStats a, ScoreBothHalvesSeasonStats b) {
             return Integer.valueOf(SEASONS_LIST.indexOf(a.getSeason()))
                     .compareTo(Integer.valueOf(SEASONS_LIST.indexOf(b.getSeason())));
         }

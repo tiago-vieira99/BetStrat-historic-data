@@ -16,6 +16,7 @@ import com.api.BetStrat.entity.football.NoDrawSeasonStats;
 import com.api.BetStrat.entity.football.NoGoalsFestSeasonStats;
 import com.api.BetStrat.entity.football.NoMarginWinsSeasonStats;
 import com.api.BetStrat.entity.football.NoWinsSeasonStats;
+import com.api.BetStrat.entity.football.ScoreBothHalvesSeasonStats;
 import com.api.BetStrat.entity.football.WinsMarginSeasonStats;
 import com.api.BetStrat.entity.football.WinsSeasonStats;
 import com.api.BetStrat.entity.handball.Handball16WinsMarginSeasonStats;
@@ -39,6 +40,7 @@ import com.api.BetStrat.service.football.NoDrawStrategySeasonStatsService;
 import com.api.BetStrat.service.football.NoGoalsFestStrategySeasonStatsService;
 import com.api.BetStrat.service.football.NoMarginWinsStrategySeasonStatsService;
 import com.api.BetStrat.service.football.NoWinsStrategySeasonStatsService;
+import com.api.BetStrat.service.football.ScoreBothHalvesSeasonStatsService;
 import com.api.BetStrat.service.football.WinsMarginStrategySeasonStatsService;
 import com.api.BetStrat.service.football.WinsStrategySeasonStatsService;
 import com.api.BetStrat.service.handball.HandballWinsMargin16StrategySeasonStatsService;
@@ -79,6 +81,7 @@ public abstract class StrategyMappingPattern {
                                   NoCleanSheetStrategySeasonStatsService noCleanSheetStrategySeasonStatsService,
                                   BttsStrategySeasonStatsService bttsStrategySeasonStatsService,
                                   NoBttsStrategySeasonStatsService noBttsStrategySeasonStatsService,
+                                  ScoreBothHalvesSeasonStatsService scoreBothHalvesSeasonStatsService,
                                   HandballWinsMargin16StrategySeasonStatsService handballWinsMargin16StrategySeasonstatsService,
                                   HandballWinsMargin49StrategySeasonStatsService handballWinsMargin49StrategySeasonstatsService,
                                   HandballWinsMargin712StrategySeasonStatsService handballWinsMargin712StrategySeasonstatsService,
@@ -107,6 +110,7 @@ public abstract class StrategyMappingPattern {
         serviceMap.put(NoGoalsFestSeasonStats.class, noGoalsFestStrategySeasonstatsService);
         serviceMap.put(BttsSeasonStats.class, bttsStrategySeasonStatsService);
         serviceMap.put(NoBttsSeasonStats.class, noBttsStrategySeasonStatsService);
+        serviceMap.put(ScoreBothHalvesSeasonStats.class, scoreBothHalvesSeasonStatsService);
         // Handball Strategies
         serviceMap.put(Handball16WinsMarginSeasonStats.class, handballWinsMargin16StrategySeasonstatsService);
         serviceMap.put(Handball49WinsMarginSeasonStats.class, handballWinsMargin49StrategySeasonstatsService);
