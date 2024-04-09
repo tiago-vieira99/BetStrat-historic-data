@@ -320,28 +320,28 @@ public class WinsStrategySeasonStatsService extends StrategyScoreCalculator<Wins
         return 0;
     }
 
-    @Override
-    public int calculateAllSeasonsStdDevScore(List<WinsSeasonStats> statsByTeam) {
-        double sumStdDev = 0;
-        for (int i=0; i<statsByTeam.size(); i++) {
-            sumStdDev += statsByTeam.get(i).getStdDeviation();
-        }
-
-        double avgStdDev = Utils.beautifyDoubleValue(sumStdDev/statsByTeam.size());
-
-        if (isBetween(avgStdDev,0,1.8)) {
-            return 100;
-        } else if(isBetween(avgStdDev,1.8,2.0)) {
-            return 80;
-        } else if(isBetween(avgStdDev,2.0,2.2)) {
-            return 70;
-        } else if(isBetween(avgStdDev,2.2,2.4)) {
-            return 50;
-        } else if(isBetween(avgStdDev,2.4,25)) {
-            return 30;
-        }
-        return 0;
-    }
+//    @Override
+//    public int calculateAllSeasonsStdDevScore(List<WinsSeasonStats> statsByTeam) {
+//        double sumStdDev = 0;
+//        for (int i=0; i<statsByTeam.size(); i++) {
+//            sumStdDev += statsByTeam.get(i).getStdDeviation();
+//        }
+//
+//        double avgStdDev = Utils.beautifyDoubleValue(sumStdDev/statsByTeam.size());
+//
+//        if (isBetween(avgStdDev,0,1.8)) {
+//            return 100;
+//        } else if(isBetween(avgStdDev,1.8,2.0)) {
+//            return 80;
+//        } else if(isBetween(avgStdDev,2.0,2.2)) {
+//            return 70;
+//        } else if(isBetween(avgStdDev,2.2,2.4)) {
+//            return 50;
+//        } else if(isBetween(avgStdDev,2.4,25)) {
+//            return 30;
+//        }
+//        return 0;
+//    }
 
     static class SortStatsDataBySeason implements Comparator<WinsSeasonStats> {
 

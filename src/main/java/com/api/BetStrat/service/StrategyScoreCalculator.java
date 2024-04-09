@@ -2,6 +2,7 @@ package com.api.BetStrat.service;
 
 import com.api.BetStrat.enums.TeamScoreEnum;
 import com.api.BetStrat.entity.StrategySeasonStats;
+import com.api.BetStrat.util.Utils;
 
 import java.util.List;
 
@@ -35,9 +36,29 @@ public abstract class StrategyScoreCalculator<T extends StrategySeasonStats> {
 
     public abstract int calculateLast3SeasonsStdDevScore(List<T> statsByTeam);
 
-    public abstract int calculateAllSeasonsStdDevScore(List<T> statsByTeam);
+    public int calculateAllSeasonsStdDevScore(List<T> statsByTeam) {
+        double sumStdDev = 0;
+        for (int i=0; i<statsByTeam.size(); i++) {
+            sumStdDev += statsByTeam.get(i).getStdDeviation();
+        }
 
-    public static int calculateLeagueMatchesScore(int totalMatches) {
+        double avgStdDev = Utils.beautifyDoubleValue(sumStdDev/statsByTeam.size());
+
+        if (isBetween(avgStdDev,0,1.8)) {
+            return 100;
+        } else if(isBetween(avgStdDev,1.8,2.0)) {
+            return 80;
+        } else if(isBetween(avgStdDev,2.0,2.2)) {
+            return 70;
+        } else if(isBetween(avgStdDev,2.2,2.4)) {
+            return 50;
+        } else if(isBetween(avgStdDev,2.4,25)) {
+            return 30;
+        }
+        return 0;
+    }
+
+    public int calculateLeagueMatchesScore(int totalMatches) {
         if (isBetween(totalMatches,0,31)) {
             return 100;
         } else if(isBetween(totalMatches,31,33)) {
