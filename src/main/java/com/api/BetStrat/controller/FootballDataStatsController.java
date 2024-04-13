@@ -3,11 +3,6 @@ package com.api.BetStrat.controller;
 import com.api.BetStrat.entity.HistoricMatch;
 import com.api.BetStrat.entity.StrategySeasonStats;
 import com.api.BetStrat.entity.Team;
-import com.api.BetStrat.entity.football.DrawSeasonStats;
-import com.api.BetStrat.entity.football.EuroHandicapSeasonStats;
-import com.api.BetStrat.entity.football.FlipFlopOversUndersStats;
-import com.api.BetStrat.entity.football.GoalsFestSeasonStats;
-import com.api.BetStrat.entity.football.WinsMarginSeasonStats;
 import com.api.BetStrat.exception.NotFoundException;
 import com.api.BetStrat.exception.StandardError;
 import com.api.BetStrat.repository.HistoricMatchRepository;
@@ -16,9 +11,6 @@ import com.api.BetStrat.service.StrategySeasonStatsService;
 import com.api.BetStrat.service.TeamService;
 import com.api.BetStrat.tasks.GetLastPlayedMatchTask;
 import com.api.BetStrat.util.ScrappingUtil;
-import com.api.BetStrat.util.TeamDFhistoricData;
-import com.api.BetStrat.util.TeamEHhistoricData;
-import com.api.BetStrat.util.TeamGoalsFestHistoricData;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
@@ -44,12 +36,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import javax.validation.Valid;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static com.api.BetStrat.constants.BetStratConstants.API_SPORTS_BASE_URL;
@@ -221,6 +209,18 @@ public class FootballDataStatsController {
         teamService.updateTeamScore(teamByName, strategy);
 
         return ResponseEntity.ok().body("OK");
+    }
+
+    @PostMapping("/simulate-by-strategy/")
+    public ResponseEntity<List<Map>> simulateStrategyBySeason (@Valid @RequestParam  String strategy, @Valid @RequestParam  String teamName, @Valid @RequestParam String season) {
+        Team teamByName = teamRepository.getTeamByNameAndSport(teamName, "Football");
+        if (teamByName == null) {
+            throw new NotFoundException();
+        }
+
+        List<Map> list = strategySeasonStatsService.simulateStrategyBySeason(season, teamByName, strategy);
+
+        return ResponseEntity.ok().body(list);
     }
 
 //    @PostMapping("/draw-stats-manually")

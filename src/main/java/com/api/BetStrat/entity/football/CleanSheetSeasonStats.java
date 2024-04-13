@@ -28,7 +28,10 @@ public class CleanSheetSeasonStats extends StrategySeasonStats {
 
     @Override
     public void maxSeqScale() {
-        // avg odds : 3 - 3.3
+        // avg odds : TODO
+        // odd tight match: 2.7 - 4.2
+        // odd in favour match:
+        // odd underdog match:
         super.setMaxSeqScale(StrategyDurationScaleEnum.MEDIUM_LONG.getValue());
     }
 }

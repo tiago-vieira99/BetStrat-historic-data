@@ -20,6 +20,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import static com.api.BetStrat.constants.BetStratConstants.SEASONS_LIST;
@@ -50,6 +51,16 @@ public class ComebackStrategySeasonStatsService extends StrategyScoreCalculator<
     @Override
     public List<ComebackSeasonStats> getStatsByStrategyAndTeam(Team team, String strategyName) {
         return comebackSeasonInfoRepository.getComebackStatsByTeam(team);
+    }
+
+    @Override
+    public List<Map> simulateStrategyBySeason(String season, Team team, String strategyName) {
+        return null;
+    }
+
+    @Override
+    public boolean matchFollowStrategyRules(HistoricMatch historicMatch, String teamName, String strategyName) {
+        return false;
     }
 
     @Override

@@ -1,8 +1,8 @@
 package com.api.BetStrat.service;
 
+import com.api.BetStrat.entity.HistoricMatch;
 import com.api.BetStrat.entity.StrategySeasonStats;
 import com.api.BetStrat.entity.Team;
-import com.api.BetStrat.entity.football.WinsSeasonStats;
 import com.api.BetStrat.service.basketball.ComebackStrategySeasonStatsService;
 import com.api.BetStrat.service.basketball.LongBasketWinsStrategySeasonStatsService;
 import com.api.BetStrat.service.basketball.ShortBasketWinsStrategySeasonStatsService;
@@ -30,13 +30,12 @@ import com.api.BetStrat.service.hockey.WinsMargin3StrategySeasonStatsService;
 import com.api.BetStrat.service.hockey.WinsMarginAny2StrategySeasonStatsService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
-import java.util.Comparator;
 import java.util.List;
-
-import static com.api.BetStrat.constants.BetStratConstants.SEASONS_LIST;
+import java.util.Map;
 
 @Service
 @Transactional
@@ -105,6 +104,24 @@ public class StrategySeasonStatsService<T extends StrategySeasonStats> extends S
                 serviceMap.get(serviceMap.keySet().stream().filter(s -> s.getSimpleName().equals(strategy)).findFirst().get());
         // Delegate the insertion to the corresponding service implementation
         service.updateStrategySeasonStats(team, null);
+    }
+
+    @Override
+    public List<Map> simulateStrategyBySeason(String season, Team team, String strategy) {
+        // Get the service implementation corresponding to the type of strategy
+        StrategySeasonStatsInterface<T> service = (StrategySeasonStatsInterface<T>)
+                serviceMap.get(serviceMap.keySet().stream().filter(s -> s.getSimpleName().equals(strategy)).findFirst().get());
+        // Delegate the insertion to the corresponding service implementation
+        return service.simulateStrategyBySeason(season, team, strategy);
+    }
+
+    @Override
+    public boolean matchFollowStrategyRules(HistoricMatch historicMatch, String teamName, String strategy) {
+        // Get the service implementation corresponding to the type of strategy
+        StrategySeasonStatsInterface<T> service = (StrategySeasonStatsInterface<T>)
+                serviceMap.get(serviceMap.keySet().stream().filter(s -> s.getSimpleName().equals(strategy)).findFirst().get());
+        // Delegate the insertion to the corresponding service implementation
+        return service.matchFollowStrategyRules(historicMatch, teamName, strategy);
     }
 
     @Override

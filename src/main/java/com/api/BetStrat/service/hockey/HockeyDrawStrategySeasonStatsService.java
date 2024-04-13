@@ -1,5 +1,6 @@
 package com.api.BetStrat.service.hockey;
 
+import com.api.BetStrat.entity.HistoricMatch;
 import com.api.BetStrat.enums.TeamScoreEnum;
 import com.api.BetStrat.entity.hockey.HockeyDrawSeasonStats;
 import com.api.BetStrat.entity.Team;
@@ -17,6 +18,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import static com.api.BetStrat.constants.BetStratConstants.SEASONS_LIST;
@@ -38,6 +40,16 @@ public class HockeyDrawStrategySeasonStatsService extends StrategyScoreCalculato
     @Override
     public List<HockeyDrawSeasonStats> getStatsByStrategyAndTeam(Team team, String strategyName) {
         return hockeyDrawSeasonInfoRepository.getHockeyDrawStatsByTeam(team);
+    }
+
+    @Override
+    public List<Map> simulateStrategyBySeason(String season, Team team, String strategyName) {
+        return null;
+    }
+
+    @Override
+    public boolean matchFollowStrategyRules(HistoricMatch historicMatch, String teamName, String strategyName) {
+        return false;
     }
 
     @Override

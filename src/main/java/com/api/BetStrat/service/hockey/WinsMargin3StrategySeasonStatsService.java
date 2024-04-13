@@ -1,5 +1,6 @@
 package com.api.BetStrat.service.hockey;
 
+import com.api.BetStrat.entity.HistoricMatch;
 import com.api.BetStrat.enums.TeamScoreEnum;
 import com.api.BetStrat.entity.Team;
 import com.api.BetStrat.entity.hockey.WinsMargin3SeasonStats;
@@ -17,6 +18,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import static com.api.BetStrat.constants.BetStratConstants.SEASONS_LIST;
@@ -38,6 +40,16 @@ public class WinsMargin3StrategySeasonStatsService extends StrategyScoreCalculat
     @Override
     public List<WinsMargin3SeasonStats> getStatsByStrategyAndTeam(Team team, String strategyName) {
         return winsMargin3SeasonInfoRepository.getHockeyWinsMargin3StatsByTeam(team);
+    }
+
+    @Override
+    public List<Map> simulateStrategyBySeason(String season, Team team, String strategyName) {
+        return null;
+    }
+
+    @Override
+    public boolean matchFollowStrategyRules(HistoricMatch historicMatch, String teamName, String strategyName) {
+        return false;
     }
 
     @Override

@@ -35,7 +35,10 @@ public class EuroHandicapSeasonStats extends StrategySeasonStats {
 
     @Override
     public void maxSeqScale() {
-        // avg odds : 3 - 3.3 TODO
+        // avg odds :  TODO
+        // odd tight match: 3.17 - 4.64
+        // odd in favour match:
+        // odd underdog match:
         super.setMaxSeqScale(StrategyDurationScaleEnum.MEDIUM_LONG.getValue());
     }
 

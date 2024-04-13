@@ -19,8 +19,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import static com.api.BetStrat.constants.BetStratConstants.SEASONS_LIST;
@@ -52,6 +54,67 @@ public class WinsMarginStrategySeasonStatsService extends StrategyScoreCalculato
     @Override
     public List<WinsMarginSeasonStats> getStatsByStrategyAndTeam(Team team, String strategyName) {
         return winsMarginSeasonInfoRepository.getFootballWinsMarginStatsByTeam(team);
+    }
+
+    @Override
+    public List<Map> simulateStrategyBySeason(String season, Team team, String strategyName) {
+        List<Map> matchesBetted = new ArrayList<>();
+        List<HistoricMatch> teamMatchesBySeason = historicMatchRepository.getTeamMatchesBySeason(team, season);
+        String mainCompetition = Utils.findMainCompetition(teamMatchesBySeason);
+        List<HistoricMatch> filteredMatches = teamMatchesBySeason.stream().filter(t -> t.getCompetition().equals(mainCompetition)).collect(Collectors.toList());
+        filteredMatches.sort(new Utils.MatchesByDateSorter());
+
+        if (filteredMatches.size() == 0) {
+            return matchesBetted;
+        }
+
+        boolean isActiveSequence = true;
+        int actualNegativeSequence = 0;
+        for (int i = 0; i < filteredMatches.size(); i++) {
+            HistoricMatch historicMatch = filteredMatches.get(i);
+            if (actualNegativeSequence >= 4) {
+                isActiveSequence = true;
+            }
+
+            if (isActiveSequence) {
+                HashMap<String, Object> matchMap = new HashMap<>();
+                matchMap.put("date", historicMatch.getMatchDate());
+                matchMap.put("homeTeam", historicMatch.getHomeTeam());
+                matchMap.put("awayTeam", historicMatch.getAwayTeam());
+                matchMap.put("round", i+1);
+                matchMap.put("ftResult", historicMatch.getFtResult());
+                if (matchFollowStrategyRules(historicMatch, team.getName(), null)) {
+                    matchMap.put("balance", 2.0);
+                    matchesBetted.add(matchMap);
+                    actualNegativeSequence = 0;
+                    isActiveSequence = false;
+                } else {
+                    matchMap.put("balance", -1.0);
+                    matchesBetted.add(matchMap);
+                }
+            } else {
+                if (!matchFollowStrategyRules(historicMatch, team.getName(), null)) {
+                    actualNegativeSequence++;
+                } else {
+                    actualNegativeSequence = 0;
+                }
+            }
+        }
+
+        return matchesBetted;
+    }
+
+    @Override
+    public boolean matchFollowStrategyRules(HistoricMatch historicMatch, String teamName, String strategyName) {
+        String res = historicMatch.getFtResult().split("\\(")[0];
+        int homeResult = Integer.parseInt(res.split(":")[0]);
+        int awayResult = Integer.parseInt(res.split(":")[1]);
+        if (((historicMatch.getHomeTeam().equals(teamName) && homeResult>awayResult) || (historicMatch.getAwayTeam().equals(teamName) && homeResult<awayResult))
+                && (Math.abs(homeResult - awayResult) == 1 || Math.abs(homeResult - awayResult) == 2)) {
+            return true;
+        } else {
+            return false;
+        }
     }
 
     @Override
@@ -90,7 +153,7 @@ public class WinsMarginStrategySeasonStatsService extends StrategyScoreCalculato
                     int awayResult = Integer.parseInt(res.split(":")[1]);
                     if ((historicMatch.getHomeTeam().equals(team.getName()) && homeResult>awayResult) || (historicMatch.getAwayTeam().equals(team.getName()) && homeResult<awayResult)) {
                         totalWins++;
-                        if (Math.abs(homeResult - awayResult) == 1 || Math.abs(homeResult - awayResult) == 2) {
+                        if (matchFollowStrategyRules(historicMatch, team.getName(), null)) {
                             noMarginWinsSequence.add(count);
                             count = 0;
                         }
@@ -101,10 +164,7 @@ public class WinsMarginStrategySeasonStatsService extends StrategyScoreCalculato
 
                 noMarginWinsSequence.add(count);
                 HistoricMatch lastMatch = filteredMatches.get(filteredMatches.size() - 1);
-                String lastResult = lastMatch.getFtResult().split("\\(")[0];
-                if (!((lastMatch.getHomeTeam().equals(team.getName()) && Integer.parseInt(lastResult.split(":")[0])>Integer.parseInt(lastResult.split(":")[1])) ||
-                        (lastMatch.getAwayTeam().equals(team.getName()) && Integer.parseInt(lastResult.split(":")[0])<Integer.parseInt(lastResult.split(":")[1]))) ||
-                        (Math.abs(Integer.parseInt(lastResult.split(":")[0]) - Integer.parseInt(lastResult.split(":")[1])) > 2)) {
+                if (!matchFollowStrategyRules(lastMatch, team.getName(), null)) {
                     noMarginWinsSequence.add(-1);
                 }
 

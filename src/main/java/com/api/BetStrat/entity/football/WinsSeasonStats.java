@@ -28,8 +28,8 @@ public class WinsSeasonStats extends StrategySeasonStats {
 
     @Override
     public void maxSeqScale() {
-        // avg odds : 3 - 3.3 TODO
-        super.setMaxSeqScale(StrategyDurationScaleEnum.MEDIUM_LONG.getValue());
+        // avg odds : 1.3 - 2
+        super.setMaxSeqScale(StrategyDurationScaleEnum.SHORT.getValue());
     }
 
 }
