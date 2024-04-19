@@ -1,5 +1,6 @@
 package com.api.BetStrat.service.handball;
 
+import com.api.BetStrat.dto.SimulatedMatchDto;
 import com.api.BetStrat.enums.TeamScoreEnum;
 import com.api.BetStrat.entity.HistoricMatch;
 import com.api.BetStrat.entity.Team;
@@ -20,7 +21,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 import static com.api.BetStrat.constants.BetStratConstants.SEASONS_LIST;
@@ -55,7 +55,7 @@ public class HandballWinsMargin712StrategySeasonStatsService extends StrategySco
     }
 
     @Override
-    public List<Map> simulateStrategyBySeason(String season, Team team, String strategyName) {
+    public List<SimulatedMatchDto> simulateStrategyBySeason(String season, Team team, String strategyName) {
         return null;
     }
 

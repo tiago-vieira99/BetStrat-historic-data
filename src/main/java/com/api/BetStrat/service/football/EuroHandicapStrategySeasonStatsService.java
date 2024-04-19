@@ -1,5 +1,6 @@
 package com.api.BetStrat.service.football;
 
+import com.api.BetStrat.dto.SimulatedMatchDto;
 import com.api.BetStrat.enums.TeamScoreEnum;
 import com.api.BetStrat.entity.HistoricMatch;
 import com.api.BetStrat.entity.football.EuroHandicapSeasonStats;
@@ -20,9 +21,9 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
+import static com.api.BetStrat.constants.BetStratConstants.DEFAULT_BAD_RUN_TO_NEW_SEQ;
 import static com.api.BetStrat.constants.BetStratConstants.SEASONS_LIST;
 import static com.api.BetStrat.constants.BetStratConstants.SUMMER_SEASONS_BEGIN_MONTH_LIST;
 import static com.api.BetStrat.constants.BetStratConstants.SUMMER_SEASONS_LIST;
@@ -55,8 +56,53 @@ public class EuroHandicapStrategySeasonStatsService extends StrategyScoreCalcula
     }
 
     @Override
-    public List<Map> simulateStrategyBySeason(String season, Team team, String strategyName) {
-        return null;
+    public List<SimulatedMatchDto> simulateStrategyBySeason(String season, Team team, String strategyName) {
+        List<SimulatedMatchDto> matchesBetted = new ArrayList<>();
+        List<HistoricMatch> teamMatchesBySeason = historicMatchRepository.getTeamMatchesBySeason(team, season);
+        String mainCompetition = Utils.findMainCompetition(teamMatchesBySeason);
+        List<HistoricMatch> filteredMatches = teamMatchesBySeason.stream().filter(t -> t.getCompetition().equals(mainCompetition)).collect(Collectors.toList());
+        filteredMatches.sort(new Utils.MatchesByDateSorter());
+
+        if (filteredMatches.size() == 0) {
+            return matchesBetted;
+        }
+
+        boolean isActiveSequence = true;
+        int actualNegativeSequence = 0;
+        for (int i = 0; i < filteredMatches.size(); i++) {
+            HistoricMatch historicMatch = filteredMatches.get(i);
+            if (actualNegativeSequence >= DEFAULT_BAD_RUN_TO_NEW_SEQ) {
+                isActiveSequence = true;
+            }
+
+            if (isActiveSequence) {
+                SimulatedMatchDto simulatedMatchDto = new SimulatedMatchDto();
+                simulatedMatchDto.setMatchDate(historicMatch.getMatchDate());
+                simulatedMatchDto.setHomeTeam(historicMatch.getHomeTeam());
+                simulatedMatchDto.setAwayTeam(historicMatch.getAwayTeam());
+                simulatedMatchDto.setMatchNumber(String.valueOf(i+1));
+                simulatedMatchDto.setHtResult(historicMatch.getHtResult());
+                simulatedMatchDto.setFtResult(historicMatch.getFtResult());
+                simulatedMatchDto.setSeason(season);
+                simulatedMatchDto.setCompetition(historicMatch.getCompetition());
+                if (matchFollowStrategyRules(historicMatch, team.getName(), null)) {
+                    simulatedMatchDto.setIsGreen(true);
+                    actualNegativeSequence = 0;
+                    isActiveSequence = false;
+                } else {
+                    simulatedMatchDto.setIsGreen(false);
+                }
+                matchesBetted.add(simulatedMatchDto);
+            } else {
+                if (!matchFollowStrategyRules(historicMatch, team.getName(), null)) {
+                    actualNegativeSequence++;
+                } else {
+                    actualNegativeSequence = 0;
+                }
+            }
+        }
+
+        return matchesBetted;
     }
 
     @Override

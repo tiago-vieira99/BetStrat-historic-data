@@ -1,5 +1,6 @@
 package com.api.BetStrat.service.football;
 
+import com.api.BetStrat.dto.SimulatedMatchDto;
 import com.api.BetStrat.enums.TeamScoreEnum;
 import com.api.BetStrat.entity.HistoricMatch;
 import com.api.BetStrat.entity.Team;
@@ -19,12 +20,11 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
+import static com.api.BetStrat.constants.BetStratConstants.DEFAULT_BAD_RUN_TO_NEW_SEQ;
 import static com.api.BetStrat.constants.BetStratConstants.SEASONS_LIST;
 import static com.api.BetStrat.constants.BetStratConstants.SUMMER_SEASONS_BEGIN_MONTH_LIST;
 import static com.api.BetStrat.constants.BetStratConstants.SUMMER_SEASONS_LIST;
@@ -57,8 +57,8 @@ public class WinsMarginStrategySeasonStatsService extends StrategyScoreCalculato
     }
 
     @Override
-    public List<Map> simulateStrategyBySeason(String season, Team team, String strategyName) {
-        List<Map> matchesBetted = new ArrayList<>();
+    public List<SimulatedMatchDto> simulateStrategyBySeason(String season, Team team, String strategyName) {
+        List<SimulatedMatchDto> matchesBetted = new ArrayList<>();
         List<HistoricMatch> teamMatchesBySeason = historicMatchRepository.getTeamMatchesBySeason(team, season);
         String mainCompetition = Utils.findMainCompetition(teamMatchesBySeason);
         List<HistoricMatch> filteredMatches = teamMatchesBySeason.stream().filter(t -> t.getCompetition().equals(mainCompetition)).collect(Collectors.toList());
@@ -72,26 +72,28 @@ public class WinsMarginStrategySeasonStatsService extends StrategyScoreCalculato
         int actualNegativeSequence = 0;
         for (int i = 0; i < filteredMatches.size(); i++) {
             HistoricMatch historicMatch = filteredMatches.get(i);
-            if (actualNegativeSequence >= 4) {
+            if (actualNegativeSequence >= DEFAULT_BAD_RUN_TO_NEW_SEQ) {
                 isActiveSequence = true;
             }
 
             if (isActiveSequence) {
-                HashMap<String, Object> matchMap = new HashMap<>();
-                matchMap.put("date", historicMatch.getMatchDate());
-                matchMap.put("homeTeam", historicMatch.getHomeTeam());
-                matchMap.put("awayTeam", historicMatch.getAwayTeam());
-                matchMap.put("round", i+1);
-                matchMap.put("ftResult", historicMatch.getFtResult());
+                SimulatedMatchDto simulatedMatchDto = new SimulatedMatchDto();
+                simulatedMatchDto.setMatchDate(historicMatch.getMatchDate());
+                simulatedMatchDto.setHomeTeam(historicMatch.getHomeTeam());
+                simulatedMatchDto.setAwayTeam(historicMatch.getAwayTeam());
+                simulatedMatchDto.setMatchNumber(String.valueOf(i+1));
+                simulatedMatchDto.setHtResult(historicMatch.getHtResult());
+                simulatedMatchDto.setFtResult(historicMatch.getFtResult());
+                simulatedMatchDto.setSeason(season);
+                simulatedMatchDto.setCompetition(historicMatch.getCompetition());
                 if (matchFollowStrategyRules(historicMatch, team.getName(), null)) {
-                    matchMap.put("balance", 2.0);
-                    matchesBetted.add(matchMap);
+                    simulatedMatchDto.setIsGreen(true);
                     actualNegativeSequence = 0;
                     isActiveSequence = false;
                 } else {
-                    matchMap.put("balance", -1.0);
-                    matchesBetted.add(matchMap);
+                    simulatedMatchDto.setIsGreen(false);
                 }
+                matchesBetted.add(simulatedMatchDto);
             } else {
                 if (!matchFollowStrategyRules(historicMatch, team.getName(), null)) {
                     actualNegativeSequence++;

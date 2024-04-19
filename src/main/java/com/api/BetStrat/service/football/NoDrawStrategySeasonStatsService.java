@@ -1,5 +1,6 @@
 package com.api.BetStrat.service.football;
 
+import com.api.BetStrat.dto.SimulatedMatchDto;
 import com.api.BetStrat.entity.HistoricMatch;
 import com.api.BetStrat.entity.Team;
 import com.api.BetStrat.entity.football.DrawSeasonStats;
@@ -10,7 +11,6 @@ import com.api.BetStrat.repository.football.NoDrawSeasonInfoRepository;
 import com.api.BetStrat.service.StrategyScoreCalculator;
 import com.api.BetStrat.service.StrategySeasonStatsInterface;
 import com.api.BetStrat.util.Utils;
-import com.google.common.collect.ImmutableList;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,9 +21,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 import static com.api.BetStrat.constants.BetStratConstants.SEASONS_LIST;
@@ -58,7 +56,7 @@ public class NoDrawStrategySeasonStatsService extends StrategyScoreCalculator<No
     }
 
     @Override
-    public List<Map> simulateStrategyBySeason(String season, Team team, String strategyName) {
+    public List<SimulatedMatchDto> simulateStrategyBySeason(String season, Team team, String strategyName) {
         return null;
     }
 

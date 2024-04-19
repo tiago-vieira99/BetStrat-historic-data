@@ -1,11 +1,11 @@
 package com.api.BetStrat.service;
 
+import com.api.BetStrat.dto.SimulatedMatchDto;
 import com.api.BetStrat.entity.HistoricMatch;
 import com.api.BetStrat.entity.StrategySeasonStats;
 import com.api.BetStrat.entity.Team;
 
 import java.util.List;
-import java.util.Map;
 
 public interface StrategySeasonStatsInterface<T extends StrategySeasonStats> {
 
@@ -17,7 +17,7 @@ public interface StrategySeasonStatsInterface<T extends StrategySeasonStats> {
 
     Team updateTeamScore (Team team);
 
-    List<Map> simulateStrategyBySeason(String season, Team team, String strategyName);
+    List<SimulatedMatchDto> simulateStrategyBySeason(String season, Team team, String strategyName);
 
     boolean matchFollowStrategyRules(HistoricMatch historicMatch, String teamName, String strategyName);
 
