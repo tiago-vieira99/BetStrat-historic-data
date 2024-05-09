@@ -271,6 +271,11 @@ public class HockeyDrawStrategySeasonStatsService extends StrategyScoreCalculato
     }
 
     @Override
+    public String calculateScoreBySeason(Team team, String season, String strategy) {
+        return null;
+    }
+
+    @Override
     public int calculateLast3SeasonsTotalWinsRateScore(List<HockeyDrawSeasonStats> statsByTeam) {
         return 0;
     }

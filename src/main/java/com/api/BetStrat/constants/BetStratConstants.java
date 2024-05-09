@@ -21,7 +21,7 @@ public class BetStratConstants {
 
     public static final String CURRENT_SEASON = "2023-24";
 
-    public static final Integer DEFAULT_BAD_RUN_TO_NEW_SEQ = 4;
+    public static final Integer DEFAULT_BAD_RUN_TO_NEW_SEQ = 6;
 
     public static final List<String> SEASONS_LIST = ImmutableList.of("2016","2016-17","2017","2017-18","2018","2018-19","2019","2019-20",
             "2020","2020-21","2021","2021-22","2022","2022-23");
@@ -36,6 +36,8 @@ public class BetStratConstants {
 
     public static final List<String> HOCKEY_SEASONS_LIST = ImmutableList.of("2016-2017","2017-2018","2018-2019","2019-2020",
             "2020-2021","2021-2022","2021-2022");
+
+    public static final List<String> FOOTBALL_STRATEGIES_LIST = ImmutableList.of("Draw","GoalsFest","WinsMargin","Btts");
 
     public static final Map<String, String> ZEROZERO_SEASON_CODES  = new HashMap<String, String>() {{
         put("2016", "2016");

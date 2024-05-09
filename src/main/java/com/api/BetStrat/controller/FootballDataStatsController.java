@@ -4,6 +4,7 @@ import com.api.BetStrat.dto.SimulatedMatchDto;
 import com.api.BetStrat.entity.HistoricMatch;
 import com.api.BetStrat.entity.StrategySeasonStats;
 import com.api.BetStrat.entity.Team;
+import com.api.BetStrat.enums.TeamScoreEnum;
 import com.api.BetStrat.exception.NotFoundException;
 import com.api.BetStrat.exception.StandardError;
 import com.api.BetStrat.repository.HistoricMatchRepository;
@@ -37,11 +38,14 @@ import org.springframework.web.bind.annotation.RestController;
 
 import javax.validation.Valid;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import static com.api.BetStrat.constants.BetStratConstants.API_SPORTS_BASE_URL;
 import static com.api.BetStrat.constants.BetStratConstants.FBREF_BASE_URL;
+import static com.api.BetStrat.constants.BetStratConstants.FOOTBALL_STRATEGIES_LIST;
 import static com.api.BetStrat.constants.BetStratConstants.LONG_STREAKS_LEAGUES_LIST;
 import static com.api.BetStrat.constants.BetStratConstants.WORLDFOOTBALL_BASE_URL;
 import static com.api.BetStrat.constants.BetStratConstants.ZEROZERO_BASE_URL;
@@ -189,8 +193,8 @@ public class FootballDataStatsController {
         return ResponseEntity.ok().body("OK");
     }
 
-    @ApiOperation(value = "updateTeamStatsByStrategy", notes = "Strategy values:\nDrawSeasonStats | EuroHandicapSeasonStats | FlipFlopOversUndersStats | GoalsFestSeasonStats " +
-            "| WinsMarginSeasonStats | WinsSeasonStats \nData sources:  \n FBRef:\n" +
+    @ApiOperation(value = "updateTeamStatsByStrategy", notes = "Strategy values:\nDraw | EuroHandicap | FlipFlopOversUnders | GoalsFest " +
+            "| WinsMargin | Wins \nData sources:  \n FBRef:\n" +
             " \n https://fbref.com/en/squads/d48ad4ff/2022-2023/matchlogs/schedule/Napoli-Scores-and-Fixturesn" +
             " \n\n" +
             " \n ZZ:\n" +
@@ -218,9 +222,47 @@ public class FootballDataStatsController {
             throw new NotFoundException();
         }
 
+        //simulate score for desired season
+        String scoreBySeason = strategySeasonStatsService.calculateScoreBySeason(teamByName, season, strategy+"SeasonStats");
+
+        if (scoreBySeason.contains("INAPT") || scoreBySeason.equals(TeamScoreEnum.INSUFFICIENT_DATA.getValue()) ||
+                Double.parseDouble(scoreBySeason.substring(scoreBySeason.indexOf('(')+1, scoreBySeason.lastIndexOf(')'))) < 70 ) {
+            return ResponseEntity.ok().body(null);
+        }
+
         List<SimulatedMatchDto> list = strategySeasonStatsService.simulateStrategyBySeason(season, teamByName, strategy);
 
         return ResponseEntity.ok().body(list);
+    }
+
+    @PostMapping("/report-by-season/")
+    public ResponseEntity<Object> simulationReportBySeason (@Valid @RequestParam String season) {
+        List<Team> allTeams = teamRepository.findAll().stream().filter(t -> t.getSport().equals("Football")).collect(Collectors.toList());
+
+        HashMap<String, Map> reportMap = new HashMap<>();
+
+        for (String strategy : FOOTBALL_STRATEGIES_LIST) {
+            reportMap.put(strategy, new HashMap<String, List>());
+
+            for (Team team : allTeams) {
+                //simulate score for desired season
+                String scoreBySeason = strategySeasonStatsService.calculateScoreBySeason(team, season, strategy+"SeasonStats");
+
+                if (scoreBySeason.contains("INAPT") || scoreBySeason.equals(TeamScoreEnum.INSUFFICIENT_DATA.getValue()) ||
+                        Double.parseDouble(scoreBySeason.substring(scoreBySeason.indexOf('(')+1, scoreBySeason.lastIndexOf(')'))) < 90 ) {
+                    continue;
+                }
+
+                List<SimulatedMatchDto> simulatedMatchDtoList = strategySeasonStatsService.simulateStrategyBySeason(season, team, strategy+"SeasonStats");
+                if (simulatedMatchDtoList != null && !simulatedMatchDtoList.isEmpty()) {
+                    HashMap<String, List> teamReportMap = new HashMap<>();
+                    teamReportMap.put(team.getName(), simulatedMatchDtoList);
+                    reportMap.get(strategy).putAll(teamReportMap);
+                }
+            }
+        }
+
+        return ResponseEntity.ok().body(reportMap);
     }
 
 //    @PostMapping("/draw-stats-manually")

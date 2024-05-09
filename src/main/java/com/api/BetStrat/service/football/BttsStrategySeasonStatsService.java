@@ -24,6 +24,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static com.api.BetStrat.constants.BetStratConstants.DEFAULT_BAD_RUN_TO_NEW_SEQ;
 import static com.api.BetStrat.constants.BetStratConstants.SEASONS_LIST;
 import static com.api.BetStrat.constants.BetStratConstants.SUMMER_SEASONS_BEGIN_MONTH_LIST;
 import static com.api.BetStrat.constants.BetStratConstants.SUMMER_SEASONS_LIST;
@@ -82,11 +83,8 @@ public class BttsStrategySeasonStatsService extends StrategyScoreCalculator<Btts
                 ArrayList<Integer> strategySequence = new ArrayList<>();
                 int count = 0;
                 for (HistoricMatch historicMatch : teamMatchesBySeason) {
-                    String res = historicMatch.getFtResult().split("\\(")[0];
                     count++;
-                    int homeResult = Integer.parseInt(res.split(":")[0]);
-                    int awayResult = Integer.parseInt(res.split(":")[1]);
-                    if (homeResult > 0 && awayResult > 0) {
+                    if (matchFollowStrategyRules(historicMatch, team.getName(), null)) {
                         strategySequence.add(count);
                         count = 0;
                     }
@@ -96,8 +94,7 @@ public class BttsStrategySeasonStatsService extends StrategyScoreCalculator<Btts
 
                 strategySequence.add(count);
                 HistoricMatch lastMatch = teamMatchesBySeason.get(teamMatchesBySeason.size() - 1);
-                String lastResult = lastMatch.getFtResult().split("\\(")[0];
-                if (!(Integer.parseInt(lastResult.split(":")[0]) > 0 && Integer.parseInt(lastResult.split(":")[1]) > 0)) {
+                if (!matchFollowStrategyRules(lastMatch, team.getName(), null)) {
                     strategySequence.add(-1);
                 }
 
@@ -150,13 +147,90 @@ public class BttsStrategySeasonStatsService extends StrategyScoreCalculator<Btts
     }
 
     @Override
+    public String calculateScoreBySeason(Team team, String season, String strategy) {
+        List<BttsSeasonStats> statsByTeam = bttsSeasonInfoRepository.getFootballBttsStatsByTeam(team);
+        Collections.sort(statsByTeam, new SortStatsDataBySeason());
+        Collections.reverse(statsByTeam);
+
+        int indexOfSeason = WINTER_SEASONS_LIST.indexOf(season);
+        statsByTeam = statsByTeam.stream().filter(s -> WINTER_SEASONS_LIST.indexOf(s.getSeason()) < indexOfSeason).collect(Collectors.toList());
+
+        if (statsByTeam.size() < 3 || statsByTeam.stream().filter(s -> s.getNumMatches() < 15).findAny().isPresent()) {
+            return TeamScoreEnum.INSUFFICIENT_DATA.getValue();
+        } else {
+            int last3SeasonsGoalsFestRateScore = calculateLast3SeasonsRateScore(statsByTeam);
+            int allSeasonsGoalsFestRateScore = calculateAllSeasonsRateScore(statsByTeam);
+            int last3SeasonsmaxSeqWOGoalsFestScore = calculateLast3SeasonsMaxSeqWOGreenScore(statsByTeam);
+            int allSeasonsmaxSeqWOGoalsFestScore = calculateAllSeasonsMaxSeqWOGreenScore(statsByTeam);
+            int last3SeasonsStdDevScore = calculateLast3SeasonsStdDevScore(statsByTeam);
+            int allSeasonsStdDevScore = calculateAllSeasonsStdDevScore(statsByTeam);
+//            int totalMatchesScore = calculateLeagueMatchesScore(statsByTeam.get(0).getNumMatches());
+
+            double totalScore = Utils.beautifyDoubleValue(0.2*last3SeasonsGoalsFestRateScore + 0.1*allSeasonsGoalsFestRateScore +
+                    0.2*last3SeasonsmaxSeqWOGoalsFestScore + 0.1*allSeasonsmaxSeqWOGoalsFestScore +
+                    0.3*last3SeasonsStdDevScore + 0.1*allSeasonsStdDevScore);
+
+            return calculateFinalRating(totalScore);
+        }
+    }
+
+    @Override
     public List<SimulatedMatchDto> simulateStrategyBySeason(String season, Team team, String strategyName) {
-        return null;
+        List<SimulatedMatchDto> matchesBetted = new ArrayList<>();
+        List<HistoricMatch> teamMatchesBySeason = historicMatchRepository.getTeamMatchesBySeason(team, season);
+
+        if (teamMatchesBySeason.size() == 0) {
+            return matchesBetted;
+        }
+
+        boolean isActiveSequence = true;
+        int actualNegativeSequence = 0;
+        for (int i = 0; i < teamMatchesBySeason.size(); i++) {
+            HistoricMatch historicMatch = teamMatchesBySeason.get(i);
+            if (actualNegativeSequence >= DEFAULT_BAD_RUN_TO_NEW_SEQ) {
+                isActiveSequence = true;
+            }
+
+            if (isActiveSequence) {
+                SimulatedMatchDto simulatedMatchDto = new SimulatedMatchDto();
+                simulatedMatchDto.setMatchDate(historicMatch.getMatchDate());
+                simulatedMatchDto.setHomeTeam(historicMatch.getHomeTeam());
+                simulatedMatchDto.setAwayTeam(historicMatch.getAwayTeam());
+                simulatedMatchDto.setMatchNumber(String.valueOf(i+1));
+                simulatedMatchDto.setHtResult(historicMatch.getHtResult());
+                simulatedMatchDto.setFtResult(historicMatch.getFtResult());
+                simulatedMatchDto.setSeason(season);
+                simulatedMatchDto.setCompetition(historicMatch.getCompetition());
+                if (matchFollowStrategyRules(historicMatch, team.getName(), null)) {
+                    simulatedMatchDto.setIsGreen(true);
+                    actualNegativeSequence = 0;
+                    isActiveSequence = false;
+                } else {
+                    simulatedMatchDto.setIsGreen(false);
+                }
+                matchesBetted.add(simulatedMatchDto);
+            } else {
+                if (!matchFollowStrategyRules(historicMatch, team.getName(), null)) {
+                    actualNegativeSequence++;
+                } else {
+                    actualNegativeSequence = 0;
+                }
+            }
+        }
+
+        return matchesBetted;
     }
 
     @Override
     public boolean matchFollowStrategyRules(HistoricMatch historicMatch, String teamName, String strategyName) {
-        return false;
+        String res = historicMatch.getFtResult().split("\\(")[0];
+        int homeResult = Integer.parseInt(res.split(":")[0]);
+        int awayResult = Integer.parseInt(res.split(":")[1]);
+        if (homeResult > 0 && awayResult > 0) {
+            return true;
+        } else {
+            return false;
+        }
     }
 
     public LinkedHashMap<String, String> getSimulatedScorePartialSeasons(Team teamByName, int seasonsToDiscard) {

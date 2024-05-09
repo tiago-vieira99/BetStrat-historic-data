@@ -109,7 +109,14 @@ public class DrawStrategySeasonStatsService extends StrategyScoreCalculator<Draw
 
     @Override
     public boolean matchFollowStrategyRules(HistoricMatch historicMatch, String teamName, String strategyName) {
-        return false;
+        String res = historicMatch.getFtResult().split("\\(")[0];
+        int homeResult = Integer.parseInt(res.split(":")[0]);
+        int awayResult = Integer.parseInt(res.split(":")[1]);
+        if (homeResult == awayResult) {
+            return true;
+        } else {
+            return false;
+        }
     }
 
     @Override
@@ -141,11 +148,8 @@ public class DrawStrategySeasonStatsService extends StrategyScoreCalculator<Draw
                 ArrayList<Integer> noDrawsSequence = new ArrayList<>();
                 int count = 0;
                 for (HistoricMatch historicMatch : filteredMatches) {
-                    String res = historicMatch.getFtResult().split("\\(")[0];
                     count++;
-                    int homeResult = Integer.parseInt(res.split(":")[0]);
-                    int awayResult = Integer.parseInt(res.split(":")[1]);
-                    if (homeResult == awayResult) {
+                    if (matchFollowStrategyRules(historicMatch, team.getName(), null)) {
                         noDrawsSequence.add(count);
                         count = 0;
                     }
@@ -155,8 +159,7 @@ public class DrawStrategySeasonStatsService extends StrategyScoreCalculator<Draw
 
                 noDrawsSequence.add(count);
                 HistoricMatch lastMatch = filteredMatches.get(filteredMatches.size() - 1);
-                String lastResult = lastMatch.getFtResult().split("\\(")[0];
-                if (Integer.parseInt(lastResult.split(":")[0]) != Integer.parseInt(lastResult.split(":")[1])) {
+                if (!matchFollowStrategyRules(lastMatch, team.getName(), null)) {
                     noDrawsSequence.add(-1);
                 }
 
@@ -206,6 +209,34 @@ public class DrawStrategySeasonStatsService extends StrategyScoreCalculator<Draw
         }
 
         return team;
+    }
+
+    @Override
+    public String calculateScoreBySeason(Team team, String season, String strategy) {
+        List<DrawSeasonStats> statsByTeam = drawSeasonInfoRepository.getFootballDrawStatsByTeam(team);
+        Collections.sort(statsByTeam, new SortStatsDataBySeason());
+        Collections.reverse(statsByTeam);
+
+        int indexOfSeason = WINTER_SEASONS_LIST.indexOf(season);
+        statsByTeam = statsByTeam.stream().filter(s -> WINTER_SEASONS_LIST.indexOf(s.getSeason()) < indexOfSeason).collect(Collectors.toList());
+
+        if (statsByTeam.size() < 3) {
+            return TeamScoreEnum.INSUFFICIENT_DATA.getValue();
+        } else {
+            int last3SeasonsDrawRateScore = calculateLast3SeasonsRateScore(statsByTeam);
+            int allSeasonsDrawRateScore = calculateAllSeasonsRateScore(statsByTeam);
+            int last3SeasonsmaxSeqWODrawScore = calculateLast3SeasonsMaxSeqWOGreenScore(statsByTeam);
+            int allSeasonsmaxSeqWODrawScore = calculateAllSeasonsMaxSeqWOGreenScore(statsByTeam);
+            int last3SeasonsStdDevScore = calculateLast3SeasonsStdDevScore(statsByTeam);
+            int allSeasonsStdDevScore = calculateAllSeasonsStdDevScore(statsByTeam);
+            int totalMatchesScore = calculateLeagueMatchesScore(statsByTeam.get(0).getNumMatches());
+
+            double totalScore = Utils.beautifyDoubleValue(0.2*last3SeasonsDrawRateScore + 0.15*allSeasonsDrawRateScore +
+                    0.15*last3SeasonsmaxSeqWODrawScore + 0.05*allSeasonsmaxSeqWODrawScore +
+                    0.3*last3SeasonsStdDevScore + 0.1*allSeasonsStdDevScore + 0.05*totalMatchesScore);
+
+           return calculateFinalRating(totalScore);
+        }
     }
 
     public LinkedHashMap<String, String> getSimulatedScorePartialSeasons(Team teamByName, int seasonsToDiscard) {

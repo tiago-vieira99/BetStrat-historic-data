@@ -128,7 +128,15 @@ public class StrategySeasonStatsService<T extends StrategySeasonStats> extends S
         return null;
     }
 
-//
+    @Override
+    public String calculateScoreBySeason(Team team, String season, String strategy) {
+        // Get the service implementation corresponding to the type of strategy
+        StrategySeasonStatsInterface<T> service = (StrategySeasonStatsInterface<T>)
+                serviceMap.get(serviceMap.keySet().stream().filter(s -> s.getSimpleName().equals(strategy)).findFirst().get());
+        // Delegate the insertion to the corresponding service implementation
+        return service.calculateScoreBySeason(team, season, strategy);
+    }
+    //
 //    @Override
 //    public String calculateFinalRating(double score, String strategy) {
 //        // Get the service implementation corresponding to the type of strategy

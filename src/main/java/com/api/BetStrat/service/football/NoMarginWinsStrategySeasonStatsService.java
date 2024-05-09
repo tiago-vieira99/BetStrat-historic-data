@@ -176,6 +176,11 @@ public class NoMarginWinsStrategySeasonStatsService extends StrategyScoreCalcula
         return teamByName;
     }
 
+    @Override
+    public String calculateScoreBySeason(Team team, String season, String strategy) {
+        return null;
+    }
+
     public LinkedHashMap<String, String> getSimulatedScorePartialSeasons(Team teamByName, int seasonsToDiscard) {
         List<NoMarginWinsSeasonStats> statsByTeam = noMarginWinsSeasonInfoRepository.getFootballNoMarginWinStatsByTeam(teamByName);
         LinkedHashMap<String, String> outMap = new LinkedHashMap<>();

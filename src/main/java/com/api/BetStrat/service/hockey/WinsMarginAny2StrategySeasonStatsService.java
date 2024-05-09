@@ -85,6 +85,11 @@ public class WinsMarginAny2StrategySeasonStatsService extends StrategyScoreCalcu
         return teamByName;
     }
 
+    @Override
+    public String calculateScoreBySeason(Team team, String season, String strategy) {
+        return null;
+    }
+
     public String calculateFinalRating(double score) {
         return super.calculateFinalRating(score);
     }

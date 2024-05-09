@@ -161,7 +161,12 @@ public class NoDrawStrategySeasonStatsService extends StrategyScoreCalculator<No
         return team;
     }
 
-//    public LinkedHashMap<String, String> getSimulatedScorePartialSeasons(Team teamByName, int seasonsToDiscard) {
+    @Override
+    public String calculateScoreBySeason(Team team, String season, String strategy) {
+        return null;
+    }
+
+    //    public LinkedHashMap<String, String> getSimulatedScorePartialSeasons(Team teamByName, int seasonsToDiscard) {
 //        List<NoDrawSeasonStats> statsByTeam = noDrawSeasonInfoRepository.getFootballNoDrawStatsByTeam(teamByName);
 //        LinkedHashMap<String, String> outMap = new LinkedHashMap<>();
 //        List<String> profits = ImmutableList.of("1","0,6","1,2","1,3","2","2,8","4,3","6,6","-20,4","-23,4","-19,8","-19,2","-15");
