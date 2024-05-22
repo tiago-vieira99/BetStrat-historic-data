@@ -59,7 +59,7 @@ public class WinsMarginAny2StrategySeasonStatsService extends StrategyScoreCalcu
         Collections.reverse(statsByTeam);
 
         if (statsByTeam.size() < 3) {
-            teamByName.setMarginWinsAny2Score(TeamScoreEnum.INSUFFICIENT_DATA.getValue());
+            teamByName.setHockeyMarginWinsAny2Score(TeamScoreEnum.INSUFFICIENT_DATA.getValue());
         } else {
             int last3SeasonsMarginWinsRateScore = calculateLast3SeasonsRateScore(statsByTeam);
             int allSeasonsMarginWinsRateScore = calculateAllSeasonsRateScore(statsByTeam);
@@ -79,7 +79,7 @@ public class WinsMarginAny2StrategySeasonStatsService extends StrategyScoreCalcu
 
             double totalScore = Utils.beautifyDoubleValue(0.70*last3SeasonsScore + 0.25*allSeasonsScore + 0.05*totalMatchesScore);
 
-            teamByName.setMarginWinsAny2Score(calculateFinalRating(totalScore));
+            teamByName.setHockeyMarginWinsAny2Score(calculateFinalRating(totalScore));
         }
 
         return teamByName;

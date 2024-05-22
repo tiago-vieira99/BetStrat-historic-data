@@ -14,11 +14,7 @@ import com.api.BetStrat.service.football.EuroHandicapStrategySeasonStatsService;
 import com.api.BetStrat.service.football.FlipFlopOversUndersStatsServiceStrategy;
 import com.api.BetStrat.service.football.GoalsFestStrategySeasonStatsService;
 import com.api.BetStrat.service.football.NoBttsStrategySeasonStatsService;
-import com.api.BetStrat.service.football.NoCleanSheetStrategySeasonStatsService;
-import com.api.BetStrat.service.football.NoDrawStrategySeasonStatsService;
 import com.api.BetStrat.service.football.NoGoalsFestStrategySeasonStatsService;
-import com.api.BetStrat.service.football.NoMarginWinsStrategySeasonStatsService;
-import com.api.BetStrat.service.football.NoScoreBothHalvesSeasonStatsService;
 import com.api.BetStrat.service.football.NoWinsStrategySeasonStatsService;
 import com.api.BetStrat.service.football.ScoreBothHalvesSeasonStatsService;
 import com.api.BetStrat.service.football.WinsMarginStrategySeasonStatsService;
@@ -53,14 +49,10 @@ public class StrategySeasonStatsService<T extends StrategySeasonStats> extends S
                                       WinsMarginStrategySeasonStatsService winsMarginStrategySeasonstatsService,
                                       WinsStrategySeasonStatsService winsStrategySeasonStatsService,
                                       NoWinsStrategySeasonStatsService noWinsStrategySeasonStatsService,
-                                      NoDrawStrategySeasonStatsService noDrawStrategySeasonStatsService,
-                                      NoMarginWinsStrategySeasonStatsService noMarginWinsStrategySeasonStatsService,
                                       CleanSheetStrategySeasonStatsService cleanSheetStrategySeasonStatsService,
-                                      NoCleanSheetStrategySeasonStatsService noCleanSheetStrategySeasonStatsService,
                                       BttsStrategySeasonStatsService bttsStrategySeasonStatsService,
                                       NoBttsStrategySeasonStatsService noBttsStrategySeasonStatsService,
                                       ScoreBothHalvesSeasonStatsService scoreBothHalvesSeasonStatsService,
-                                      NoScoreBothHalvesSeasonStatsService noScoreBothHalvesSeasonStatsService,
                                       HandballWinsMargin16StrategySeasonStatsService handballWinsMargin16StrategySeasonstatsService,
                                       HandballWinsMargin49StrategySeasonStatsService handballWinsMargin49StrategySeasonstatsService,
                                       HandballWinsMargin712StrategySeasonStatsService handballWinsMargin712StrategySeasonstatsService,
@@ -69,8 +61,7 @@ public class StrategySeasonStatsService<T extends StrategySeasonStats> extends S
                                       WinsMarginAny2StrategySeasonStatsService winsMarginAny2StrategySeasonstatsService) {
         super(comebackStrategySeasonstatsService, longBasketWinsStrategySeasonstatsService, shortBasketWinsStrategySeasonstatsService, drawStrategySeasonstatsService, euroHandicapStrategySeasonstatsService,
                 flipFlopOversUndersInfoService, goalsFestStrategySeasonstatsService, noGoalsFestStrategySeasonstatsService, winsMarginStrategySeasonstatsService, winsStrategySeasonStatsService, noWinsStrategySeasonStatsService,
-                noDrawStrategySeasonStatsService, noMarginWinsStrategySeasonStatsService, cleanSheetStrategySeasonStatsService, noCleanSheetStrategySeasonStatsService, bttsStrategySeasonStatsService, noBttsStrategySeasonStatsService,
-                scoreBothHalvesSeasonStatsService, noScoreBothHalvesSeasonStatsService,
+                cleanSheetStrategySeasonStatsService, bttsStrategySeasonStatsService, noBttsStrategySeasonStatsService, scoreBothHalvesSeasonStatsService,
                 handballWinsMargin16StrategySeasonstatsService, handballWinsMargin49StrategySeasonstatsService, handballWinsMargin712StrategySeasonstatsService, hockeyDrawStrategySeasonstatsService, winsMargin3StrategySeasonstatsService,
                 winsMarginAny2StrategySeasonstatsService);
     }

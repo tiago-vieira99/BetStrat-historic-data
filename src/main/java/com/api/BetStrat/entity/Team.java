@@ -1,24 +1,17 @@
 package com.api.BetStrat.entity;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import io.swagger.annotations.ApiModelProperty;
-import io.swagger.annotations.ApiParam;
 import lombok.AllArgsConstructor;
-import lombok.Data;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import lombok.SneakyThrows;
 import lombok.ToString;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
-import org.springframework.context.annotation.Primary;
 
 import javax.persistence.*;
 import java.io.Serializable;
-import java.sql.Timestamp;
 import java.util.Date;
 
 @ToString
@@ -119,24 +112,6 @@ public class Team implements Serializable {
     @Column(name = "no_wins_avg_red_run")
     private Integer noWinsAvgRedRun;
 
-    @Column(name = "no_draws_score")
-    private String noDrawsScore;
-
-    @Column(name = "no_draws_max_red_run")
-    private Integer noDrawsMaxRedRun;
-
-    @Column(name = "no_draws_avg_red_run")
-    private Integer noDrawsAvgRedRun;
-
-    @Column(name = "no_margin_wins_score")
-    private String noMarginWinsScore;
-
-    @Column(name = "no_margin_wins_max_red_run")
-    private Integer noMarginWinsMaxRedRun;
-
-    @Column(name = "no_margin_wins_avg_red_run")
-    private Integer noMarginWinsAvgRedRun;
-
     @Column(name = "clean_sheet_score")
     private String cleanSheetScore;
 
@@ -146,32 +121,23 @@ public class Team implements Serializable {
     @Column(name = "clean_sheet_avg_red_run")
     private Integer cleanSheetAvgRedRun;
 
-    @Column(name = "no_clean_sheet_score")
-    private String noCleanSheetScore;
+    @Column(name = "hockey_margin_wins_any2_score")
+    private String hockeyMarginWinsAny2Score;
 
-    @Column(name = "no_clean_sheet_max_red_run")
-    private Integer noCleanSheetMaxRedRun;
+    @Column(name = "hockey_margin_wins_any2_max_red_run")
+    private Integer hockeyMarginWinsAny2MaxRedRun;
 
-    @Column(name = "no_clean_sheet_avg_red_run")
-    private Integer noCleanSheetAvgRedRun;
+    @Column(name = "hockey_margin_wins_any2_avg_red_run")
+    private Integer hockeyMarginWinsAny2AvgRedRun;
 
-    @Column(name = "margin_wins_any2_score")
-    private String marginWinsAny2Score;
+    @Column(name = "hockey_margin_wins_3_score")
+    private String hockeyMarginWins3Score;
 
-    @Column(name = "margin_wins_any2_max_red_run")
-    private Integer marginWinsAny2MaxRedRun;
+    @Column(name = "hockey_margin_wins_3_max_red_run")
+    private Integer hockeyMarginWins3MaxRedRun;
 
-    @Column(name = "margin_wins_any2_avg_red_run")
-    private Integer marginWinsAny2AvgRedRun;
-
-    @Column(name = "margin_wins_3_score")
-    private String marginWins3Score;
-
-    @Column(name = "margin_wins_3_max_red_run")
-    private Integer marginWins3MaxRedRun;
-
-    @Column(name = "margin_wins_3_avg_red_run")
-    private Integer marginWins3AvgRedRun;
+    @Column(name = "hockey_margin_wins_3_avg_red_run")
+    private Integer hockeyMarginWins3AvgRedRun;
 
     @Column(name = "goals_fest_score")
     private String goalsFestScore;
@@ -208,15 +174,6 @@ public class Team implements Serializable {
 
     @Column(name = "score_both_halves_avg_red_run")
     private Integer scoreBothHalvesAvgRedRun;
-
-    @Column(name = "no_score_both_halves_score")
-    private String noScoreBothHalvesScore;
-
-    @Column(name = "no_score_both_halves_max_red_run")
-    private Integer noScoreBothHalvesMaxRedRun;
-
-    @Column(name = "no_score_both_halves_avg_red_run")
-    private Integer noScoreBothHalvesAvgRedRun;
 
     @Column(name = "no_goals_fest_score")
     private String noGoalsFestScore;
