@@ -68,7 +68,7 @@ public class BttsStrategySeasonStatsService extends StrategyScoreCalculator<Btts
         }
 
         for (String season : seasonsList) {
-            if (!statsByTeam.stream().filter(s -> s.getSeason().equals(season)).findAny().isPresent()) {
+            if (!statsByTeam.stream().anyMatch(s -> s.getSeason().equals(season))) {
                 String newSeasonUrl = "";
 
                 List<HistoricMatch> teamMatchesBySeason = historicMatchRepository.getTeamMatchesBySeason(team, season);
