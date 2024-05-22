@@ -7,18 +7,7 @@ import com.api.BetStrat.entity.Team;
 import com.api.BetStrat.service.basketball.ComebackStrategySeasonStatsService;
 import com.api.BetStrat.service.basketball.LongBasketWinsStrategySeasonStatsService;
 import com.api.BetStrat.service.basketball.ShortBasketWinsStrategySeasonStatsService;
-import com.api.BetStrat.service.football.BttsStrategySeasonStatsService;
-import com.api.BetStrat.service.football.CleanSheetStrategySeasonStatsService;
-import com.api.BetStrat.service.football.DrawStrategySeasonStatsService;
-import com.api.BetStrat.service.football.EuroHandicapStrategySeasonStatsService;
-import com.api.BetStrat.service.football.FlipFlopOversUndersStatsServiceStrategy;
-import com.api.BetStrat.service.football.GoalsFestStrategySeasonStatsService;
-import com.api.BetStrat.service.football.NoBttsStrategySeasonStatsService;
-import com.api.BetStrat.service.football.NoGoalsFestStrategySeasonStatsService;
-import com.api.BetStrat.service.football.NoWinsStrategySeasonStatsService;
-import com.api.BetStrat.service.football.ScoreBothHalvesSeasonStatsService;
-import com.api.BetStrat.service.football.WinsMarginStrategySeasonStatsService;
-import com.api.BetStrat.service.football.WinsStrategySeasonStatsService;
+import com.api.BetStrat.service.football.*;
 import com.api.BetStrat.service.handball.HandballWinsMargin16StrategySeasonStatsService;
 import com.api.BetStrat.service.handball.HandballWinsMargin49StrategySeasonStatsService;
 import com.api.BetStrat.service.handball.HandballWinsMargin712StrategySeasonStatsService;
@@ -53,6 +42,7 @@ public class StrategySeasonStatsService<T extends StrategySeasonStats> extends S
                                       BttsStrategySeasonStatsService bttsStrategySeasonStatsService,
                                       NoBttsStrategySeasonStatsService noBttsStrategySeasonStatsService,
                                       ScoreBothHalvesSeasonStatsService scoreBothHalvesSeasonStatsService,
+                                      ConcedeBothHalvesSeasonStatsService concedeBothHalvesSeasonStatsService,
                                       HandballWinsMargin16StrategySeasonStatsService handballWinsMargin16StrategySeasonstatsService,
                                       HandballWinsMargin49StrategySeasonStatsService handballWinsMargin49StrategySeasonstatsService,
                                       HandballWinsMargin712StrategySeasonStatsService handballWinsMargin712StrategySeasonstatsService,
@@ -62,6 +52,7 @@ public class StrategySeasonStatsService<T extends StrategySeasonStats> extends S
         super(comebackStrategySeasonstatsService, longBasketWinsStrategySeasonstatsService, shortBasketWinsStrategySeasonstatsService, drawStrategySeasonstatsService, euroHandicapStrategySeasonstatsService,
                 flipFlopOversUndersInfoService, goalsFestStrategySeasonstatsService, noGoalsFestStrategySeasonstatsService, winsMarginStrategySeasonstatsService, winsStrategySeasonStatsService, noWinsStrategySeasonStatsService,
                 cleanSheetStrategySeasonStatsService, bttsStrategySeasonStatsService, noBttsStrategySeasonStatsService, scoreBothHalvesSeasonStatsService,
+                concedeBothHalvesSeasonStatsService,
                 handballWinsMargin16StrategySeasonstatsService, handballWinsMargin49StrategySeasonstatsService, handballWinsMargin712StrategySeasonstatsService, hockeyDrawStrategySeasonstatsService, winsMargin3StrategySeasonstatsService,
                 winsMarginAny2StrategySeasonstatsService);
     }
