@@ -56,6 +56,7 @@ public class TeamService<T extends StrategySeasonStats> extends StrategyMappingP
                                   ScoreBothHalvesSeasonStatsService scoreBothHalvesSeasonStatsService,
                                   ConcedeBothHalvesSeasonStatsService concedeBothHalvesSeasonStatsService,
                                   WinBothHalvesStrategySeasonStatsService winBothHalvesStrategySeasonStatsService,
+                                  WinAndGoalsStrategySeasonStatsService winAndGoalsStrategySeasonStatsService,
                                   HandballWinsMargin16StrategySeasonStatsService handballWinsMargin16StrategySeasonstatsService,
                                   HandballWinsMargin49StrategySeasonStatsService handballWinsMargin49StrategySeasonstatsService,
                                   HandballWinsMargin712StrategySeasonStatsService handballWinsMargin712StrategySeasonstatsService,
@@ -65,7 +66,7 @@ public class TeamService<T extends StrategySeasonStats> extends StrategyMappingP
         super(comebackStrategySeasonstatsService, longBasketWinsStrategySeasonstatsService, shortBasketWinsStrategySeasonstatsService, drawStrategySeasonstatsService, euroHandicapStrategySeasonstatsService,
                 flipFlopOversUndersInfoService, goalsFestStrategySeasonstatsService, noGoalsFestStrategySeasonstatsService, winsMarginStrategySeasonstatsService, winsStrategySeasonStatsService, noWinsStrategySeasonStatsService,
                 cleanSheetStrategySeasonStatsService, bttsStrategySeasonStatsService, noBttsStrategySeasonStatsService, scoreBothHalvesSeasonStatsService,
-                concedeBothHalvesSeasonStatsService, winBothHalvesStrategySeasonStatsService,
+                concedeBothHalvesSeasonStatsService, winBothHalvesStrategySeasonStatsService, winAndGoalsStrategySeasonStatsService,
                 handballWinsMargin16StrategySeasonstatsService, handballWinsMargin49StrategySeasonstatsService, handballWinsMargin712StrategySeasonstatsService, hockeyDrawStrategySeasonstatsService, winsMargin3StrategySeasonstatsService,
                 winsMarginAny2StrategySeasonstatsService);
     }

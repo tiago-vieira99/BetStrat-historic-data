@@ -53,6 +53,7 @@ public abstract class StrategyMappingPattern {
                                   ScoreBothHalvesSeasonStatsService scoreBothHalvesSeasonStatsService,
                                   ConcedeBothHalvesSeasonStatsService concedeBothHalvesSeasonStatsService,
                                   WinBothHalvesStrategySeasonStatsService winBothHalvesStrategySeasonStatsService,
+                                  WinAndGoalsStrategySeasonStatsService winAndGoalsStrategySeasonStatsService,
                                   HandballWinsMargin16StrategySeasonStatsService handballWinsMargin16StrategySeasonstatsService,
                                   HandballWinsMargin49StrategySeasonStatsService handballWinsMargin49StrategySeasonstatsService,
                                   HandballWinsMargin712StrategySeasonStatsService handballWinsMargin712StrategySeasonstatsService,
@@ -81,6 +82,7 @@ public abstract class StrategyMappingPattern {
         serviceMap.put(ScoreBothHalvesSeasonStats.class, scoreBothHalvesSeasonStatsService);
         serviceMap.put(ConcedeBothHalvesSeasonStats.class, concedeBothHalvesSeasonStatsService);
         serviceMap.put(WinBothHalvesSeasonStats.class, winBothHalvesStrategySeasonStatsService);
+        serviceMap.put(WinAndGoalsSeasonStats.class, winAndGoalsStrategySeasonStatsService);
         // Handball Strategies
         serviceMap.put(Handball16WinsMarginSeasonStats.class, handballWinsMargin16StrategySeasonstatsService);
         serviceMap.put(Handball49WinsMarginSeasonStats.class, handballWinsMargin49StrategySeasonstatsService);
