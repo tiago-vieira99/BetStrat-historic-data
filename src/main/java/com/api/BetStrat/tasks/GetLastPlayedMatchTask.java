@@ -77,7 +77,7 @@ public class GetLastPlayedMatchTask {
             Team team = teamRepository.getTeamByNameAndSport(t, "Football");
 
             if (team != null) {
-                JSONArray scrappingData = ScrappingUtil.getLastNMatchesScrappingService(team, 2);
+                JSONArray scrappingData = ScrappingUtil.getLastNMatchesScrappingService(team, 5);
                 if (scrappingData != null) {
                     for (int i = 0; i < scrappingData.length(); i++) {
                         HistoricMatch historicMatch = new HistoricMatch();

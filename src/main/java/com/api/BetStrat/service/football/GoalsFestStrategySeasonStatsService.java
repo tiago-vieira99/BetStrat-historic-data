@@ -65,7 +65,7 @@ public class GoalsFestStrategySeasonStatsService extends StrategyScoreCalculator
             return matchesBetted;
         }
 
-        boolean isActiveSequence = true;
+        boolean isActiveSequence = false; //true if starting betting from the 1st game of the season
         int actualNegativeSequence = 0;
         for (int i = 0; i < teamMatchesBySeason.size(); i++) {
             HistoricMatch historicMatch = teamMatchesBySeason.get(i);

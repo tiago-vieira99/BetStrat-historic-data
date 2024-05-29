@@ -2,10 +2,12 @@ package com.api.BetStrat.dto;
 
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 
 
 @Getter
 @Setter
+@ToString
 public class SimulatedMatchDto {
 
     private String homeTeam;

@@ -25,6 +25,9 @@ import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.persistence.UniqueConstraint;
 import java.io.Serializable;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Comparator;
 import java.util.Date;
 
 @ToString
@@ -83,5 +86,20 @@ public class HistoricMatch implements Serializable {
 
     @Column(name = "sport")
     private String sport;
+
+    public static Comparator<HistoricMatch> matchDateComparator = new Comparator<HistoricMatch>() {
+        private final SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy");
+
+        @Override
+        public int compare(HistoricMatch hm1, HistoricMatch hm2) {
+            try {
+                Date date1 = dateFormat.parse(hm1.getMatchDate());
+                Date date2 = dateFormat.parse(hm2.getMatchDate());
+                return date1.compareTo(date2);
+            } catch (ParseException e) {
+                throw new IllegalArgumentException("Invalid date format. Please use dd/MM/yyyy.", e);
+            }
+        }
+    };
 
 }
