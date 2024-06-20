@@ -168,6 +168,7 @@ public class SecondHalfBiggerSeasonStatsService extends StrategyScoreCalculator<
     public List<SimulatedMatchDto> simulateStrategyBySeason(String season, Team team, String strategyName) {
         List<SimulatedMatchDto> matchesBetted = new ArrayList<>();
         List<HistoricMatch> teamMatchesBySeason = historicMatchRepository.getTeamMatchesBySeason(team, season);
+        Collections.sort(teamMatchesBySeason, HistoricMatch.matchDateComparator);
 
         if (teamMatchesBySeason.size() == 0) {
             return matchesBetted;

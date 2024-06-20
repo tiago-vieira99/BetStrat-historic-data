@@ -61,7 +61,7 @@ public class EuroHandicapStrategySeasonStatsService extends StrategyScoreCalcula
         List<HistoricMatch> teamMatchesBySeason = historicMatchRepository.getTeamMatchesBySeason(team, season);
         String mainCompetition = Utils.findMainCompetition(teamMatchesBySeason);
         List<HistoricMatch> filteredMatches = teamMatchesBySeason.stream().filter(t -> t.getCompetition().equals(mainCompetition)).collect(Collectors.toList());
-        filteredMatches.sort(new Utils.MatchesByDateSorter());
+        Collections.sort(filteredMatches, HistoricMatch.matchDateComparator);
 
         if (filteredMatches.size() == 0) {
             return matchesBetted;
