@@ -1,17 +1,15 @@
 package com.api.BetStrat.controller;
 
-import com.api.BetStrat.entity.football.DrawSeasonInfo;
-import com.api.BetStrat.entity.hockey.HockeyDrawSeasonInfo;
+import com.api.BetStrat.entity.StrategySeasonStats;
 import com.api.BetStrat.entity.Team;
-import com.api.BetStrat.entity.football.WinsMarginSeasonInfo;
+import com.api.BetStrat.entity.football.DrawSeasonStats;
+import com.api.BetStrat.entity.football.WinsMarginSeasonStats;
+import com.api.BetStrat.entity.hockey.HockeyDrawSeasonStats;
+import com.api.BetStrat.exception.NotFoundException;
 import com.api.BetStrat.exception.StandardError;
 import com.api.BetStrat.repository.TeamRepository;
-import com.api.BetStrat.service.football.DrawSeasonInfoService;
-import com.api.BetStrat.service.hockey.HockeyDrawSeasonInfoService;
+import com.api.BetStrat.service.StrategySeasonStatsService;
 import com.api.BetStrat.service.TeamService;
-import com.api.BetStrat.service.hockey.WinsMargin3SeasonInfoService;
-import com.api.BetStrat.service.hockey.WinsMarginAny2SeasonInfoService;
-import com.api.BetStrat.service.football.WinsMarginSeasonInfoService;
 import com.api.BetStrat.util.HockeyEurohockeyScrappingData;
 import com.api.BetStrat.util.TeamDFhistoricData;
 import com.api.BetStrat.util.TeamEHhistoricData;
@@ -67,19 +65,7 @@ public class HockeyDataStatsController {
     private TeamService teamService;
 
     @Autowired
-    private DrawSeasonInfoService drawSeasonInfoService;
-
-    @Autowired
-    private HockeyDrawSeasonInfoService hockeyDrawSeasonInfoService;
-
-    @Autowired
-    private WinsMarginSeasonInfoService winsMarginSeasonInfoService;
-
-    @Autowired
-    private WinsMarginAny2SeasonInfoService winsMarginAny2SeasonInfoService;
-
-    @Autowired
-    private WinsMargin3SeasonInfoService winsMargin3SeasonInfoService;
+    private StrategySeasonStatsService strategySeasonStatsService;
 
     @Autowired
     private ModelMapper modelMapper;
@@ -105,7 +91,7 @@ public class HockeyDataStatsController {
         return ResponseEntity.ok().body(allTeams);
     }
 
-    @ApiOperation(value = "get Team Margin Wins Stats")
+    @ApiOperation(value = "get Team Stats by Strategy", notes = "Strategy values:\nHockeyDrawSeasonStats | WinsMargin3SeasonStats | WinsMarginAny2SeasonStats")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "OK", response = ArrayList.class),
             @ApiResponse(code = 400, message = "Bad Request", response = StandardError.class),
@@ -114,54 +100,29 @@ public class HockeyDataStatsController {
             @ApiResponse(code = 404, message = "Not Found", response = StandardError.class),
             @ApiResponse(code = 500, message = "Internal Server Error", response = StandardError.class),
     })
-    @GetMapping("/team-margin-wins-stats/{teamName}")
-    public ResponseEntity<List<WinsMarginSeasonInfo>> getTeamMarginWinsStats(@PathVariable("teamName") String teamName) {
-        List<WinsMarginSeasonInfo> teamStats = teamService.getTeamMarginWinStats(teamName);
-        return ResponseEntity.ok().body(teamStats);
-    }
-
-    @ApiOperation(value = "get Team Draw Stats")
-    @ApiResponses(value = {
-            @ApiResponse(code = 200, message = "OK", response = ArrayList.class),
-            @ApiResponse(code = 400, message = "Bad Request", response = StandardError.class),
-            @ApiResponse(code = 401, message = "Unauthorized", response = StandardError.class),
-            @ApiResponse(code = 403, message = "Forbidden", response = StandardError.class),
-            @ApiResponse(code = 404, message = "Not Found", response = StandardError.class),
-            @ApiResponse(code = 500, message = "Internal Server Error", response = StandardError.class),
-    })
-    @GetMapping("/team-draw-stats/{teamName}")
-    public ResponseEntity<List<DrawSeasonInfo>> getTeamStats(@PathVariable("teamName") String teamName) {
-        List<DrawSeasonInfo> teamStats = teamService.getTeamDrawStats(teamName);
-        return ResponseEntity.ok().body(teamStats);
-    }
-
-    @ApiOperation(value = "get Hockey Team Draw Stats")
-    @ApiResponses(value = {
-            @ApiResponse(code = 200, message = "OK", response = ArrayList.class),
-            @ApiResponse(code = 400, message = "Bad Request", response = StandardError.class),
-            @ApiResponse(code = 401, message = "Unauthorized", response = StandardError.class),
-            @ApiResponse(code = 403, message = "Forbidden", response = StandardError.class),
-            @ApiResponse(code = 404, message = "Not Found", response = StandardError.class),
-            @ApiResponse(code = 500, message = "Internal Server Error", response = StandardError.class),
-    })
-    @GetMapping("/team-hockey-draw-stats/{teamName}")
-    public ResponseEntity<List<HockeyDrawSeasonInfo>> getHockeyTeamStats(@PathVariable("teamName") String teamName) {
-        List<HockeyDrawSeasonInfo> teamStats = teamService.getHockeyTeamDrawStats(teamName);
-        return ResponseEntity.ok().body(teamStats);
+    @GetMapping("/stats/{strategy}/{teamName}")
+    public ResponseEntity<List<StrategySeasonStats>> getStrategyStats(@PathVariable("teamName") String teamName, @PathVariable("strategy") String strategy) {
+        Team team = teamRepository.getTeamByNameAndSport(teamName, "Hockey");
+        List<StrategySeasonStats> statsByStrategyAndTeam = strategySeasonStatsService.getStatsByStrategyAndTeam(team, strategy);
+        return ResponseEntity.ok().body(statsByStrategyAndTeam);
     }
 
     @PostMapping("/updateTeamScore/{teamName}")
     public Team updateTeamScore (@PathVariable("teamName") String teamName, @Valid @RequestParam  String strategy) {
-        return teamService.updateTeamScore(teamName, strategy, "Hockey");
+        Team teamByName = teamRepository.getTeamByNameAndSport(teamName, "Hockey");
+        if (null == teamByName) {
+            throw new NotFoundException();
+        }
+        return teamService.updateTeamScore(teamByName, strategy);
     }
 
-    @ApiOperation(value = "updateAllTeamsScoreBystrategy", notes = "Strategy values: hockeyDraw, hockeyWinsMarginAny2, hockeyWinsMargin3, footballDrawHunter, footballMarginWins, footballGoalsFest, footballEuroHandicap, basketComebacks")
+    @ApiOperation(value = "updateAllTeamsScoreBystrategy", notes = "Strategy values:\nHockeyDrawSeasonStats | WinsMargin3SeasonStats | WinsMarginAny2SeasonStats")
     @PostMapping("/updateAllTeamsScoreBystrategy")
     public ResponseEntity<String> updateAllTeamsScoreBystrategy (@Valid @RequestParam  String strategy) {
-        List<Team> allTeams = teamRepository.findAll();
+        List<Team> allTeams = teamRepository.findAll().stream().filter(t -> t.getSport().equals("Hockey")).collect(Collectors.toList());
         for (int i=0; i< allTeams.size(); i++) {
             try {
-                teamService.updateTeamScore(allTeams.get(i).getName(), strategy, "Hockey");
+                teamService.updateTeamScore(allTeams.get(i), strategy);
             } catch (NumberFormatException er) {
                 log.error(er.toString());
             }
@@ -170,17 +131,17 @@ public class HockeyDataStatsController {
     }
 
     @PostMapping("/draw-stats-by-team-season-fcstats")
-    public LinkedHashMap<String, DrawSeasonInfo> setDrawStatsByTeamSeasonFC(@Valid @RequestParam  String teamName,
-                                                                            @Valid @RequestParam(value = "begin_season", required = false) String beginSeason,
-                                                                            @Valid @RequestParam(value = "end-season", required = false) String endSeason,
-                                                                            @Valid @RequestParam(value = "url", required = false) String url) {
-        LinkedHashMap<String, DrawSeasonInfo> returnMap = new LinkedHashMap<>();
+    public LinkedHashMap<String, DrawSeasonStats> setDrawStatsByTeamSeasonFC(@Valid @RequestParam  String teamName,
+                                                                             @Valid @RequestParam(value = "begin_season", required = false) String beginSeason,
+                                                                             @Valid @RequestParam(value = "end-season", required = false) String endSeason,
+                                                                             @Valid @RequestParam(value = "url", required = false) String url) {
+        LinkedHashMap<String, DrawSeasonStats> returnMap = new LinkedHashMap<>();
 
         Team team = teamRepository.getTeamByName(teamName);
         if (team == null) {
             team = new Team();
             team.setName(teamName);
-            team.setSport("Football");
+            team.setSport("Hockey");
             team.setBeginSeason(beginSeason);
             team.setEndSeason(endSeason);
             teamService.insertTeam(team);
@@ -191,7 +152,7 @@ public class HockeyDataStatsController {
 
         for (Map.Entry<String,Object> entry : scrappedInfoMap.entrySet()){
             LinkedHashMap<String, Object> scrappedInfo = (LinkedHashMap<String, Object>) entry.getValue();
-            DrawSeasonInfo drawSeasonInfo = new DrawSeasonInfo();
+            DrawSeasonStats drawSeasonInfo = new DrawSeasonStats();
             try {
                 drawSeasonInfo.setDrawRate((Double) scrappedInfo.get("drawRate"));
                 drawSeasonInfo.setNumDraws((Integer) scrappedInfo.get("totalDraws"));
@@ -205,11 +166,11 @@ public class HockeyDataStatsController {
             drawSeasonInfo.setSeason(entry.getKey());
             drawSeasonInfo.setUrl(url);
 
-            drawSeasonInfo.setNoDrawsSequence((String) scrappedInfo.get("noDrawsSeq"));
+            drawSeasonInfo.setNegativeSequence((String) scrappedInfo.get("noDrawsSeq"));
             drawSeasonInfo.setStdDeviation((Double) scrappedInfo.get("standardDeviation"));
             drawSeasonInfo.setCoefDeviation((Double) scrappedInfo.get("coefficientVariation"));
             drawSeasonInfo.setCompetition((String) scrappedInfo.get("competition"));
-            drawSeasonInfoService.insertDrawInfo(drawSeasonInfo);
+            strategySeasonStatsService.insertStrategySeasonStats(drawSeasonInfo);
             returnMap.put(entry.getKey(), drawSeasonInfo);
         }
 
@@ -274,7 +235,7 @@ public class HockeyDataStatsController {
 
                 //draws hunter stats
                 LinkedHashMap<String, Object> scrappedInfo = hockeyEurohockeyScrappingData.buildDrawStatsMap((List<Node>) teamEntry.getValue());
-                HockeyDrawSeasonInfo hockeyDrawSeasonInfo = new HockeyDrawSeasonInfo();
+                HockeyDrawSeasonStats hockeyDrawSeasonInfo = new HockeyDrawSeasonStats();
                 try {
                     hockeyDrawSeasonInfo.setDrawRate((Double) scrappedInfo.get("drawRate"));
                     hockeyDrawSeasonInfo.setNumDraws((Integer) scrappedInfo.get("totalDraws"));
@@ -288,12 +249,12 @@ public class HockeyDataStatsController {
                 hockeyDrawSeasonInfo.setSeason(seasonn);
 //                    hockeyDrawSeasonInfo.setUrl(url);
 
-                hockeyDrawSeasonInfo.setNoDrawsSequence((String) scrappedInfo.get("noDrawsSeq"));
+                hockeyDrawSeasonInfo.setNegativeSequence((String) scrappedInfo.get("noDrawsSeq"));
                 hockeyDrawSeasonInfo.setStdDeviation((Double) scrappedInfo.get("standardDeviation"));
                 hockeyDrawSeasonInfo.setCoefDeviation((Double) scrappedInfo.get("coefficientVariation"));
                 hockeyDrawSeasonInfo.setCompetition((String) scrappedInfo.get("competition"));
                 try {
-                    hockeyDrawSeasonInfoService.insertDrawInfo(hockeyDrawSeasonInfo);
+                    strategySeasonStatsService.insertStrategySeasonStats(hockeyDrawSeasonInfo);
                 } catch (DataIntegrityViolationException er) {
                     log.error(er.toString());
                 }
@@ -377,12 +338,12 @@ public class HockeyDataStatsController {
     }
 
     @PostMapping("/hockey-draw-stats-bulk-by-league")
-    public LinkedHashMap<String, HockeyDrawSeasonInfo> setHockeyDrawStatsBulkByLeagueSeason(@Valid @RequestParam  String leagueName, @Valid @RequestParam  String country,
-                                                                                            @Valid @RequestParam  String season,
-                                                                                      @Valid @RequestParam(value = "begin_season", required = false) String beginSeason,
-                                                                                      @Valid @RequestParam(value = "end-season", required = false) String endSeason,
-                                                                                      @Valid @RequestParam String url) throws UnsupportedEncodingException {
-        LinkedHashMap<String, HockeyDrawSeasonInfo> returnMap = new LinkedHashMap<>();
+    public LinkedHashMap<String, HockeyDrawSeasonStats> setHockeyDrawStatsBulkByLeagueSeason(@Valid @RequestParam  String leagueName, @Valid @RequestParam  String country,
+                                                                                             @Valid @RequestParam  String season,
+                                                                                             @Valid @RequestParam(value = "begin_season", required = false) String beginSeason,
+                                                                                             @Valid @RequestParam(value = "end-season", required = false) String endSeason,
+                                                                                             @Valid @RequestParam String url) throws UnsupportedEncodingException {
+        LinkedHashMap<String, HockeyDrawSeasonStats> returnMap = new LinkedHashMap<>();
 
         HttpPost httppost = new HttpPost("http://betstrat-coreapp:8080/api/league/new");
         // Request parameters and other properties.
@@ -430,11 +391,11 @@ public class HockeyDataStatsController {
     }
 
     @PostMapping("/hockey-draw-stats-by-team")
-    public LinkedHashMap<String, HockeyDrawSeasonInfo> setHockeyDrawStatsByTeamSeason(@Valid @RequestParam  String teamName,
-                                                                            @Valid @RequestParam(value = "begin_season", required = false) String beginSeason,
-                                                                            @Valid @RequestParam(value = "end-season", required = false) String endSeason,
-                                                                            @Valid @RequestParam(value = "url", required = false) String url) {
-        LinkedHashMap<String, HockeyDrawSeasonInfo> returnMap = new LinkedHashMap<>();
+    public LinkedHashMap<String, HockeyDrawSeasonStats> setHockeyDrawStatsByTeamSeason(@Valid @RequestParam  String teamName,
+                                                                                       @Valid @RequestParam(value = "begin_season", required = false) String beginSeason,
+                                                                                       @Valid @RequestParam(value = "end-season", required = false) String endSeason,
+                                                                                       @Valid @RequestParam(value = "url", required = false) String url) {
+        LinkedHashMap<String, HockeyDrawSeasonStats> returnMap = new LinkedHashMap<>();
 
         Team team = teamRepository.getTeamByName(teamName);
         if (team == null) {
@@ -451,7 +412,7 @@ public class HockeyDataStatsController {
 
         for (Map.Entry<String,Object> entry : scrappedInfoMap.entrySet()){
             LinkedHashMap<String, Object> scrappedInfo = (LinkedHashMap<String, Object>) entry.getValue();
-            HockeyDrawSeasonInfo hockeyDrawSeasonInfo = new HockeyDrawSeasonInfo();
+            HockeyDrawSeasonStats hockeyDrawSeasonInfo = new HockeyDrawSeasonStats();
             try {
                 hockeyDrawSeasonInfo.setDrawRate((Double) scrappedInfo.get("drawRate"));
                 hockeyDrawSeasonInfo.setNumDraws((Integer) scrappedInfo.get("totalDraws"));
@@ -465,11 +426,11 @@ public class HockeyDataStatsController {
             hockeyDrawSeasonInfo.setSeason(entry.getKey());
             hockeyDrawSeasonInfo.setUrl(url);
 
-            hockeyDrawSeasonInfo.setNoDrawsSequence((String) scrappedInfo.get("noDrawsSeq"));
+            hockeyDrawSeasonInfo.setNegativeSequence((String) scrappedInfo.get("noDrawsSeq"));
             hockeyDrawSeasonInfo.setStdDeviation((Double) scrappedInfo.get("standardDeviation"));
             hockeyDrawSeasonInfo.setCoefDeviation((Double) scrappedInfo.get("coefficientVariation"));
             hockeyDrawSeasonInfo.setCompetition((String) scrappedInfo.get("competition"));
-            hockeyDrawSeasonInfoService.insertDrawInfo(hockeyDrawSeasonInfo);
+            strategySeasonStatsService.insertStrategySeasonStats(hockeyDrawSeasonInfo);
             returnMap.put(entry.getKey(), hockeyDrawSeasonInfo);
         }
 
@@ -477,26 +438,26 @@ public class HockeyDataStatsController {
     }
 
     @PostMapping("/draw-stats-by-team-season")
-    public LinkedHashMap<String, DrawSeasonInfo> setDrawStatsByTeamSeason(@Valid @RequestParam  String teamName,
-                                                                          @Valid @RequestParam(value = "begin_season", required = false) String beginSeason,
-                                                                          @Valid @RequestParam(value = "end-season", required = false) String endSeason,
-                                                                          @Valid @RequestParam(value = "2016", required = false) Optional<String> url2016,
-                                                                          @Valid @RequestParam(value = "2016-17", required = false) Optional<String> url201617,
-                                                                          @Valid @RequestParam(value = "2017", required = false) Optional<String> url2017,
-                                                                          @Valid @RequestParam(value = "2017-18", required = false) Optional<String> url201718,
-                                                                          @Valid @RequestParam(value = "2018", required = false) Optional<String> url2018,
-                                                                          @Valid @RequestParam(value = "2018-19", required = false) Optional<String> url201819,
-                                                                          @Valid @RequestParam(value = "2019", required = false) Optional<String> url2019,
-                                                                          @Valid @RequestParam(value = "2019-20", required = false) Optional<String> url201920,
-                                                                          @Valid @RequestParam(value = "2020", required = false) Optional<String> url2020,
-                                                                          @Valid @RequestParam(value = "2020-21", required = false) Optional<String> url202021,
-                                                                          @Valid @RequestParam(value = "2021", required = false) Optional<String> url2021,
-                                                                          @Valid @RequestParam(value = "2021-22", required = false) Optional<String> url202122,
-                                                                          @Valid @RequestParam(value = "2022", required = false) Optional<String> url2022,
-                                                                          @Valid @RequestParam(value = "2022-23", required = false) Optional<String> url202223,
-                                                                          @Valid @RequestParam(value = "2023", required = false) Optional<String> url2023) {
+    public LinkedHashMap<String, DrawSeasonStats> setDrawStatsByTeamSeason(@Valid @RequestParam  String teamName,
+                                                                           @Valid @RequestParam(value = "begin_season", required = false) String beginSeason,
+                                                                           @Valid @RequestParam(value = "end-season", required = false) String endSeason,
+                                                                           @Valid @RequestParam(value = "2016", required = false) Optional<String> url2016,
+                                                                           @Valid @RequestParam(value = "2016-17", required = false) Optional<String> url201617,
+                                                                           @Valid @RequestParam(value = "2017", required = false) Optional<String> url2017,
+                                                                           @Valid @RequestParam(value = "2017-18", required = false) Optional<String> url201718,
+                                                                           @Valid @RequestParam(value = "2018", required = false) Optional<String> url2018,
+                                                                           @Valid @RequestParam(value = "2018-19", required = false) Optional<String> url201819,
+                                                                           @Valid @RequestParam(value = "2019", required = false) Optional<String> url2019,
+                                                                           @Valid @RequestParam(value = "2019-20", required = false) Optional<String> url201920,
+                                                                           @Valid @RequestParam(value = "2020", required = false) Optional<String> url2020,
+                                                                           @Valid @RequestParam(value = "2020-21", required = false) Optional<String> url202021,
+                                                                           @Valid @RequestParam(value = "2021", required = false) Optional<String> url2021,
+                                                                           @Valid @RequestParam(value = "2021-22", required = false) Optional<String> url202122,
+                                                                           @Valid @RequestParam(value = "2022", required = false) Optional<String> url2022,
+                                                                           @Valid @RequestParam(value = "2022-23", required = false) Optional<String> url202223,
+                                                                           @Valid @RequestParam(value = "2023", required = false) Optional<String> url2023) {
 
-        LinkedHashMap<String, DrawSeasonInfo> returnMap = new LinkedHashMap<>();
+        LinkedHashMap<String, DrawSeasonStats> returnMap = new LinkedHashMap<>();
 
         Team team = teamRepository.getTeamByName(teamName);
         if (team == null) {
@@ -557,10 +518,10 @@ public class HockeyDataStatsController {
         return returnMap;
     }
 
-    private DrawSeasonInfo insertDrawInfoBySeason (Team team, String season, String url) {
+    private DrawSeasonStats insertDrawInfoBySeason (Team team, String season, String url) {
         TeamDFhistoricData teamDFhistoricData = new TeamDFhistoricData();
         LinkedHashMap<String, Object> scrappedInfo = null;
-        DrawSeasonInfo drawSeasonInfo = new DrawSeasonInfo();
+        DrawSeasonStats drawSeasonInfo = new DrawSeasonStats();
         try {
             if (url.contains("team_matches")) {
                 scrappedInfo = teamDFhistoricData.extractDFDataFromZZ(url);
@@ -582,19 +543,19 @@ public class HockeyDataStatsController {
         drawSeasonInfo.setSeason(season);
         drawSeasonInfo.setUrl(url);
 
-        drawSeasonInfo.setNoDrawsSequence((String) scrappedInfo.get("noDrawsSeq"));
+        drawSeasonInfo.setNegativeSequence((String) scrappedInfo.get("noDrawsSeq"));
         drawSeasonInfo.setStdDeviation((Double) scrappedInfo.get("standardDeviation"));
         drawSeasonInfo.setCoefDeviation((Double) scrappedInfo.get("coefficientVariation"));
         drawSeasonInfo.setCompetition((String) scrappedInfo.get("competition"));
-        return drawSeasonInfoService.insertDrawInfo(drawSeasonInfo);
+        return (DrawSeasonStats) strategySeasonStatsService.insertStrategySeasonStats(drawSeasonInfo);
     }
 
     @PostMapping("/margin-wins-stats-by-team-season-fcstats")
-    public LinkedHashMap<String, WinsMarginSeasonInfo> setMarginWinsStatsByTeamSeasonFC(@Valid @RequestParam  String teamName,
-                                                                            @Valid @RequestParam(value = "begin_season", required = false) String beginSeason,
-                                                                            @Valid @RequestParam(value = "end-season", required = false) String endSeason,
-                                                                            @Valid @RequestParam(value = "url", required = false) String url) {
-        LinkedHashMap<String, WinsMarginSeasonInfo> returnMap = new LinkedHashMap<>();
+    public LinkedHashMap<String, WinsMarginSeasonStats> setMarginWinsStatsByTeamSeasonFC(@Valid @RequestParam  String teamName,
+                                                                                         @Valid @RequestParam(value = "begin_season", required = false) String beginSeason,
+                                                                                         @Valid @RequestParam(value = "end-season", required = false) String endSeason,
+                                                                                         @Valid @RequestParam(value = "url", required = false) String url) {
+        LinkedHashMap<String, WinsMarginSeasonStats> returnMap = new LinkedHashMap<>();
 
         Team team = teamRepository.getTeamByName(teamName);
         if (team == null) {
@@ -611,7 +572,7 @@ public class HockeyDataStatsController {
 
         for (Map.Entry<String, Object> entry : scrappedInfoMap.entrySet()) {
             LinkedHashMap<String, Object> scrappedInfo = (LinkedHashMap<String, Object>) entry.getValue();
-            WinsMarginSeasonInfo winsMarginSeasonInfo = new WinsMarginSeasonInfo();
+            WinsMarginSeasonStats winsMarginSeasonInfo = new WinsMarginSeasonStats();
 
             winsMarginSeasonInfo.setNumMatches((Integer) scrappedInfo.get("totalMatches"));
             winsMarginSeasonInfo.setNumMarginWins((Integer) scrappedInfo.get("numMarginWins"));
@@ -623,11 +584,11 @@ public class HockeyDataStatsController {
 
             winsMarginSeasonInfo.setWinsRate((Double) scrappedInfo.get("totalWinsRate"));
             winsMarginSeasonInfo.setMarginWinsRate((Double) scrappedInfo.get("marginWinsRate"));
-            winsMarginSeasonInfo.setNoMarginWinsSequence((String) scrappedInfo.get("noMarginWinsSeq"));
+            winsMarginSeasonInfo.setNegativeSequence((String) scrappedInfo.get("noMarginWinsSeq"));
             winsMarginSeasonInfo.setStdDeviation((Double) scrappedInfo.get("standardDeviation"));
             winsMarginSeasonInfo.setCoefDeviation((Double) scrappedInfo.get("coefficientVariation"));
             winsMarginSeasonInfo.setCompetition((String) scrappedInfo.get("competition"));
-            winsMarginSeasonInfoService.insertWinsMarginInfo(winsMarginSeasonInfo);
+            strategySeasonStatsService.insertStrategySeasonStats(winsMarginSeasonInfo);
             returnMap.put(entry.getKey(), winsMarginSeasonInfo);
         }
 
@@ -635,26 +596,26 @@ public class HockeyDataStatsController {
     }
 
     @PostMapping("/12margin-goal-stats-by-team-season")
-    public LinkedHashMap<String, WinsMarginSeasonInfo> setMarginWinsStatsByTeamSeason(@Valid @RequestParam  String teamName,
-                                                                          @Valid @RequestParam(value = "begin_season", required = false) String beginSeason,
-                                                                          @Valid @RequestParam(value = "end-season", required = false) String endSeason,
-                                                                          @Valid @RequestParam(value = "2016", required = false) Optional<String> url2016,
-                                                                          @Valid @RequestParam(value = "2016-17", required = false) Optional<String> url201617,
-                                                                          @Valid @RequestParam(value = "2017", required = false) Optional<String> url2017,
-                                                                          @Valid @RequestParam(value = "2017-18", required = false) Optional<String> url201718,
-                                                                          @Valid @RequestParam(value = "2018", required = false) Optional<String> url2018,
-                                                                          @Valid @RequestParam(value = "2018-19", required = false) Optional<String> url201819,
-                                                                          @Valid @RequestParam(value = "2019", required = false) Optional<String> url2019,
-                                                                          @Valid @RequestParam(value = "2019-20", required = false) Optional<String> url201920,
-                                                                          @Valid @RequestParam(value = "2020", required = false) Optional<String> url2020,
-                                                                          @Valid @RequestParam(value = "2020-21", required = false) Optional<String> url202021,
-                                                                          @Valid @RequestParam(value = "2021", required = false) Optional<String> url2021,
-                                                                          @Valid @RequestParam(value = "2021-22", required = false) Optional<String> url202122,
-                                                                          @Valid @RequestParam(value = "2022", required = false) Optional<String> url2022,
-                                                                          @Valid @RequestParam(value = "2022-23", required = false) Optional<String> url202223,
-                                                                          @Valid @RequestParam(value = "2023", required = false) Optional<String> url2023) {
+    public LinkedHashMap<String, WinsMarginSeasonStats> setMarginWinsStatsByTeamSeason(@Valid @RequestParam  String teamName,
+                                                                                       @Valid @RequestParam(value = "begin_season", required = false) String beginSeason,
+                                                                                       @Valid @RequestParam(value = "end-season", required = false) String endSeason,
+                                                                                       @Valid @RequestParam(value = "2016", required = false) Optional<String> url2016,
+                                                                                       @Valid @RequestParam(value = "2016-17", required = false) Optional<String> url201617,
+                                                                                       @Valid @RequestParam(value = "2017", required = false) Optional<String> url2017,
+                                                                                       @Valid @RequestParam(value = "2017-18", required = false) Optional<String> url201718,
+                                                                                       @Valid @RequestParam(value = "2018", required = false) Optional<String> url2018,
+                                                                                       @Valid @RequestParam(value = "2018-19", required = false) Optional<String> url201819,
+                                                                                       @Valid @RequestParam(value = "2019", required = false) Optional<String> url2019,
+                                                                                       @Valid @RequestParam(value = "2019-20", required = false) Optional<String> url201920,
+                                                                                       @Valid @RequestParam(value = "2020", required = false) Optional<String> url2020,
+                                                                                       @Valid @RequestParam(value = "2020-21", required = false) Optional<String> url202021,
+                                                                                       @Valid @RequestParam(value = "2021", required = false) Optional<String> url2021,
+                                                                                       @Valid @RequestParam(value = "2021-22", required = false) Optional<String> url202122,
+                                                                                       @Valid @RequestParam(value = "2022", required = false) Optional<String> url2022,
+                                                                                       @Valid @RequestParam(value = "2022-23", required = false) Optional<String> url202223,
+                                                                                       @Valid @RequestParam(value = "2023", required = false) Optional<String> url2023) {
 
-        LinkedHashMap<String, WinsMarginSeasonInfo> returnMap = new LinkedHashMap<>();
+        LinkedHashMap<String, WinsMarginSeasonStats> returnMap = new LinkedHashMap<>();
 
         Team team = teamRepository.getTeamByName(teamName);
         if (team == null) {
@@ -714,10 +675,10 @@ public class HockeyDataStatsController {
         return returnMap;
     }
 
-    private WinsMarginSeasonInfo insertWinsMarginBySeason (Team team, String season, String url) {
+    private WinsMarginSeasonStats insertWinsMarginBySeason (Team team, String season, String url) {
         TeamEHhistoricData teamEHhistoricData = new TeamEHhistoricData();
         LinkedHashMap<String, Object> scrappedInfo = null;
-        WinsMarginSeasonInfo winsMarginSeasonInfo = new WinsMarginSeasonInfo();
+        WinsMarginSeasonStats winsMarginSeasonInfo = new WinsMarginSeasonStats();
         try {
             if (url.contains("team_matches")) {
                 scrappedInfo = teamEHhistoricData.extract12MarginGoalsDataZZ(url);
@@ -741,10 +702,10 @@ public class HockeyDataStatsController {
 
         winsMarginSeasonInfo.setWinsRate((Double) scrappedInfo.get("totalWinsRate"));
         winsMarginSeasonInfo.setMarginWinsRate((Double) scrappedInfo.get("marginWinsRate"));
-        winsMarginSeasonInfo.setNoMarginWinsSequence((String) scrappedInfo.get("noMarginWinsSeq"));
+        winsMarginSeasonInfo.setNegativeSequence((String) scrappedInfo.get("noMarginWinsSeq"));
         winsMarginSeasonInfo.setStdDeviation((Double) scrappedInfo.get("standardDeviation"));
         winsMarginSeasonInfo.setCoefDeviation((Double) scrappedInfo.get("coefficientVariation"));
         winsMarginSeasonInfo.setCompetition((String) scrappedInfo.get("competition"));
-        return winsMarginSeasonInfoService.insertWinsMarginInfo(winsMarginSeasonInfo);
+        return (WinsMarginSeasonStats) strategySeasonStatsService.insertStrategySeasonStats(winsMarginSeasonInfo);
     }
 }

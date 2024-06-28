@@ -2,6 +2,7 @@ package com.api.BetStrat.constants;
 
 import com.google.common.collect.ImmutableList;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -9,7 +10,7 @@ import java.util.Map;
 public class BetStratConstants {
 
     //Scrapping Service
-    public static final String SCRAPPER_SERVICE_URL = "http://16.170.226.136:8000/";
+    public static final String SCRAPPER_SERVICE_URL = "http://localhost:8000/";
 
     public static final String SOCCERSTATS_BASE_URL = "http://www.soccerstats.com/";
     public static final String FCSTATS_BASE_URL = "http://www.fcstats.com/";
@@ -19,6 +20,8 @@ public class BetStratConstants {
     public static final String API_SPORTS_BASE_URL = "api-sports";
 
     public static final String CURRENT_SEASON = "2023-24";
+
+    public static final Integer DEFAULT_BAD_RUN_TO_NEW_SEQ = 6;
 
     public static final List<String> SEASONS_LIST = ImmutableList.of("2016","2016-17","2017","2017-18","2018","2018-19","2019","2019-20",
             "2020","2020-21","2021","2021-22","2022","2022-23");
@@ -33,6 +36,12 @@ public class BetStratConstants {
 
     public static final List<String> HOCKEY_SEASONS_LIST = ImmutableList.of("2016-2017","2017-2018","2018-2019","2019-2020",
             "2020-2021","2021-2022","2021-2022");
+
+//    public static final List<String> FOOTBALL_STRATEGIES_LIST = ImmutableList.of("Draw","GoalsFest","WinsMargin","Btts", "CleanSheet",
+//            "ConcedeBothHalves", "EuroHandicap", "NoBtts", "NoGoalsFest", "NoWins", "ScoreBothHalves", "SecondHalfBigger",
+//            "WinAndGoals", "WinBothHalves", "Wins");
+
+    public static final List<String> FOOTBALL_STRATEGIES_LIST = ImmutableList.of("Btts","GoalsFest");
 
     public static final Map<String, String> ZEROZERO_SEASON_CODES  = new HashMap<String, String>() {{
         put("2016", "2016");

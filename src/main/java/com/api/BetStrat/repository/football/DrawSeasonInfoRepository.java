@@ -1,6 +1,6 @@
 package com.api.BetStrat.repository.football;
 
-import com.api.BetStrat.entity.football.DrawSeasonInfo;
+import com.api.BetStrat.entity.football.DrawSeasonStats;
 import com.api.BetStrat.entity.Team;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -14,11 +14,11 @@ import java.util.List;
 
 @Repository
 @Transactional
-@RepositoryDefinition(domainClass = DrawSeasonInfo.class, idClass = Long.class)
-public interface DrawSeasonInfoRepository extends JpaRepository<DrawSeasonInfo, Long>, JpaSpecificationExecutor<DrawSeasonInfo> {
+@RepositoryDefinition(domainClass = DrawSeasonStats.class, idClass = Long.class)
+public interface DrawSeasonInfoRepository extends JpaRepository<DrawSeasonStats, Long>, JpaSpecificationExecutor<DrawSeasonStats> {
 
-    @Cacheable(value="List<DrawSeasonInfo>", key="{#root.methodName, #team.name}")
-    @Query(value = "SELECT m FROM DrawSeasonInfo m WHERE m.teamId = ?1")
-    List<DrawSeasonInfo> getFootballDrawStatsByTeam(Team team);
+    @Cacheable(value="List<DrawSeasonStats>", key="{#root.methodName, #team.name}")
+    @Query(value = "SELECT m FROM DrawSeasonStats m WHERE m.teamId = ?1")
+    List<DrawSeasonStats> getFootballDrawStatsByTeam(Team team);
 
 }

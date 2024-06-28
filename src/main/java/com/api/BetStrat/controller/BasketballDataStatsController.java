@@ -1,16 +1,13 @@
 package com.api.BetStrat.controller;
 
 import com.api.BetStrat.entity.HistoricMatch;
-import com.api.BetStrat.entity.basketball.ComebackSeasonInfo;
-import com.api.BetStrat.entity.basketball.LongBasketWinsSeasonInfo;
-import com.api.BetStrat.entity.basketball.ShortBasketWinsSeasonInfo;
+import com.api.BetStrat.entity.StrategySeasonStats;
 import com.api.BetStrat.entity.Team;
+import com.api.BetStrat.exception.NotFoundException;
 import com.api.BetStrat.exception.StandardError;
 import com.api.BetStrat.repository.HistoricMatchRepository;
 import com.api.BetStrat.repository.TeamRepository;
-import com.api.BetStrat.service.basketball.ComebackSeasonInfoService;
-import com.api.BetStrat.service.basketball.LongBasketWinsSeasonInfoService;
-import com.api.BetStrat.service.basketball.ShortBasketWinsSeasonInfoService;
+import com.api.BetStrat.service.StrategySeasonStatsService;
 import com.api.BetStrat.service.TeamService;
 import com.api.BetStrat.util.ScrappingUtil;
 import io.swagger.annotations.Api;
@@ -59,13 +56,7 @@ public class BasketballDataStatsController {
     private TeamService teamService;
 
     @Autowired
-    private ComebackSeasonInfoService comebackSeasonInfoService;
-
-    @Autowired
-    private ShortBasketWinsSeasonInfoService shortBasketWinsSeasonInfoService;
-
-    @Autowired
-    private LongBasketWinsSeasonInfoService longBasketWinsSeasonInfoService;
+    private StrategySeasonStatsService strategySeasonStatsService;
 
     @Autowired
     private ModelMapper modelMapper;
@@ -95,7 +86,7 @@ public class BasketballDataStatsController {
         return ResponseEntity.ok().body(allTeams);
     }
 
-    @ApiOperation(value = "get Team Comeback Wins Stats Info")
+    @ApiOperation(value = "get Team Stats by Strategy", notes = "Strategy values:\nComebackSeasonStats | LongBasketWinsSeasonStats | ShortBasketWinsSeasonStats")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "OK", response = ArrayList.class),
             @ApiResponse(code = 400, message = "Bad Request", response = StandardError.class),
@@ -104,45 +95,20 @@ public class BasketballDataStatsController {
             @ApiResponse(code = 404, message = "Not Found", response = StandardError.class),
             @ApiResponse(code = 500, message = "Internal Server Error", response = StandardError.class),
     })
-    @GetMapping("/team-comebackwins-stats/{teamName}")
-    public ResponseEntity<List<ComebackSeasonInfo>> getComebackWinsTeamStats(@PathVariable("teamName") String teamName) {
-        List<ComebackSeasonInfo> teamStats = teamService.getTeamComebackWinsStats(teamName);
-        return ResponseEntity.ok().body(teamStats);
-    }
-
-    @ApiOperation(value = "get Team Short Wins Stats Info")
-    @ApiResponses(value = {
-            @ApiResponse(code = 200, message = "OK", response = ArrayList.class),
-            @ApiResponse(code = 400, message = "Bad Request", response = StandardError.class),
-            @ApiResponse(code = 401, message = "Unauthorized", response = StandardError.class),
-            @ApiResponse(code = 403, message = "Forbidden", response = StandardError.class),
-            @ApiResponse(code = 404, message = "Not Found", response = StandardError.class),
-            @ApiResponse(code = 500, message = "Internal Server Error", response = StandardError.class),
-    })
-    @GetMapping("/team-shortwins-stats/{teamName}")
-    public ResponseEntity<List<ShortBasketWinsSeasonInfo>> getShortWinsTeamStats(@PathVariable("teamName") String teamName) {
-        List<ShortBasketWinsSeasonInfo> teamStats = teamService.getTeamShortWinsStats(teamName);
-        return ResponseEntity.ok().body(teamStats);
-    }
-
-    @ApiOperation(value = "get Team Long Wins Stats Info")
-    @ApiResponses(value = {
-            @ApiResponse(code = 200, message = "OK", response = ArrayList.class),
-            @ApiResponse(code = 400, message = "Bad Request", response = StandardError.class),
-            @ApiResponse(code = 401, message = "Unauthorized", response = StandardError.class),
-            @ApiResponse(code = 403, message = "Forbidden", response = StandardError.class),
-            @ApiResponse(code = 404, message = "Not Found", response = StandardError.class),
-            @ApiResponse(code = 500, message = "Internal Server Error", response = StandardError.class),
-    })
-    @GetMapping("/team-longwins-stats/{teamName}")
-    public ResponseEntity<List<LongBasketWinsSeasonInfo>> getLongWinsTeamStats(@PathVariable("teamName") String teamName) {
-        List<LongBasketWinsSeasonInfo> teamStats = teamService.getTeamLongWinsStats(teamName);
-        return ResponseEntity.ok().body(teamStats);
+    @GetMapping("/stats/{strategy}/{teamName}")
+    public ResponseEntity<List<StrategySeasonStats>> getStrategyStats(@PathVariable("teamName") String teamName, @PathVariable("strategy") String strategy) {
+        Team team = teamRepository.getTeamByNameAndSport(teamName, "Basketball");
+        List<StrategySeasonStats> statsByStrategyAndTeam = strategySeasonStatsService.getStatsByStrategyAndTeam(team, strategy);
+        return ResponseEntity.ok().body(statsByStrategyAndTeam);
     }
 
     @PostMapping("/updateTeamScore/{teamName}")
     public Team updateTeamScore (@PathVariable("teamName") String teamName, @Valid @RequestParam  String strategy) {
-        return teamService.updateTeamScore(teamName, strategy, "Basketball");
+        Team teamByName = teamRepository.getTeamByNameAndSport(teamName, "Basketball");
+        if (null == teamByName) {
+            throw new NotFoundException();
+        }
+        return teamService.updateTeamScore(teamByName, strategy);
     }
 
     @SneakyThrows
@@ -205,13 +171,13 @@ public class BasketballDataStatsController {
         }
     }
 
-    @ApiOperation(value = "updateAllTeamsScoreBystrategy", notes = "Strategy values: hockeyDraw, hockeyWinsMarginAny2, hockeyWinsMargin3, footballDrawHunter, footballMarginWins, footballGoalsFest, footballEuroHandicap, basketComebacks, basketShortWins")
+    @ApiOperation(value = "updateAllTeamsScoreBystrategy", notes = "Strategy values:\nComebackSeasonStats | LongBasketWinsSeasonStats | ShortBasketWinsSeasonStats")
     @PostMapping("/updateAllTeamsScoreBystrategy")
     public ResponseEntity<String> updateAllTeamsScoreBystrategy (@Valid @RequestParam  String strategy) {
         List<Team> allTeams = teamRepository.findAll().stream().filter(t -> t.getSport().equals("Basketball")).collect(Collectors.toList());
         for (int i=0; i< allTeams.size(); i++) {
             try {
-                teamService.updateTeamScore(allTeams.get(i).getName(), strategy, "Basketball");
+                teamService.updateTeamScore(allTeams.get(i), strategy);
             } catch (NumberFormatException er) {
                 log.error(er.toString());
             }
@@ -226,7 +192,7 @@ public class BasketballDataStatsController {
 
         List<Team> allTeams = teamRepository.findAll().stream().filter(t -> t.getSport().equals("Basketball")).collect(Collectors.toList());
         for (Team team : allTeams) {
-            longBasketWinsSeasonInfoService.updateStatsDataInfo(team);
+//            longBasketWinsSeasonInfoService.updateStatsBySeasonInfo(team);
 //            comebackSeasonInfoService.updateStatsDataInfo(team);
 //            shortBasketWinsSeasonInfoService.updateStatsDataInfo(team);
         }

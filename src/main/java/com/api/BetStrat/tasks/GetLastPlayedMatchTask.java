@@ -8,15 +8,11 @@ import com.api.BetStrat.repository.HistoricMatchRepository;
 import com.api.BetStrat.repository.TeamRepository;
 import com.api.BetStrat.util.ScrappingUtil;
 import com.api.BetStrat.util.TelegramBotNotifications;
-import com.api.BetStrat.util.Utils;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
-import org.hibernate.exception.ConstraintViolationException;
 import org.json.JSONArray;
-import org.json.JSONException;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,11 +22,10 @@ import org.springframework.context.event.EventListener;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
+
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 import static com.api.BetStrat.constants.BetStratConstants.CURRENT_SEASON;
 import static com.api.BetStrat.constants.BetStratConstants.LONG_STREAKS_LEAGUES_LIST;
@@ -82,7 +77,7 @@ public class GetLastPlayedMatchTask {
             Team team = teamRepository.getTeamByNameAndSport(t, "Football");
 
             if (team != null) {
-                JSONArray scrappingData = ScrappingUtil.getLastNMatchesScrappingService(team, 2);
+                JSONArray scrappingData = ScrappingUtil.getLastNMatchesScrappingService(team, 5);
                 if (scrappingData != null) {
                     for (int i = 0; i < scrappingData.length(); i++) {
                         HistoricMatch historicMatch = new HistoricMatch();
