@@ -1,36 +1,33 @@
 package com.api.BetStrat.service.football;
 
-import com.api.BetStrat.dto.SimulatedMatchDto;
-import com.api.BetStrat.entity.StrategySeasonStats;
-import com.api.BetStrat.enums.TeamScoreEnum;
-import com.api.BetStrat.entity.HistoricMatch;
-import com.api.BetStrat.entity.Team;
-import com.api.BetStrat.entity.football.FlipFlopOversUndersStats;
-import com.api.BetStrat.repository.HistoricMatchRepository;
-import com.api.BetStrat.repository.football.FlipFlopOversUndersInfoRepository;
-import com.api.BetStrat.service.StrategyScoreCalculator;
-import com.api.BetStrat.service.StrategySeasonStatsInterface;
-import com.api.BetStrat.util.Utils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
-import java.util.stream.Collectors;
-
-import static com.api.BetStrat.constants.BetStratConstants.SEASONS_LIST;
 import static com.api.BetStrat.constants.BetStratConstants.SUMMER_SEASONS_BEGIN_MONTH_LIST;
 import static com.api.BetStrat.constants.BetStratConstants.SUMMER_SEASONS_LIST;
 import static com.api.BetStrat.constants.BetStratConstants.WINTER_SEASONS_BEGIN_MONTH_LIST;
 import static com.api.BetStrat.constants.BetStratConstants.WINTER_SEASONS_LIST;
 import static com.api.BetStrat.util.Utils.calculateCoeffVariation;
 import static com.api.BetStrat.util.Utils.calculateSD;
+
+import com.api.BetStrat.dto.SimulatedMatchDto;
+import com.api.BetStrat.entity.HistoricMatch;
+import com.api.BetStrat.entity.StrategySeasonStats;
+import com.api.BetStrat.entity.Team;
+import com.api.BetStrat.entity.football.FlipFlopOversUndersStats;
+import com.api.BetStrat.enums.TeamScoreEnum;
+import com.api.BetStrat.repository.HistoricMatchRepository;
+import com.api.BetStrat.repository.football.FlipFlopOversUndersInfoRepository;
+import com.api.BetStrat.service.StrategyScoreCalculator;
+import com.api.BetStrat.service.StrategySeasonStatsInterface;
+import com.api.BetStrat.util.Utils;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.stream.Collectors;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @Transactional
@@ -159,27 +156,42 @@ public class FlipFlopOversUndersStatsServiceStrategy extends StrategyScoreCalcul
         if (statsByTeam.size() < 3) {
             teamByName.setDrawsHunterScore(TeamScoreEnum.INSUFFICIENT_DATA.getValue());
         } else {
-            int last3SeasonsOversRateScore = calculateLast3SeasonsRateScore(statsByTeam);
-            int allSeasonsOversRateScore = calculateAllSeasonsRateScore(statsByTeam);
-            int last3SeasonsmaxSeqWOFlipFlopScore = calculateLast3SeasonsMaxSeqWOGreenScore(statsByTeam);
-            int allSeasonsmaxSeqWOFlipFlopScore = calculateAllSeasonsMaxSeqWOGreenScore(statsByTeam);
-            int last3SeasonsStdDevScore = calculateLast3SeasonsStdDevScore(statsByTeam);
-            int allSeasonsStdDevScore = calculateAllSeasonsStdDevScore(statsByTeam);
-            int totalMatchesScore = calculateLeagueMatchesScore(statsByTeam.get(0).getNumMatches());
-
-            double totalScore = Utils.beautifyDoubleValue(0.2*last3SeasonsOversRateScore + 0.15*allSeasonsOversRateScore +
-                    0.15*last3SeasonsmaxSeqWOFlipFlopScore + 0.05*allSeasonsmaxSeqWOFlipFlopScore +
-                    0.3*last3SeasonsStdDevScore + 0.1*allSeasonsStdDevScore + 0.05*totalMatchesScore);
-
+            double totalScore = calculateTotalFinalScore(statsByTeam);
             teamByName.setFlipFlopScore(calculateFinalRating(totalScore));
         }
 
         return teamByName;
     }
 
+    private double calculateTotalFinalScore(List<FlipFlopOversUndersStats> statsByTeam) {
+        int last3SeasonsFlipFlopRateScore = calculateLast3SeasonsRateScore(statsByTeam);
+        int allSeasonsFlipFlopRateScore = calculateAllSeasonsRateScore(statsByTeam);
+        int last3SeasonsmaxSeqWOFlipFlopScore = calculateLast3SeasonsMaxSeqWOGreenScore(statsByTeam);
+        int allSeasonsmaxSeqWOFlipFlopScore = calculateAllSeasonsMaxSeqWOGreenScore(statsByTeam);
+        int last3SeasonsStdDevScore = calculateLast3SeasonsStdDevScore(statsByTeam);
+        int allSeasonsStdDevScore = calculateAllSeasonsStdDevScore(statsByTeam);
+        int totalMatchesScore = calculateLeagueMatchesScore(statsByTeam.get(0).getNumMatches());
+
+        return Utils.beautifyDoubleValue(0.2*last3SeasonsFlipFlopRateScore + 0.1*allSeasonsFlipFlopRateScore +
+            0.18*last3SeasonsmaxSeqWOFlipFlopScore + 0.1*allSeasonsmaxSeqWOFlipFlopScore +
+            0.3*last3SeasonsStdDevScore + 0.1*allSeasonsStdDevScore + 0.02*totalMatchesScore);
+    }
+
     @Override
     public String calculateScoreBySeason(Team team, String season, String strategyName) {
-        return "";
+        List<FlipFlopOversUndersStats> statsByTeam = flipFlopOversUndersInfoRepository.getFlipFlopStatsByTeam(team);
+        Collections.sort(statsByTeam, StrategySeasonStats.strategySeasonSorter);
+        Collections.reverse(statsByTeam);
+
+        int indexOfSeason = WINTER_SEASONS_LIST.indexOf(season);
+        statsByTeam = statsByTeam.stream().filter(s -> WINTER_SEASONS_LIST.indexOf(s.getSeason()) < indexOfSeason).collect(Collectors.toList());
+
+        if (statsByTeam.size() < 3 || statsByTeam.stream().filter(s -> s.getNumMatches() < 15).findAny().isPresent()) {
+            return TeamScoreEnum.INSUFFICIENT_DATA.getValue();
+        } else {
+            double totalScore = calculateTotalFinalScore(statsByTeam);
+            return calculateFinalRating(totalScore);
+        }
     }
 
     @Override

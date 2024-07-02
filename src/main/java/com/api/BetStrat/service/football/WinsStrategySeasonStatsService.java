@@ -2,6 +2,7 @@ package com.api.BetStrat.service.football;
 
 import com.api.BetStrat.dto.SimulatedMatchDto;
 import com.api.BetStrat.entity.StrategySeasonStats;
+import com.api.BetStrat.entity.football.BttsSeasonStats;
 import com.api.BetStrat.enums.TeamScoreEnum;
 import com.api.BetStrat.entity.HistoricMatch;
 import com.api.BetStrat.entity.Team;
@@ -170,7 +171,19 @@ public class WinsStrategySeasonStatsService extends StrategyScoreCalculator<Wins
 
     @Override
     public String calculateScoreBySeason(Team team, String season, String strategy) {
-        return null;
+        List<WinsSeasonStats> statsByTeam = winsSeasonInfoRepository.getFootballWinsStatsByTeam(team);
+        Collections.sort(statsByTeam, StrategySeasonStats.strategySeasonSorter);
+        Collections.reverse(statsByTeam);
+
+        int indexOfSeason = WINTER_SEASONS_LIST.indexOf(season);
+        statsByTeam = statsByTeam.stream().filter(s -> WINTER_SEASONS_LIST.indexOf(s.getSeason()) < indexOfSeason).collect(Collectors.toList());
+
+        if (statsByTeam.size() < 3 || statsByTeam.stream().filter(s -> s.getNumMatches() < 15).findAny().isPresent()) {
+            return TeamScoreEnum.INSUFFICIENT_DATA.getValue();
+        } else {
+            double totalScore = calculateTotalFinalScore(statsByTeam);
+            return calculateFinalRating(totalScore);
+        }
     }
 
     @Override
