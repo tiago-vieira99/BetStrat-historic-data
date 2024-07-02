@@ -5,6 +5,7 @@ import com.api.BetStrat.entity.HistoricMatch;
 import com.api.BetStrat.entity.StrategySeasonStats;
 import com.api.BetStrat.entity.Team;
 import com.api.BetStrat.entity.football.WinAndGoalsSeasonStats;
+import com.api.BetStrat.entity.football.WinAndGoalsSeasonStats;
 import com.api.BetStrat.enums.TeamScoreEnum;
 import com.api.BetStrat.repository.HistoricMatchRepository;
 import com.api.BetStrat.repository.football.WinAndGoalsSeasonInfoRepository;
@@ -195,28 +196,28 @@ public class WinAndGoalsStrategySeasonStatsService extends StrategyScoreCalculat
         if (statsByTeam.size() < 3) {
             teamByName.setMarginWinsScore(TeamScoreEnum.INSUFFICIENT_DATA.getValue());
         } else {
-            int last3SeasonsMarginWinsRateScore = calculateLast3SeasonsRateScore(statsByTeam);
-            int allSeasonsMarginWinsRateScore = calculateAllSeasonsRateScore(statsByTeam);
-            int last3SeasonsTotalWinsRateScore = calculateLast3SeasonsTotalWinsRateScore(statsByTeam);
-            int allSeasonsTotalWinsRateScore = calculateAllSeasonsTotalWinsRateScore(statsByTeam);
-            int last3SeasonsmaxSeqWOMarginWinsScore = calculateLast3SeasonsMaxSeqWOGreenScore(statsByTeam);
-            int allSeasonsmaxSeqWOMarginWinsScore = calculateAllSeasonsMaxSeqWOGreenScore(statsByTeam);
-            int last3SeasonsStdDevScore = calculateLast3SeasonsStdDevScore(statsByTeam);
-            int allSeasonsStdDevScore = calculateAllSeasonsStdDevScore(statsByTeam);
-            int totalMatchesScore = calculateLeagueMatchesScore(statsByTeam.get(0).getNumMatches());
-
-            double last3SeasonsWinsAvg = (last3SeasonsTotalWinsRateScore + last3SeasonsMarginWinsRateScore) / 2;
-            double allSeasonsWinsAvg = (allSeasonsTotalWinsRateScore + allSeasonsMarginWinsRateScore) / 2;
-
-            double last3SeasonsScore = Utils.beautifyDoubleValue(0.3*last3SeasonsWinsAvg + 0.4*last3SeasonsmaxSeqWOMarginWinsScore + 0.3*last3SeasonsStdDevScore);
-            double allSeasonsScore = Utils.beautifyDoubleValue(0.3*allSeasonsWinsAvg + 0.4*allSeasonsmaxSeqWOMarginWinsScore + 0.3*allSeasonsStdDevScore);
-
-            double totalScore = Utils.beautifyDoubleValue(0.75*last3SeasonsScore + 0.20*allSeasonsScore + 0.05*totalMatchesScore);
-
+            double totalScore = calculateTotalFinalScore(statsByTeam);
             teamByName.setMarginWinsScore(calculateFinalRating(totalScore));
         }
 
         return teamByName;
+    }
+
+    private double calculateTotalFinalScore(List<WinAndGoalsSeasonStats> statsByTeam) {
+        int last3SeasonsWinAndGoalsRateScore = calculateLast3SeasonsRateScore(statsByTeam);
+        int allSeasonsWinAndGoalsRateScore = calculateAllSeasonsRateScore(statsByTeam);
+        int last3SeasonsTotalWinsRateScore = calculateLast3SeasonsTotalWinsRateScore(statsByTeam);
+        int allSeasonsTotalWinsRateScore = calculateAllSeasonsTotalWinsRateScore(statsByTeam);
+        int last3SeasonsmaxSeqWOWinAndGoalsScore = calculateLast3SeasonsMaxSeqWOGreenScore(statsByTeam);
+        int allSeasonsmaxSeqWOWinAndGoalsScore = calculateAllSeasonsMaxSeqWOGreenScore(statsByTeam);
+        int last3SeasonsStdDevScore = calculateLast3SeasonsStdDevScore(statsByTeam);
+        int allSeasonsStdDevScore = calculateAllSeasonsStdDevScore(statsByTeam);
+        int totalMatchesScore = calculateLeagueMatchesScore(statsByTeam.get(0).getNumMatches());
+
+        return Utils.beautifyDoubleValue(0.13*last3SeasonsWinAndGoalsRateScore + 0.07*allSeasonsWinAndGoalsRateScore +
+            0.13*last3SeasonsTotalWinsRateScore + 0.07*allSeasonsTotalWinsRateScore +
+            0.12*last3SeasonsmaxSeqWOWinAndGoalsScore + 0.06*allSeasonsmaxSeqWOWinAndGoalsScore +
+            0.3*last3SeasonsStdDevScore + 0.1*allSeasonsStdDevScore + 0.02*totalMatchesScore);
     }
 
     @Override
@@ -231,24 +232,7 @@ public class WinAndGoalsStrategySeasonStatsService extends StrategyScoreCalculat
         if (statsByTeam.size() < 3) {
             return TeamScoreEnum.INSUFFICIENT_DATA.getValue();
         } else {
-            int last3SeasonsMarginWinsRateScore = calculateLast3SeasonsRateScore(statsByTeam);
-            int allSeasonsMarginWinsRateScore = calculateAllSeasonsRateScore(statsByTeam);
-            int last3SeasonsTotalWinsRateScore = calculateLast3SeasonsTotalWinsRateScore(statsByTeam);
-            int allSeasonsTotalWinsRateScore = calculateAllSeasonsTotalWinsRateScore(statsByTeam);
-            int last3SeasonsmaxSeqWOMarginWinsScore = calculateLast3SeasonsMaxSeqWOGreenScore(statsByTeam);
-            int allSeasonsmaxSeqWOMarginWinsScore = calculateAllSeasonsMaxSeqWOGreenScore(statsByTeam);
-            int last3SeasonsStdDevScore = calculateLast3SeasonsStdDevScore(statsByTeam);
-            int allSeasonsStdDevScore = calculateAllSeasonsStdDevScore(statsByTeam);
-            int totalMatchesScore = calculateLeagueMatchesScore(statsByTeam.get(0).getNumMatches());
-
-            double last3SeasonsWinsAvg = (last3SeasonsTotalWinsRateScore + last3SeasonsMarginWinsRateScore) / 2;
-            double allSeasonsWinsAvg = (allSeasonsTotalWinsRateScore + allSeasonsMarginWinsRateScore) / 2;
-
-            double last3SeasonsScore = Utils.beautifyDoubleValue(0.3*last3SeasonsWinsAvg + 0.4*last3SeasonsmaxSeqWOMarginWinsScore + 0.3*last3SeasonsStdDevScore);
-            double allSeasonsScore = Utils.beautifyDoubleValue(0.3*allSeasonsWinsAvg + 0.4*allSeasonsmaxSeqWOMarginWinsScore + 0.3*allSeasonsStdDevScore);
-
-            double totalScore = Utils.beautifyDoubleValue(0.75*last3SeasonsScore + 0.20*allSeasonsScore + 0.05*totalMatchesScore);
-
+            double totalScore = calculateTotalFinalScore(statsByTeam);
             return calculateFinalRating(totalScore);
         }
     }

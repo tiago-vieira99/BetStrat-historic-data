@@ -145,95 +145,30 @@ public class NoGoalsFestStrategySeasonStatsService extends StrategyScoreCalculat
         if (statsByTeam.size() < 3 || statsByTeam.stream().filter(s -> s.getNumMatches() < 15).findAny().isPresent()) {
             teamByName.setGoalsFestScore(TeamScoreEnum.INSUFFICIENT_DATA.getValue());
         } else {
-            int last3SeasonsGoalsFestRateScore = calculateLast3SeasonsRateScore(statsByTeam);
-            int allSeasonsGoalsFestRateScore = calculateAllSeasonsRateScore(statsByTeam);
-            int last3SeasonsmaxSeqWOGoalsFestScore = calculateLast3SeasonsMaxSeqWOGreenScore(statsByTeam);
-            int allSeasonsmaxSeqWOGoalsFestScore = calculateAllSeasonsMaxSeqWOGreenScore(statsByTeam);
-            int last3SeasonsStdDevScore = calculateLast3SeasonsStdDevScore(statsByTeam);
-            int allSeasonsStdDevScore = calculateAllSeasonsStdDevScore(statsByTeam);
-//            int totalMatchesScore = calculateLeagueMatchesScore(statsByTeam.get(0).getNumMatches());
-
-            double totalScore = Utils.beautifyDoubleValue(0.2*last3SeasonsGoalsFestRateScore + 0.1*allSeasonsGoalsFestRateScore +
-                    0.2*last3SeasonsmaxSeqWOGoalsFestScore + 0.1*allSeasonsmaxSeqWOGoalsFestScore +
-                    0.3*last3SeasonsStdDevScore + 0.1*allSeasonsStdDevScore);
-
+            double totalScore = calculateTotalFinalScore(statsByTeam);
             teamByName.setNoGoalsFestScore(calculateFinalRating(totalScore));
         }
 
         return teamByName;
     }
 
+    private double calculateTotalFinalScore(List<NoGoalsFestSeasonStats> statsByTeam) {
+        int last3SeasonsNoGoalsFestRateScore = calculateLast3SeasonsRateScore(statsByTeam);
+        int allSeasonsNoGoalsFestRateScore = calculateAllSeasonsRateScore(statsByTeam);
+        int last3SeasonsmaxSeqWONoGoalsFestScore = calculateLast3SeasonsMaxSeqWOGreenScore(statsByTeam);
+        int allSeasonsmaxSeqWONoGoalsFestScore = calculateAllSeasonsMaxSeqWOGreenScore(statsByTeam);
+        int last3SeasonsStdDevScore = calculateLast3SeasonsStdDevScore(statsByTeam);
+        int allSeasonsStdDevScore = calculateAllSeasonsStdDevScore(statsByTeam);
+        int totalMatchesScore = calculateLeagueMatchesScore(statsByTeam.get(0).getNumMatches());
+
+        return Utils.beautifyDoubleValue(0.2*last3SeasonsNoGoalsFestRateScore + 0.1*allSeasonsNoGoalsFestRateScore +
+            0.18*last3SeasonsmaxSeqWONoGoalsFestScore + 0.1*allSeasonsmaxSeqWONoGoalsFestScore +
+            0.3*last3SeasonsStdDevScore + 0.1*allSeasonsStdDevScore + 0.02*totalMatchesScore);
+    }
+
     @Override
     public String calculateScoreBySeason(Team team, String season, String strategy) {
         return null;
-    }
-
-    public LinkedHashMap<String, String> getSimulatedScorePartialSeasons(Team teamByName, int seasonsToDiscard) {
-        List<NoGoalsFestSeasonStats> statsByTeam = noGoalsFestSeasonInfoRepository.getNoGoalsFestStatsByTeam(teamByName);
-        LinkedHashMap<String, String> outMap = new LinkedHashMap<>();
-
-        if (statsByTeam.size() <= 2 || statsByTeam.stream().filter(s -> s.getNumMatches() < 15).findAny().isPresent() || statsByTeam.size() < seasonsToDiscard) {
-            outMap.put("footballGoalsFest", TeamScoreEnum.INSUFFICIENT_DATA.getValue());
-            return outMap;
-        }
-        Collections.sort(statsByTeam, StrategySeasonStats.strategySeasonSorter);
-        Collections.reverse(statsByTeam);
-        List<NoGoalsFestSeasonStats> filteredStats = statsByTeam.subList(seasonsToDiscard, statsByTeam.size());
-
-        if (filteredStats.size() < 3 || !filteredStats.get(0).getSeason().equals(WINTER_SEASONS_LIST.get(WINTER_SEASONS_LIST.size()-1-seasonsToDiscard)) ||
-                !filteredStats.get(1).getSeason().equals(WINTER_SEASONS_LIST.get(WINTER_SEASONS_LIST.size()-2-seasonsToDiscard)) ||
-                !filteredStats.get(2).getSeason().equals(WINTER_SEASONS_LIST.get(WINTER_SEASONS_LIST.size()-3-seasonsToDiscard))) {
-            outMap.put("footballGoalsFest", TeamScoreEnum.INSUFFICIENT_DATA.getValue());
-        } else {
-            int last3SeasonsGoalsFestRateScore = calculateLast3SeasonsRateScore(filteredStats);
-            int allSeasonsGoalsFestRateScore = calculateAllSeasonsRateScore(filteredStats);
-            int last3SeasonsmaxSeqWOGoalsFestScore = calculateLast3SeasonsMaxSeqWOGreenScore(filteredStats);
-            int allSeasonsmaxSeqWOGoalsFestScore = calculateAllSeasonsMaxSeqWOGreenScore(filteredStats);
-            int last3SeasonsStdDevScore = calculateLast3SeasonsStdDevScore(filteredStats);
-            int allSeasonsStdDevScore = calculateAllSeasonsStdDevScore(filteredStats);
-//            int totalMatchesScore = calculateLeagueMatchesScore(statsByTeam.get(0).getNumMatches());
-
-            double totalScore = Utils.beautifyDoubleValue(0.2*last3SeasonsGoalsFestRateScore + 0.1*allSeasonsGoalsFestRateScore +
-                    0.2*last3SeasonsmaxSeqWOGoalsFestScore + 0.1*allSeasonsmaxSeqWOGoalsFestScore +
-                    0.3*last3SeasonsStdDevScore + 0.1*allSeasonsStdDevScore);
-
-            String finalScore = calculateFinalRating(totalScore);
-            outMap.put("footballGoalsFest", finalScore);
-            outMap.put("sequence", statsByTeam.get(seasonsToDiscard-1).getNegativeSequence());
-            double balance = 0;
-            String[] seqArray = statsByTeam.get(seasonsToDiscard - 1).getNegativeSequence().replaceAll("\\[","").replaceAll("]","").split(",");
-            for (int i=0; i<seqArray.length-2; i++) {
-                int excelBadRun = 0;
-                int accepBadRun = 0;
-                if (balance < -20) {
-                    break;
-                }
-//                } else if (Integer.parseInt(seqArray[i].trim())-accepBadRun >= 7 && Integer.parseInt(seqArray[i].trim())-accepBadRun < 10) {
-//                    balance += -11;
-//                } else if (Integer.parseInt(seqArray[i].trim())-accepBadRun >= 10 && Integer.parseInt(seqArray[i].trim())-accepBadRun < 13) {
-//                    balance += -17;
-//                } else if (Integer.parseInt(seqArray[i].trim())-accepBadRun >= 13 && Integer.parseInt(seqArray[i].trim())-accepBadRun < 16) {
-//                    balance += -23;
-//                } else if (Integer.parseInt(seqArray[i].trim())-accepBadRun >= 16) {
-//                    balance += -29;
-                double marginWinsScorePoints = Double.parseDouble(finalScore.substring(finalScore.indexOf('(') + 1, finalScore.indexOf(')')));
-                if (finalScore.contains("EXCEL") && Integer.parseInt(seqArray[i].trim()) > excelBadRun) {
-                    if (Integer.parseInt(seqArray[i].trim())-excelBadRun > 4) {
-                        balance += -10;
-                        continue;
-                    }
-                    balance += 1;
-                } else if (finalScore.contains("ACCEPTABLE") &&  Integer.parseInt(seqArray[i].trim()) > accepBadRun) {
-                    if (Integer.parseInt(seqArray[i].trim())-accepBadRun > 4) {
-                        balance += -10;
-                        continue;
-                    }
-                    balance += 1;
-                }
-            }
-            outMap.put("balance", String.valueOf(balance).replaceAll("\\.",","));
-        }
-        return outMap;
     }
 
     @Override

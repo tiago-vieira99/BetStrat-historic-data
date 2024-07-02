@@ -194,18 +194,7 @@ public class DrawStrategySeasonStatsService extends StrategyScoreCalculator<Draw
         if (statsByTeam.size() < 3) {
             team.setDrawsHunterScore(TeamScoreEnum.INSUFFICIENT_DATA.getValue());
         } else {
-            int last3SeasonsDrawRateScore = calculateLast3SeasonsRateScore(statsByTeam);
-            int allSeasonsDrawRateScore = calculateAllSeasonsRateScore(statsByTeam);
-            int last3SeasonsmaxSeqWODrawScore = calculateLast3SeasonsMaxSeqWOGreenScore(statsByTeam);
-            int allSeasonsmaxSeqWODrawScore = calculateAllSeasonsMaxSeqWOGreenScore(statsByTeam);
-            int last3SeasonsStdDevScore = calculateLast3SeasonsStdDevScore(statsByTeam);
-            int allSeasonsStdDevScore = calculateAllSeasonsStdDevScore(statsByTeam);
-            int totalMatchesScore = calculateLeagueMatchesScore(statsByTeam.get(0).getNumMatches());
-
-            double totalScore = Utils.beautifyDoubleValue(0.2*last3SeasonsDrawRateScore + 0.15*allSeasonsDrawRateScore +
-                    0.15*last3SeasonsmaxSeqWODrawScore + 0.05*allSeasonsmaxSeqWODrawScore +
-                    0.3*last3SeasonsStdDevScore + 0.1*allSeasonsStdDevScore + 0.05*totalMatchesScore);
-
+            double totalScore = calculateTotalFinalScore(statsByTeam);
             team.setDrawsHunterScore(calculateFinalRating(totalScore));
         }
 
@@ -224,79 +213,23 @@ public class DrawStrategySeasonStatsService extends StrategyScoreCalculator<Draw
         if (statsByTeam.size() < 3) {
             return TeamScoreEnum.INSUFFICIENT_DATA.getValue();
         } else {
-            int last3SeasonsDrawRateScore = calculateLast3SeasonsRateScore(statsByTeam);
-            int allSeasonsDrawRateScore = calculateAllSeasonsRateScore(statsByTeam);
-            int last3SeasonsmaxSeqWODrawScore = calculateLast3SeasonsMaxSeqWOGreenScore(statsByTeam);
-            int allSeasonsmaxSeqWODrawScore = calculateAllSeasonsMaxSeqWOGreenScore(statsByTeam);
-            int last3SeasonsStdDevScore = calculateLast3SeasonsStdDevScore(statsByTeam);
-            int allSeasonsStdDevScore = calculateAllSeasonsStdDevScore(statsByTeam);
-            int totalMatchesScore = calculateLeagueMatchesScore(statsByTeam.get(0).getNumMatches());
-
-            double totalScore = Utils.beautifyDoubleValue(0.2*last3SeasonsDrawRateScore + 0.15*allSeasonsDrawRateScore +
-                    0.15*last3SeasonsmaxSeqWODrawScore + 0.05*allSeasonsmaxSeqWODrawScore +
-                    0.3*last3SeasonsStdDevScore + 0.1*allSeasonsStdDevScore + 0.05*totalMatchesScore);
-
-           return calculateFinalRating(totalScore);
+            double totalScore = calculateTotalFinalScore(statsByTeam);
+            return calculateFinalRating(totalScore);
         }
     }
 
-    @Deprecated
-    public LinkedHashMap<String, String> getSimulatedScorePartialSeasons(Team teamByName, int seasonsToDiscard) {
-        List<DrawSeasonStats> statsByTeam = drawSeasonInfoRepository.getFootballDrawStatsByTeam(teamByName);
-        LinkedHashMap<String, String> outMap = new LinkedHashMap<>();
-        List<String> profits = ImmutableList.of("1","0,6","1,2","1,3","2","2,8","4,3","6,6","-20,4","-23,4","-19,8","-19,2","-15");
+    private double calculateTotalFinalScore(List<DrawSeasonStats> statsByTeam) {
+        int last3SeasonsDrawRateScore = calculateLast3SeasonsRateScore(statsByTeam);
+        int allSeasonsDrawRateScore = calculateAllSeasonsRateScore(statsByTeam);
+        int last3SeasonsmaxSeqWODrawScore = calculateLast3SeasonsMaxSeqWOGreenScore(statsByTeam);
+        int allSeasonsmaxSeqWODrawScore = calculateAllSeasonsMaxSeqWOGreenScore(statsByTeam);
+        int last3SeasonsStdDevScore = calculateLast3SeasonsStdDevScore(statsByTeam);
+        int allSeasonsStdDevScore = calculateAllSeasonsStdDevScore(statsByTeam);
+        int totalMatchesScore = calculateLeagueMatchesScore(statsByTeam.get(0).getNumMatches());
 
-        if (statsByTeam.size() <= 2 || statsByTeam.size() < seasonsToDiscard) {
-            outMap.put("footballDrawHunter", TeamScoreEnum.INSUFFICIENT_DATA.getValue());
-            return outMap;
-        }
-        Collections.sort(statsByTeam, StrategySeasonStats.strategySeasonSorter);
-        Collections.reverse(statsByTeam);
-        List<DrawSeasonStats> filteredStats = statsByTeam.subList(seasonsToDiscard, statsByTeam.size());
-
-        if (filteredStats.size() < 3 || !filteredStats.get(0).getSeason().equals(WINTER_SEASONS_LIST.get(WINTER_SEASONS_LIST.size()-1-seasonsToDiscard)) ||
-                !filteredStats.get(1).getSeason().equals(WINTER_SEASONS_LIST.get(WINTER_SEASONS_LIST.size()-2-seasonsToDiscard)) ||
-                !filteredStats.get(2).getSeason().equals(WINTER_SEASONS_LIST.get(WINTER_SEASONS_LIST.size()-3-seasonsToDiscard))) {
-            outMap.put("footballDrawHunter", TeamScoreEnum.INSUFFICIENT_DATA.getValue());
-        } else {
-            int last3SeasonsDrawRateScore = calculateLast3SeasonsRateScore(filteredStats);
-            int allSeasonsDrawRateScore = calculateAllSeasonsRateScore(filteredStats);
-            int last3SeasonsmaxSeqWODrawScore = calculateLast3SeasonsMaxSeqWOGreenScore(filteredStats);
-            int allSeasonsmaxSeqWODrawScore = calculateAllSeasonsMaxSeqWOGreenScore(filteredStats);
-            int last3SeasonsStdDevScore = calculateLast3SeasonsStdDevScore(filteredStats);
-            int allSeasonsStdDevScore = calculateAllSeasonsStdDevScore(filteredStats);
-            int totalMatchesScore = super.calculateLeagueMatchesScore(filteredStats.get(0).getNumMatches());
-
-            double totalScore = Utils.beautifyDoubleValue(0.2*last3SeasonsDrawRateScore + 0.15*allSeasonsDrawRateScore +
-                    0.15*last3SeasonsmaxSeqWODrawScore + 0.05*allSeasonsmaxSeqWODrawScore +
-                    0.3*last3SeasonsStdDevScore + 0.1*allSeasonsStdDevScore + 0.05*totalMatchesScore);
-
-            String finalScore = calculateFinalRating(totalScore);
-            outMap.put("footballDrawHunter", finalScore);
-            outMap.put("sequence", statsByTeam.get(seasonsToDiscard-1).getNegativeSequence());
-            double balance = 0;
-            String[] seqArray = statsByTeam.get(seasonsToDiscard - 1).getNegativeSequence().replaceAll("\\[","").replaceAll("]","").split(",");
-            for (int i=0; i<seqArray.length-2; i++) {
-                int excelBadRun = 5;
-                int accepBadRun = 6;
-                double drawsScorePoints = Double.parseDouble(finalScore.substring(finalScore.indexOf('(') + 1, finalScore.indexOf(')')));
-                if (finalScore.contains("EXCEL") && Integer.parseInt(seqArray[i].trim()) > excelBadRun) {
-                    if (Integer.parseInt(seqArray[i].trim())-excelBadRun > 6) {
-                        balance += -10;
-                        continue;
-                    }
-                   balance += Double.parseDouble(profits.get(Integer.parseInt(seqArray[i].trim())-excelBadRun-1).replaceAll(",","."));
-                } else if (drawsScorePoints >= 70 && finalScore.contains("ACCEPTABLE") &&  Integer.parseInt(seqArray[i].trim()) > accepBadRun) {
-                    if (Integer.parseInt(seqArray[i].trim())-accepBadRun > 6) {
-                        balance += -10;
-                        continue;
-                    }
-                    balance += Double.parseDouble(profits.get(Integer.parseInt(seqArray[i].trim())-accepBadRun-1).replaceAll(",","."));
-                }
-            }
-            outMap.put("balance", String.valueOf(balance).replaceAll("\\.",","));
-        }
-        return outMap;
+        return Utils.beautifyDoubleValue(0.2*last3SeasonsDrawRateScore + 0.1*allSeasonsDrawRateScore +
+            0.18*last3SeasonsmaxSeqWODrawScore + 0.1*allSeasonsmaxSeqWODrawScore +
+            0.3*last3SeasonsStdDevScore + 0.1*allSeasonsStdDevScore + 0.02*totalMatchesScore);
     }
 
     @Override

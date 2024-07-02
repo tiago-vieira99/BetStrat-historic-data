@@ -120,22 +120,25 @@ public class ConcedeBothHalvesSeasonStatsService extends StrategyScoreCalculator
         if (statsByTeam.size() < 3 || statsByTeam.stream().filter(s -> s.getNumMatches() < 15).findAny().isPresent()) {
             teamByName.setGoalsFestScore(TeamScoreEnum.INSUFFICIENT_DATA.getValue());
         } else {
-            int last3SeasonsGoalsFestRateScore = calculateLast3SeasonsRateScore(statsByTeam);
-            int allSeasonsGoalsFestRateScore = calculateAllSeasonsRateScore(statsByTeam);
-            int last3SeasonsmaxSeqWOGoalsFestScore = calculateLast3SeasonsMaxSeqWOGreenScore(statsByTeam);
-            int allSeasonsmaxSeqWOGoalsFestScore = calculateAllSeasonsMaxSeqWOGreenScore(statsByTeam);
-            int last3SeasonsStdDevScore = calculateLast3SeasonsStdDevScore(statsByTeam);
-            int allSeasonsStdDevScore = calculateAllSeasonsStdDevScore(statsByTeam);
-//            int totalMatchesScore = calculateLeagueMatchesScore(statsByTeam.get(0).getNumMatches());
-
-            double totalScore = Utils.beautifyDoubleValue(0.2*last3SeasonsGoalsFestRateScore + 0.1*allSeasonsGoalsFestRateScore +
-                    0.2*last3SeasonsmaxSeqWOGoalsFestScore + 0.1*allSeasonsmaxSeqWOGoalsFestScore +
-                    0.3*last3SeasonsStdDevScore + 0.1*allSeasonsStdDevScore);
-
-            teamByName.setBttsScore(calculateFinalRating(totalScore));
+            double totalScore = calculateTotalFinalScore(statsByTeam);
+            teamByName.setConcedeBothHalvesScore(calculateFinalRating(totalScore));
         }
 
         return teamByName;
+    }
+
+    private double calculateTotalFinalScore(List<ConcedeBothHalvesSeasonStats> statsByTeam) {
+        int last3SeasonsConcedeBothHalvesRateScore = calculateLast3SeasonsRateScore(statsByTeam);
+        int allSeasonsConcedeBothHalvesRateScore = calculateAllSeasonsRateScore(statsByTeam);
+        int last3SeasonsmaxSeqWOConcedeBothHalvesScore = calculateLast3SeasonsMaxSeqWOGreenScore(statsByTeam);
+        int allSeasonsmaxSeqWOConcedeBothHalvesScore = calculateAllSeasonsMaxSeqWOGreenScore(statsByTeam);
+        int last3SeasonsStdDevScore = calculateLast3SeasonsStdDevScore(statsByTeam);
+        int allSeasonsStdDevScore = calculateAllSeasonsStdDevScore(statsByTeam);
+        int totalMatchesScore = calculateLeagueMatchesScore(statsByTeam.get(0).getNumMatches());
+
+        return Utils.beautifyDoubleValue(0.2*last3SeasonsConcedeBothHalvesRateScore + 0.1*allSeasonsConcedeBothHalvesRateScore +
+            0.18*last3SeasonsmaxSeqWOConcedeBothHalvesScore + 0.1*allSeasonsmaxSeqWOConcedeBothHalvesScore +
+            0.3*last3SeasonsStdDevScore + 0.1*allSeasonsStdDevScore + 0.02*totalMatchesScore);
     }
 
     @Override
@@ -150,18 +153,7 @@ public class ConcedeBothHalvesSeasonStatsService extends StrategyScoreCalculator
         if (statsByTeam.size() < 3 || statsByTeam.stream().filter(s -> s.getNumMatches() < 15).findAny().isPresent()) {
             return TeamScoreEnum.INSUFFICIENT_DATA.getValue();
         } else {
-            int last3SeasonsGoalsFestRateScore = calculateLast3SeasonsRateScore(statsByTeam);
-            int allSeasonsGoalsFestRateScore = calculateAllSeasonsRateScore(statsByTeam);
-            int last3SeasonsmaxSeqWOGoalsFestScore = calculateLast3SeasonsMaxSeqWOGreenScore(statsByTeam);
-            int allSeasonsmaxSeqWOGoalsFestScore = calculateAllSeasonsMaxSeqWOGreenScore(statsByTeam);
-            int last3SeasonsStdDevScore = calculateLast3SeasonsStdDevScore(statsByTeam);
-            int allSeasonsStdDevScore = calculateAllSeasonsStdDevScore(statsByTeam);
-//            int totalMatchesScore = calculateLeagueMatchesScore(statsByTeam.get(0).getNumMatches());
-
-            double totalScore = Utils.beautifyDoubleValue(0.2*last3SeasonsGoalsFestRateScore + 0.1*allSeasonsGoalsFestRateScore +
-                    0.2*last3SeasonsmaxSeqWOGoalsFestScore + 0.1*allSeasonsmaxSeqWOGoalsFestScore +
-                    0.3*last3SeasonsStdDevScore + 0.1*allSeasonsStdDevScore);
-
+            double totalScore = calculateTotalFinalScore(statsByTeam);
             return calculateFinalRating(totalScore);
         }
     }

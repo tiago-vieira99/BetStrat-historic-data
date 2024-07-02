@@ -5,6 +5,7 @@ import com.api.BetStrat.entity.HistoricMatch;
 import com.api.BetStrat.entity.StrategySeasonStats;
 import com.api.BetStrat.entity.Team;
 import com.api.BetStrat.entity.football.CleanSheetSeasonStats;
+import com.api.BetStrat.entity.football.CleanSheetSeasonStats;
 import com.api.BetStrat.enums.TeamScoreEnum;
 import com.api.BetStrat.repository.HistoricMatchRepository;
 import com.api.BetStrat.repository.football.CleanSheetSeasonInfoRepository;
@@ -146,23 +147,25 @@ public class CleanSheetStrategySeasonStatsService extends StrategyScoreCalculato
         if (statsByTeam.size() < 3) {
             teamByName.setWinsScore(TeamScoreEnum.INSUFFICIENT_DATA.getValue());
         } else {
-            int last3SeasonsTotalWinsRateScore = calculateLast3SeasonsTotalWinsRateScore(statsByTeam);
-            int allSeasonsTotalWinsRateScore = calculateAllSeasonsTotalWinsRateScore(statsByTeam);
-            int last3SeasonsmaxSeqWOWinsScore = calculateLast3SeasonsMaxSeqWOGreenScore(statsByTeam);
-            int allSeasonsmaxSeqWOWinsScore = calculateAllSeasonsMaxSeqWOGreenScore(statsByTeam);
-            int last3SeasonsStdDevScore = calculateLast3SeasonsStdDevScore(statsByTeam);
-            int allSeasonsStdDevScore = calculateAllSeasonsStdDevScore(statsByTeam);
-            int totalMatchesScore = calculateLeagueMatchesScore(statsByTeam.get(0).getNumMatches());
-
-            double last3SeasonsScore = Utils.beautifyDoubleValue(0.3*last3SeasonsTotalWinsRateScore + 0.4*last3SeasonsmaxSeqWOWinsScore + 0.3*last3SeasonsStdDevScore);
-            double allSeasonsScore = Utils.beautifyDoubleValue(0.3*allSeasonsTotalWinsRateScore + 0.4*allSeasonsmaxSeqWOWinsScore + 0.3*allSeasonsStdDevScore);
-
-            double totalScore = Utils.beautifyDoubleValue(0.75*last3SeasonsScore + 0.20*allSeasonsScore + 0.05*totalMatchesScore);
-
+            double totalScore = calculateTotalFinalScore(statsByTeam);
             teamByName.setCleanSheetScore(calculateFinalRating(totalScore));
         }
 
         return teamByName;
+    }
+
+    private double calculateTotalFinalScore(List<CleanSheetSeasonStats> statsByTeam) {
+        int last3SeasonsCleanSheetRateScore = calculateLast3SeasonsRateScore(statsByTeam);
+        int allSeasonsCleanSheetRateScore = calculateAllSeasonsRateScore(statsByTeam);
+        int last3SeasonsmaxSeqWOCleanSheetScore = calculateLast3SeasonsMaxSeqWOGreenScore(statsByTeam);
+        int allSeasonsmaxSeqWOCleanSheetScore = calculateAllSeasonsMaxSeqWOGreenScore(statsByTeam);
+        int last3SeasonsStdDevScore = calculateLast3SeasonsStdDevScore(statsByTeam);
+        int allSeasonsStdDevScore = calculateAllSeasonsStdDevScore(statsByTeam);
+        int totalMatchesScore = calculateLeagueMatchesScore(statsByTeam.get(0).getNumMatches());
+
+        return Utils.beautifyDoubleValue(0.2*last3SeasonsCleanSheetRateScore + 0.1*allSeasonsCleanSheetRateScore +
+            0.18*last3SeasonsmaxSeqWOCleanSheetScore + 0.1*allSeasonsmaxSeqWOCleanSheetScore +
+            0.3*last3SeasonsStdDevScore + 0.1*allSeasonsStdDevScore + 0.02*totalMatchesScore);
     }
 
     @Override

@@ -151,23 +151,25 @@ public class ScoreBothHalvesSeasonStatsService extends StrategyScoreCalculator<S
         if (statsByTeam.size() < 3) {
             teamByName.setWinsScore(TeamScoreEnum.INSUFFICIENT_DATA.getValue());
         } else {
-            int last3SeasonsTotalWinsRateScore = calculateLast3SeasonsTotalWinsRateScore(statsByTeam);
-            int allSeasonsTotalWinsRateScore = calculateAllSeasonsTotalWinsRateScore(statsByTeam);
-            int last3SeasonsmaxSeqWOWinsScore = calculateLast3SeasonsMaxSeqWOGreenScore(statsByTeam);
-            int allSeasonsmaxSeqWOWinsScore = calculateAllSeasonsMaxSeqWOGreenScore(statsByTeam);
-            int last3SeasonsStdDevScore = calculateLast3SeasonsStdDevScore(statsByTeam);
-            int allSeasonsStdDevScore = calculateAllSeasonsStdDevScore(statsByTeam);
-            int totalMatchesScore = super.calculateLeagueMatchesScore(statsByTeam.get(0).getNumMatches());
-
-            double last3SeasonsScore = Utils.beautifyDoubleValue(0.3*last3SeasonsTotalWinsRateScore + 0.4*last3SeasonsmaxSeqWOWinsScore + 0.3*last3SeasonsStdDevScore);
-            double allSeasonsScore = Utils.beautifyDoubleValue(0.3*allSeasonsTotalWinsRateScore + 0.4*allSeasonsmaxSeqWOWinsScore + 0.3*allSeasonsStdDevScore);
-
-            double totalScore = Utils.beautifyDoubleValue(0.75*last3SeasonsScore + 0.20*allSeasonsScore + 0.05*totalMatchesScore);
-
+            double totalScore = calculateTotalFinalScore(statsByTeam);
             teamByName.setNoWinsScore(calculateFinalRating(totalScore));
         }
 
         return teamByName;
+    }
+
+    private double calculateTotalFinalScore(List<ScoreBothHalvesSeasonStats> statsByTeam) {
+        int last3SeasonsScoreBothHalvesRateScore = calculateLast3SeasonsRateScore(statsByTeam);
+        int allSeasonsScoreBothHalvesRateScore = calculateAllSeasonsRateScore(statsByTeam);
+        int last3SeasonsmaxSeqWOScoreBothHalvesScore = calculateLast3SeasonsMaxSeqWOGreenScore(statsByTeam);
+        int allSeasonsmaxSeqWOScoreBothHalvesScore = calculateAllSeasonsMaxSeqWOGreenScore(statsByTeam);
+        int last3SeasonsStdDevScore = calculateLast3SeasonsStdDevScore(statsByTeam);
+        int allSeasonsStdDevScore = calculateAllSeasonsStdDevScore(statsByTeam);
+        int totalMatchesScore = calculateLeagueMatchesScore(statsByTeam.get(0).getNumMatches());
+
+        return Utils.beautifyDoubleValue(0.2*last3SeasonsScoreBothHalvesRateScore + 0.1*allSeasonsScoreBothHalvesRateScore +
+            0.18*last3SeasonsmaxSeqWOScoreBothHalvesScore + 0.1*allSeasonsmaxSeqWOScoreBothHalvesScore +
+            0.3*last3SeasonsStdDevScore + 0.1*allSeasonsStdDevScore + 0.02*totalMatchesScore);
     }
 
     @Override
