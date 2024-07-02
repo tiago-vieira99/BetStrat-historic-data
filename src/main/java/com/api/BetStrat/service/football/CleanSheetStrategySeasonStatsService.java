@@ -62,7 +62,14 @@ public class CleanSheetStrategySeasonStatsService extends StrategyScoreCalculato
 
     @Override
     public boolean matchFollowStrategyRules(HistoricMatch historicMatch, String teamName, String strategyName) {
-        return false;
+        String res = historicMatch.getFtResult().split("\\(")[0];
+        int homeResult = Integer.parseInt(res.split(":")[0]);
+        int awayResult = Integer.parseInt(res.split(":")[1]);
+        if ((historicMatch.getHomeTeam().equals(teamName) && awayResult == 0) || (historicMatch.getAwayTeam().equals(teamName) && homeResult == 0)) {
+            return true;
+        } else {
+            return false;
+        }
     }
 
     @Override
@@ -95,11 +102,8 @@ public class CleanSheetStrategySeasonStatsService extends StrategyScoreCalculato
                 int count = 0;
                 int totalCleanSheets= 0;
                 for (HistoricMatch historicMatch : filteredMatches) {
-                    String res = historicMatch.getFtResult().split("\\(")[0];
                     count++;
-                    int homeResult = Integer.parseInt(res.split(":")[0]);
-                    int awayResult = Integer.parseInt(res.split(":")[1]);
-                    if ((historicMatch.getHomeTeam().equals(team.getName()) && awayResult == 0) || (historicMatch.getAwayTeam().equals(team.getName()) && homeResult == 0)) {
+                    if (matchFollowStrategyRules(historicMatch, team.getName(), null)) {
                         totalCleanSheets++;
                         strategySequence.add(count);
                         count = 0;
@@ -108,9 +112,7 @@ public class CleanSheetStrategySeasonStatsService extends StrategyScoreCalculato
 
                 strategySequence.add(count);
                 HistoricMatch lastMatch = filteredMatches.get(filteredMatches.size() - 1);
-                String lastResult = lastMatch.getFtResult().split("\\(")[0];
-                if (!((lastMatch.getHomeTeam().equals(team.getName()) && Integer.parseInt(lastResult.split(":")[1]) == 0) ||
-                        (lastMatch.getAwayTeam().equals(team.getName()) && Integer.parseInt(lastResult.split(":")[0]) == 0))) {
+                if (!matchFollowStrategyRules(lastMatch, team.getName(), null)) {
                     strategySequence.add(-1);
                 }
 
@@ -150,7 +152,7 @@ public class CleanSheetStrategySeasonStatsService extends StrategyScoreCalculato
             int allSeasonsmaxSeqWOWinsScore = calculateAllSeasonsMaxSeqWOGreenScore(statsByTeam);
             int last3SeasonsStdDevScore = calculateLast3SeasonsStdDevScore(statsByTeam);
             int allSeasonsStdDevScore = calculateAllSeasonsStdDevScore(statsByTeam);
-            int totalMatchesScore = super.calculateLeagueMatchesScore(statsByTeam.get(0).getNumMatches());
+            int totalMatchesScore = calculateLeagueMatchesScore(statsByTeam.get(0).getNumMatches());
 
             double last3SeasonsScore = Utils.beautifyDoubleValue(0.3*last3SeasonsTotalWinsRateScore + 0.4*last3SeasonsmaxSeqWOWinsScore + 0.3*last3SeasonsStdDevScore);
             double allSeasonsScore = Utils.beautifyDoubleValue(0.3*allSeasonsTotalWinsRateScore + 0.4*allSeasonsmaxSeqWOWinsScore + 0.3*allSeasonsStdDevScore);

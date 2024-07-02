@@ -62,7 +62,14 @@ public class NoWinsStrategySeasonStatsService extends StrategyScoreCalculator<No
 
     @Override
     public boolean matchFollowStrategyRules(HistoricMatch historicMatch, String teamName, String strategyName) {
-        return false;
+        String res = historicMatch.getFtResult().split("\\(")[0];
+        int homeResult = Integer.parseInt(res.split(":")[0]);
+        int awayResult = Integer.parseInt(res.split(":")[1]);
+        if ((historicMatch.getHomeTeam().equals(teamName) && homeResult <= awayResult) || (historicMatch.getAwayTeam().equals(teamName) && homeResult >= awayResult)) {
+            return true;
+        } else {
+            return false;
+        }
     }
 
     @Override
@@ -95,22 +102,18 @@ public class NoWinsStrategySeasonStatsService extends StrategyScoreCalculator<No
                 int count = 0;
                 int totalWins= 0;
                 for (HistoricMatch historicMatch : filteredMatches) {
-                    String res = historicMatch.getFtResult().split("\\(")[0];
                     count++;
-                    int homeResult = Integer.parseInt(res.split(":")[0]);
-                    int awayResult = Integer.parseInt(res.split(":")[1]);
-                    if ((historicMatch.getHomeTeam().equals(team.getName()) && homeResult <= awayResult) || (historicMatch.getAwayTeam().equals(team.getName()) && homeResult >= awayResult)) {
-                        totalWins++;
+                    if (matchFollowStrategyRules(historicMatch, team.getName(), null)) {
                         negativeSequence.add(count);
                         count = 0;
+                    } else {
+                        totalWins++;
                     }
                 }
 
                 negativeSequence.add(count);
                 HistoricMatch lastMatch = filteredMatches.get(filteredMatches.size() - 1);
-                String lastResult = lastMatch.getFtResult().split("\\(")[0];
-                if (!((lastMatch.getHomeTeam().equals(team.getName()) && Integer.parseInt(lastResult.split(":")[0]) <= Integer.parseInt(lastResult.split(":")[1])) ||
-                        (lastMatch.getAwayTeam().equals(team.getName()) && Integer.parseInt(lastResult.split(":")[0]) >= Integer.parseInt(lastResult.split(":")[1])))) {
+                if (!matchFollowStrategyRules(lastMatch, team.getName(), null)) {
                     negativeSequence.add(-1);
                 }
 

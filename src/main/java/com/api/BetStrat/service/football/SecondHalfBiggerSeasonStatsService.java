@@ -81,7 +81,7 @@ public class SecondHalfBiggerSeasonStatsService extends StrategyScoreCalculator<
                     }
                 }
 
-                int totalConcedeBothHalves = strategySequence.size();
+                int totalSecondHalfBigger = strategySequence.size();
 
                 strategySequence.add(count);
                 HistoricMatch lastMatch = teamMatchesBySeason.get(teamMatchesBySeason.size() - 1);
@@ -89,14 +89,14 @@ public class SecondHalfBiggerSeasonStatsService extends StrategyScoreCalculator<
                     strategySequence.add(-1);
                 }
 
-                if (totalConcedeBothHalves == 0) {
+                if (totalSecondHalfBigger == 0) {
                     SecondHalfBiggerSeasonStats.setSecondHalfBiggerRate(0);
                 } else {
-                    SecondHalfBiggerSeasonStats.setSecondHalfBiggerRate(Utils.beautifyDoubleValue(100*totalConcedeBothHalves/teamMatchesBySeason.size()));
+                    SecondHalfBiggerSeasonStats.setSecondHalfBiggerRate(Utils.beautifyDoubleValue(100*totalSecondHalfBigger/teamMatchesBySeason.size()));
                 }
                 SecondHalfBiggerSeasonStats.setCompetition("all");
                 SecondHalfBiggerSeasonStats.setNegativeSequence(strategySequence.toString());
-                SecondHalfBiggerSeasonStats.setNumScondHalfBigger(totalConcedeBothHalves);
+                SecondHalfBiggerSeasonStats.setNumScondHalfBigger(totalSecondHalfBigger);
                 SecondHalfBiggerSeasonStats.setNumMatches(teamMatchesBySeason.size());
 
                 double stdDev =  Utils.beautifyDoubleValue(calculateSD(strategySequence));

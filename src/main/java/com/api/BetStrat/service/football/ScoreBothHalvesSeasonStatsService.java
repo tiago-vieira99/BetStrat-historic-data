@@ -62,7 +62,18 @@ public class ScoreBothHalvesSeasonStatsService extends StrategyScoreCalculator<S
 
     @Override
     public boolean matchFollowStrategyRules(HistoricMatch historicMatch, String teamName, String strategyName) {
-        return false;
+        String ftRes = historicMatch.getFtResult().split("\\(")[0];
+        String htRes = historicMatch.getHtResult().split("\\(")[0];
+        int homeHTResult = Integer.parseInt(htRes.split(":")[0]);
+        int awayHTResult = Integer.parseInt(htRes.split(":")[1]);
+        int home2HTResult = Math.abs(Integer.parseInt(ftRes.split(":")[0]) - homeHTResult);
+        int away2HTResult = Math.abs(Integer.parseInt(ftRes.split(":")[1]) - awayHTResult);
+        if ((historicMatch.getHomeTeam().equals(teamName) && homeHTResult > 0 && home2HTResult > 0) ||
+            (historicMatch.getAwayTeam().equals(teamName) && 0 < awayHTResult && 0 < away2HTResult)) {
+            return true;
+        } else {
+            return false;
+        }
     }
 
     @Override
@@ -89,22 +100,14 @@ public class ScoreBothHalvesSeasonStatsService extends StrategyScoreCalculator<S
                     continue;
                 }
 
-                ScoreBothHalvesSeasonStats noWinsSeasonInfo = new ScoreBothHalvesSeasonStats();
+                ScoreBothHalvesSeasonStats scoreBothHalvesSeasonStats = new ScoreBothHalvesSeasonStats();
 
                 ArrayList<Integer> negativeSequence = new ArrayList<>();
                 int count = 0;
                 int totalWins= 0;
                 for (HistoricMatch historicMatch : filteredMatches) {
-                    String ftRes = historicMatch.getFtResult().split("\\(")[0];
-                    String htRes = historicMatch.getHtResult().split("\\(")[0];
                     count++;
-                    int homeHTResult = Integer.parseInt(htRes.split(":")[0]);
-                    int awayHTResult = Integer.parseInt(htRes.split(":")[1]);
-                    int home2HTResult = Math.abs(Integer.parseInt(ftRes.split(":")[0]) - homeHTResult);
-                    int away2HTResult = Math.abs(Integer.parseInt(ftRes.split(":")[1]) - awayHTResult);
-                    if ((historicMatch.getHomeTeam().equals(team.getName()) && homeHTResult > 0 && home2HTResult > 0) ||
-                            (historicMatch.getAwayTeam().equals(team.getName()) && 0 < awayHTResult && 0 < away2HTResult)) {
-                        totalWins++;
+                    if (matchFollowStrategyRules(historicMatch, team.getName(), null)) {
                         negativeSequence.add(count);
                         count = 0;
                     }
@@ -112,34 +115,29 @@ public class ScoreBothHalvesSeasonStatsService extends StrategyScoreCalculator<S
 
                 negativeSequence.add(count);
                 HistoricMatch lastMatch = filteredMatches.get(filteredMatches.size() - 1);
-                String lastHTResult = lastMatch.getHtResult().split("\\(")[0];
-                String lastFTResult = lastMatch.getFtResult().split("\\(")[0];
-                int homeLastHTResult = Integer.parseInt(lastHTResult.split(":")[0]);
-                int awayLastHTResult = Integer.parseInt(lastHTResult.split(":")[1]);
-                int homeLast2HTResult = Integer.parseInt(lastFTResult.split(":")[0]);
-                int awayLast2HTResult = Integer.parseInt(lastFTResult.split(":")[1]);
-                if (!((lastMatch.getHomeTeam().equals(team.getName()) && homeLastHTResult > 0 && homeLast2HTResult > 0) ||
-                        (lastMatch.getAwayTeam().equals(team.getName()) && awayLastHTResult > 0 && awayLast2HTResult > 0))) {
+                if (!matchFollowStrategyRules(lastMatch, team.getName(), null)) {
                     negativeSequence.add(-1);
                 }
 
-                if (totalWins == 0) {
-                    noWinsSeasonInfo.setScoreBothHalvesRate(0);
+                int totalScoreBothHalves = negativeSequence.size();
+
+                if (totalScoreBothHalves == 0) {
+                    scoreBothHalvesSeasonStats.setScoreBothHalvesRate(0);
                 } else {
-                    noWinsSeasonInfo.setScoreBothHalvesRate(Utils.beautifyDoubleValue(100*totalWins/filteredMatches.size()));
+                    scoreBothHalvesSeasonStats.setScoreBothHalvesRate(Utils.beautifyDoubleValue(100*totalScoreBothHalves/filteredMatches.size()));
                 }
-                noWinsSeasonInfo.setCompetition(mainCompetition);
-                noWinsSeasonInfo.setNegativeSequence(negativeSequence.toString());
-                noWinsSeasonInfo.setNumMatches(filteredMatches.size());
-                noWinsSeasonInfo.setNumScoreBothHalves(totalWins);
+                scoreBothHalvesSeasonStats.setCompetition(mainCompetition);
+                scoreBothHalvesSeasonStats.setNegativeSequence(negativeSequence.toString());
+                scoreBothHalvesSeasonStats.setNumMatches(filteredMatches.size());
+                scoreBothHalvesSeasonStats.setNumScoreBothHalves(totalWins);
 
                 double stdDev =  Utils.beautifyDoubleValue(calculateSD(negativeSequence));
-                noWinsSeasonInfo.setStdDeviation(stdDev);
-                noWinsSeasonInfo.setCoefDeviation(Utils.beautifyDoubleValue(calculateCoeffVariation(stdDev, negativeSequence)));
-                noWinsSeasonInfo.setSeason(season);
-                noWinsSeasonInfo.setTeamId(team);
-                noWinsSeasonInfo.setUrl(newSeasonUrl);
-                insertStrategySeasonStats(noWinsSeasonInfo);
+                scoreBothHalvesSeasonStats.setStdDeviation(stdDev);
+                scoreBothHalvesSeasonStats.setCoefDeviation(Utils.beautifyDoubleValue(calculateCoeffVariation(stdDev, negativeSequence)));
+                scoreBothHalvesSeasonStats.setSeason(season);
+                scoreBothHalvesSeasonStats.setTeamId(team);
+                scoreBothHalvesSeasonStats.setUrl(newSeasonUrl);
+                insertStrategySeasonStats(scoreBothHalvesSeasonStats);
             }
         }
     }

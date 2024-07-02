@@ -135,9 +135,9 @@ public class WinAndGoalsStrategySeasonStatsService extends StrategyScoreCalculat
                     continue;
                 }
 
-                WinAndGoalsSeasonStats winsMarginSeasonInfo = new WinAndGoalsSeasonStats();
+                WinAndGoalsSeasonStats winAndGoalsSeasonStats = new WinAndGoalsSeasonStats();
 
-                ArrayList<Integer> noMarginWinsSequence = new ArrayList<>();
+                ArrayList<Integer> negativeSequence = new ArrayList<>();
                 int count = 0;
                 int totalWins= 0;
                 for (HistoricMatch historicMatch : filteredMatches) {
@@ -148,40 +148,40 @@ public class WinAndGoalsStrategySeasonStatsService extends StrategyScoreCalculat
                     if ((historicMatch.getHomeTeam().equals(team.getName()) && homeResult>awayResult) || (historicMatch.getAwayTeam().equals(team.getName()) && homeResult<awayResult)) {
                         totalWins++;
                         if (matchFollowStrategyRules(historicMatch, team.getName(), null)) {
-                            noMarginWinsSequence.add(count);
+                            negativeSequence.add(count);
                             count = 0;
                         }
                     }
                 }
 
-                int totalMarginWins = noMarginWinsSequence.size();
+                int totalWinAndGoals = negativeSequence.size();
 
-                noMarginWinsSequence.add(count);
+                negativeSequence.add(count);
                 HistoricMatch lastMatch = filteredMatches.get(filteredMatches.size() - 1);
                 if (!matchFollowStrategyRules(lastMatch, team.getName(), null)) {
-                    noMarginWinsSequence.add(-1);
+                    negativeSequence.add(-1);
                 }
 
                 if (totalWins == 0) {
-                    winsMarginSeasonInfo.setWinAndGoalsRate(0);
-                    winsMarginSeasonInfo.setWinsRate(0);
+                    winAndGoalsSeasonStats.setWinAndGoalsRate(0);
+                    winAndGoalsSeasonStats.setWinsRate(0);
                 } else {
-                    winsMarginSeasonInfo.setWinAndGoalsRate(Utils.beautifyDoubleValue(100*totalMarginWins/totalWins));
-                    winsMarginSeasonInfo.setWinsRate(Utils.beautifyDoubleValue(100*totalWins/filteredMatches.size()));
+                    winAndGoalsSeasonStats.setWinAndGoalsRate(Utils.beautifyDoubleValue(100*totalWinAndGoals/totalWins));
+                    winAndGoalsSeasonStats.setWinsRate(Utils.beautifyDoubleValue(100*totalWins/filteredMatches.size()));
                 }
-                winsMarginSeasonInfo.setCompetition(mainCompetition);
-                winsMarginSeasonInfo.setNegativeSequence(noMarginWinsSequence.toString());
-                winsMarginSeasonInfo.setNumWinsAndGoals(totalMarginWins);
-                winsMarginSeasonInfo.setNumMatches(filteredMatches.size());
-                winsMarginSeasonInfo.setNumWins(totalWins);
+                winAndGoalsSeasonStats.setCompetition(mainCompetition);
+                winAndGoalsSeasonStats.setNegativeSequence(negativeSequence.toString());
+                winAndGoalsSeasonStats.setNumWinsAndGoals(totalWinAndGoals);
+                winAndGoalsSeasonStats.setNumMatches(filteredMatches.size());
+                winAndGoalsSeasonStats.setNumWins(totalWins);
 
-                double stdDev =  Utils.beautifyDoubleValue(calculateSD(noMarginWinsSequence));
-                winsMarginSeasonInfo.setStdDeviation(stdDev);
-                winsMarginSeasonInfo.setCoefDeviation(Utils.beautifyDoubleValue(calculateCoeffVariation(stdDev, noMarginWinsSequence)));
-                winsMarginSeasonInfo.setSeason(season);
-                winsMarginSeasonInfo.setTeamId(team);
-                winsMarginSeasonInfo.setUrl(newSeasonUrl);
-                insertStrategySeasonStats(winsMarginSeasonInfo);
+                double stdDev =  Utils.beautifyDoubleValue(calculateSD(negativeSequence));
+                winAndGoalsSeasonStats.setStdDeviation(stdDev);
+                winAndGoalsSeasonStats.setCoefDeviation(Utils.beautifyDoubleValue(calculateCoeffVariation(stdDev, negativeSequence)));
+                winAndGoalsSeasonStats.setSeason(season);
+                winAndGoalsSeasonStats.setTeamId(team);
+                winAndGoalsSeasonStats.setUrl(newSeasonUrl);
+                insertStrategySeasonStats(winAndGoalsSeasonStats);
             }
         }
     }

@@ -63,7 +63,14 @@ public class NoGoalsFestStrategySeasonStatsService extends StrategyScoreCalculat
 
     @Override
     public boolean matchFollowStrategyRules(HistoricMatch historicMatch, String teamName, String strategyName) {
-        return false;
+        String res = historicMatch.getFtResult().split("\\(")[0];
+        int homeResult = Integer.parseInt(res.split(":")[0]);
+        int awayResult = Integer.parseInt(res.split(":")[1]);
+        if (homeResult == 0 || awayResult == 0 || homeResult+awayResult <= 2) {
+            return true;
+        } else {
+            return false;
+        }
     }
 
     @Override
@@ -93,11 +100,8 @@ public class NoGoalsFestStrategySeasonStatsService extends StrategyScoreCalculat
                 ArrayList<Integer> strategySequence = new ArrayList<>();
                 int count = 0;
                 for (HistoricMatch historicMatch : teamMatchesBySeason) {
-                    String res = historicMatch.getFtResult().split("\\(")[0];
                     count++;
-                    int homeResult = Integer.parseInt(res.split(":")[0]);
-                    int awayResult = Integer.parseInt(res.split(":")[1]);
-                    if (homeResult == 0 || awayResult == 0 || homeResult+awayResult <= 2) {
+                    if (matchFollowStrategyRules(historicMatch, team.getName(), null)) {
                         strategySequence.add(count);
                         count = 0;
                     }
@@ -107,9 +111,7 @@ public class NoGoalsFestStrategySeasonStatsService extends StrategyScoreCalculat
 
                 strategySequence.add(count);
                 HistoricMatch lastMatch = teamMatchesBySeason.get(teamMatchesBySeason.size() - 1);
-                String lastResult = lastMatch.getFtResult().split("\\(")[0];
-                if ((Integer.parseInt(lastResult.split(":")[0]) > 0 && Integer.parseInt(lastResult.split(":")[1]) > 0 &&
-                        Integer.parseInt(lastResult.split(":")[0]) + Integer.parseInt(lastResult.split(":")[1]) > 2)) {
+                if (!matchFollowStrategyRules(lastMatch, team.getName(), null)) {
                     strategySequence.add(-1);
                 }
 

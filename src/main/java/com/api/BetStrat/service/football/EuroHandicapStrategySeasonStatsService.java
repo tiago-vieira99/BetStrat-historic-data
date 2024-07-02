@@ -108,7 +108,15 @@ public class EuroHandicapStrategySeasonStatsService extends StrategyScoreCalcula
 
     @Override
     public boolean matchFollowStrategyRules(HistoricMatch historicMatch, String teamName, String strategyName) {
-        return false;
+        String res = historicMatch.getFtResult().split("\\(")[0];
+        int homeResult = Integer.parseInt(res.split(":")[0]);
+        int awayResult = Integer.parseInt(res.split(":")[1]);
+        if ((historicMatch.getHomeTeam().equals(teamName) && Math.abs(homeResult-awayResult) == 1) ||
+            (historicMatch.getAwayTeam().equals(teamName) && Math.abs(homeResult-awayResult) == 1)) {
+            return true;
+        } else {
+            return false;
+        }
     }
 
     @Override
@@ -147,7 +155,7 @@ public class EuroHandicapStrategySeasonStatsService extends StrategyScoreCalcula
                     int awayResult = Integer.parseInt(res.split(":")[1]);
                     if ((historicMatch.getHomeTeam().equals(team.getName()) && homeResult>awayResult) || (historicMatch.getAwayTeam().equals(team.getName()) && homeResult<awayResult)) {
                         totalWins++;
-                        if (Math.abs(homeResult - awayResult) == 1) {
+                        if (matchFollowStrategyRules(historicMatch, team.getName(), null)) {
                             noEuroHandicapsSequence.add(count);
                             count = 0;
                         }
@@ -158,10 +166,7 @@ public class EuroHandicapStrategySeasonStatsService extends StrategyScoreCalcula
 
                 noEuroHandicapsSequence.add(count);
                 HistoricMatch lastMatch = filteredMatches.get(filteredMatches.size() - 1);
-                String lastResult = lastMatch.getFtResult().split("\\(")[0];
-                if (!((lastMatch.getHomeTeam().equals(team.getName()) && Integer.parseInt(lastResult.split(":")[0])>Integer.parseInt(lastResult.split(":")[1])) ||
-                        (lastMatch.getAwayTeam().equals(team.getName()) && Integer.parseInt(lastResult.split(":")[0])<Integer.parseInt(lastResult.split(":")[1]))) ||
-                        (Math.abs(Integer.parseInt(lastResult.split(":")[0]) - Integer.parseInt(lastResult.split(":")[1])) > 1)) {
+                if (!matchFollowStrategyRules(lastMatch, team.getName(), null)) {
                     noEuroHandicapsSequence.add(-1);
                 }
 

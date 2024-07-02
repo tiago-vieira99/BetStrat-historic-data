@@ -95,43 +95,43 @@ public class WinBothHalvesStrategySeasonStatsService extends StrategyScoreCalcul
                     continue;
                 }
 
-                WinBothHalvesSeasonStats winsSeasonInfo = new WinBothHalvesSeasonStats();
+                WinBothHalvesSeasonStats winBothHalvesSeasonStats = new WinBothHalvesSeasonStats();
 
-                ArrayList<Integer> noWinsSequence = new ArrayList<>();
+                ArrayList<Integer> negativeSequence = new ArrayList<>();
                 int count = 0;
                 for (HistoricMatch historicMatch : filteredMatches) {
                     count++;
                     if (matchFollowStrategyRules(historicMatch, team.getName(), null)) {
-                        noWinsSequence.add(count);
+                        negativeSequence.add(count);
                         count = 0;
                     }
                 }
 
-                int totalWins = noWinsSequence.size();
+                int totalWinBothHalves = negativeSequence.size();
 
-                noWinsSequence.add(count);
+                negativeSequence.add(count);
                 HistoricMatch lastMatch = filteredMatches.get(filteredMatches.size() - 1);
                 if (!matchFollowStrategyRules(lastMatch, team.getName(), null)) {
-                    noWinsSequence.add(-1);
+                    negativeSequence.add(-1);
                 }
 
-                if (totalWins == 0) {
-                    winsSeasonInfo.setWinBothHalvesRate(0);
+                if (totalWinBothHalves == 0) {
+                    winBothHalvesSeasonStats.setWinBothHalvesRate(0);
                 } else {
-                    winsSeasonInfo.setWinBothHalvesRate(Utils.beautifyDoubleValue(100*totalWins/filteredMatches.size()));
+                    winBothHalvesSeasonStats.setWinBothHalvesRate(Utils.beautifyDoubleValue(100*totalWinBothHalves/filteredMatches.size()));
                 }
-                winsSeasonInfo.setCompetition(mainCompetition);
-                winsSeasonInfo.setNegativeSequence(noWinsSequence.toString());
-                winsSeasonInfo.setNumMatches(filteredMatches.size());
-                winsSeasonInfo.setNumWinsBothHalves(totalWins);
+                winBothHalvesSeasonStats.setCompetition(mainCompetition);
+                winBothHalvesSeasonStats.setNegativeSequence(negativeSequence.toString());
+                winBothHalvesSeasonStats.setNumMatches(filteredMatches.size());
+                winBothHalvesSeasonStats.setNumWinsBothHalves(totalWinBothHalves);
 
-                double stdDev =  Utils.beautifyDoubleValue(calculateSD(noWinsSequence));
-                winsSeasonInfo.setStdDeviation(stdDev);
-                winsSeasonInfo.setCoefDeviation(Utils.beautifyDoubleValue(calculateCoeffVariation(stdDev, noWinsSequence)));
-                winsSeasonInfo.setSeason(season);
-                winsSeasonInfo.setTeamId(team);
-                winsSeasonInfo.setUrl(newSeasonUrl);
-                insertStrategySeasonStats(winsSeasonInfo);
+                double stdDev =  Utils.beautifyDoubleValue(calculateSD(negativeSequence));
+                winBothHalvesSeasonStats.setStdDeviation(stdDev);
+                winBothHalvesSeasonStats.setCoefDeviation(Utils.beautifyDoubleValue(calculateCoeffVariation(stdDev, negativeSequence)));
+                winBothHalvesSeasonStats.setSeason(season);
+                winBothHalvesSeasonStats.setTeamId(team);
+                winBothHalvesSeasonStats.setUrl(newSeasonUrl);
+                insertStrategySeasonStats(winBothHalvesSeasonStats);
             }
         }
     }
