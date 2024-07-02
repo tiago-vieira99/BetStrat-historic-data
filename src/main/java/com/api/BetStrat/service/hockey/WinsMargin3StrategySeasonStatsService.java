@@ -43,7 +43,7 @@ public class WinsMargin3StrategySeasonStatsService extends StrategyScoreCalculat
     }
 
     @Override
-    public List<SimulatedMatchDto> simulateStrategyBySeason(String season, Team team, String strategyName) {
+    public List<SimulatedMatchDto> getSimulatedMatchesByStrategyAndSeason(String season, Team team, String strategyName) {
         return null;
     }
 

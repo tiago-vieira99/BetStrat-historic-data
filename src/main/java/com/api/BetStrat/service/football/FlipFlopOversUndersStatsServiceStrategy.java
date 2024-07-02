@@ -1,5 +1,6 @@
 package com.api.BetStrat.service.football;
 
+import static com.api.BetStrat.constants.BetStratConstants.DEFAULT_BAD_RUN_TO_NEW_SEQ;
 import static com.api.BetStrat.constants.BetStratConstants.SUMMER_SEASONS_BEGIN_MONTH_LIST;
 import static com.api.BetStrat.constants.BetStratConstants.SUMMER_SEASONS_LIST;
 import static com.api.BetStrat.constants.BetStratConstants.WINTER_SEASONS_BEGIN_MONTH_LIST;
@@ -53,8 +54,51 @@ public class FlipFlopOversUndersStatsServiceStrategy extends StrategyScoreCalcul
     }
 
     @Override
-    public List<SimulatedMatchDto> simulateStrategyBySeason(String season, Team team, String strategyName) {
-        return null;
+    public List<SimulatedMatchDto> getSimulatedMatchesByStrategyAndSeason(String season, Team team, String strategyName) {
+        List<SimulatedMatchDto> matchesBetted = new ArrayList<>();
+        List<HistoricMatch> teamMatchesBySeason = historicMatchRepository.getTeamMatchesBySeason(team, season);
+        Collections.sort(teamMatchesBySeason, HistoricMatch.matchDateComparator);
+
+        if (teamMatchesBySeason.size() == 0) {
+            return matchesBetted;
+        }
+
+        boolean isActiveSequence = true;
+        int actualNegativeSequence = 0;
+        for (int i = 0; i < teamMatchesBySeason.size(); i++) {
+            HistoricMatch historicMatch = teamMatchesBySeason.get(i);
+            if (actualNegativeSequence >= DEFAULT_BAD_RUN_TO_NEW_SEQ) {
+                isActiveSequence = true;
+            }
+
+            if (isActiveSequence) {
+                SimulatedMatchDto simulatedMatchDto = new SimulatedMatchDto();
+                simulatedMatchDto.setMatchDate(historicMatch.getMatchDate());
+                simulatedMatchDto.setHomeTeam(historicMatch.getHomeTeam());
+                simulatedMatchDto.setAwayTeam(historicMatch.getAwayTeam());
+                simulatedMatchDto.setMatchNumber(String.valueOf(i+1));
+                simulatedMatchDto.setHtResult(historicMatch.getHtResult());
+                simulatedMatchDto.setFtResult(historicMatch.getFtResult());
+                simulatedMatchDto.setSeason(season);
+                simulatedMatchDto.setCompetition(historicMatch.getCompetition());
+                if (matchFollowStrategyRules(historicMatch, team.getName(), null)) {
+                    simulatedMatchDto.setIsGreen(true);
+                    actualNegativeSequence = 0;
+                    isActiveSequence = false;
+                } else {
+                    simulatedMatchDto.setIsGreen(false);
+                }
+                matchesBetted.add(simulatedMatchDto);
+            } else {
+                if (!matchFollowStrategyRules(historicMatch, team.getName(), null)) {
+                    actualNegativeSequence++;
+                } else {
+                    actualNegativeSequence = 0;
+                }
+            }
+        }
+
+        return matchesBetted;
     }
 
     @Override

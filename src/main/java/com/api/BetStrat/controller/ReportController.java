@@ -1,32 +1,17 @@
 package com.api.BetStrat.controller;
 
 import com.api.BetStrat.dto.SimulatedMatchDto;
-import com.api.BetStrat.entity.HistoricMatch;
 import com.api.BetStrat.entity.Report;
-import com.api.BetStrat.entity.StrategySeasonStats;
 import com.api.BetStrat.entity.Team;
 import com.api.BetStrat.enums.TeamScoreEnum;
 import com.api.BetStrat.exception.NotFoundException;
-import com.api.BetStrat.exception.StandardError;
-import com.api.BetStrat.repository.HistoricMatchRepository;
 import com.api.BetStrat.repository.ReportRepository;
 import com.api.BetStrat.repository.TeamRepository;
 import com.api.BetStrat.service.StrategySeasonStatsService;
 import com.api.BetStrat.service.TeamService;
-import com.api.BetStrat.tasks.GetLastPlayedMatchTask;
-import com.api.BetStrat.util.ScrappingUtil;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiResponse;
-import io.swagger.annotations.ApiResponses;
-import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClients;
-import org.json.JSONArray;
-import org.json.JSONObject;
 import org.modelmapper.ModelMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,7 +20,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -84,7 +68,7 @@ public class ReportController {
             return ResponseEntity.ok().body(null);
         }
 
-        List<SimulatedMatchDto> list = strategySeasonStatsService.simulateStrategyBySeason(season, teamByName, strategy.concat("SeasonStats"));
+        List<SimulatedMatchDto> list = strategySeasonStatsService.getSimulatedMatchesByStrategyAndSeason(season, teamByName, strategy.concat("SeasonStats"));
 
         return ResponseEntity.ok().body(list);
     }
@@ -109,7 +93,7 @@ public class ReportController {
                     continue;
                 }
 
-                List<SimulatedMatchDto> simulatedMatchDtoList = strategySeasonStatsService.simulateStrategyBySeason(season, team, strategy.concat("SeasonStats"));
+                List<SimulatedMatchDto> simulatedMatchDtoList = strategySeasonStatsService.getSimulatedMatchesByStrategyAndSeason(season, team, strategy.concat("SeasonStats"));
                 if (simulatedMatchDtoList != null && !simulatedMatchDtoList.isEmpty()) {
                     HashMap<String, List> teamReportMap = new HashMap<>();
                     teamReportMap.put(team.getName(), simulatedMatchDtoList);

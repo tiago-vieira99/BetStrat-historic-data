@@ -1,5 +1,13 @@
 package com.api.BetStrat.service.football;
 
+import static com.api.BetStrat.constants.BetStratConstants.DEFAULT_BAD_RUN_TO_NEW_SEQ;
+import static com.api.BetStrat.constants.BetStratConstants.SUMMER_SEASONS_BEGIN_MONTH_LIST;
+import static com.api.BetStrat.constants.BetStratConstants.SUMMER_SEASONS_LIST;
+import static com.api.BetStrat.constants.BetStratConstants.WINTER_SEASONS_BEGIN_MONTH_LIST;
+import static com.api.BetStrat.constants.BetStratConstants.WINTER_SEASONS_LIST;
+import static com.api.BetStrat.util.Utils.calculateCoeffVariation;
+import static com.api.BetStrat.util.Utils.calculateSD;
+
 import com.api.BetStrat.dto.SimulatedMatchDto;
 import com.api.BetStrat.entity.HistoricMatch;
 import com.api.BetStrat.entity.StrategySeasonStats;
@@ -11,18 +19,15 @@ import com.api.BetStrat.repository.football.SecondHalfBiggerSeasonInfoRepository
 import com.api.BetStrat.service.StrategyScoreCalculator;
 import com.api.BetStrat.service.StrategySeasonStatsInterface;
 import com.api.BetStrat.util.Utils;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.*;
-import java.util.stream.Collectors;
-
-import static com.api.BetStrat.constants.BetStratConstants.*;
-import static com.api.BetStrat.util.Utils.calculateCoeffVariation;
-import static com.api.BetStrat.util.Utils.calculateSD;
 
 @Service
 @Transactional
@@ -158,7 +163,7 @@ public class SecondHalfBiggerSeasonStatsService extends StrategyScoreCalculator<
     }
 
     @Override
-    public List<SimulatedMatchDto> simulateStrategyBySeason(String season, Team team, String strategyName) {
+    public List<SimulatedMatchDto> getSimulatedMatchesByStrategyAndSeason(String season, Team team, String strategyName) {
         List<SimulatedMatchDto> matchesBetted = new ArrayList<>();
         List<HistoricMatch> teamMatchesBySeason = historicMatchRepository.getTeamMatchesBySeason(team, season);
         Collections.sort(teamMatchesBySeason, HistoricMatch.matchDateComparator);

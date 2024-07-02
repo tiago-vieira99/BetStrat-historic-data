@@ -19,7 +19,7 @@ public interface StrategySeasonStatsInterface<T extends StrategySeasonStats> {
 
     String calculateScoreBySeason (Team team, String season, String strategyName);
 
-    List<SimulatedMatchDto> simulateStrategyBySeason(String season, Team team, String strategyName);
+    List<SimulatedMatchDto> getSimulatedMatchesByStrategyAndSeason(String season, Team team, String strategyName);
 
     boolean matchFollowStrategyRules(HistoricMatch historicMatch, String teamName, String strategyName);
 

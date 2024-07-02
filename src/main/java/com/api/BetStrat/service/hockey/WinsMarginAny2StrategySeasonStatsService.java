@@ -43,7 +43,7 @@ public class WinsMarginAny2StrategySeasonStatsService extends StrategyScoreCalcu
     }
 
     @Override
-    public List<SimulatedMatchDto> simulateStrategyBySeason(String season, Team team, String strategyName) {
+    public List<SimulatedMatchDto> getSimulatedMatchesByStrategyAndSeason(String season, Team team, String strategyName) {
         return null;
     }
 

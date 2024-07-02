@@ -43,7 +43,7 @@ public class HockeyDrawStrategySeasonStatsService extends StrategyScoreCalculato
     }
 
     @Override
-    public List<SimulatedMatchDto> simulateStrategyBySeason(String season, Team team, String strategyName) {
+    public List<SimulatedMatchDto> getSimulatedMatchesByStrategyAndSeason(String season, Team team, String strategyName) {
         return null;
     }
 

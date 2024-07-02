@@ -91,12 +91,12 @@ public class StrategySeasonStatsService<T extends StrategySeasonStats> extends S
     }
 
     @Override
-    public List<SimulatedMatchDto> simulateStrategyBySeason(String season, Team team, String strategy) {
+    public List<SimulatedMatchDto> getSimulatedMatchesByStrategyAndSeason(String season, Team team, String strategy) {
         // Get the service implementation corresponding to the type of strategy
         StrategySeasonStatsInterface<T> service = (StrategySeasonStatsInterface<T>)
                 serviceMap.get(serviceMap.keySet().stream().filter(s -> s.getSimpleName().equals(strategy)).findFirst().get());
         // Delegate the insertion to the corresponding service implementation
-        return service.simulateStrategyBySeason(season, team, strategy);
+        return service.getSimulatedMatchesByStrategyAndSeason(season, team, strategy);
     }
 
     @Override
