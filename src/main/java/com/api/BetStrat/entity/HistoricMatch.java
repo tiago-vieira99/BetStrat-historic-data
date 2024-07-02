@@ -88,17 +88,33 @@ public class HistoricMatch implements Serializable {
     private String sport;
 
     public static Comparator<HistoricMatch> matchDateComparator = new Comparator<HistoricMatch>() {
-        private final SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy");
+        private SimpleDateFormat[] dateFormats = {
+            new SimpleDateFormat("dd/MM/yyyy"),
+            new SimpleDateFormat("yyyy-MM-dd")
+        };
 
         @Override
-        public int compare(HistoricMatch hm1, HistoricMatch hm2) {
-            try {
-                Date date1 = dateFormat.parse(hm1.getMatchDate());
-                Date date2 = dateFormat.parse(hm2.getMatchDate());
+        public int compare(HistoricMatch obj1, HistoricMatch obj2) {
+            Date date1 = parseDate(obj1.getMatchDate());
+            Date date2 = parseDate(obj2.getMatchDate());
+
+            if (date1 != null && date2 != null) {
                 return date1.compareTo(date2);
-            } catch (ParseException e) {
-                throw new IllegalArgumentException("Invalid date format. Please use dd/MM/yyyy.", e);
             }
+
+            // Handle cases where parsing fails by treating them as greater
+            return 1;
+        }
+
+        private Date parseDate(String dateString) {
+            for (SimpleDateFormat dateFormat : dateFormats) {
+                try {
+                    return dateFormat.parse(dateString);
+                } catch (ParseException e) {
+                    // Parsing failed, try the next format
+                }
+            }
+            return null; // Parsing failed for all formats
         }
     };
 

@@ -28,8 +28,8 @@ public class BttsSeasonStats extends StrategySeasonStats {
 
     @Override
     public void maxSeqScale() {
-        // avg odds : 1.6 - 2
-        super.setMaxSeqScale(StrategyDurationScaleEnum.MEDIUM_SHORT.getValue());
+        // avg odds : 1.5 - 2.2
+        super.setMaxSeqScale(StrategyDurationScaleEnum.SHORT.getValue());
     }
 
 }

@@ -158,6 +158,7 @@ public class BttsStrategySeasonStatsService extends StrategyScoreCalculator<Btts
         if (statsByTeam.size() < 3 || statsByTeam.stream().filter(s -> s.getNumMatches() < 15).findAny().isPresent()) {
             return TeamScoreEnum.INSUFFICIENT_DATA.getValue();
         } else {
+            //TODO move this block into calculateFinalRating method
             int last3SeasonsGoalsFestRateScore = calculateLast3SeasonsRateScore(statsByTeam);
             int allSeasonsGoalsFestRateScore = calculateAllSeasonsRateScore(statsByTeam);
             int last3SeasonsmaxSeqWOGoalsFestScore = calculateLast3SeasonsMaxSeqWOGreenScore(statsByTeam);
@@ -234,6 +235,7 @@ public class BttsStrategySeasonStatsService extends StrategyScoreCalculator<Btts
         }
     }
 
+    @Deprecated
     public LinkedHashMap<String, String> getSimulatedScorePartialSeasons(Team teamByName, int seasonsToDiscard) {
         List<BttsSeasonStats> statsByTeam = bttsSeasonInfoRepository.getFootballBttsStatsByTeam(teamByName);
         LinkedHashMap<String, String> outMap = new LinkedHashMap<>();
@@ -302,10 +304,6 @@ public class BttsStrategySeasonStatsService extends StrategyScoreCalculator<Btts
         return outMap;
     }
 
-    public String calculateFinalRating(double score) {
-        return super.calculateFinalRating(score);
-    }
-
     @Override
     public int calculateLast3SeasonsRateScore(List<BttsSeasonStats> statsByTeam) {
         double GoalsFestRates = 0;
@@ -357,108 +355,12 @@ public class BttsStrategySeasonStatsService extends StrategyScoreCalculator<Btts
     }
 
     @Override
-    public int calculateLast3SeasonsMaxSeqWOGreenScore(List<BttsSeasonStats> statsByTeam) {
-        int maxValue = 0;
-        for (int i=0; i<3; i++) {
-            String sequenceStr = statsByTeam.get(i).getNegativeSequence().replaceAll("[\\[\\]\\s]", "");
-            List<Integer> sequenceList = Arrays.asList(sequenceStr.split(",")).stream().map(Integer::parseInt).collect(Collectors.toList());
-            if (Collections.max(sequenceList) > maxValue) {
-                maxValue = Collections.max(sequenceList);
-            }
-        }
-
-        if (isBetween(maxValue,0,5)) {
-            return 100;
-        } else if(isBetween(maxValue,5,6)) {
-            return 90;
-        } else if(isBetween(maxValue,6,7)) {
-            return 80;
-        } else if(isBetween(maxValue,7,8)) {
-            return 50;
-        } else if(isBetween(maxValue,8,25)) {
-            return 30;
-        }
-        return 0;
-    }
-
-    @Override
-    public int calculateAllSeasonsMaxSeqWOGreenScore(List<BttsSeasonStats> statsByTeam) {
-        int maxValue = 0;
-        for (int i=0; i<statsByTeam.size(); i++) {
-            String sequenceStr = statsByTeam.get(i).getNegativeSequence().replaceAll("[\\[\\]\\s]", "");
-            List<Integer> sequenceList = Arrays.asList(sequenceStr.split(",")).stream().map(Integer::parseInt).collect(Collectors.toList());
-            if (Collections.max(sequenceList) > maxValue) {
-                maxValue = Collections.max(sequenceList);
-            }
-        }
-
-        if (isBetween(maxValue,0,5)) {
-            return 100;
-        } else if(isBetween(maxValue,5,6)) {
-            return 90;
-        } else if(isBetween(maxValue,6,7)) {
-            return 80;
-        } else if(isBetween(maxValue,7,8)) {
-            return 50;
-        } else if(isBetween(maxValue,8,25)) {
-            return 30;
-        }
-        return 0;
-    }
-
-    @Override
     public int calculateLast3SeasonsTotalWinsRateScore(List<BttsSeasonStats> statsByTeam) {
         return 0;
     }
 
     @Override
     public int calculateAllSeasonsTotalWinsRateScore(List<BttsSeasonStats> statsByTeam) {
-        return 0;
-    }
-
-    @Override
-    public int calculateLast3SeasonsStdDevScore(List<BttsSeasonStats> statsByTeam) {
-        double sumStdDev = 0;
-        for (int i=0; i<3; i++) {
-            sumStdDev += statsByTeam.get(i).getStdDeviation();
-        }
-
-        double avgStdDev = Utils.beautifyDoubleValue(sumStdDev/3);
-
-        if (isBetween(avgStdDev,0,1.7)) {
-            return 100;
-        } else if(isBetween(avgStdDev,1.7,2.0)) {
-            return 80;
-        } else if(isBetween(avgStdDev,2.0,2.2)) {
-            return 70;
-        } else if(isBetween(avgStdDev,2.2,2.4)) {
-            return 50;
-        } else if(isBetween(avgStdDev,2.4,25)) {
-            return 30;
-        }
-        return 0;
-    }
-
-    @Override
-    public int calculateAllSeasonsStdDevScore(List<BttsSeasonStats> statsByTeam) {
-        double sumStdDev = 0;
-        for (int i=0; i<statsByTeam.size(); i++) {
-            sumStdDev += statsByTeam.get(i).getStdDeviation();
-        }
-
-        double avgStdDev = Utils.beautifyDoubleValue(sumStdDev/statsByTeam.size());
-
-        if (isBetween(avgStdDev,0,1.7)) {
-            return 100;
-        } else if(isBetween(avgStdDev,1.7,2.0)) {
-            return 80;
-        } else if(isBetween(avgStdDev,2.0,2.2)) {
-            return 70;
-        } else if(isBetween(avgStdDev,2.2,2.4)) {
-            return 50;
-        } else if(isBetween(avgStdDev,2.4,25)) {
-            return 30;
-        }
         return 0;
     }
 

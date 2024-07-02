@@ -167,10 +167,6 @@ public class WinsStrategySeasonStatsService extends StrategyScoreCalculator<Wins
         return null;
     }
 
-    public String calculateFinalRating(double score) {
-        return super.calculateFinalRating(score);
-    }
-
     @Override
     public int calculateLast3SeasonsRateScore(List<WinsSeasonStats> statsByTeam) {
         double winsRates = 0;
@@ -262,102 +258,6 @@ public class WinsStrategySeasonStatsService extends StrategyScoreCalculator<Wins
         }
         return 0;
     }
-
-    @Override
-    public int calculateLast3SeasonsMaxSeqWOGreenScore(List<WinsSeasonStats> statsByTeam) {
-        int maxValue = 0;
-        for (int i=0; i<3; i++) {
-            String sequenceStr = statsByTeam.get(i).getNegativeSequence().replaceAll("[\\[\\]\\s]", "");
-            List<Integer> sequenceList = Arrays.asList(sequenceStr.split(",")).stream().map(Integer::parseInt).collect(Collectors.toList());
-            if (Collections.max(sequenceList) > maxValue) {
-                maxValue = Collections.max(sequenceList);
-            }
-        }
-
-        if (isBetween(maxValue,0,7)) {
-            return 100;
-        } else if(isBetween(maxValue,7,8)) {
-            return 90;
-        } else if(isBetween(maxValue,8,9)) {
-            return 70;
-        } else if(isBetween(maxValue,9,10)) {
-            return 50;
-        } else if(isBetween(maxValue,10,25)) {
-            return 30;
-        }
-        return 0;
-    }
-
-    @Override
-    public int calculateAllSeasonsMaxSeqWOGreenScore(List<WinsSeasonStats> statsByTeam) {
-        int maxValue = 0;
-        for (int i=0; i<statsByTeam.size(); i++) {
-            String sequenceStr = statsByTeam.get(i).getNegativeSequence().replaceAll("[\\[\\]\\s]", "");
-            List<Integer> sequenceList = Arrays.asList(sequenceStr.split(",")).stream().map(Integer::parseInt).collect(Collectors.toList());
-            if (Collections.max(sequenceList) > maxValue) {
-                maxValue = Collections.max(sequenceList);
-            }
-        }
-
-        if (isBetween(maxValue,0,7)) {
-            return 100;
-        } else if(isBetween(maxValue,7,8)) {
-            return 90;
-        } else if(isBetween(maxValue,8,9)) {
-            return 70;
-        } else if(isBetween(maxValue,9,10)) {
-            return 50;
-        } else if(isBetween(maxValue,10,25)) {
-            return 30;
-        }
-        return 0;
-    }
-
-    @Override
-    public int calculateLast3SeasonsStdDevScore(List<WinsSeasonStats> statsByTeam) {
-        double sumStdDev = 0;
-        for (int i=0; i<3; i++) {
-            sumStdDev += statsByTeam.get(i).getStdDeviation();
-        }
-
-        double avgStdDev = Utils.beautifyDoubleValue(sumStdDev/3);
-
-        if (isBetween(avgStdDev,0,1.8)) {
-            return 100;
-        } else if(isBetween(avgStdDev,1.8,2.0)) {
-            return 80;
-        } else if(isBetween(avgStdDev,2.0,2.2)) {
-            return 70;
-        } else if(isBetween(avgStdDev,2.2,2.4)) {
-            return 50;
-        } else if(isBetween(avgStdDev,2.4,25)) {
-            return 30;
-        }
-        return 0;
-    }
-
-//    @Override
-//    public int calculateAllSeasonsStdDevScore(List<WinsSeasonStats> statsByTeam) {
-//        double sumStdDev = 0;
-//        for (int i=0; i<statsByTeam.size(); i++) {
-//            sumStdDev += statsByTeam.get(i).getStdDeviation();
-//        }
-//
-//        double avgStdDev = Utils.beautifyDoubleValue(sumStdDev/statsByTeam.size());
-//
-//        if (isBetween(avgStdDev,0,1.8)) {
-//            return 100;
-//        } else if(isBetween(avgStdDev,1.8,2.0)) {
-//            return 80;
-//        } else if(isBetween(avgStdDev,2.0,2.2)) {
-//            return 70;
-//        } else if(isBetween(avgStdDev,2.2,2.4)) {
-//            return 50;
-//        } else if(isBetween(avgStdDev,2.4,25)) {
-//            return 30;
-//        }
-//        return 0;
-//    }
 
     static class SortStatsDataBySeason implements Comparator<WinsSeasonStats> {
 

@@ -2,6 +2,7 @@ package com.api.BetStrat.service.football;
 
 import com.api.BetStrat.dto.SimulatedMatchDto;
 import com.api.BetStrat.entity.HistoricMatch;
+import com.api.BetStrat.entity.StrategySeasonStats;
 import com.api.BetStrat.entity.Team;
 import com.api.BetStrat.entity.football.CleanSheetSeasonStats;
 import com.api.BetStrat.enums.TeamScoreEnum;
@@ -82,7 +83,8 @@ public class CleanSheetStrategySeasonStatsService extends StrategyScoreCalculato
                 List<HistoricMatch> teamMatchesBySeason = historicMatchRepository.getTeamMatchesBySeason(team, season);
                 String mainCompetition = Utils.findMainCompetition(teamMatchesBySeason);
                 List<HistoricMatch> filteredMatches = teamMatchesBySeason.stream().filter(t -> t.getCompetition().equals(mainCompetition)).collect(Collectors.toList());
-                filteredMatches.sort(new Utils.MatchesByDateSorter());
+                //filteredMatches.sort(new Utils.MatchesByDateSorter()); //TODO use the method of HistoricMatch class
+                Collections.sort(filteredMatches, HistoricMatch.matchDateComparator);
 
                 if (filteredMatches.size() == 0) {
                     continue;
@@ -137,7 +139,7 @@ public class CleanSheetStrategySeasonStatsService extends StrategyScoreCalculato
     @Override
     public Team updateTeamScore(Team teamByName) {
         List<CleanSheetSeasonStats> statsByTeam = cleanSheetSeasonInfoRepository.getFootballCleanSheetStatsByTeam(teamByName);
-        Collections.sort(statsByTeam, new SortStatsDataBySeason());
+        Collections.sort(statsByTeam, StrategySeasonStats.strategySeasonSorter); //TODO test this
         Collections.reverse(statsByTeam);
 
         if (statsByTeam.size() < 3) {
@@ -165,10 +167,6 @@ public class CleanSheetStrategySeasonStatsService extends StrategyScoreCalculato
     @Override
     public String calculateScoreBySeason(Team team, String season, String strategy) {
         return null;
-    }
-
-    public String calculateFinalRating(double score) {
-        return super.calculateFinalRating(score);
     }
 
     @Override
@@ -263,101 +261,6 @@ public class CleanSheetStrategySeasonStatsService extends StrategyScoreCalculato
         return 0;
     }
 
-    @Override
-    public int calculateLast3SeasonsMaxSeqWOGreenScore(List<CleanSheetSeasonStats> statsByTeam) {
-        int maxValue = 0;
-        for (int i=0; i<3; i++) {
-            String sequenceStr = statsByTeam.get(i).getNegativeSequence().replaceAll("[\\[\\]\\s]", "");
-            List<Integer> sequenceList = Arrays.asList(sequenceStr.split(",")).stream().map(Integer::parseInt).collect(Collectors.toList());
-            if (Collections.max(sequenceList) > maxValue) {
-                maxValue = Collections.max(sequenceList);
-            }
-        }
-
-        if (super.isBetween(maxValue,0,7)) {
-            return 100;
-        } else if(super.isBetween(maxValue,7,8)) {
-            return 90;
-        } else if(super.isBetween(maxValue,8,9)) {
-            return 70;
-        } else if(super.isBetween(maxValue,9,10)) {
-            return 50;
-        } else if(super.isBetween(maxValue,10,25)) {
-            return 30;
-        }
-        return 0;
-    }
-
-    @Override
-    public int calculateAllSeasonsMaxSeqWOGreenScore(List<CleanSheetSeasonStats> statsByTeam) {
-        int maxValue = 0;
-        for (int i=0; i<statsByTeam.size(); i++) {
-            String sequenceStr = statsByTeam.get(i).getNegativeSequence().replaceAll("[\\[\\]\\s]", "");
-            List<Integer> sequenceList = Arrays.asList(sequenceStr.split(",")).stream().map(Integer::parseInt).collect(Collectors.toList());
-            if (Collections.max(sequenceList) > maxValue) {
-                maxValue = Collections.max(sequenceList);
-            }
-        }
-
-        if (super.isBetween(maxValue,0,7)) {
-            return 100;
-        } else if(super.isBetween(maxValue,7,8)) {
-            return 90;
-        } else if(super.isBetween(maxValue,8,9)) {
-            return 70;
-        } else if(super.isBetween(maxValue,9,10)) {
-            return 50;
-        } else if(super.isBetween(maxValue,10,25)) {
-            return 30;
-        }
-        return 0;
-    }
-
-    @Override
-    public int calculateLast3SeasonsStdDevScore(List<CleanSheetSeasonStats> statsByTeam) {
-        double sumStdDev = 0;
-        for (int i=0; i<3; i++) {
-            sumStdDev += statsByTeam.get(i).getStdDeviation();
-        }
-
-        double avgStdDev = Utils.beautifyDoubleValue(sumStdDev/3);
-
-        if (super.isBetween(avgStdDev,0,1.8)) {
-            return 100;
-        } else if(super.isBetween(avgStdDev,1.8,2.0)) {
-            return 80;
-        } else if(super.isBetween(avgStdDev,2.0,2.2)) {
-            return 70;
-        } else if(super.isBetween(avgStdDev,2.2,2.4)) {
-            return 50;
-        } else if(super.isBetween(avgStdDev,2.4,25)) {
-            return 30;
-        }
-        return 0;
-    }
-
-    @Override
-    public int calculateAllSeasonsStdDevScore(List<CleanSheetSeasonStats> statsByTeam) {
-        double sumStdDev = 0;
-        for (int i=0; i<statsByTeam.size(); i++) {
-            sumStdDev += statsByTeam.get(i).getStdDeviation();
-        }
-
-        double avgStdDev = Utils.beautifyDoubleValue(sumStdDev/statsByTeam.size());
-
-        if (super.isBetween(avgStdDev,0,1.8)) {
-            return 100;
-        } else if(super.isBetween(avgStdDev,1.8,2.0)) {
-            return 80;
-        } else if(super.isBetween(avgStdDev,2.0,2.2)) {
-            return 70;
-        } else if(super.isBetween(avgStdDev,2.2,2.4)) {
-            return 50;
-        } else if(super.isBetween(avgStdDev,2.4,25)) {
-            return 30;
-        }
-        return 0;
-    }
 
     static class SortStatsDataBySeason implements Comparator<CleanSheetSeasonStats> {
 

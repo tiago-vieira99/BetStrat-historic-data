@@ -1,8 +1,13 @@
 package com.api.BetStrat.entity;
 
+import static com.api.BetStrat.constants.BetStratConstants.SEASONS_LIST;
+
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.annotations.ApiModelProperty;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Comparator;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.SneakyThrows;
@@ -86,5 +91,13 @@ public abstract class StrategySeasonStats implements Serializable {
     }
 
     public abstract void maxSeqScale();
+
+    public static Comparator<StrategySeasonStats> strategySeasonSorter = new Comparator<StrategySeasonStats>() {
+        @Override
+        public int compare(StrategySeasonStats a, StrategySeasonStats b) {
+            return Integer.valueOf(SEASONS_LIST.indexOf(a.getSeason()))
+                .compareTo(Integer.valueOf(SEASONS_LIST.indexOf(b.getSeason())));
+        }
+    };
 
 }

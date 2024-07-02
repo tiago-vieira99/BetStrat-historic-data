@@ -239,6 +239,7 @@ public class DrawStrategySeasonStatsService extends StrategyScoreCalculator<Draw
         }
     }
 
+    @Deprecated
     public LinkedHashMap<String, String> getSimulatedScorePartialSeasons(Team teamByName, int seasonsToDiscard) {
         List<DrawSeasonStats> statsByTeam = drawSeasonInfoRepository.getFootballDrawStatsByTeam(teamByName);
         LinkedHashMap<String, String> outMap = new LinkedHashMap<>();
@@ -295,10 +296,6 @@ public class DrawStrategySeasonStatsService extends StrategyScoreCalculator<Draw
             outMap.put("balance", String.valueOf(balance).replaceAll("\\.",","));
         }
         return outMap;
-    }
-
-    public String calculateFinalRating(double score) {
-        return super.calculateFinalRating(score);
     }
 
     @Override
@@ -371,126 +368,6 @@ public class DrawStrategySeasonStatsService extends StrategyScoreCalculator<Draw
 
     @Override
     public int calculateAllSeasonsTotalWinsRateScore(List<DrawSeasonStats> statsByTeam) {
-        return 0;
-    }
-
-    @Override
-    public int calculateLast3SeasonsMaxSeqWOGreenScore(List<DrawSeasonStats> statsByTeam) {
-        int maxValue = 0;
-        for (int i=0; i<3; i++) {
-            String sequenceStr = statsByTeam.get(i).getNegativeSequence().replaceAll("[\\[\\]\\s]", "");
-            List<Integer> sequenceList = Arrays.asList(sequenceStr.split(",")).stream().map(Integer::parseInt).collect(Collectors.toList());
-            if (Collections.max(sequenceList) > maxValue) {
-                maxValue = Collections.max(sequenceList);
-            }
-        }
-
-        if (isBetween(maxValue,0,7)) {
-            return 100;
-        } else if(isBetween(maxValue,7,8)) {
-            return 90;
-        } else if(isBetween(maxValue,8,9)) {
-            return 80;
-        } else if(isBetween(maxValue,9,10)) {
-            return 70;
-        } else if(isBetween(maxValue,10,13)) {
-            return 60;
-        }  else if(isBetween(maxValue,12,15)) {
-            return 50;
-        }  else if(isBetween(maxValue,14,15)) {
-            return 40;
-        } else if(isBetween(maxValue,14,25)) {
-            return 30;
-        }
-        return 0;
-    }
-
-    @Override
-    public int calculateAllSeasonsMaxSeqWOGreenScore(List<DrawSeasonStats> statsByTeam) {
-        int maxValue = 0;
-        for (int i=0; i<statsByTeam.size(); i++) {
-            String sequenceStr = statsByTeam.get(i).getNegativeSequence().replaceAll("[\\[\\]\\s]", "");
-            List<Integer> sequenceList = Arrays.asList(sequenceStr.split(",")).stream().map(Integer::parseInt).collect(Collectors.toList());
-            if (Collections.max(sequenceList) > maxValue) {
-                maxValue = Collections.max(sequenceList);
-            }
-        }
-
-        if (isBetween(maxValue,0,7)) {
-            return 100;
-        } else if(isBetween(maxValue,7,8)) {
-            return 90;
-        } else if(isBetween(maxValue,8,9)) {
-            return 80;
-        } else if(isBetween(maxValue,9,10)) {
-            return 70;
-        } else if(isBetween(maxValue,10,13)) {
-            return 60;
-        }  else if(isBetween(maxValue,12,15)) {
-            return 50;
-        }  else if(isBetween(maxValue,14,15)) {
-            return 40;
-        } else if(isBetween(maxValue,14,25)) {
-            return 30;
-        }
-        return 0;
-    }
-
-    @Override
-    public int calculateLast3SeasonsStdDevScore(List<DrawSeasonStats> statsByTeam) {
-        double sumStdDev = 0;
-        for (int i=0; i<3; i++) {
-            sumStdDev += statsByTeam.get(i).getStdDeviation();
-        }
-
-        double avgStdDev = Utils.beautifyDoubleValue(sumStdDev/3);
-
-        if (isBetween(avgStdDev,0,2.3)) {
-            return 100;
-        } else if(isBetween(avgStdDev,2.3,2.4)) {
-            return 90;
-        } else if(isBetween(avgStdDev,2.4,2.5)) {
-            return 80;
-        } else if(isBetween(avgStdDev,2.5,2.6)) {
-            return 70;
-        } else if(isBetween(avgStdDev,2.6,2.7)) {
-            return 60;
-        }  else if(isBetween(avgStdDev,2.7,2.8)) {
-            return 50;
-        }  else if(isBetween(avgStdDev,2.8,3)) {
-            return 40;
-        } else if(isBetween(avgStdDev,3,25)) {
-            return 30;
-        }
-        return 0;
-    }
-
-    @Override
-    public int calculateAllSeasonsStdDevScore(List<DrawSeasonStats> statsByTeam) {
-        double sumStdDev = 0;
-        for (int i=0; i<statsByTeam.size(); i++) {
-            sumStdDev += statsByTeam.get(i).getStdDeviation();
-        }
-
-        double avgStdDev = Utils.beautifyDoubleValue(sumStdDev/statsByTeam.size());
-
-        if (isBetween(avgStdDev,0,2.3)) {
-            return 100;
-        } else if(isBetween(avgStdDev,2.3,2.4)) {
-            return 90;
-        } else if(isBetween(avgStdDev,2.4,2.5)) {
-            return 80;
-        } else if(isBetween(avgStdDev,2.5,2.6)) {
-            return 70;
-        } else if(isBetween(avgStdDev,2.6,2.7)) {
-            return 60;
-        }  else if(isBetween(avgStdDev,2.7,2.8)) {
-            return 50;
-        }  else if(isBetween(avgStdDev,2.8,3)) {
-            return 40;
-        } else if(isBetween(avgStdDev,3,25)) {
-            return 30;
-        }
         return 0;
     }
 
