@@ -2,6 +2,7 @@ package com.api.BetStrat.service.football;
 
 import com.api.BetStrat.dto.SimulatedMatchDto;
 import com.api.BetStrat.entity.HistoricMatch;
+import com.api.BetStrat.entity.StrategySeasonStats;
 import com.api.BetStrat.entity.Team;
 import com.api.BetStrat.entity.football.NoGoalsFestSeasonStats;
 import com.api.BetStrat.enums.TeamScoreEnum;
@@ -81,7 +82,7 @@ public class NoGoalsFestStrategySeasonStatsService extends StrategyScoreCalculat
                 String newSeasonUrl = "";
 
                 List<HistoricMatch> teamMatchesBySeason = historicMatchRepository.getTeamMatchesBySeason(team, season);
-                teamMatchesBySeason.sort(new Utils.MatchesByDateSorter());
+                teamMatchesBySeason.sort(HistoricMatch.matchDateComparator);
 
                 if (teamMatchesBySeason.size() == 0) {
                     continue;
@@ -136,7 +137,7 @@ public class NoGoalsFestStrategySeasonStatsService extends StrategyScoreCalculat
     @Override
     public Team updateTeamScore(Team teamByName) {
         List<NoGoalsFestSeasonStats> statsByTeam = noGoalsFestSeasonInfoRepository.getNoGoalsFestStatsByTeam(teamByName);
-        Collections.sort(statsByTeam, new SortStatsDataBySeason());
+        Collections.sort(statsByTeam, StrategySeasonStats.strategySeasonSorter);
         Collections.reverse(statsByTeam);
 
         if (statsByTeam.size() < 3 || statsByTeam.stream().filter(s -> s.getNumMatches() < 15).findAny().isPresent()) {
@@ -173,7 +174,7 @@ public class NoGoalsFestStrategySeasonStatsService extends StrategyScoreCalculat
             outMap.put("footballGoalsFest", TeamScoreEnum.INSUFFICIENT_DATA.getValue());
             return outMap;
         }
-        Collections.sort(statsByTeam, new SortStatsDataBySeason());
+        Collections.sort(statsByTeam, StrategySeasonStats.strategySeasonSorter);
         Collections.reverse(statsByTeam);
         List<NoGoalsFestSeasonStats> filteredStats = statsByTeam.subList(seasonsToDiscard, statsByTeam.size());
 
@@ -290,15 +291,6 @@ public class NoGoalsFestStrategySeasonStatsService extends StrategyScoreCalculat
     @Override
     public int calculateAllSeasonsTotalWinsRateScore(List<NoGoalsFestSeasonStats> statsByTeam) {
         return 0;
-    }
-
-    static class SortStatsDataBySeason implements Comparator<NoGoalsFestSeasonStats> {
-
-        @Override
-        public int compare(NoGoalsFestSeasonStats a, NoGoalsFestSeasonStats b) {
-            return Integer.valueOf(SEASONS_LIST.indexOf(a.getSeason()))
-                    .compareTo(Integer.valueOf(SEASONS_LIST.indexOf(b.getSeason())));
-        }
     }
 
 }

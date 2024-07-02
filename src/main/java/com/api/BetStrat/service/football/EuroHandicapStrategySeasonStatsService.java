@@ -1,6 +1,7 @@
 package com.api.BetStrat.service.football;
 
 import com.api.BetStrat.dto.SimulatedMatchDto;
+import com.api.BetStrat.entity.StrategySeasonStats;
 import com.api.BetStrat.enums.TeamScoreEnum;
 import com.api.BetStrat.entity.HistoricMatch;
 import com.api.BetStrat.entity.football.EuroHandicapSeasonStats;
@@ -128,7 +129,7 @@ public class EuroHandicapStrategySeasonStatsService extends StrategyScoreCalcula
                 List<HistoricMatch> teamMatchesBySeason = historicMatchRepository.getTeamMatchesBySeason(team, season);
                 String mainCompetition = Utils.findMainCompetition(teamMatchesBySeason);
                 List<HistoricMatch> filteredMatches = teamMatchesBySeason.stream().filter(t -> t.getCompetition().equals(mainCompetition)).collect(Collectors.toList());
-                filteredMatches.sort(new Utils.MatchesByDateSorter());
+                filteredMatches.sort(HistoricMatch.matchDateComparator);
 
                 if (filteredMatches.size() == 0) {
                     continue;
@@ -191,7 +192,7 @@ public class EuroHandicapStrategySeasonStatsService extends StrategyScoreCalcula
     @Override
     public Team updateTeamScore (Team teamByName) {
         List<EuroHandicapSeasonStats> statsByTeam = euroHandicapSeasonInfoRepository.getEuroHandicapStatsByTeam(teamByName);
-        Collections.sort(statsByTeam, new SortStatsDataBySeason());
+        Collections.sort(statsByTeam, StrategySeasonStats.strategySeasonSorter);
         Collections.reverse(statsByTeam);
 
         if (statsByTeam.size() < 3) {
@@ -308,15 +309,6 @@ public class EuroHandicapStrategySeasonStatsService extends StrategyScoreCalcula
             return 30;
         }
         return 0;
-    }
-
-    static class SortStatsDataBySeason implements Comparator<EuroHandicapSeasonStats> {
-
-        @Override
-        public int compare(EuroHandicapSeasonStats a, EuroHandicapSeasonStats b) {
-            return Integer.valueOf(SEASONS_LIST.indexOf(a.getSeason()))
-                    .compareTo(Integer.valueOf(SEASONS_LIST.indexOf(b.getSeason())));
-        }
     }
 
 }

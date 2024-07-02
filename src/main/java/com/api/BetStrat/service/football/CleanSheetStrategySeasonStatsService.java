@@ -83,7 +83,6 @@ public class CleanSheetStrategySeasonStatsService extends StrategyScoreCalculato
                 List<HistoricMatch> teamMatchesBySeason = historicMatchRepository.getTeamMatchesBySeason(team, season);
                 String mainCompetition = Utils.findMainCompetition(teamMatchesBySeason);
                 List<HistoricMatch> filteredMatches = teamMatchesBySeason.stream().filter(t -> t.getCompetition().equals(mainCompetition)).collect(Collectors.toList());
-                //filteredMatches.sort(new Utils.MatchesByDateSorter()); //TODO use the method of HistoricMatch class
                 Collections.sort(filteredMatches, HistoricMatch.matchDateComparator);
 
                 if (filteredMatches.size() == 0) {
@@ -259,16 +258,6 @@ public class CleanSheetStrategySeasonStatsService extends StrategyScoreCalculato
             return 30;
         }
         return 0;
-    }
-
-
-    static class SortStatsDataBySeason implements Comparator<CleanSheetSeasonStats> {
-
-        @Override
-        public int compare(CleanSheetSeasonStats a, CleanSheetSeasonStats b) {
-            return Integer.valueOf(SEASONS_LIST.indexOf(a.getSeason()))
-                    .compareTo(Integer.valueOf(SEASONS_LIST.indexOf(b.getSeason())));
-        }
     }
 
 }

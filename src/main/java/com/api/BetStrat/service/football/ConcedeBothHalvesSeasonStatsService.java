@@ -2,6 +2,7 @@ package com.api.BetStrat.service.football;
 
 import com.api.BetStrat.dto.SimulatedMatchDto;
 import com.api.BetStrat.entity.HistoricMatch;
+import com.api.BetStrat.entity.StrategySeasonStats;
 import com.api.BetStrat.entity.Team;
 import com.api.BetStrat.entity.football.ConcedeBothHalvesSeasonStats;
 import com.api.BetStrat.enums.TeamScoreEnum;
@@ -63,7 +64,7 @@ public class ConcedeBothHalvesSeasonStatsService extends StrategyScoreCalculator
                 String newSeasonUrl = "";
 
                 List<HistoricMatch> teamMatchesBySeason = historicMatchRepository.getTeamMatchesBySeason(team, season);
-                teamMatchesBySeason.sort(new Utils.MatchesByDateSorter());
+                teamMatchesBySeason.sort(HistoricMatch.matchDateComparator);
 
                 if (teamMatchesBySeason.size() == 0) {
                     continue;
@@ -113,7 +114,7 @@ public class ConcedeBothHalvesSeasonStatsService extends StrategyScoreCalculator
     @Override
     public Team updateTeamScore(Team teamByName) {
         List<ConcedeBothHalvesSeasonStats> statsByTeam = concedeBothHalvesSeasonInfoRepository.getFootballConcedeBothHalvesStatsByTeam(teamByName);
-        Collections.sort(statsByTeam, new SortStatsDataBySeason());
+        Collections.sort(statsByTeam, StrategySeasonStats.strategySeasonSorter);
         Collections.reverse(statsByTeam);
 
         if (statsByTeam.size() < 3 || statsByTeam.stream().filter(s -> s.getNumMatches() < 15).findAny().isPresent()) {
@@ -140,7 +141,7 @@ public class ConcedeBothHalvesSeasonStatsService extends StrategyScoreCalculator
     @Override
     public String calculateScoreBySeason(Team team, String season, String strategy) {
         List<ConcedeBothHalvesSeasonStats> statsByTeam = concedeBothHalvesSeasonInfoRepository.getFootballConcedeBothHalvesStatsByTeam(team);
-        Collections.sort(statsByTeam, new SortStatsDataBySeason());
+        Collections.sort(statsByTeam, StrategySeasonStats.strategySeasonSorter);
         Collections.reverse(statsByTeam);
 
         int indexOfSeason = WINTER_SEASONS_LIST.indexOf(season);
@@ -289,15 +290,6 @@ public class ConcedeBothHalvesSeasonStatsService extends StrategyScoreCalculator
     @Override
     public int calculateAllSeasonsTotalWinsRateScore(List<ConcedeBothHalvesSeasonStats> statsByTeam) {
         return 0;
-    }
-
-    static class SortStatsDataBySeason implements Comparator<ConcedeBothHalvesSeasonStats> {
-
-        @Override
-        public int compare(ConcedeBothHalvesSeasonStats a, ConcedeBothHalvesSeasonStats b) {
-            return Integer.valueOf(SEASONS_LIST.indexOf(a.getSeason()))
-                    .compareTo(Integer.valueOf(SEASONS_LIST.indexOf(b.getSeason())));
-        }
     }
 
 }

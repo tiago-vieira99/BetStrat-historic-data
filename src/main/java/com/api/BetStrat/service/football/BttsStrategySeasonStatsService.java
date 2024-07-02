@@ -2,6 +2,7 @@ package com.api.BetStrat.service.football;
 
 import com.api.BetStrat.dto.SimulatedMatchDto;
 import com.api.BetStrat.entity.HistoricMatch;
+import com.api.BetStrat.entity.StrategySeasonStats;
 import com.api.BetStrat.entity.Team;
 import com.api.BetStrat.entity.football.BttsSeasonStats;
 import com.api.BetStrat.enums.TeamScoreEnum;
@@ -72,7 +73,7 @@ public class BttsStrategySeasonStatsService extends StrategyScoreCalculator<Btts
                 String newSeasonUrl = "";
 
                 List<HistoricMatch> teamMatchesBySeason = historicMatchRepository.getTeamMatchesBySeason(team, season);
-                teamMatchesBySeason.sort(new Utils.MatchesByDateSorter());
+                teamMatchesBySeason.sort(HistoricMatch.matchDateComparator);
 
                 if (teamMatchesBySeason.size() == 0) {
                     continue;
@@ -122,7 +123,7 @@ public class BttsStrategySeasonStatsService extends StrategyScoreCalculator<Btts
     @Override
     public Team updateTeamScore(Team teamByName) {
         List<BttsSeasonStats> statsByTeam = bttsSeasonInfoRepository.getFootballBttsStatsByTeam(teamByName);
-        Collections.sort(statsByTeam, new SortStatsDataBySeason());
+        Collections.sort(statsByTeam, StrategySeasonStats.strategySeasonSorter);
         Collections.reverse(statsByTeam);
 
         if (statsByTeam.size() < 3 || statsByTeam.stream().filter(s -> s.getNumMatches() < 15).findAny().isPresent()) {
@@ -149,7 +150,7 @@ public class BttsStrategySeasonStatsService extends StrategyScoreCalculator<Btts
     @Override
     public String calculateScoreBySeason(Team team, String season, String strategy) {
         List<BttsSeasonStats> statsByTeam = bttsSeasonInfoRepository.getFootballBttsStatsByTeam(team);
-        Collections.sort(statsByTeam, new SortStatsDataBySeason());
+        Collections.sort(statsByTeam, StrategySeasonStats.strategySeasonSorter);
         Collections.reverse(statsByTeam);
 
         int indexOfSeason = WINTER_SEASONS_LIST.indexOf(season);
@@ -244,7 +245,7 @@ public class BttsStrategySeasonStatsService extends StrategyScoreCalculator<Btts
             outMap.put("footballGoalsFest", TeamScoreEnum.INSUFFICIENT_DATA.getValue());
             return outMap;
         }
-        Collections.sort(statsByTeam, new SortStatsDataBySeason());
+        Collections.sort(statsByTeam, StrategySeasonStats.strategySeasonSorter);
         Collections.reverse(statsByTeam);
         List<BttsSeasonStats> filteredStats = statsByTeam.subList(seasonsToDiscard, statsByTeam.size());
 
@@ -362,15 +363,6 @@ public class BttsStrategySeasonStatsService extends StrategyScoreCalculator<Btts
     @Override
     public int calculateAllSeasonsTotalWinsRateScore(List<BttsSeasonStats> statsByTeam) {
         return 0;
-    }
-
-    static class SortStatsDataBySeason implements Comparator<BttsSeasonStats> {
-
-        @Override
-        public int compare(BttsSeasonStats a, BttsSeasonStats b) {
-            return Integer.valueOf(SEASONS_LIST.indexOf(a.getSeason()))
-                    .compareTo(Integer.valueOf(SEASONS_LIST.indexOf(b.getSeason())));
-        }
     }
 
 }

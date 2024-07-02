@@ -81,7 +81,7 @@ public class HandballWinsMargin49StrategySeasonStatsService extends StrategyScor
                 List<HistoricMatch> teamMatchesBySeason = historicMatchRepository.getTeamMatchesBySeason(team, season);
                 String mainCompetition = Utils.findMainCompetition(teamMatchesBySeason);
                 List<HistoricMatch> filteredMatches = teamMatchesBySeason.stream().filter(t -> t.getCompetition().equals(mainCompetition)).collect(Collectors.toList());
-                filteredMatches.sort(new Utils.MatchesByDateSorter());
+                filteredMatches.sort(HistoricMatch.matchDateComparator);
 
                 Handball49WinsMarginSeasonStats handball49WinsMarginSeasonInfo = new Handball49WinsMarginSeasonStats();
 

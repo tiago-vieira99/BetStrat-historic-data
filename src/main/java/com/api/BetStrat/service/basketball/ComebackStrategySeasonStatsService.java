@@ -80,7 +80,7 @@ public class ComebackStrategySeasonStatsService extends StrategyScoreCalculator<
                 List<HistoricMatch> teamMatchesBySeason = historicMatchRepository.getTeamMatchesBySeason(team, season);
                 String mainCompetition = Utils.findMainCompetition(teamMatchesBySeason);
                 List<HistoricMatch> filteredMatches = teamMatchesBySeason.stream().filter(t -> t.getCompetition().equals(mainCompetition)).collect(Collectors.toList());
-//                filteredMatches.sort(new Utils.MatchesByDateSorter());
+//                filteredMatches.sort(HistoricMatch.matchDateComparator);
 
                 ComebackSeasonStats comebackSeasonInfo = new ComebackSeasonStats();
                 LOGGER.info("Insert " + comebackSeasonInfo.getClass() + " for " + team.getName() + " and season " + season);

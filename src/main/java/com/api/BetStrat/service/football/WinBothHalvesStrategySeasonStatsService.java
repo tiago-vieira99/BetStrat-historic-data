@@ -2,6 +2,7 @@ package com.api.BetStrat.service.football;
 
 import com.api.BetStrat.dto.SimulatedMatchDto;
 import com.api.BetStrat.entity.HistoricMatch;
+import com.api.BetStrat.entity.StrategySeasonStats;
 import com.api.BetStrat.entity.Team;
 import com.api.BetStrat.entity.football.WinBothHalvesSeasonStats;
 import com.api.BetStrat.enums.TeamScoreEnum;
@@ -88,7 +89,7 @@ public class WinBothHalvesStrategySeasonStatsService extends StrategyScoreCalcul
                 List<HistoricMatch> teamMatchesBySeason = historicMatchRepository.getTeamMatchesBySeason(team, season);
                 String mainCompetition = Utils.findMainCompetition(teamMatchesBySeason);
                 List<HistoricMatch> filteredMatches = teamMatchesBySeason.stream().filter(t -> t.getCompetition().equals(mainCompetition)).collect(Collectors.toList());
-                filteredMatches.sort(new Utils.MatchesByDateSorter());
+                filteredMatches.sort(HistoricMatch.matchDateComparator);
 
                 if (filteredMatches.isEmpty()) {
                     continue;
@@ -138,7 +139,7 @@ public class WinBothHalvesStrategySeasonStatsService extends StrategyScoreCalcul
     @Override
     public Team updateTeamScore(Team teamByName) {
         List<WinBothHalvesSeasonStats> statsByTeam = winBothHalvesSeasonInfoRepository.getFootballWinBothHalvesStatsByTeam(teamByName);
-        Collections.sort(statsByTeam, new SortStatsDataBySeason());
+        Collections.sort(statsByTeam, StrategySeasonStats.strategySeasonSorter);
         Collections.reverse(statsByTeam);
 
         if (statsByTeam.size() < 3) {
@@ -258,15 +259,6 @@ public class WinBothHalvesStrategySeasonStatsService extends StrategyScoreCalcul
             return 30;
         }
         return 0;
-    }
-
-    static class SortStatsDataBySeason implements Comparator<WinBothHalvesSeasonStats> {
-
-        @Override
-        public int compare(WinBothHalvesSeasonStats a, WinBothHalvesSeasonStats b) {
-            return Integer.valueOf(SEASONS_LIST.indexOf(a.getSeason()))
-                    .compareTo(Integer.valueOf(SEASONS_LIST.indexOf(b.getSeason())));
-        }
     }
 
 }

@@ -1,6 +1,7 @@
 package com.api.BetStrat.service.football;
 
 import com.api.BetStrat.dto.SimulatedMatchDto;
+import com.api.BetStrat.entity.StrategySeasonStats;
 import com.api.BetStrat.enums.TeamScoreEnum;
 import com.api.BetStrat.entity.HistoricMatch;
 import com.api.BetStrat.entity.football.DrawSeasonStats;
@@ -137,7 +138,7 @@ public class DrawStrategySeasonStatsService extends StrategyScoreCalculator<Draw
                 List<HistoricMatch> teamMatchesBySeason = historicMatchRepository.getTeamMatchesBySeason(team, season);
                 String mainCompetition = Utils.findMainCompetition(teamMatchesBySeason);
                 List<HistoricMatch> filteredMatches = teamMatchesBySeason.stream().filter(t -> t.getCompetition().equals(mainCompetition)).collect(Collectors.toList());
-                filteredMatches.sort(new Utils.MatchesByDateSorter());
+                filteredMatches.sort(HistoricMatch.matchDateComparator);
 
                 if (filteredMatches.size() == 0) {
                     continue;
@@ -187,7 +188,7 @@ public class DrawStrategySeasonStatsService extends StrategyScoreCalculator<Draw
     @Override
     public Team updateTeamScore (Team team) {
         List<DrawSeasonStats> statsByTeam = drawSeasonInfoRepository.getFootballDrawStatsByTeam(team);
-        Collections.sort(statsByTeam, new SortStatsDataBySeason());
+        Collections.sort(statsByTeam, StrategySeasonStats.strategySeasonSorter);
         Collections.reverse(statsByTeam);
 
         if (statsByTeam.size() < 3) {
@@ -214,7 +215,7 @@ public class DrawStrategySeasonStatsService extends StrategyScoreCalculator<Draw
     @Override
     public String calculateScoreBySeason(Team team, String season, String strategy) {
         List<DrawSeasonStats> statsByTeam = drawSeasonInfoRepository.getFootballDrawStatsByTeam(team);
-        Collections.sort(statsByTeam, new SortStatsDataBySeason());
+        Collections.sort(statsByTeam, StrategySeasonStats.strategySeasonSorter);
         Collections.reverse(statsByTeam);
 
         int indexOfSeason = WINTER_SEASONS_LIST.indexOf(season);
@@ -249,7 +250,7 @@ public class DrawStrategySeasonStatsService extends StrategyScoreCalculator<Draw
             outMap.put("footballDrawHunter", TeamScoreEnum.INSUFFICIENT_DATA.getValue());
             return outMap;
         }
-        Collections.sort(statsByTeam, new SortStatsDataBySeason());
+        Collections.sort(statsByTeam, StrategySeasonStats.strategySeasonSorter);
         Collections.reverse(statsByTeam);
         List<DrawSeasonStats> filteredStats = statsByTeam.subList(seasonsToDiscard, statsByTeam.size());
 
@@ -369,15 +370,6 @@ public class DrawStrategySeasonStatsService extends StrategyScoreCalculator<Draw
     @Override
     public int calculateAllSeasonsTotalWinsRateScore(List<DrawSeasonStats> statsByTeam) {
         return 0;
-    }
-
-    static class SortStatsDataBySeason implements Comparator<DrawSeasonStats> {
-
-        @Override
-        public int compare(DrawSeasonStats a, DrawSeasonStats b) {
-            return Integer.valueOf(SEASONS_LIST.indexOf(a.getSeason()))
-                    .compareTo(Integer.valueOf(SEASONS_LIST.indexOf(b.getSeason())));
-        }
     }
 
     /* avaliar cada parametro independentemente:

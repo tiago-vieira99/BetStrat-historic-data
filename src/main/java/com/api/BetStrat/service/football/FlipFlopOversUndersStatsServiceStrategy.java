@@ -1,6 +1,7 @@
 package com.api.BetStrat.service.football;
 
 import com.api.BetStrat.dto.SimulatedMatchDto;
+import com.api.BetStrat.entity.StrategySeasonStats;
 import com.api.BetStrat.enums.TeamScoreEnum;
 import com.api.BetStrat.entity.HistoricMatch;
 import com.api.BetStrat.entity.Team;
@@ -80,7 +81,7 @@ public class FlipFlopOversUndersStatsServiceStrategy extends StrategyScoreCalcul
                 String newSeasonUrl = "";
 
                 List<HistoricMatch> teamMatchesBySeason = historicMatchRepository.getTeamMatchesBySeason(team, season);
-                teamMatchesBySeason.sort(new Utils.MatchesByDateSorter());
+                teamMatchesBySeason.sort(HistoricMatch.matchDateComparator);
 
                 if (teamMatchesBySeason.size() == 0) {
                     continue;
@@ -152,7 +153,7 @@ public class FlipFlopOversUndersStatsServiceStrategy extends StrategyScoreCalcul
     @Override
     public Team updateTeamScore(Team teamByName) {
         List<FlipFlopOversUndersStats> statsByTeam = flipFlopOversUndersInfoRepository.getFlipFlopStatsByTeam(teamByName);
-        Collections.sort(statsByTeam, new SortStatsDataBySeason());
+        Collections.sort(statsByTeam, StrategySeasonStats.strategySeasonSorter);
         Collections.reverse(statsByTeam);
 
         if (statsByTeam.size() < 3) {
@@ -248,15 +249,6 @@ public class FlipFlopOversUndersStatsServiceStrategy extends StrategyScoreCalcul
             }
         }
         return maxValue-6 < 0 ? 0 : maxValue-6;
-    }
-
-    static class SortStatsDataBySeason implements Comparator<FlipFlopOversUndersStats> {
-
-        @Override
-        public int compare(FlipFlopOversUndersStats a, FlipFlopOversUndersStats b) {
-            return Integer.valueOf(SEASONS_LIST.indexOf(a.getSeason()))
-                    .compareTo(Integer.valueOf(SEASONS_LIST.indexOf(b.getSeason())));
-        }
     }
 
     /* avaliar cada parametro independentemente:
