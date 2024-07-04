@@ -14,7 +14,6 @@ import javax.persistence.UniqueConstraint;
 
 @Getter
 @Setter
-@NoArgsConstructor
 @AllArgsConstructor
 @Entity
 @Table(name = "GoalsFestSeasonStats",  uniqueConstraints = { @UniqueConstraint(name = "UniqueSeasonAndCompetitionForTeamGF", columnNames = { "teamID", "season", "competition" }) })
@@ -26,10 +25,14 @@ public class GoalsFestSeasonStats extends StrategySeasonStats {
     @Column(name = "num_goalsFest")
     private int numGoalsFest;
 
+    public GoalsFestSeasonStats() {
+        maxSeqScale();
+    }
+
     @Override
     public void maxSeqScale() {
-        // avg odds : 3 - 3.3 TODO
-        super.setMaxSeqScale(StrategyDurationScaleEnum.MEDIUM_LONG.getValue());
+        // avg odds : 1.7 - 2.4
+        super.setMaxSeqScale(StrategyDurationScaleEnum.MEDIUM_SHORT.getValue());
     }
 
 }

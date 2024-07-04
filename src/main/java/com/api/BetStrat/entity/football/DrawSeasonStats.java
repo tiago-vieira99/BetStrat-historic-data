@@ -11,7 +11,6 @@ import javax.persistence.*;
 
 @Getter
 @Setter
-@NoArgsConstructor
 @AllArgsConstructor
 @Entity
 @Table(name = "DrawSeasonStats", uniqueConstraints = { @UniqueConstraint(name = "UniqueSeasonAndCompetitionForTeamDH", columnNames = { "teamID", "season", "competition" }) })
@@ -22,6 +21,10 @@ public class DrawSeasonStats extends StrategySeasonStats {
 
     @Column(name = "num_draws")
     private int numDraws;
+
+    public DrawSeasonStats() {
+        maxSeqScale();
+    }
 
     @Override
     public void maxSeqScale() {

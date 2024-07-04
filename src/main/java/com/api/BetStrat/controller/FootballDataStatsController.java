@@ -165,6 +165,8 @@ public class FootballDataStatsController {
             log.info("handling " + allTeams.get(i).getName());
             strategySeasonStatsService.updateStrategySeasonStats(allTeams.get(i), strategy.concat("SeasonStats"));
             teamService.updateTeamScore(allTeams.get(i), strategy.concat("SeasonStats"));
+            System.out.println();
+            break;
         }
 
         return ResponseEntity.ok().body("OK");
