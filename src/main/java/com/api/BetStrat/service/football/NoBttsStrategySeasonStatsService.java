@@ -176,6 +176,16 @@ public class NoBttsStrategySeasonStatsService extends StrategyScoreCalculator<No
     }
 
     @Override
+    public double calculateHistoricMaxSeqValue(List<NoBttsSeasonStats> statsByTeam) {
+        return 0;
+    }
+
+    @Override
+    public double calculateHistoricAvgSeqValue(List<NoBttsSeasonStats> statsByTeam) {
+        return 0;
+    }
+
+    @Override
     public Team updateTeamScore(Team teamByName) {
         List<NoBttsSeasonStats> statsByTeam = noBttsSeasonInfoRepository.getFootballNoBttsStatsByTeam(teamByName);
         Collections.sort(statsByTeam, StrategySeasonStats.strategySeasonSorter);

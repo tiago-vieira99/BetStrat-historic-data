@@ -176,6 +176,16 @@ public class NoGoalsFestStrategySeasonStatsService extends StrategyScoreCalculat
     }
 
     @Override
+    public double calculateHistoricMaxSeqValue(List<NoGoalsFestSeasonStats> statsByTeam) {
+        return 0;
+    }
+
+    @Override
+    public double calculateHistoricAvgSeqValue(List<NoGoalsFestSeasonStats> statsByTeam) {
+        return 0;
+    }
+
+    @Override
     public Team updateTeamScore(Team teamByName) {
         List<NoGoalsFestSeasonStats> statsByTeam = noGoalsFestSeasonInfoRepository.getNoGoalsFestStatsByTeam(teamByName);
         Collections.sort(statsByTeam, StrategySeasonStats.strategySeasonSorter);

@@ -180,6 +180,16 @@ public class DrawStrategySeasonStatsService extends StrategyScoreCalculator<Draw
     }
 
     @Override
+    public double calculateHistoricMaxSeqValue(List<DrawSeasonStats> statsByTeam) {
+        return 0;
+    }
+
+    @Override
+    public double calculateHistoricAvgSeqValue(List<DrawSeasonStats> statsByTeam) {
+        return 0;
+    }
+
+    @Override
     public Team updateTeamScore (Team team) {
         List<DrawSeasonStats> statsByTeam = drawSeasonInfoRepository.getFootballDrawStatsByTeam(team);
         Collections.sort(statsByTeam, StrategySeasonStats.strategySeasonSorter);

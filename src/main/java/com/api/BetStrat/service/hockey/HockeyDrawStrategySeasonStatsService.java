@@ -79,6 +79,16 @@ public class HockeyDrawStrategySeasonStatsService extends StrategyScoreCalculato
 //        return teamByName;
     }
 
+    @Override
+    public double calculateHistoricMaxSeqValue(List<HockeyDrawSeasonStats> statsByTeam) {
+        return 0;
+    }
+
+    @Override
+    public double calculateHistoricAvgSeqValue(List<HockeyDrawSeasonStats> statsByTeam) {
+        return 0;
+    }
+
     public String calculateFinalRating(double score) {
         return super.calculateFinalRating(score);
     }

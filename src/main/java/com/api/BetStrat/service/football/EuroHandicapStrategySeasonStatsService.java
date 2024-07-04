@@ -191,6 +191,16 @@ public class EuroHandicapStrategySeasonStatsService extends StrategyScoreCalcula
     }
 
     @Override
+    public double calculateHistoricMaxSeqValue(List<EuroHandicapSeasonStats> statsByTeam) {
+        return 0;
+    }
+
+    @Override
+    public double calculateHistoricAvgSeqValue(List<EuroHandicapSeasonStats> statsByTeam) {
+        return 0;
+    }
+
+    @Override
     public Team updateTeamScore (Team teamByName) {
         List<EuroHandicapSeasonStats> statsByTeam = euroHandicapSeasonInfoRepository.getEuroHandicapStatsByTeam(teamByName);
         Collections.sort(statsByTeam, StrategySeasonStats.strategySeasonSorter);

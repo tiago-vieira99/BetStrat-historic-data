@@ -192,6 +192,16 @@ public class FlipFlopOversUndersStatsServiceStrategy extends StrategyScoreCalcul
     }
 
     @Override
+    public double calculateHistoricMaxSeqValue(List<FlipFlopOversUndersStats> statsByTeam) {
+        return 0;
+    }
+
+    @Override
+    public double calculateHistoricAvgSeqValue(List<FlipFlopOversUndersStats> statsByTeam) {
+        return 0;
+    }
+
+    @Override
     public Team updateTeamScore(Team teamByName) {
         List<FlipFlopOversUndersStats> statsByTeam = flipFlopOversUndersInfoRepository.getFlipFlopStatsByTeam(teamByName);
         Collections.sort(statsByTeam, StrategySeasonStats.strategySeasonSorter);

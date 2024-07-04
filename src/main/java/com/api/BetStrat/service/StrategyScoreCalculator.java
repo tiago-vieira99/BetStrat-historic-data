@@ -1,9 +1,14 @@
 package com.api.BetStrat.service;
 
-import com.api.BetStrat.enums.TeamScoreEnum;
-import com.api.BetStrat.entity.StrategySeasonStats;
-import com.api.BetStrat.util.Utils;
+import static com.api.BetStrat.enums.StrategyDurationScaleEnum.LONG;
+import static com.api.BetStrat.enums.StrategyDurationScaleEnum.MEDIUM;
+import static com.api.BetStrat.enums.StrategyDurationScaleEnum.MEDIUM_LONG;
+import static com.api.BetStrat.enums.StrategyDurationScaleEnum.MEDIUM_SHORT;
+import static com.api.BetStrat.enums.StrategyDurationScaleEnum.SHORT;
 
+import com.api.BetStrat.entity.StrategySeasonStats;
+import com.api.BetStrat.enums.TeamScoreEnum;
+import com.api.BetStrat.util.Utils;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -11,7 +16,6 @@ import java.util.stream.Collectors;
 
 public abstract class StrategyScoreCalculator<T extends StrategySeasonStats> {
 
-    //TODO refactor
     public String calculateFinalRating(double score) {
         if (isBetween(score,85,150)) {
             return TeamScoreEnum.EXCELLENT.getValue() + " (" + score + ")";
@@ -24,6 +28,11 @@ public abstract class StrategyScoreCalculator<T extends StrategySeasonStats> {
         }
         return "";
     }
+
+    //TODO impl methods to find maxSeqValue and avgSeqValue
+    public abstract double calculateHistoricMaxSeqValue(List<T> statsByTeam);
+
+    public abstract double calculateHistoricAvgSeqValue(List<T> statsByTeam);
 
     public abstract int calculateLast3SeasonsRateScore(List<T> statsByTeam);
 
@@ -43,18 +52,72 @@ public abstract class StrategyScoreCalculator<T extends StrategySeasonStats> {
             }
         }
 
-        if (isBetween(maxValue,0,5)) {
-            return 100;
-        } else if(isBetween(maxValue,5,6)) {
-            return 90;
-        } else if(isBetween(maxValue,6,7)) {
-            return 80;
-        } else if(isBetween(maxValue,7,8)) {
-            return 50;
-        } else if(isBetween(maxValue,8,25)) {
-            return 30;
+        int maxSeqStrategyScale = statsByTeam.get(0).getMaxSeqScale();
+
+        if (maxSeqStrategyScale == SHORT.getValue()) {
+            if (isBetween(maxValue,0,3)) {
+                return 100;
+            } else if(isBetween(maxValue,3,4)) {
+                return 90;
+            } else if(isBetween(maxValue,4,6)) {
+                return 80;
+            } else if(isBetween(maxValue,6,7)) {
+                return 50;
+            } else if(isBetween(maxValue,7,50)) {
+                return 30;
+            }
+        } else if (maxSeqStrategyScale == MEDIUM_SHORT.getValue()) {
+            if (isBetween(maxValue,0,4)) {
+                return 100;
+            } else if(isBetween(maxValue,4,5)) {
+                return 90;
+            } else if(isBetween(maxValue,5,7)) {
+                return 80;
+            } else if(isBetween(maxValue,7,8)) {
+                return 50;
+            } else if(isBetween(maxValue,8,50)) {
+                return 30;
+            }
+        } else if (maxSeqStrategyScale == MEDIUM.getValue()) {
+            if (isBetween(maxValue,0,5)) {
+                return 100;
+            } else if(isBetween(maxValue,5,6)) {
+                return 90;
+            } else if(isBetween(maxValue,6,8)) {
+                return 80;
+            } else if(isBetween(maxValue,8,9)) {
+                return 50;
+            } else if(isBetween(maxValue,9,50)) {
+                return 30;
+            }
+        } else if (maxSeqStrategyScale == MEDIUM_LONG.getValue()) {
+            if (isBetween(maxValue,0,6)) {
+                return 100;
+            } else if(isBetween(maxValue,6,7)) {
+                return 90;
+            } else if(isBetween(maxValue,7,9)) {
+                return 80;
+            } else if(isBetween(maxValue,9,10)) {
+                return 50;
+            } else if(isBetween(maxValue,10,50)) {
+                return 30;
+            }
+        } else if (maxSeqStrategyScale == LONG.getValue()) {
+            if (isBetween(maxValue,0,7)) {
+                return 100;
+            } else if(isBetween(maxValue,7,8)) {
+                return 90;
+            } else if(isBetween(maxValue,8,10)) {
+                return 80;
+            } else if(isBetween(maxValue,10,12)) {
+                return 50;
+            } else if(isBetween(maxValue,12,50)) {
+                return 30;
+            }
+        } else {
+            return -1;
         }
-        return 0;
+        return -1;
     }
 
     public int calculateAllSeasonsMaxSeqWOGreenScore(List<T> statsByTeam) {
@@ -67,22 +130,75 @@ public abstract class StrategyScoreCalculator<T extends StrategySeasonStats> {
             }
         }
 
-        //TODO implement new method to calculate this taking in account the maxSeqScale
+        int maxSeqStrategyScale = statsByTeam.get(0).getMaxSeqScale();
 
-        if (isBetween(maxValue,0,7)) {
-            return 100;
-        } else if(isBetween(maxValue,7,8)) {
-            return 90;
-        } else if(isBetween(maxValue,8,9)) {
-            return 70;
-        } else if(isBetween(maxValue,9,10)) {
-            return 50;
-        } else if(isBetween(maxValue,10,25)) {
-            return 30;
+        if (maxSeqStrategyScale == SHORT.getValue()) {
+            if (isBetween(maxValue,0,3)) {
+                return 100;
+            } else if(isBetween(maxValue,3,4)) {
+                return 90;
+            } else if(isBetween(maxValue,4,6)) {
+                return 80;
+            } else if(isBetween(maxValue,6,7)) {
+                return 50;
+            } else if(isBetween(maxValue,7,50)) {
+                return 30;
+            }
+        } else if (maxSeqStrategyScale == MEDIUM_SHORT.getValue()) {
+            if (isBetween(maxValue,0,4)) {
+                return 100;
+            } else if(isBetween(maxValue,4,5)) {
+                return 90;
+            } else if(isBetween(maxValue,5,7)) {
+                return 80;
+            } else if(isBetween(maxValue,7,8)) {
+                return 50;
+            } else if(isBetween(maxValue,8,50)) {
+                return 30;
+            }
+        } else if (maxSeqStrategyScale == MEDIUM.getValue()) {
+            if (isBetween(maxValue,0,5)) {
+                return 100;
+            } else if(isBetween(maxValue,5,6)) {
+                return 90;
+            } else if(isBetween(maxValue,6,8)) {
+                return 80;
+            } else if(isBetween(maxValue,8,9)) {
+                return 50;
+            } else if(isBetween(maxValue,9,50)) {
+                return 30;
+            }
+        } else if (maxSeqStrategyScale == MEDIUM_LONG.getValue()) {
+            if (isBetween(maxValue,0,6)) {
+                return 100;
+            } else if(isBetween(maxValue,6,7)) {
+                return 90;
+            } else if(isBetween(maxValue,7,9)) {
+                return 80;
+            } else if(isBetween(maxValue,9,10)) {
+                return 50;
+            } else if(isBetween(maxValue,10,50)) {
+                return 30;
+            }
+        } else if (maxSeqStrategyScale == LONG.getValue()) {
+            if (isBetween(maxValue,0,7)) {
+                return 100;
+            } else if(isBetween(maxValue,7,8)) {
+                return 90;
+            } else if(isBetween(maxValue,8,10)) {
+                return 80;
+            } else if(isBetween(maxValue,10,12)) {
+                return 50;
+            } else if(isBetween(maxValue,12,50)) {
+                return 30;
+            }
+        } else {
+            return -1;
         }
-        return 0;
+        return -1;
     }
 
+    // standard deviation tells me how regular is the team hitting the strategy outcome. The lowest value, the best
     public int calculateLast3SeasonsStdDevScore(List<T> statsByTeam) {
         double sumStdDev = 0;
         for (int i=0; i<3; i++) {
@@ -90,8 +206,6 @@ public abstract class StrategyScoreCalculator<T extends StrategySeasonStats> {
         }
 
         double avgStdDev = Utils.beautifyDoubleValue(sumStdDev/3);
-
-        //TODO implement new method to calculate this taking in account the maxSeqScale
 
         if (isBetween(avgStdDev,0,1.7)) {
             return 100;
@@ -115,18 +229,60 @@ public abstract class StrategyScoreCalculator<T extends StrategySeasonStats> {
 
         double avgStdDev = Utils.beautifyDoubleValue(sumStdDev/statsByTeam.size());
 
-
-      //TODO implement new method to calculate this taking in account the maxSeqScale
-
-        if (isBetween(avgStdDev,0,1.8)) {
+        if (isBetween(avgStdDev,0,1.7)) {
             return 100;
-        } else if(isBetween(avgStdDev,1.8,2.0)) {
+        } else if(isBetween(avgStdDev,1.7,2.0)) {
             return 80;
         } else if(isBetween(avgStdDev,2.0,2.2)) {
             return 70;
         } else if(isBetween(avgStdDev,2.2,2.4)) {
             return 50;
         } else if(isBetween(avgStdDev,2.4,25)) {
+            return 30;
+        }
+        return 0;
+    }
+
+    // coefficient deviation tells me how high are the values of the negative sequence. The lowest, the best
+    public int calculateLast3SeasonsCoefDevScore(List<T> statsByTeam) {
+        double sumCoefDev = 0;
+        for (int i=0; i<3; i++) {
+            sumCoefDev += statsByTeam.get(i).getCoefDeviation();
+        }
+
+        double avgCoefDev = Utils.beautifyDoubleValue(sumCoefDev/3);
+
+        if (isBetween(avgCoefDev,0,70)) {
+            return 100;
+        } else if(isBetween(avgCoefDev,70,80)) {
+            return 80;
+        } else if(isBetween(avgCoefDev,80,100)) {
+            return 70;
+        } else if(isBetween(avgCoefDev,100,140)) {
+            return 50;
+        } else if(isBetween(avgCoefDev,140,9999)) {
+            return 30;
+        }
+        return 0;
+    }
+
+    public int calculateAllSeasonsCoefDevScore(List<T> statsByTeam) {
+        double sumCoefDev = 0;
+        for (int i=0; i<statsByTeam.size(); i++) {
+            sumCoefDev += statsByTeam.get(i).getCoefDeviation();
+        }
+
+        double avgCoefDev = Utils.beautifyDoubleValue(sumCoefDev/statsByTeam.size());
+
+        if (isBetween(avgCoefDev,0,70)) {
+            return 100;
+        } else if(isBetween(avgCoefDev,70,80)) {
+            return 80;
+        } else if(isBetween(avgCoefDev,80,100)) {
+            return 70;
+        } else if(isBetween(avgCoefDev,100,140)) {
+            return 50;
+        } else if(isBetween(avgCoefDev,140,9999)) {
             return 30;
         }
         return 0;
@@ -142,6 +298,8 @@ public abstract class StrategyScoreCalculator<T extends StrategySeasonStats> {
         } else if(isBetween(totalMatches,35,41)) {
             return 60;
         } else if(isBetween(totalMatches,41,50)) {
+            return 50;
+        } else if (isBetween(totalMatches, 50, 100)) {
             return 30;
         }
         return 0;

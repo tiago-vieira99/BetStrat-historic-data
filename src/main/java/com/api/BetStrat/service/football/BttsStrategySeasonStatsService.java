@@ -116,6 +116,16 @@ public class BttsStrategySeasonStatsService extends StrategyScoreCalculator<Btts
     }
 
     @Override
+    public double calculateHistoricMaxSeqValue(List<BttsSeasonStats> statsByTeam) {
+        return 0;
+    }
+
+    @Override
+    public double calculateHistoricAvgSeqValue(List<BttsSeasonStats> statsByTeam) {
+        return 0;
+    }
+
+    @Override
     public Team updateTeamScore(Team teamByName) {
         List<BttsSeasonStats> statsByTeam = bttsSeasonInfoRepository.getFootballBttsStatsByTeam(teamByName);
         Collections.sort(statsByTeam, StrategySeasonStats.strategySeasonSorter);
@@ -137,12 +147,15 @@ public class BttsStrategySeasonStatsService extends StrategyScoreCalculator<Btts
         int last3SeasonsmaxSeqWOBttsScore = calculateLast3SeasonsMaxSeqWOGreenScore(statsByTeam);
         int allSeasonsmaxSeqWOBttsScore = calculateAllSeasonsMaxSeqWOGreenScore(statsByTeam);
         int last3SeasonsStdDevScore = calculateLast3SeasonsStdDevScore(statsByTeam);
-        int allSeasonsStdDevScore = calculateAllSeasonsStdDevScore(statsByTeam);         
+        int allSeasonsStdDevScore = calculateAllSeasonsStdDevScore(statsByTeam);
+        int last3SeasonsCoefDevScore = calculateLast3SeasonsCoefDevScore(statsByTeam);
+        int allSeasonsCoefDevScore = calculateAllSeasonsCoefDevScore(statsByTeam);
         int totalMatchesScore = calculateLeagueMatchesScore(statsByTeam.get(0).getNumMatches());
 
-        return Utils.beautifyDoubleValue(0.2*last3SeasonsBttsRateScore + 0.1*allSeasonsBttsRateScore +
-            0.18*last3SeasonsmaxSeqWOBttsScore + 0.1*allSeasonsmaxSeqWOBttsScore +
-            0.3*last3SeasonsStdDevScore + 0.1*allSeasonsStdDevScore + 0.02*totalMatchesScore);
+        return Utils.beautifyDoubleValue(0.15*last3SeasonsBttsRateScore + 0.07*allSeasonsBttsRateScore +
+            0.15*last3SeasonsmaxSeqWOBttsScore + 0.07*allSeasonsmaxSeqWOBttsScore +
+            0.22*last3SeasonsCoefDevScore + 0.09*allSeasonsCoefDevScore +
+            0.18*last3SeasonsStdDevScore + 0.07*allSeasonsStdDevScore + 0.02*totalMatchesScore);
     }
 
     @Override

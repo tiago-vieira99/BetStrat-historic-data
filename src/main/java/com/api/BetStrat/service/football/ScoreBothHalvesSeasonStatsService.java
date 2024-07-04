@@ -181,6 +181,16 @@ public class ScoreBothHalvesSeasonStatsService extends StrategyScoreCalculator<S
     }
 
     @Override
+    public double calculateHistoricMaxSeqValue(List<ScoreBothHalvesSeasonStats> statsByTeam) {
+        return 0;
+    }
+
+    @Override
+    public double calculateHistoricAvgSeqValue(List<ScoreBothHalvesSeasonStats> statsByTeam) {
+        return 0;
+    }
+
+    @Override
     public Team updateTeamScore(Team teamByName) {
         List<ScoreBothHalvesSeasonStats> statsByTeam = scoreBothHalvesSeasonInfoRepository.getFootballScoreBothHalvesStatsByTeam(teamByName);
         Collections.sort(statsByTeam, StrategySeasonStats.strategySeasonSorter);

@@ -136,6 +136,16 @@ public class HandballWinsMargin712StrategySeasonStatsService extends StrategySco
     }
 
     @Override
+    public double calculateHistoricMaxSeqValue(List<Handball712WinsMarginSeasonStats> statsByTeam) {
+        return 0;
+    }
+
+    @Override
+    public double calculateHistoricAvgSeqValue(List<Handball712WinsMarginSeasonStats> statsByTeam) {
+        return 0;
+    }
+
+    @Override
     public Team updateTeamScore(Team teamByName) {
         List<Handball712WinsMarginSeasonStats> statsByTeam = handball712WinsMarginSeasonInfoRepository.getHandball712WinsMarginStatsByTeam(teamByName);
         Collections.sort(statsByTeam, new SortStatsDataBySeason());

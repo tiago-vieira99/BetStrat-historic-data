@@ -1,19 +1,14 @@
 package com.api.BetStrat.util;
 
 import com.api.BetStrat.entity.HistoricMatch;
-import lombok.SneakyThrows;
-
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
+import lombok.SneakyThrows;
 
 public class Utils {
 

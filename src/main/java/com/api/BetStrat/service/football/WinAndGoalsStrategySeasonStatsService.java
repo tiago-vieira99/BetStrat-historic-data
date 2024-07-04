@@ -190,6 +190,16 @@ public class WinAndGoalsStrategySeasonStatsService extends StrategyScoreCalculat
     }
 
     @Override
+    public double calculateHistoricMaxSeqValue(List<WinAndGoalsSeasonStats> statsByTeam) {
+        return 0;
+    }
+
+    @Override
+    public double calculateHistoricAvgSeqValue(List<WinAndGoalsSeasonStats> statsByTeam) {
+        return 0;
+    }
+
+    @Override
     public Team updateTeamScore(Team teamByName) {
         List<WinAndGoalsSeasonStats> statsByTeam = winAndGoalsSeasonInfoRepository.getFootballWinAndGoalsStatsByTeam(teamByName);
         Collections.sort(statsByTeam, StrategySeasonStats.strategySeasonSorter);

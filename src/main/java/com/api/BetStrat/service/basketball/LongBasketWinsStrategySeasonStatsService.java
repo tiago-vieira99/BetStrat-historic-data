@@ -135,6 +135,16 @@ public class LongBasketWinsStrategySeasonStatsService extends StrategyScoreCalcu
     }
 
     @Override
+    public double calculateHistoricMaxSeqValue(List<LongBasketWinsSeasonStats> statsByTeam) {
+        return 0;
+    }
+
+    @Override
+    public double calculateHistoricAvgSeqValue(List<LongBasketWinsSeasonStats> statsByTeam) {
+        return 0;
+    }
+
+    @Override
     public Team updateTeamScore(Team teamByName) {
         List<LongBasketWinsSeasonStats> statsByTeam = longWinsSeasonInfoRepository.getLongBasketWinsStatsByTeam(teamByName);
         Collections.sort(statsByTeam, new SortStatsDataBySeason());

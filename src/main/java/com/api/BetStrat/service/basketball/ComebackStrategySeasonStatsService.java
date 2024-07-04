@@ -144,6 +144,16 @@ public class ComebackStrategySeasonStatsService extends StrategyScoreCalculator<
     }
 
     @Override
+    public double calculateHistoricMaxSeqValue(List<ComebackSeasonStats> statsByTeam) {
+        return 0;
+    }
+
+    @Override
+    public double calculateHistoricAvgSeqValue(List<ComebackSeasonStats> statsByTeam) {
+        return 0;
+    }
+
+    @Override
     public Team updateTeamScore (Team teamByName) {
         List<ComebackSeasonStats> statsByTeam = comebackSeasonInfoRepository.getComebackStatsByTeam(teamByName);
         Collections.sort(statsByTeam, new SortStatsDataBySeason());

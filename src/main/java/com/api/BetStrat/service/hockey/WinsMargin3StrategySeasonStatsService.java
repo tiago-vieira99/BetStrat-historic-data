@@ -86,6 +86,16 @@ public class WinsMargin3StrategySeasonStatsService extends StrategyScoreCalculat
     }
 
     @Override
+    public double calculateHistoricMaxSeqValue(List<WinsMargin3SeasonStats> statsByTeam) {
+        return 0;
+    }
+
+    @Override
+    public double calculateHistoricAvgSeqValue(List<WinsMargin3SeasonStats> statsByTeam) {
+        return 0;
+    }
+
+    @Override
     public String calculateScoreBySeason(Team team, String season, String strategy) {
         return null;
     }

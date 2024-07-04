@@ -181,6 +181,16 @@ public class NoWinsStrategySeasonStatsService extends StrategyScoreCalculator<No
     }
 
     @Override
+    public double calculateHistoricMaxSeqValue(List<NoWinsSeasonStats> statsByTeam) {
+        return 0;
+    }
+
+    @Override
+    public double calculateHistoricAvgSeqValue(List<NoWinsSeasonStats> statsByTeam) {
+        return 0;
+    }
+
+    @Override
     public Team updateTeamScore(Team teamByName) {
         List<NoWinsSeasonStats> statsByTeam = noWinsSeasonInfoRepository.getFootballNoWinsStatsByTeam(teamByName);
         Collections.sort(statsByTeam, StrategySeasonStats.strategySeasonSorter);

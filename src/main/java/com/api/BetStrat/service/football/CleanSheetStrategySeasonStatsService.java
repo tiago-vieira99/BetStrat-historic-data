@@ -178,6 +178,16 @@ public class CleanSheetStrategySeasonStatsService extends StrategyScoreCalculato
     }
 
     @Override
+    public double calculateHistoricMaxSeqValue(List<CleanSheetSeasonStats> statsByTeam) {
+        return 0;
+    }
+
+    @Override
+    public double calculateHistoricAvgSeqValue(List<CleanSheetSeasonStats> statsByTeam) {
+        return 0;
+    }
+
+    @Override
     public Team updateTeamScore(Team teamByName) {
         List<CleanSheetSeasonStats> statsByTeam = cleanSheetSeasonInfoRepository.getFootballCleanSheetStatsByTeam(teamByName);
         Collections.sort(statsByTeam, StrategySeasonStats.strategySeasonSorter); //TODO test this

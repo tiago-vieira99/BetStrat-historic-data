@@ -191,6 +191,16 @@ public class WinsMarginStrategySeasonStatsService extends StrategyScoreCalculato
     }
 
     @Override
+    public double calculateHistoricMaxSeqValue(List<WinsMarginSeasonStats> statsByTeam) {
+        return 0;
+    }
+
+    @Override
+    public double calculateHistoricAvgSeqValue(List<WinsMarginSeasonStats> statsByTeam) {
+        return 0;
+    }
+
+    @Override
     public Team updateTeamScore(Team teamByName) {
         List<WinsMarginSeasonStats> statsByTeam = winsMarginSeasonInfoRepository.getFootballWinsMarginStatsByTeam(teamByName);
         Collections.sort(statsByTeam, StrategySeasonStats.strategySeasonSorter);
