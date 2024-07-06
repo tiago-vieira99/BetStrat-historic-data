@@ -1,6 +1,5 @@
 package com.api.BetStrat.controller;
 
-import com.api.BetStrat.dto.SimulatedMatchDto;
 import com.api.BetStrat.entity.Report;
 import com.api.BetStrat.entity.Team;
 import com.api.BetStrat.enums.TeamScoreEnum;
@@ -52,9 +51,9 @@ public class ReportController {
     private ReportRepository reportRepository;
 
 
-    @ApiOperation(value = "simulate Team by Strategy and Season")
-    @PostMapping("/simulate-by-strategy/")
-    public ResponseEntity<List<SimulatedMatchDto>> simulateStrategyBySeason (@Valid @RequestParam  String strategy, @Valid @RequestParam  String teamName, @Valid @RequestParam String season) {
+    @ApiOperation(value = "get simulation Team by Strategy and Season")
+    @GetMapping("/simulate-by-strategy/")
+    public ResponseEntity<HashMap> simulateStrategyBySeason (@Valid @RequestParam  String strategy, @Valid @RequestParam  String teamName, @Valid @RequestParam String season) {
         Team teamByName = teamRepository.getTeamByNameAndSport(teamName, "Football");
         if (teamByName == null) {
             throw new NotFoundException();
@@ -68,12 +67,13 @@ public class ReportController {
             return ResponseEntity.ok().body(null);
         }
 
-        List<SimulatedMatchDto> list = strategySeasonStatsService.getSimulatedMatchesByStrategyAndSeason(season, teamByName, strategy.concat("SeasonStats"));
+        HashMap list = strategySeasonStatsService.getSimulatedMatchesByStrategyAndSeason(season, teamByName, strategy.concat("SeasonStats"));
+        list.put("scoreBySeason", scoreBySeason);
 
         return ResponseEntity.ok().body(list);
     }
 
-    @ApiOperation(value = "insert reports of all teams for all strategies for Season")
+    @ApiOperation(value = "insert and save reports of all teams for all strategies for Season")
     @PostMapping("/{season}")
     public ResponseEntity<Object> insertReportsBySeason (@PathVariable("season") String season) {
         List<Team> allTeams = teamRepository.findAll().stream().filter(t -> t.getSport().equals("Football")).collect(Collectors.toList());
@@ -93,10 +93,11 @@ public class ReportController {
                     continue;
                 }
 
-                List<SimulatedMatchDto> simulatedMatchDtoList = strategySeasonStatsService.getSimulatedMatchesByStrategyAndSeason(season, team, strategy.concat("SeasonStats"));
-                if (simulatedMatchDtoList != null && !simulatedMatchDtoList.isEmpty()) {
-                    HashMap<String, List> teamReportMap = new HashMap<>();
-                    teamReportMap.put(team.getName(), simulatedMatchDtoList);
+                HashMap<String, Object> simulatedInfoForSeasonMap = strategySeasonStatsService.getSimulatedMatchesByStrategyAndSeason(season, team, strategy.concat("SeasonStats"));
+                simulatedInfoForSeasonMap.put("scoreBySeason", scoreBySeason);
+                if (simulatedInfoForSeasonMap != null && !simulatedInfoForSeasonMap.isEmpty()) {
+                    HashMap<String, Map> teamReportMap = new HashMap<>();
+                    teamReportMap.put(team.getName(), simulatedInfoForSeasonMap);
                     reportMap.get(strategy).putAll(teamReportMap);
                 }
             }

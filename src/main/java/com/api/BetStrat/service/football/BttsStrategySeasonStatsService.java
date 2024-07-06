@@ -15,12 +15,15 @@ import com.api.BetStrat.entity.Team;
 import com.api.BetStrat.entity.football.BttsSeasonStats;
 import com.api.BetStrat.enums.TeamScoreEnum;
 import com.api.BetStrat.repository.HistoricMatchRepository;
+import com.api.BetStrat.repository.TeamRepository;
 import com.api.BetStrat.repository.football.BttsSeasonInfoRepository;
 import com.api.BetStrat.service.StrategyScoreCalculator;
 import com.api.BetStrat.service.StrategySeasonStatsInterface;
 import com.api.BetStrat.util.Utils;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.slf4j.Logger;
@@ -40,6 +43,9 @@ public class BttsStrategySeasonStatsService extends StrategyScoreCalculator<Btts
 
     @Autowired
     private HistoricMatchRepository historicMatchRepository;
+
+    @Autowired
+    private TeamRepository teamRepository;
 
     @Override
     public BttsSeasonStats insertStrategySeasonStats(BttsSeasonStats strategySeasonStats) {
@@ -74,7 +80,7 @@ public class BttsStrategySeasonStatsService extends StrategyScoreCalculator<Btts
                     continue;
                 }
 
-                BttsSeasonStats BttsSeasonStats = new BttsSeasonStats();
+                BttsSeasonStats bttsSeasonStats = new BttsSeasonStats();
 
                 ArrayList<Integer> strategySequence = new ArrayList<>();
                 int count = 0;
@@ -95,34 +101,62 @@ public class BttsStrategySeasonStatsService extends StrategyScoreCalculator<Btts
                 }
 
                 if (totalBtts == 0) {
-                    BttsSeasonStats.setBttsRate(0);
+                    bttsSeasonStats.setBttsRate(0);
                 } else {
-                    BttsSeasonStats.setBttsRate(Utils.beautifyDoubleValue(100*totalBtts/teamMatchesBySeason.size()));
+                    bttsSeasonStats.setBttsRate(Utils.beautifyDoubleValue(100*totalBtts/teamMatchesBySeason.size()));
                 }
-                BttsSeasonStats.setCompetition("all");
-                BttsSeasonStats.setNegativeSequence(strategySequence.toString());
-                BttsSeasonStats.setNumBtts(totalBtts);
-                BttsSeasonStats.setNumMatches(teamMatchesBySeason.size());
+                bttsSeasonStats.setCompetition("all");
+                bttsSeasonStats.setNegativeSequence(strategySequence.toString());
+                bttsSeasonStats.setNumBtts(totalBtts);
+                bttsSeasonStats.setNumMatches(teamMatchesBySeason.size());
 
                 double stdDev =  Utils.beautifyDoubleValue(calculateSD(strategySequence));
-                BttsSeasonStats.setStdDeviation(stdDev);
-                BttsSeasonStats.setCoefDeviation(Utils.beautifyDoubleValue(calculateCoeffVariation(stdDev, strategySequence)));
-                BttsSeasonStats.setSeason(season);
-                BttsSeasonStats.setTeamId(team);
-                BttsSeasonStats.setUrl(newSeasonUrl);
-                insertStrategySeasonStats(BttsSeasonStats);
+                bttsSeasonStats.setStdDeviation(stdDev);
+                bttsSeasonStats.setCoefDeviation(Utils.beautifyDoubleValue(calculateCoeffVariation(stdDev, strategySequence)));
+                bttsSeasonStats.setSeason(season);
+                bttsSeasonStats.setTeamId(team);
+                bttsSeasonStats.setUrl(newSeasonUrl);
+                statsByTeam.add(bttsSeasonStats);
+                insertStrategySeasonStats(bttsSeasonStats);
             }
         }
+        team.setBttsMaxRedRun(calculateHistoricMaxNegativeSeq(statsByTeam));
+        team.setBttsAvgRedRun((int)Math.round(calculateHistoricAvgNegativeSeq(statsByTeam)));
     }
 
     @Override
-    public double calculateHistoricMaxSeqValue(List<BttsSeasonStats> statsByTeam) {
-        return 0;
+    public int calculateHistoricMaxNegativeSeq(List<BttsSeasonStats> statsByTeam) {
+        int maxValue = 0;
+        for (int i=0; i<statsByTeam.size(); i++) {
+            int[] currSeqMaxValue = Arrays.stream(statsByTeam.get(i).getNegativeSequence().replaceAll("\\[","").replaceAll("\\]","")
+                                                    .replaceAll(" ","").split(",")).mapToInt(Integer::parseInt).toArray();
+            if (currSeqMaxValue.length > 2) {
+                for (int j = 0; j < currSeqMaxValue.length - 1; j++) {
+                    if (currSeqMaxValue[j] > maxValue)
+                        maxValue = currSeqMaxValue[j];
+                }
+            } else {
+                if (currSeqMaxValue[0] > maxValue)
+                    maxValue = currSeqMaxValue[0];
+            }
+        }
+        
+        return maxValue;
     }
 
     @Override
-    public double calculateHistoricAvgSeqValue(List<BttsSeasonStats> statsByTeam) {
-        return 0;
+    public double calculateHistoricAvgNegativeSeq(List<BttsSeasonStats> statsByTeam) {
+        int seqValues = 0;
+        int count = 0;
+        for (int i=0; i<statsByTeam.size(); i++) {
+            String[] arraySeq = statsByTeam.get(i).getNegativeSequence()
+                            .replaceAll("\\[","").replaceAll("\\]","").replaceAll(" ","").split(",");
+            count += arraySeq.length - 1;
+            for (int j = 0; j < arraySeq.length - 1; j++)
+                seqValues += Integer.parseInt(arraySeq[j]);
+        }
+
+        return Utils.beautifyDoubleValue((double) seqValues / (double) count);
     }
 
     @Override
@@ -176,20 +210,30 @@ public class BttsStrategySeasonStatsService extends StrategyScoreCalculator<Btts
     }
 
     @Override
-    public List<SimulatedMatchDto> getSimulatedMatchesByStrategyAndSeason(String season, Team team, String strategyName) {
+    public HashMap<String, Object> getSimulatedMatchesByStrategyAndSeason(String season, Team team, String strategyName) {
+        HashMap<String, Object> simuMapForSeason = new HashMap<>();
         List<SimulatedMatchDto> matchesBetted = new ArrayList<>();
         List<HistoricMatch> teamMatchesBySeason = historicMatchRepository.getTeamMatchesBySeason(team, season);
         Collections.sort(teamMatchesBySeason, HistoricMatch.matchDateComparator);
 
         if (teamMatchesBySeason.size() == 0) {
-            return matchesBetted;
+            return simuMapForSeason;
         }
 
-        boolean isActiveSequence = true;
+        List<BttsSeasonStats> statsByTeam = bttsSeasonInfoRepository.getFootballBttsStatsByTeam(team);
+        Collections.sort(statsByTeam, StrategySeasonStats.strategySeasonSorter);
+        Collections.reverse(statsByTeam);
+
+        int indexOfSeason = WINTER_SEASONS_LIST.indexOf(season);
+        statsByTeam = statsByTeam.stream().filter(s -> WINTER_SEASONS_LIST.indexOf(s.getSeason()) < indexOfSeason).collect(Collectors.toList());
+        int avgNegativeSeqForSeason = (int) Math.round(calculateHistoricAvgNegativeSeq(statsByTeam));
+        int maxNegativeSeqForSeason = calculateHistoricMaxNegativeSeq(statsByTeam);
+
+        boolean isActiveSequence = false; //when true it always bet on the first game
         int actualNegativeSequence = 0;
         for (int i = 0; i < teamMatchesBySeason.size(); i++) {
             HistoricMatch historicMatch = teamMatchesBySeason.get(i);
-            if (actualNegativeSequence >= DEFAULT_BAD_RUN_TO_NEW_SEQ) {
+            if ((actualNegativeSequence >= ( maxNegativeSeqForSeason - statsByTeam.get(0).getMaxSeqScale() % 10))) {
                 isActiveSequence = true;
             }
 
@@ -219,8 +263,10 @@ public class BttsStrategySeasonStatsService extends StrategyScoreCalculator<Btts
                 }
             }
         }
-
-        return matchesBetted;
+        simuMapForSeason.put("matchesBetted", matchesBetted);
+        simuMapForSeason.put("avgNegativeSeq", avgNegativeSeqForSeason);
+        simuMapForSeason.put("maxNegativeSeq", maxNegativeSeqForSeason);
+        return simuMapForSeason;
     }
 
     @Override
@@ -244,11 +290,11 @@ public class BttsStrategySeasonStatsService extends StrategyScoreCalculator<Btts
 
         double avgBttsRate = Utils.beautifyDoubleValue(BttsRates / 3);
 
-        if (isBetween(avgBttsRate,50,100)) {
+        if (isBetween(avgBttsRate,60,100)) {
             return 100;
-        } else if(isBetween(avgBttsRate,40,50)) {
+        } else if(isBetween(avgBttsRate,50,60)) {
             return 90;
-        } else if(isBetween(avgBttsRate,35,40)) {
+        } else if(isBetween(avgBttsRate,35,50)) {
             return 80;
         } else if(isBetween(avgBttsRate,30,35)) {
             return 60;
@@ -269,11 +315,11 @@ public class BttsStrategySeasonStatsService extends StrategyScoreCalculator<Btts
 
         double avgBttsRate = Utils.beautifyDoubleValue(BttsRates / statsByTeam.size());
 
-        if (isBetween(avgBttsRate,50,100)) {
+        if (isBetween(avgBttsRate,60,100)) {
             return 100;
-        } else if(isBetween(avgBttsRate,40,50)) {
+        } else if(isBetween(avgBttsRate,50,60)) {
             return 90;
-        } else if(isBetween(avgBttsRate,35,40)) {
+        } else if(isBetween(avgBttsRate,35,50)) {
             return 80;
         } else if(isBetween(avgBttsRate,30,35)) {
             return 60;

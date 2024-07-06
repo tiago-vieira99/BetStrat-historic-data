@@ -1,6 +1,5 @@
 package com.api.BetStrat.service.handball;
 
-import com.api.BetStrat.dto.SimulatedMatchDto;
 import com.api.BetStrat.enums.TeamScoreEnum;
 import com.api.BetStrat.entity.HistoricMatch;
 import com.api.BetStrat.entity.Team;
@@ -10,6 +9,7 @@ import com.api.BetStrat.repository.handball.Handball49WinsMarginSeasonInfoReposi
 import com.api.BetStrat.service.StrategyScoreCalculator;
 import com.api.BetStrat.service.StrategySeasonStatsInterface;
 import com.api.BetStrat.util.Utils;
+import java.util.HashMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -55,7 +55,7 @@ public class HandballWinsMargin49StrategySeasonStatsService extends StrategyScor
     }
 
     @Override
-    public List<SimulatedMatchDto> getSimulatedMatchesByStrategyAndSeason(String season, Team team, String strategyName) {
+    public HashMap<String, Object> getSimulatedMatchesByStrategyAndSeason(String season, Team team, String strategyName) {
         return null;
     }
 
@@ -136,12 +136,12 @@ public class HandballWinsMargin49StrategySeasonStatsService extends StrategyScor
     }
 
     @Override
-    public double calculateHistoricMaxSeqValue(List<Handball49WinsMarginSeasonStats> statsByTeam) {
+    public int calculateHistoricMaxNegativeSeq(List<Handball49WinsMarginSeasonStats> statsByTeam) {
         return 0;
     }
 
     @Override
-    public double calculateHistoricAvgSeqValue(List<Handball49WinsMarginSeasonStats> statsByTeam) {
+    public double calculateHistoricAvgNegativeSeq(List<Handball49WinsMarginSeasonStats> statsByTeam) {
         return 0;
     }
 

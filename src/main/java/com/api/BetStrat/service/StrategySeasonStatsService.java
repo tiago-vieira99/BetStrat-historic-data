@@ -1,6 +1,5 @@
 package com.api.BetStrat.service;
 
-import com.api.BetStrat.dto.SimulatedMatchDto;
 import com.api.BetStrat.entity.HistoricMatch;
 import com.api.BetStrat.entity.StrategySeasonStats;
 import com.api.BetStrat.entity.Team;
@@ -14,6 +13,7 @@ import com.api.BetStrat.service.handball.HandballWinsMargin712StrategySeasonStat
 import com.api.BetStrat.service.hockey.HockeyDrawStrategySeasonStatsService;
 import com.api.BetStrat.service.hockey.WinsMargin3StrategySeasonStatsService;
 import com.api.BetStrat.service.hockey.WinsMarginAny2StrategySeasonStatsService;
+import java.util.HashMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -91,7 +91,7 @@ public class StrategySeasonStatsService<T extends StrategySeasonStats> extends S
     }
 
     @Override
-    public List<SimulatedMatchDto> getSimulatedMatchesByStrategyAndSeason(String season, Team team, String strategy) {
+    public HashMap<String, Object> getSimulatedMatchesByStrategyAndSeason(String season, Team team, String strategy) {
         // Get the service implementation corresponding to the type of strategy
         StrategySeasonStatsInterface<T> service = (StrategySeasonStatsInterface<T>)
                 serviceMap.get(serviceMap.keySet().stream().filter(s -> s.getSimpleName().equals(strategy)).findFirst().get());

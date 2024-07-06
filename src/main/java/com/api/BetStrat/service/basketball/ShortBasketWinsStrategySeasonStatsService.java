@@ -1,6 +1,5 @@
 package com.api.BetStrat.service.basketball;
 
-import com.api.BetStrat.dto.SimulatedMatchDto;
 import com.api.BetStrat.enums.TeamScoreEnum;
 import com.api.BetStrat.entity.HistoricMatch;
 import com.api.BetStrat.entity.basketball.ShortBasketWinsSeasonStats;
@@ -10,6 +9,7 @@ import com.api.BetStrat.repository.basketball.ShortWinsSeasonInfoRepository;
 import com.api.BetStrat.service.StrategyScoreCalculator;
 import com.api.BetStrat.service.StrategySeasonStatsInterface;
 import com.api.BetStrat.util.Utils;
+import java.util.HashMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -54,7 +54,7 @@ public class ShortBasketWinsStrategySeasonStatsService extends StrategyScoreCalc
     }
 
     @Override
-    public List<SimulatedMatchDto> getSimulatedMatchesByStrategyAndSeason(String season, Team team, String strategyName) {
+    public HashMap<String, Object> getSimulatedMatchesByStrategyAndSeason(String season, Team team, String strategyName) {
         return null;
     }
 
@@ -135,12 +135,12 @@ public class ShortBasketWinsStrategySeasonStatsService extends StrategyScoreCalc
     }
 
     @Override
-    public double calculateHistoricMaxSeqValue(List<ShortBasketWinsSeasonStats> statsByTeam) {
+    public int calculateHistoricMaxNegativeSeq(List<ShortBasketWinsSeasonStats> statsByTeam) {
         return 0;
     }
 
     @Override
-    public double calculateHistoricAvgSeqValue(List<ShortBasketWinsSeasonStats> statsByTeam) {
+    public double calculateHistoricAvgNegativeSeq(List<ShortBasketWinsSeasonStats> statsByTeam) {
         return 0;
     }
 

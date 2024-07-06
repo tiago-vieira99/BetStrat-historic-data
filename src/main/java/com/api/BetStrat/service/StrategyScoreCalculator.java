@@ -30,9 +30,9 @@ public abstract class StrategyScoreCalculator<T extends StrategySeasonStats> {
     }
 
     //TODO impl methods to find maxSeqValue and avgSeqValue
-    public abstract double calculateHistoricMaxSeqValue(List<T> statsByTeam);
+    public abstract int calculateHistoricMaxNegativeSeq(List<T> statsByTeam);
 
-    public abstract double calculateHistoricAvgSeqValue(List<T> statsByTeam);
+    public abstract double calculateHistoricAvgNegativeSeq(List<T> statsByTeam);
 
     public abstract int calculateLast3SeasonsRateScore(List<T> statsByTeam);
 

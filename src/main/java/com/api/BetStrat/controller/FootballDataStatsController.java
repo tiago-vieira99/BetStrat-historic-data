@@ -161,12 +161,10 @@ public class FootballDataStatsController {
     public ResponseEntity<String> updateAllTeamsStatsByStrategy (@Valid @RequestParam  String strategy) {
         List<Team> allTeams = teamRepository.findAll().stream().filter(t -> t.getSport().equals("Football")).collect(Collectors.toList());
 
-        for (int i=0; i< allTeams.size(); i++) {
-            log.info("handling " + allTeams.get(i).getName());
+        for (int i=0; i < allTeams.size(); i++) {
+            log.info("handling " + allTeams.get(i).getName() + "   " + i);
             strategySeasonStatsService.updateStrategySeasonStats(allTeams.get(i), strategy.concat("SeasonStats"));
             teamService.updateTeamScore(allTeams.get(i), strategy.concat("SeasonStats"));
-            System.out.println();
-            break;
         }
 
         return ResponseEntity.ok().body("OK");
