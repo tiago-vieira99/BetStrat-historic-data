@@ -12,6 +12,7 @@ import com.api.BetStrat.dto.SimulatedMatchDto;
 import com.api.BetStrat.entity.HistoricMatch;
 import com.api.BetStrat.entity.StrategySeasonStats;
 import com.api.BetStrat.entity.Team;
+import com.api.BetStrat.entity.football.BttsSeasonStats;
 import com.api.BetStrat.entity.football.CleanSheetSeasonStats;
 import com.api.BetStrat.enums.TeamScoreEnum;
 import com.api.BetStrat.repository.HistoricMatchRepository;
@@ -20,6 +21,7 @@ import com.api.BetStrat.service.StrategyScoreCalculator;
 import com.api.BetStrat.service.StrategySeasonStatsInterface;
 import com.api.BetStrat.util.Utils;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -55,51 +57,62 @@ public class CleanSheetStrategySeasonStatsService extends StrategyScoreCalculato
 
     @Override
     public HashMap<String, Object> getSimulatedMatchesByStrategyAndSeason(String season, Team team, String strategyName) {
-//        List<SimulatedMatchDto> matchesBetted = new ArrayList<>();
-//        List<HistoricMatch> teamMatchesBySeason = historicMatchRepository.getTeamMatchesBySeason(team, season);
-//        Collections.sort(teamMatchesBySeason, HistoricMatch.matchDateComparator);
-//
-//        if (teamMatchesBySeason.size() == 0) {
-//            return matchesBetted;
-//        }
-//
-//        boolean isActiveSequence = true;
-//        int actualNegativeSequence = 0;
-//        for (int i = 0; i < teamMatchesBySeason.size(); i++) {
-//            HistoricMatch historicMatch = teamMatchesBySeason.get(i);
-//            if (actualNegativeSequence >= DEFAULT_BAD_RUN_TO_NEW_SEQ) {
-//                isActiveSequence = true;
-//            }
-//
-//            if (isActiveSequence) {
-//                SimulatedMatchDto simulatedMatchDto = new SimulatedMatchDto();
-//                simulatedMatchDto.setMatchDate(historicMatch.getMatchDate());
-//                simulatedMatchDto.setHomeTeam(historicMatch.getHomeTeam());
-//                simulatedMatchDto.setAwayTeam(historicMatch.getAwayTeam());
-//                simulatedMatchDto.setMatchNumber(String.valueOf(i+1));
-//                simulatedMatchDto.setHtResult(historicMatch.getHtResult());
-//                simulatedMatchDto.setFtResult(historicMatch.getFtResult());
-//                simulatedMatchDto.setSeason(season);
-//                simulatedMatchDto.setCompetition(historicMatch.getCompetition());
-//                if (matchFollowStrategyRules(historicMatch, team.getName(), null)) {
-//                    simulatedMatchDto.setIsGreen(true);
-//                    actualNegativeSequence = 0;
-//                    isActiveSequence = false;
-//                } else {
-//                    simulatedMatchDto.setIsGreen(false);
-//                }
-//                matchesBetted.add(simulatedMatchDto);
-//            } else {
-//                if (!matchFollowStrategyRules(historicMatch, team.getName(), null)) {
-//                    actualNegativeSequence++;
-//                } else {
-//                    actualNegativeSequence = 0;
-//                }
-//            }
-//        }
-//
-//        return matchesBetted;
-        return null;
+        HashMap<String, Object> simuMapForSeason = new HashMap<>();
+        List<SimulatedMatchDto> matchesBetted = new ArrayList<>();
+        List<HistoricMatch> teamMatchesBySeason = historicMatchRepository.getTeamMatchesBySeason(team, season);
+        Collections.sort(teamMatchesBySeason, HistoricMatch.matchDateComparator);
+
+        if (teamMatchesBySeason.size() == 0) {
+            return simuMapForSeason;
+        }
+
+        List<CleanSheetSeasonStats> statsByTeam = cleanSheetSeasonInfoRepository.getFootballCleanSheetStatsByTeam(team);
+        Collections.sort(statsByTeam, StrategySeasonStats.strategySeasonSorter);
+        Collections.reverse(statsByTeam);
+
+        int indexOfSeason = WINTER_SEASONS_LIST.indexOf(season);
+        statsByTeam = statsByTeam.stream().filter(s -> WINTER_SEASONS_LIST.indexOf(s.getSeason()) < indexOfSeason).collect(Collectors.toList());
+        int avgNegativeSeqForSeason = (int) Math.round(calculateHistoricAvgNegativeSeq(statsByTeam));
+        int maxNegativeSeqForSeason = calculateHistoricMaxNegativeSeq(statsByTeam);
+
+        boolean isActiveSequence = false; //when true it always bet on the first game
+        int actualNegativeSequence = 0;
+        for (int i = 0; i < teamMatchesBySeason.size(); i++) {
+            HistoricMatch historicMatch = teamMatchesBySeason.get(i);
+            if ((actualNegativeSequence >= Math.max(DEFAULT_BAD_RUN_TO_NEW_SEQ, (maxNegativeSeqForSeason - statsByTeam.get(0).getMaxSeqScale() / 10) / 2))) {
+                isActiveSequence = true;
+            }
+
+            if (isActiveSequence) {
+                SimulatedMatchDto simulatedMatchDto = new SimulatedMatchDto();
+                simulatedMatchDto.setMatchDate(historicMatch.getMatchDate());
+                simulatedMatchDto.setHomeTeam(historicMatch.getHomeTeam());
+                simulatedMatchDto.setAwayTeam(historicMatch.getAwayTeam());
+                simulatedMatchDto.setMatchNumber(String.valueOf(i+1));
+                simulatedMatchDto.setHtResult(historicMatch.getHtResult());
+                simulatedMatchDto.setFtResult(historicMatch.getFtResult());
+                simulatedMatchDto.setSeason(season);
+                simulatedMatchDto.setCompetition(historicMatch.getCompetition());
+                if (matchFollowStrategyRules(historicMatch, team.getName(), null)) {
+                    simulatedMatchDto.setIsGreen(true);
+                    actualNegativeSequence = 0;
+                    isActiveSequence = false;
+                } else {
+                    simulatedMatchDto.setIsGreen(false);
+                }
+                matchesBetted.add(simulatedMatchDto);
+            } else {
+                if (!matchFollowStrategyRules(historicMatch, team.getName(), null)) {
+                    actualNegativeSequence++;
+                } else {
+                    actualNegativeSequence = 0;
+                }
+            }
+        }
+        simuMapForSeason.put("matchesBetted", matchesBetted);
+        simuMapForSeason.put("avgNegativeSeq", avgNegativeSeqForSeason);
+        simuMapForSeason.put("maxNegativeSeq", maxNegativeSeqForSeason);
+        return simuMapForSeason;
     }
 
     @Override
@@ -129,9 +142,7 @@ public class CleanSheetStrategySeasonStatsService extends StrategyScoreCalculato
             if (!statsByTeam.stream().filter(s -> s.getSeason().equals(season)).findAny().isPresent()) {
                 String newSeasonUrl = "";
 
-                List<HistoricMatch> teamMatchesBySeason = historicMatchRepository.getTeamMatchesBySeason(team, season);
-                String mainCompetition = Utils.findMainCompetition(teamMatchesBySeason);
-                List<HistoricMatch> filteredMatches = teamMatchesBySeason.stream().filter(t -> t.getCompetition().equals(mainCompetition)).collect(Collectors.toList());
+                List<HistoricMatch> filteredMatches = historicMatchRepository.getTeamMatchesBySeason(team, season);
                 Collections.sort(filteredMatches, HistoricMatch.matchDateComparator);
 
                 if (filteredMatches.size() == 0) {
@@ -163,7 +174,7 @@ public class CleanSheetStrategySeasonStatsService extends StrategyScoreCalculato
                 } else {
                     cleanSheetSeasonInfo.setCleanSheetRate(Utils.beautifyDoubleValue(100*totalCleanSheets/filteredMatches.size()));
                 }
-                cleanSheetSeasonInfo.setCompetition(mainCompetition);
+                cleanSheetSeasonInfo.setCompetition("all");
                 cleanSheetSeasonInfo.setNegativeSequence(strategySequence.toString());
                 cleanSheetSeasonInfo.setNumMatches(filteredMatches.size());
                 cleanSheetSeasonInfo.setNumCleanSheets(totalCleanSheets);
@@ -181,21 +192,46 @@ public class CleanSheetStrategySeasonStatsService extends StrategyScoreCalculato
 
     @Override
     public int calculateHistoricMaxNegativeSeq(List<CleanSheetSeasonStats> statsByTeam) {
-        return 0;
+        int maxValue = 0;
+        for (int i=0; i<statsByTeam.size(); i++) {
+            int[] currSeqMaxValue = Arrays.stream(statsByTeam.get(i).getNegativeSequence().replaceAll("\\[","").replaceAll("\\]","")
+                .replaceAll(" ","").split(",")).mapToInt(Integer::parseInt).toArray();
+            if (currSeqMaxValue.length > 2) {
+                for (int j = 0; j < currSeqMaxValue.length - 1; j++) {
+                    if (currSeqMaxValue[j] > maxValue)
+                        maxValue = currSeqMaxValue[j];
+                }
+            } else {
+                if (currSeqMaxValue[0] > maxValue)
+                    maxValue = currSeqMaxValue[0];
+            }
+        }
+
+        return maxValue;
     }
 
     @Override
     public double calculateHistoricAvgNegativeSeq(List<CleanSheetSeasonStats> statsByTeam) {
-        return 0;
+        int seqValues = 0;
+        int count = 0;
+        for (int i=0; i<statsByTeam.size(); i++) {
+            String[] arraySeq = statsByTeam.get(i).getNegativeSequence()
+                .replaceAll("\\[","").replaceAll("\\]","").replaceAll(" ","").split(",");
+            count += arraySeq.length - 1;
+            for (int j = 0; j < arraySeq.length - 1; j++)
+                seqValues += Integer.parseInt(arraySeq[j]);
+        }
+
+        return Utils.beautifyDoubleValue((double) seqValues / (double) count);
     }
 
     @Override
     public Team updateTeamScore(Team teamByName) {
         List<CleanSheetSeasonStats> statsByTeam = cleanSheetSeasonInfoRepository.getFootballCleanSheetStatsByTeam(teamByName);
-        Collections.sort(statsByTeam, StrategySeasonStats.strategySeasonSorter); //TODO test this
+        Collections.sort(statsByTeam, StrategySeasonStats.strategySeasonSorter);
         Collections.reverse(statsByTeam);
 
-        if (statsByTeam.size() < 3) {
+        if (statsByTeam.size() < 3 || statsByTeam.stream().filter(s -> s.getNumMatches() < 15).findAny().isPresent()) {
             teamByName.setWinsScore(TeamScoreEnum.INSUFFICIENT_DATA.getValue());
         } else {
             double totalScore = calculateTotalFinalScore(statsByTeam);
@@ -212,11 +248,14 @@ public class CleanSheetStrategySeasonStatsService extends StrategyScoreCalculato
         int allSeasonsmaxSeqWOCleanSheetScore = calculateAllSeasonsMaxSeqWOGreenScore(statsByTeam);
         int last3SeasonsStdDevScore = calculateLast3SeasonsStdDevScore(statsByTeam);
         int allSeasonsStdDevScore = calculateAllSeasonsStdDevScore(statsByTeam);
+        int last3SeasonsCoefDevScore = calculateLast3SeasonsCoefDevScore(statsByTeam);
+        int allSeasonsCoefDevScore = calculateAllSeasonsCoefDevScore(statsByTeam);
         int totalMatchesScore = calculateLeagueMatchesScore(statsByTeam.get(0).getNumMatches());
 
-        return Utils.beautifyDoubleValue(0.2*last3SeasonsCleanSheetRateScore + 0.1*allSeasonsCleanSheetRateScore +
-            0.18*last3SeasonsmaxSeqWOCleanSheetScore + 0.1*allSeasonsmaxSeqWOCleanSheetScore +
-            0.3*last3SeasonsStdDevScore + 0.1*allSeasonsStdDevScore + 0.02*totalMatchesScore);
+        return Utils.beautifyDoubleValue(0.15*last3SeasonsCleanSheetRateScore + 0.07*allSeasonsCleanSheetRateScore +
+            0.15*last3SeasonsmaxSeqWOCleanSheetScore + 0.07*allSeasonsmaxSeqWOCleanSheetScore +
+            0.22*last3SeasonsCoefDevScore + 0.09*allSeasonsCoefDevScore +
+            0.18*last3SeasonsStdDevScore + 0.07*allSeasonsStdDevScore + 0.02*totalMatchesScore);
     }
 
     @Override
@@ -245,13 +284,13 @@ public class CleanSheetStrategySeasonStatsService extends StrategyScoreCalculato
 
         double avgWinsRate = Utils.beautifyDoubleValue(winsRates / 3);
 
-        if (super.isBetween(avgWinsRate,80,100)) {
+        if (super.isBetween(avgWinsRate,40,100)) {
             return 100;
-        } else if(super.isBetween(avgWinsRate,70,80)) {
+        } else if(super.isBetween(avgWinsRate,30,40)) {
             return 80;
-        } else if(super.isBetween(avgWinsRate,50,70)) {
+        } else if(super.isBetween(avgWinsRate,25,30)) {
             return 60;
-        } else if(super.isBetween(avgWinsRate,0,50)) {
+        } else if(super.isBetween(avgWinsRate,0,25)) {
             return 30;
         }
         return 0;
@@ -266,13 +305,13 @@ public class CleanSheetStrategySeasonStatsService extends StrategyScoreCalculato
 
         double avgWinsRate = Utils.beautifyDoubleValue(winsRates / statsByTeam.size());
 
-        if (super.isBetween(avgWinsRate,80,100)) {
+        if (super.isBetween(avgWinsRate,40,100)) {
             return 100;
-        } else if(super.isBetween(avgWinsRate,70,80)) {
+        } else if(super.isBetween(avgWinsRate,30,40)) {
             return 80;
-        } else if(super.isBetween(avgWinsRate,50,70)) {
+        } else if(super.isBetween(avgWinsRate,25,30)) {
             return 60;
-        } else if(super.isBetween(avgWinsRate,0,50)) {
+        } else if(super.isBetween(avgWinsRate,0,25)) {
             return 30;
         }
         return 0;
@@ -280,51 +319,11 @@ public class CleanSheetStrategySeasonStatsService extends StrategyScoreCalculato
 
     @Override
     public int calculateLast3SeasonsTotalWinsRateScore(List<CleanSheetSeasonStats> statsByTeam) {
-        double totalWinsRates = 0;
-        for (int i=0; i<3; i++) {
-            totalWinsRates += statsByTeam.get(i).getCleanSheetRate();
-        }
-
-        double avgWinsRate = Utils.beautifyDoubleValue(totalWinsRates / 3);
-
-        if (super.isBetween(avgWinsRate,80,100)) {
-            return 100;
-        } else if(super.isBetween(avgWinsRate,70,80)) {
-            return 90;
-        } else if(super.isBetween(avgWinsRate,60,70)) {
-            return 80;
-        } else if(super.isBetween(avgWinsRate,50,60)) {
-            return 70;
-        } else if(super.isBetween(avgWinsRate,40,50)) {
-            return 60;
-        } else if(super.isBetween(avgWinsRate,0,40)) {
-            return 30;
-        }
         return 0;
     }
 
     @Override
     public int calculateAllSeasonsTotalWinsRateScore(List<CleanSheetSeasonStats> statsByTeam) {
-        double totalWinsRates = 0;
-        for (int i=0; i<statsByTeam.size(); i++) {
-            totalWinsRates += statsByTeam.get(i).getCleanSheetRate();
-        }
-
-        double avgWinsRate = Utils.beautifyDoubleValue(totalWinsRates / statsByTeam.size());
-
-        if (super.isBetween(avgWinsRate,80,100)) {
-            return 100;
-        } else if(super.isBetween(avgWinsRate,70,80)) {
-            return 90;
-        } else if(super.isBetween(avgWinsRate,60,70)) {
-            return 80;
-        } else if(super.isBetween(avgWinsRate,50,60)) {
-            return 70;
-        } else if(super.isBetween(avgWinsRate,40,50)) {
-            return 60;
-        } else if(super.isBetween(avgWinsRate,0,40)) {
-            return 30;
-        }
         return 0;
     }
 
