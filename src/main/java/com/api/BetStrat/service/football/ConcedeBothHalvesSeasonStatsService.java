@@ -169,15 +169,18 @@ public class ConcedeBothHalvesSeasonStatsService extends StrategyScoreCalculator
     private double calculateTotalFinalScore(List<ConcedeBothHalvesSeasonStats> statsByTeam) {
         int last3SeasonsConcedeBothHalvesRateScore = calculateLast3SeasonsRateScore(statsByTeam);
         int allSeasonsConcedeBothHalvesRateScore = calculateAllSeasonsRateScore(statsByTeam);
-        int last3SeasonsmaxSeqWOConcedeBothHalvesScore = calculateLast3SeasonsMaxSeqWOGreenScore(statsByTeam);
-        int allSeasonsmaxSeqWOConcedeBothHalvesScore = calculateAllSeasonsMaxSeqWOGreenScore(statsByTeam);
+        int last3SeasonsmaxSeqWOGreenScore = calculateLast3SeasonsMaxSeqWOGreenScore(statsByTeam);
+        int allSeasonsmaxSeqWOGreenScore = calculateAllSeasonsMaxSeqWOGreenScore(statsByTeam);
         int last3SeasonsStdDevScore = calculateLast3SeasonsStdDevScore(statsByTeam);
         int allSeasonsStdDevScore = calculateAllSeasonsStdDevScore(statsByTeam);
+        int last3SeasonsCoefDevScore = calculateLast3SeasonsCoefDevScore(statsByTeam);
+        int allSeasonsCoefDevScore = calculateAllSeasonsCoefDevScore(statsByTeam);
         int totalMatchesScore = calculateLeagueMatchesScore(statsByTeam.get(0).getNumMatches());
 
-        return Utils.beautifyDoubleValue(0.2*last3SeasonsConcedeBothHalvesRateScore + 0.1*allSeasonsConcedeBothHalvesRateScore +
-            0.18*last3SeasonsmaxSeqWOConcedeBothHalvesScore + 0.1*allSeasonsmaxSeqWOConcedeBothHalvesScore +
-            0.3*last3SeasonsStdDevScore + 0.1*allSeasonsStdDevScore + 0.02*totalMatchesScore);
+        return Utils.beautifyDoubleValue(0.15*last3SeasonsConcedeBothHalvesRateScore + 0.05*allSeasonsConcedeBothHalvesRateScore +
+            0.15*last3SeasonsmaxSeqWOGreenScore + 0.07*allSeasonsmaxSeqWOGreenScore +
+            0.2*last3SeasonsCoefDevScore + 0.11*allSeasonsCoefDevScore +
+            0.18*last3SeasonsStdDevScore + 0.07*allSeasonsStdDevScore + 0.02*totalMatchesScore);
     }
 
     @Override
@@ -199,52 +202,69 @@ public class ConcedeBothHalvesSeasonStatsService extends StrategyScoreCalculator
 
     @Override
     public HashMap<String, Object> getSimulatedMatchesByStrategyAndSeason(String season, Team team, String strategyName) {
-//        List<SimulatedMatchDto> matchesBetted = new ArrayList<>();
-//        List<HistoricMatch> teamMatchesBySeason = historicMatchRepository.getTeamMatchesBySeason(team, season);
-//        Collections.sort(teamMatchesBySeason, HistoricMatch.matchDateComparator);
-//
-//        if (teamMatchesBySeason.size() == 0) {
-//            return matchesBetted;
-//        }
-//
-//        boolean isActiveSequence = true;
-//        int actualNegativeSequence = 0;
-//        for (int i = 0; i < teamMatchesBySeason.size(); i++) {
-//            HistoricMatch historicMatch = teamMatchesBySeason.get(i);
-//            if (actualNegativeSequence >= DEFAULT_BAD_RUN_TO_NEW_SEQ) {
-//                isActiveSequence = true;
-//            }
-//
-//            if (isActiveSequence) {
-//                SimulatedMatchDto simulatedMatchDto = new SimulatedMatchDto();
-//                simulatedMatchDto.setMatchDate(historicMatch.getMatchDate());
-//                simulatedMatchDto.setHomeTeam(historicMatch.getHomeTeam());
-//                simulatedMatchDto.setAwayTeam(historicMatch.getAwayTeam());
-//                simulatedMatchDto.setMatchNumber(String.valueOf(i+1));
-//                simulatedMatchDto.setHtResult(historicMatch.getHtResult());
-//                simulatedMatchDto.setFtResult(historicMatch.getFtResult());
-//                simulatedMatchDto.setSeason(season);
-//                simulatedMatchDto.setCompetition(historicMatch.getCompetition());
-        ////add try catch here!!
-//                if (matchFollowStrategyRules(historicMatch, team.getName(), null)) {
-//                    simulatedMatchDto.setIsGreen(true);
-//                    actualNegativeSequence = 0;
-//                    isActiveSequence = false;
-//                } else {
-//                    simulatedMatchDto.setIsGreen(false);
-//                }
-//                matchesBetted.add(simulatedMatchDto);
-//            } else {
-//                if (!matchFollowStrategyRules(historicMatch, team.getName(), null)) {
-//                    actualNegativeSequence++;
-//                } else {
-//                    actualNegativeSequence = 0;
-//                }
-//            }
-//        }
-//
-//        return matchesBetted;
-        return null;
+        HashMap<String, Object> simuMapForSeason = new HashMap<>();
+        List<SimulatedMatchDto> matchesBetted = new ArrayList<>();
+        List<HistoricMatch> teamMatchesBySeason = historicMatchRepository.getTeamMatchesBySeason(team, season);
+        Collections.sort(teamMatchesBySeason, HistoricMatch.matchDateComparator);
+
+        if (teamMatchesBySeason.size() == 0) {
+            return simuMapForSeason;
+        }
+
+        List<ConcedeBothHalvesSeasonStats> statsByTeam = concedeBothHalvesSeasonInfoRepository.getFootballConcedeBothHalvesStatsByTeam(team);
+        Collections.sort(statsByTeam, StrategySeasonStats.strategySeasonSorter);
+        Collections.reverse(statsByTeam);
+
+        int indexOfSeason = WINTER_SEASONS_LIST.indexOf(season);
+        statsByTeam = statsByTeam.stream().filter(s -> WINTER_SEASONS_LIST.indexOf(s.getSeason()) < indexOfSeason).collect(Collectors.toList());
+        int avgNegativeSeqForSeason = (int) Math.round(calculateHistoricAvgNegativeSeq(statsByTeam));
+        int maxNegativeSeqForSeason = calculateHistoricMaxNegativeSeq(statsByTeam);
+
+        boolean isActiveSequence = false; //when true it always bet on the first game
+        int actualNegativeSequence = 0;
+        for (int i = 0; i < teamMatchesBySeason.size(); i++) {
+            HistoricMatch historicMatch = teamMatchesBySeason.get(i);
+            if ((actualNegativeSequence >= Math.max(DEFAULT_BAD_RUN_TO_NEW_SEQ, (maxNegativeSeqForSeason - statsByTeam.get(0).getMaxSeqScale() / 10) / 2))) {
+                isActiveSequence = true;
+            }
+
+            boolean isMatchGreen = false;
+            try {
+                isMatchGreen = matchFollowStrategyRules(historicMatch, team.getName(), null);
+            } catch (NumberFormatException e) {
+                return null;
+            }
+
+            if (isActiveSequence) {
+                SimulatedMatchDto simulatedMatchDto = new SimulatedMatchDto();
+                simulatedMatchDto.setMatchDate(historicMatch.getMatchDate());
+                simulatedMatchDto.setHomeTeam(historicMatch.getHomeTeam());
+                simulatedMatchDto.setAwayTeam(historicMatch.getAwayTeam());
+                simulatedMatchDto.setMatchNumber(String.valueOf(i+1));
+                simulatedMatchDto.setHtResult(historicMatch.getHtResult());
+                simulatedMatchDto.setFtResult(historicMatch.getFtResult());
+                simulatedMatchDto.setSeason(season);
+                simulatedMatchDto.setCompetition(historicMatch.getCompetition());
+                if (isMatchGreen) {
+                    simulatedMatchDto.setIsGreen(true);
+                    actualNegativeSequence = 0;
+                    isActiveSequence = false;
+                } else {
+                    simulatedMatchDto.setIsGreen(false);
+                }
+                matchesBetted.add(simulatedMatchDto);
+            } else {
+                if (!isMatchGreen) {
+                    actualNegativeSequence++;
+                } else {
+                    actualNegativeSequence = 0;
+                }
+            }
+        }
+        simuMapForSeason.put("matchesBetted", matchesBetted);
+        simuMapForSeason.put("avgNegativeSeq", avgNegativeSeqForSeason);
+        simuMapForSeason.put("maxNegativeSeq", maxNegativeSeqForSeason);
+        return simuMapForSeason;
     }
 
     @Override
@@ -272,19 +292,15 @@ public class ConcedeBothHalvesSeasonStatsService extends StrategyScoreCalculator
             GoalsFestRates += statsByTeam.get(i).getConcedeBothHalvesRate();
         }
 
-        double avgGoalsFestRate = Utils.beautifyDoubleValue(GoalsFestRates / 3);
+        double avgWinsRate = Utils.beautifyDoubleValue(GoalsFestRates / 3);
 
-        if (isBetween(avgGoalsFestRate,50,100)) {
+        if (super.isBetween(avgWinsRate,40,100)) {
             return 100;
-        } else if(isBetween(avgGoalsFestRate,40,50)) {
-            return 90;
-        } else if(isBetween(avgGoalsFestRate,35,40)) {
+        } else if(super.isBetween(avgWinsRate,30,40)) {
             return 80;
-        } else if(isBetween(avgGoalsFestRate,30,35)) {
+        } else if(super.isBetween(avgWinsRate,25,30)) {
             return 60;
-        } else if(isBetween(avgGoalsFestRate,20,30)) {
-            return 50;
-        } else if(isBetween(avgGoalsFestRate,0,20)) {
+        } else if(super.isBetween(avgWinsRate,0,25)) {
             return 30;
         }
         return 0;
@@ -297,19 +313,15 @@ public class ConcedeBothHalvesSeasonStatsService extends StrategyScoreCalculator
             GoalsFestRates += statsByTeam.get(i).getConcedeBothHalvesRate();
         }
 
-        double avgGoalsFestRate = Utils.beautifyDoubleValue(GoalsFestRates / statsByTeam.size());
+        double avgWinsRate = Utils.beautifyDoubleValue(GoalsFestRates / statsByTeam.size());
 
-        if (isBetween(avgGoalsFestRate,50,100)) {
+        if (super.isBetween(avgWinsRate,40,100)) {
             return 100;
-        } else if(isBetween(avgGoalsFestRate,40,50)) {
-            return 90;
-        } else if(isBetween(avgGoalsFestRate,35,40)) {
+        } else if(super.isBetween(avgWinsRate,30,40)) {
             return 80;
-        } else if(isBetween(avgGoalsFestRate,30,35)) {
+        } else if(super.isBetween(avgWinsRate,25,30)) {
             return 60;
-        } else if(isBetween(avgGoalsFestRate,20,30)) {
-            return 50;
-        } else if(isBetween(avgGoalsFestRate,0,20)) {
+        } else if(super.isBetween(avgWinsRate,0,25)) {
             return 30;
         }
         return 0;

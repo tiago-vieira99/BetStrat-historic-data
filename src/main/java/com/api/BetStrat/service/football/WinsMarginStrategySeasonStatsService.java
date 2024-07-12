@@ -258,21 +258,21 @@ public class WinsMarginStrategySeasonStatsService extends StrategyScoreCalculato
     }
 
     private double calculateTotalFinalScore(List<WinsMarginSeasonStats> statsByTeam) {
-        int last3SeasonsMarginWinsRateScore = calculateLast3SeasonsRateScore(statsByTeam);
-        int allSeasonsMarginWinsRateScore = calculateAllSeasonsRateScore(statsByTeam);
+        int last3SeasonsGreensRateScore = calculateLast3SeasonsRateScore(statsByTeam);
+        int allSeasonsGreensRateScore = calculateAllSeasonsRateScore(statsByTeam);
         int last3SeasonsTotalWinsRateScore = calculateLast3SeasonsTotalWinsRateScore(statsByTeam);
         int allSeasonsTotalWinsRateScore = calculateAllSeasonsTotalWinsRateScore(statsByTeam);
-        int last3SeasonsmaxSeqWOMarginWinsScore = calculateLast3SeasonsMaxSeqWOGreenScore(statsByTeam);
-        int allSeasonsmaxSeqWOMarginWinsScore = calculateAllSeasonsMaxSeqWOGreenScore(statsByTeam);
+        int last3SeasonsmaxSeqWOGreensScore = calculateLast3SeasonsMaxSeqWOGreenScore(statsByTeam);
+        int allSeasonsmaxSeqWOGreensScore = calculateAllSeasonsMaxSeqWOGreenScore(statsByTeam);
         int last3SeasonsStdDevScore = calculateLast3SeasonsStdDevScore(statsByTeam);
         int allSeasonsStdDevScore = calculateAllSeasonsStdDevScore(statsByTeam);
         int last3SeasonsCoefDevScore = calculateLast3SeasonsCoefDevScore(statsByTeam);
         int allSeasonsCoefDevScore = calculateAllSeasonsCoefDevScore(statsByTeam);
         int totalMatchesScore = calculateLeagueMatchesScore(statsByTeam.get(0).getNumMatches());
 
-        return Utils.beautifyDoubleValue(0.1*last3SeasonsMarginWinsRateScore + 0.05*allSeasonsMarginWinsRateScore +
+        return Utils.beautifyDoubleValue(0.1*last3SeasonsGreensRateScore + 0.05*allSeasonsGreensRateScore +
             0.1*last3SeasonsTotalWinsRateScore + 0.05*allSeasonsTotalWinsRateScore +
-            0.14*last3SeasonsmaxSeqWOMarginWinsScore + 0.05*allSeasonsmaxSeqWOMarginWinsScore +
+            0.14*last3SeasonsmaxSeqWOGreensScore + 0.05*allSeasonsmaxSeqWOGreensScore +
             0.2*last3SeasonsCoefDevScore + 0.07*allSeasonsCoefDevScore +
             0.15*last3SeasonsStdDevScore + 0.07*allSeasonsStdDevScore + 0.02*totalMatchesScore);
     }

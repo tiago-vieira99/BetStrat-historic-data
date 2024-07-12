@@ -13,6 +13,7 @@ import com.api.BetStrat.entity.HistoricMatch;
 import com.api.BetStrat.entity.StrategySeasonStats;
 import com.api.BetStrat.entity.Team;
 import com.api.BetStrat.entity.football.CleanSheetSeasonStats;
+import com.api.BetStrat.entity.football.ConcedeBothHalvesSeasonStats;
 import com.api.BetStrat.entity.football.ScoreBothHalvesSeasonStats;
 import com.api.BetStrat.enums.TeamScoreEnum;
 import com.api.BetStrat.repository.HistoricMatchRepository;
@@ -57,52 +58,69 @@ public class ScoreBothHalvesSeasonStatsService extends StrategyScoreCalculator<S
 
     @Override
     public HashMap<String, Object> getSimulatedMatchesByStrategyAndSeason(String season, Team team, String strategyName) {
-//        List<SimulatedMatchDto> matchesBetted = new ArrayList<>();
-//        List<HistoricMatch> teamMatchesBySeason = historicMatchRepository.getTeamMatchesBySeason(team, season);
-//        Collections.sort(teamMatchesBySeason, HistoricMatch.matchDateComparator);
-//
-//        if (teamMatchesBySeason.size() == 0) {
-//            return matchesBetted;
-//        }
-//
-//        boolean isActiveSequence = true;
-//        int actualNegativeSequence = 0;
-//        for (int i = 0; i < teamMatchesBySeason.size(); i++) {
-//            HistoricMatch historicMatch = teamMatchesBySeason.get(i);
-//            if (actualNegativeSequence >= DEFAULT_BAD_RUN_TO_NEW_SEQ) {
-//                isActiveSequence = true;
-//            }
-//
-//            if (isActiveSequence) {
-//                SimulatedMatchDto simulatedMatchDto = new SimulatedMatchDto();
-//                simulatedMatchDto.setMatchDate(historicMatch.getMatchDate());
-//                simulatedMatchDto.setHomeTeam(historicMatch.getHomeTeam());
-//                simulatedMatchDto.setAwayTeam(historicMatch.getAwayTeam());
-//                simulatedMatchDto.setMatchNumber(String.valueOf(i+1));
-//                simulatedMatchDto.setHtResult(historicMatch.getHtResult());
-//                simulatedMatchDto.setFtResult(historicMatch.getFtResult());
-//                simulatedMatchDto.setSeason(season);
-//                simulatedMatchDto.setCompetition(historicMatch.getCompetition());
-        // //add try catch here
-//                if (matchFollowStrategyRules(historicMatch, team.getName(), null)) {
-//                    simulatedMatchDto.setIsGreen(true);
-//                    actualNegativeSequence = 0;
-//                    isActiveSequence = false;
-//                } else {
-//                    simulatedMatchDto.setIsGreen(false);
-//                }
-//                matchesBetted.add(simulatedMatchDto);
-//            } else {
-//                if (!matchFollowStrategyRules(historicMatch, team.getName(), null)) {
-//                    actualNegativeSequence++;
-//                } else {
-//                    actualNegativeSequence = 0;
-//                }
-//            }
-//        }
-//
-//        return matchesBetted;
-        return null;
+        HashMap<String, Object> simuMapForSeason = new HashMap<>();
+        List<SimulatedMatchDto> matchesBetted = new ArrayList<>();
+        List<HistoricMatch> teamMatchesBySeason = historicMatchRepository.getTeamMatchesBySeason(team, season);
+        Collections.sort(teamMatchesBySeason, HistoricMatch.matchDateComparator);
+
+        if (teamMatchesBySeason.size() == 0) {
+            return simuMapForSeason;
+        }
+
+        List<ScoreBothHalvesSeasonStats> statsByTeam = scoreBothHalvesSeasonInfoRepository.getFootballScoreBothHalvesStatsByTeam(team);
+        Collections.sort(statsByTeam, StrategySeasonStats.strategySeasonSorter);
+        Collections.reverse(statsByTeam);
+
+        int indexOfSeason = WINTER_SEASONS_LIST.indexOf(season);
+        statsByTeam = statsByTeam.stream().filter(s -> WINTER_SEASONS_LIST.indexOf(s.getSeason()) < indexOfSeason).collect(Collectors.toList());
+        int avgNegativeSeqForSeason = (int) Math.round(calculateHistoricAvgNegativeSeq(statsByTeam));
+        int maxNegativeSeqForSeason = calculateHistoricMaxNegativeSeq(statsByTeam);
+
+        boolean isActiveSequence = false; //when true it always bet on the first game
+        int actualNegativeSequence = 0;
+        for (int i = 0; i < teamMatchesBySeason.size(); i++) {
+            HistoricMatch historicMatch = teamMatchesBySeason.get(i);
+            if ((actualNegativeSequence >= Math.max(DEFAULT_BAD_RUN_TO_NEW_SEQ, (maxNegativeSeqForSeason - statsByTeam.get(0).getMaxSeqScale() / 10) / 2))) {
+                isActiveSequence = true;
+            }
+
+            boolean isMatchGreen = false;
+            try {
+                isMatchGreen = matchFollowStrategyRules(historicMatch, team.getName(), null);
+            } catch (NumberFormatException e) {
+                return null;
+            }
+
+            if (isActiveSequence) {
+                SimulatedMatchDto simulatedMatchDto = new SimulatedMatchDto();
+                simulatedMatchDto.setMatchDate(historicMatch.getMatchDate());
+                simulatedMatchDto.setHomeTeam(historicMatch.getHomeTeam());
+                simulatedMatchDto.setAwayTeam(historicMatch.getAwayTeam());
+                simulatedMatchDto.setMatchNumber(String.valueOf(i+1));
+                simulatedMatchDto.setHtResult(historicMatch.getHtResult());
+                simulatedMatchDto.setFtResult(historicMatch.getFtResult());
+                simulatedMatchDto.setSeason(season);
+                simulatedMatchDto.setCompetition(historicMatch.getCompetition());
+                if (isMatchGreen) {
+                    simulatedMatchDto.setIsGreen(true);
+                    actualNegativeSequence = 0;
+                    isActiveSequence = false;
+                } else {
+                    simulatedMatchDto.setIsGreen(false);
+                }
+                matchesBetted.add(simulatedMatchDto);
+            } else {
+                if (!isMatchGreen) {
+                    actualNegativeSequence++;
+                } else {
+                    actualNegativeSequence = 0;
+                }
+            }
+        }
+        simuMapForSeason.put("matchesBetted", matchesBetted);
+        simuMapForSeason.put("avgNegativeSeq", avgNegativeSeqForSeason);
+        simuMapForSeason.put("maxNegativeSeq", maxNegativeSeqForSeason);
+        return simuMapForSeason;
     }
 
     @Override
