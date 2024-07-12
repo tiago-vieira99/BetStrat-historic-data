@@ -186,9 +186,9 @@ public class BttsStrategySeasonStatsService extends StrategyScoreCalculator<Btts
         int allSeasonsCoefDevScore = calculateAllSeasonsCoefDevScore(statsByTeam);
         int totalMatchesScore = calculateLeagueMatchesScore(statsByTeam.get(0).getNumMatches());
 
-        return Utils.beautifyDoubleValue(0.15*last3SeasonsBttsRateScore + 0.07*allSeasonsBttsRateScore +
+        return Utils.beautifyDoubleValue(0.15*last3SeasonsBttsRateScore + 0.05*allSeasonsBttsRateScore +
             0.15*last3SeasonsmaxSeqWOBttsScore + 0.07*allSeasonsmaxSeqWOBttsScore +
-            0.2*last3SeasonsCoefDevScore + 0.09*allSeasonsCoefDevScore +
+            0.2*last3SeasonsCoefDevScore + 0.11*allSeasonsCoefDevScore +
             0.18*last3SeasonsStdDevScore + 0.07*allSeasonsStdDevScore + 0.02*totalMatchesScore);
     }
 
