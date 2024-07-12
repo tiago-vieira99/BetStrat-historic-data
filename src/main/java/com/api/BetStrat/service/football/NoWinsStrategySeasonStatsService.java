@@ -12,6 +12,7 @@ import com.api.BetStrat.dto.SimulatedMatchDto;
 import com.api.BetStrat.entity.HistoricMatch;
 import com.api.BetStrat.entity.StrategySeasonStats;
 import com.api.BetStrat.entity.Team;
+import com.api.BetStrat.entity.football.CleanSheetSeasonStats;
 import com.api.BetStrat.entity.football.NoWinsSeasonStats;
 import com.api.BetStrat.enums.TeamScoreEnum;
 import com.api.BetStrat.repository.HistoricMatchRepository;
@@ -20,6 +21,7 @@ import com.api.BetStrat.service.StrategyScoreCalculator;
 import com.api.BetStrat.service.StrategySeasonStatsInterface;
 import com.api.BetStrat.util.Utils;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -184,12 +186,37 @@ public class NoWinsStrategySeasonStatsService extends StrategyScoreCalculator<No
 
     @Override
     public int calculateHistoricMaxNegativeSeq(List<NoWinsSeasonStats> statsByTeam) {
-        return 0;
+        int maxValue = 0;
+        for (int i=0; i<statsByTeam.size(); i++) {
+            int[] currSeqMaxValue = Arrays.stream(statsByTeam.get(i).getNegativeSequence().replaceAll("\\[","").replaceAll("\\]","")
+                .replaceAll(" ","").split(",")).mapToInt(Integer::parseInt).toArray();
+            if (currSeqMaxValue.length > 2) {
+                for (int j = 0; j < currSeqMaxValue.length - 1; j++) {
+                    if (currSeqMaxValue[j] > maxValue)
+                        maxValue = currSeqMaxValue[j];
+                }
+            } else {
+                if (currSeqMaxValue[0] > maxValue)
+                    maxValue = currSeqMaxValue[0];
+            }
+        }
+
+        return maxValue;
     }
 
     @Override
     public double calculateHistoricAvgNegativeSeq(List<NoWinsSeasonStats> statsByTeam) {
-        return 0;
+        int seqValues = 0;
+        int count = 0;
+        for (int i=0; i<statsByTeam.size(); i++) {
+            String[] arraySeq = statsByTeam.get(i).getNegativeSequence()
+                .replaceAll("\\[","").replaceAll("\\]","").replaceAll(" ","").split(",");
+            count += arraySeq.length - 1;
+            for (int j = 0; j < arraySeq.length - 1; j++)
+                seqValues += Integer.parseInt(arraySeq[j]);
+        }
+
+        return Utils.beautifyDoubleValue((double) seqValues / (double) count);
     }
 
     @Override

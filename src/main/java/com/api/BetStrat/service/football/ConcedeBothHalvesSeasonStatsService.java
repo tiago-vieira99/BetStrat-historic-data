@@ -4,6 +4,7 @@ import com.api.BetStrat.dto.SimulatedMatchDto;
 import com.api.BetStrat.entity.HistoricMatch;
 import com.api.BetStrat.entity.StrategySeasonStats;
 import com.api.BetStrat.entity.Team;
+import com.api.BetStrat.entity.football.CleanSheetSeasonStats;
 import com.api.BetStrat.entity.football.ConcedeBothHalvesSeasonStats;
 import com.api.BetStrat.enums.TeamScoreEnum;
 import com.api.BetStrat.repository.HistoricMatchRepository;
@@ -31,8 +32,7 @@ public class ConcedeBothHalvesSeasonStatsService extends StrategyScoreCalculator
     private static final Logger LOGGER = LoggerFactory.getLogger(ConcedeBothHalvesSeasonStatsService.class);
 
     @Autowired
-    private ConcedeBothHalvesSeasonInfoRepository concedeBothHalvesSeasonInfoRepository
-            ;
+    private ConcedeBothHalvesSeasonInfoRepository concedeBothHalvesSeasonInfoRepository;
 
     @Autowired
     private HistoricMatchRepository historicMatchRepository;
@@ -76,9 +76,13 @@ public class ConcedeBothHalvesSeasonStatsService extends StrategyScoreCalculator
                 int count = 0;
                 for (HistoricMatch historicMatch : teamMatchesBySeason) {
                     count++;
-                    if (matchFollowStrategyRules(historicMatch, team.getName(), null)) {
-                        strategySequence.add(count);
-                        count = 0;
+                    try {
+                        if (matchFollowStrategyRules(historicMatch, team.getName(), null)) {
+                            strategySequence.add(count);
+                            count = 0;
+                        }
+                    } catch (NumberFormatException e) {
+                        return;
                     }
                 }
 
@@ -113,12 +117,37 @@ public class ConcedeBothHalvesSeasonStatsService extends StrategyScoreCalculator
 
     @Override
     public int calculateHistoricMaxNegativeSeq(List<ConcedeBothHalvesSeasonStats> statsByTeam) {
-        return 0;
+        int maxValue = 0;
+        for (int i=0; i<statsByTeam.size(); i++) {
+            int[] currSeqMaxValue = Arrays.stream(statsByTeam.get(i).getNegativeSequence().replaceAll("\\[","").replaceAll("\\]","")
+                .replaceAll(" ","").split(",")).mapToInt(Integer::parseInt).toArray();
+            if (currSeqMaxValue.length > 2) {
+                for (int j = 0; j < currSeqMaxValue.length - 1; j++) {
+                    if (currSeqMaxValue[j] > maxValue)
+                        maxValue = currSeqMaxValue[j];
+                }
+            } else {
+                if (currSeqMaxValue[0] > maxValue)
+                    maxValue = currSeqMaxValue[0];
+            }
+        }
+
+        return maxValue;
     }
 
     @Override
     public double calculateHistoricAvgNegativeSeq(List<ConcedeBothHalvesSeasonStats> statsByTeam) {
-        return 0;
+        int seqValues = 0;
+        int count = 0;
+        for (int i=0; i<statsByTeam.size(); i++) {
+            String[] arraySeq = statsByTeam.get(i).getNegativeSequence()
+                .replaceAll("\\[","").replaceAll("\\]","").replaceAll(" ","").split(",");
+            count += arraySeq.length - 1;
+            for (int j = 0; j < arraySeq.length - 1; j++)
+                seqValues += Integer.parseInt(arraySeq[j]);
+        }
+
+        return Utils.beautifyDoubleValue((double) seqValues / (double) count);
     }
 
     @Override
@@ -196,6 +225,7 @@ public class ConcedeBothHalvesSeasonStatsService extends StrategyScoreCalculator
 //                simulatedMatchDto.setFtResult(historicMatch.getFtResult());
 //                simulatedMatchDto.setSeason(season);
 //                simulatedMatchDto.setCompetition(historicMatch.getCompetition());
+        ////add try catch here!!
 //                if (matchFollowStrategyRules(historicMatch, team.getName(), null)) {
 //                    simulatedMatchDto.setIsGreen(true);
 //                    actualNegativeSequence = 0;

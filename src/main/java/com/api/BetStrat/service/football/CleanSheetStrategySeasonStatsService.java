@@ -254,7 +254,7 @@ public class CleanSheetStrategySeasonStatsService extends StrategyScoreCalculato
 
         return Utils.beautifyDoubleValue(0.15*last3SeasonsCleanSheetRateScore + 0.07*allSeasonsCleanSheetRateScore +
             0.15*last3SeasonsmaxSeqWOCleanSheetScore + 0.07*allSeasonsmaxSeqWOCleanSheetScore +
-            0.22*last3SeasonsCoefDevScore + 0.09*allSeasonsCoefDevScore +
+            0.2*last3SeasonsCoefDevScore + 0.09*allSeasonsCoefDevScore +
             0.18*last3SeasonsStdDevScore + 0.07*allSeasonsStdDevScore + 0.02*totalMatchesScore);
     }
 

@@ -12,6 +12,7 @@ import com.api.BetStrat.dto.SimulatedMatchDto;
 import com.api.BetStrat.entity.HistoricMatch;
 import com.api.BetStrat.entity.StrategySeasonStats;
 import com.api.BetStrat.entity.Team;
+import com.api.BetStrat.entity.football.CleanSheetSeasonStats;
 import com.api.BetStrat.entity.football.WinBothHalvesSeasonStats;
 import com.api.BetStrat.enums.TeamScoreEnum;
 import com.api.BetStrat.repository.HistoricMatchRepository;
@@ -20,6 +21,7 @@ import com.api.BetStrat.service.StrategyScoreCalculator;
 import com.api.BetStrat.service.StrategySeasonStatsInterface;
 import com.api.BetStrat.util.Utils;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -82,6 +84,7 @@ public class WinBothHalvesStrategySeasonStatsService extends StrategyScoreCalcul
 //                simulatedMatchDto.setFtResult(historicMatch.getFtResult());
 //                simulatedMatchDto.setSeason(season);
 //                simulatedMatchDto.setCompetition(historicMatch.getCompetition());
+        // //add try catch here
 //                if (matchFollowStrategyRules(historicMatch, team.getName(), null)) {
 //                    simulatedMatchDto.setIsGreen(true);
 //                    actualNegativeSequence = 0;
@@ -149,9 +152,13 @@ public class WinBothHalvesStrategySeasonStatsService extends StrategyScoreCalcul
                 int count = 0;
                 for (HistoricMatch historicMatch : filteredMatches) {
                     count++;
-                    if (matchFollowStrategyRules(historicMatch, team.getName(), null)) {
-                        negativeSequence.add(count);
-                        count = 0;
+                    try {
+                        if (matchFollowStrategyRules(historicMatch, team.getName(), null)) {
+                            negativeSequence.add(count);
+                            count = 0;
+                        }
+                    } catch (NumberFormatException e) {
+                        return;
                     }
                 }
 
@@ -186,12 +193,37 @@ public class WinBothHalvesStrategySeasonStatsService extends StrategyScoreCalcul
 
     @Override
     public int calculateHistoricMaxNegativeSeq(List<WinBothHalvesSeasonStats> statsByTeam) {
-        return 0;
+        int maxValue = 0;
+        for (int i=0; i<statsByTeam.size(); i++) {
+            int[] currSeqMaxValue = Arrays.stream(statsByTeam.get(i).getNegativeSequence().replaceAll("\\[","").replaceAll("\\]","")
+                .replaceAll(" ","").split(",")).mapToInt(Integer::parseInt).toArray();
+            if (currSeqMaxValue.length > 2) {
+                for (int j = 0; j < currSeqMaxValue.length - 1; j++) {
+                    if (currSeqMaxValue[j] > maxValue)
+                        maxValue = currSeqMaxValue[j];
+                }
+            } else {
+                if (currSeqMaxValue[0] > maxValue)
+                    maxValue = currSeqMaxValue[0];
+            }
+        }
+
+        return maxValue;
     }
 
     @Override
     public double calculateHistoricAvgNegativeSeq(List<WinBothHalvesSeasonStats> statsByTeam) {
-        return 0;
+        int seqValues = 0;
+        int count = 0;
+        for (int i=0; i<statsByTeam.size(); i++) {
+            String[] arraySeq = statsByTeam.get(i).getNegativeSequence()
+                .replaceAll("\\[","").replaceAll("\\]","").replaceAll(" ","").split(",");
+            count += arraySeq.length - 1;
+            for (int j = 0; j < arraySeq.length - 1; j++)
+                seqValues += Integer.parseInt(arraySeq[j]);
+        }
+
+        return Utils.beautifyDoubleValue((double) seqValues / (double) count);
     }
 
     @Override

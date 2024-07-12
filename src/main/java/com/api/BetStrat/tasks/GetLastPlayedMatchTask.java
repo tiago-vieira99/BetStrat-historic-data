@@ -45,7 +45,7 @@ public class GetLastPlayedMatchTask {
     @Autowired
     private HistoricMatchRepository historicMatchRepository;
 
-    @EventListener(ApplicationReadyEvent.class)
+    //@EventListener(ApplicationReadyEvent.class)
     @Scheduled(cron = "0 0 4 1/2 * ?", zone="Europe/Lisbon") //every two days at 4am
     public void execCronn() {
 
@@ -113,5 +113,10 @@ public class GetLastPlayedMatchTask {
         Thread.sleep(1000);
         TelegramBotNotifications.sendToTelegram(telegramMessage);
     }
+
+    //TODO cases to recommend a new sequence:
+    // 1 - when the actual sequence is higher than the default_max_bad_seq
+    // 2 - when the actual sequence is Max(3, -2(?) games to reach the historic avg_bad_seq)
+    // 3 - when the actual sequence is Max(3, -4(?) games to reach the historic max_bad_seq)
 
 }
