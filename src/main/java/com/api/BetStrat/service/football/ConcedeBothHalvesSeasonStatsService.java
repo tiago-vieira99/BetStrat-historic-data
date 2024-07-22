@@ -157,7 +157,7 @@ public class ConcedeBothHalvesSeasonStatsService extends StrategyScoreCalculator
         Collections.reverse(statsByTeam);
 
         if (statsByTeam.size() < 3 || statsByTeam.stream().filter(s -> s.getNumMatches() < 15).findAny().isPresent()) {
-            teamByName.setGoalsFestScore(TeamScoreEnum.INSUFFICIENT_DATA.getValue());
+            teamByName.setConcedeBothHalvesScore(TeamScoreEnum.INSUFFICIENT_DATA.getValue());
         } else {
             double totalScore = calculateTotalFinalScore(statsByTeam);
             teamByName.setConcedeBothHalvesScore(calculateFinalRating(totalScore));

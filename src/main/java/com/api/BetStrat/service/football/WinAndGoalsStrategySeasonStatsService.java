@@ -245,30 +245,33 @@ public class WinAndGoalsStrategySeasonStatsService extends StrategyScoreCalculat
         Collections.reverse(statsByTeam);
 
         if (statsByTeam.size() < 3) {
-            teamByName.setMarginWinsScore(TeamScoreEnum.INSUFFICIENT_DATA.getValue());
+            teamByName.setWinAndGoalsScore(TeamScoreEnum.INSUFFICIENT_DATA.getValue());
         } else {
             double totalScore = calculateTotalFinalScore(statsByTeam);
-            teamByName.setMarginWinsScore(calculateFinalRating(totalScore));
+            teamByName.setWinAndGoalsScore(calculateFinalRating(totalScore));
         }
 
         return teamByName;
     }
 
     private double calculateTotalFinalScore(List<WinAndGoalsSeasonStats> statsByTeam) {
-        int last3SeasonsWinAndGoalsRateScore = calculateLast3SeasonsRateScore(statsByTeam);
-        int allSeasonsWinAndGoalsRateScore = calculateAllSeasonsRateScore(statsByTeam);
+        int last3SeasonsGreensRateScore = calculateLast3SeasonsRateScore(statsByTeam);
+        int allSeasonsGreensRateScore = calculateAllSeasonsRateScore(statsByTeam);
         int last3SeasonsTotalWinsRateScore = calculateLast3SeasonsTotalWinsRateScore(statsByTeam);
         int allSeasonsTotalWinsRateScore = calculateAllSeasonsTotalWinsRateScore(statsByTeam);
-        int last3SeasonsmaxSeqWOWinAndGoalsScore = calculateLast3SeasonsMaxSeqWOGreenScore(statsByTeam);
-        int allSeasonsmaxSeqWOWinAndGoalsScore = calculateAllSeasonsMaxSeqWOGreenScore(statsByTeam);
+        int last3SeasonsmaxSeqWOGreensScore = calculateLast3SeasonsMaxSeqWOGreenScore(statsByTeam);
+        int allSeasonsmaxSeqWOGreensScore = calculateAllSeasonsMaxSeqWOGreenScore(statsByTeam);
         int last3SeasonsStdDevScore = calculateLast3SeasonsStdDevScore(statsByTeam);
         int allSeasonsStdDevScore = calculateAllSeasonsStdDevScore(statsByTeam);
+        int last3SeasonsCoefDevScore = calculateLast3SeasonsCoefDevScore(statsByTeam);
+        int allSeasonsCoefDevScore = calculateAllSeasonsCoefDevScore(statsByTeam);
         int totalMatchesScore = calculateLeagueMatchesScore(statsByTeam.get(0).getNumMatches());
 
-        return Utils.beautifyDoubleValue(0.13*last3SeasonsWinAndGoalsRateScore + 0.07*allSeasonsWinAndGoalsRateScore +
-            0.13*last3SeasonsTotalWinsRateScore + 0.07*allSeasonsTotalWinsRateScore +
-            0.12*last3SeasonsmaxSeqWOWinAndGoalsScore + 0.06*allSeasonsmaxSeqWOWinAndGoalsScore +
-            0.3*last3SeasonsStdDevScore + 0.1*allSeasonsStdDevScore + 0.02*totalMatchesScore);
+        return Utils.beautifyDoubleValue(0.1*last3SeasonsGreensRateScore + 0.05*allSeasonsGreensRateScore +
+            0.1*last3SeasonsTotalWinsRateScore + 0.05*allSeasonsTotalWinsRateScore +
+            0.14*last3SeasonsmaxSeqWOGreensScore + 0.05*allSeasonsmaxSeqWOGreensScore +
+            0.2*last3SeasonsCoefDevScore + 0.07*allSeasonsCoefDevScore +
+            0.15*last3SeasonsStdDevScore + 0.07*allSeasonsStdDevScore + 0.02*totalMatchesScore);
     }
 
     @Override

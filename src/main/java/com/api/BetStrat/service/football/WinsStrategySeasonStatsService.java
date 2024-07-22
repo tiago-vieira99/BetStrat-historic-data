@@ -246,17 +246,20 @@ public class WinsStrategySeasonStatsService extends StrategyScoreCalculator<Wins
     }
 
     private double calculateTotalFinalScore(List<WinsSeasonStats> statsByTeam) {
-        int last3SeasonsWinsRateScore = calculateLast3SeasonsRateScore(statsByTeam);
-        int allSeasonsWinsRateScore = calculateAllSeasonsRateScore(statsByTeam);
-        int last3SeasonsmaxSeqWOWinsScore = calculateLast3SeasonsMaxSeqWOGreenScore(statsByTeam);
-        int allSeasonsmaxSeqWOWinsScore = calculateAllSeasonsMaxSeqWOGreenScore(statsByTeam);
+        int last3SeasonsGreensRateScore = calculateLast3SeasonsRateScore(statsByTeam);
+        int allSeasonsGreensRateScore = calculateAllSeasonsRateScore(statsByTeam);
+        int last3SeasonsmaxSeqWOGreenScore = calculateLast3SeasonsMaxSeqWOGreenScore(statsByTeam);
+        int allSeasonsmaxSeqWOGreenScore = calculateAllSeasonsMaxSeqWOGreenScore(statsByTeam);
         int last3SeasonsStdDevScore = calculateLast3SeasonsStdDevScore(statsByTeam);
         int allSeasonsStdDevScore = calculateAllSeasonsStdDevScore(statsByTeam);
+        int last3SeasonsCoefDevScore = calculateLast3SeasonsCoefDevScore(statsByTeam);
+        int allSeasonsCoefDevScore = calculateAllSeasonsCoefDevScore(statsByTeam);
         int totalMatchesScore = calculateLeagueMatchesScore(statsByTeam.get(0).getNumMatches());
 
-        return Utils.beautifyDoubleValue(0.2*last3SeasonsWinsRateScore + 0.1*allSeasonsWinsRateScore +
-            0.18*last3SeasonsmaxSeqWOWinsScore + 0.1*allSeasonsmaxSeqWOWinsScore +
-            0.3*last3SeasonsStdDevScore + 0.1*allSeasonsStdDevScore + 0.02*totalMatchesScore);
+        return Utils.beautifyDoubleValue(0.15*last3SeasonsGreensRateScore + 0.05*allSeasonsGreensRateScore +
+            0.15*last3SeasonsmaxSeqWOGreenScore + 0.07*allSeasonsmaxSeqWOGreenScore +
+            0.2*last3SeasonsCoefDevScore + 0.11*allSeasonsCoefDevScore +
+            0.18*last3SeasonsStdDevScore + 0.07*allSeasonsStdDevScore + 0.02*totalMatchesScore);
     }
 
     @Override

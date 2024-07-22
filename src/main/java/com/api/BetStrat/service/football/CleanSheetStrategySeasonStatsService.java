@@ -232,7 +232,7 @@ public class CleanSheetStrategySeasonStatsService extends StrategyScoreCalculato
         Collections.reverse(statsByTeam);
 
         if (statsByTeam.size() < 3 || statsByTeam.stream().filter(s -> s.getNumMatches() < 15).findAny().isPresent()) {
-            teamByName.setWinsScore(TeamScoreEnum.INSUFFICIENT_DATA.getValue());
+            teamByName.setCleanSheetScore(TeamScoreEnum.INSUFFICIENT_DATA.getValue());
         } else {
             double totalScore = calculateTotalFinalScore(statsByTeam);
             teamByName.setCleanSheetScore(calculateFinalRating(totalScore));

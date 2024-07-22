@@ -256,20 +256,23 @@ public class EuroHandicapStrategySeasonStatsService extends StrategyScoreCalcula
     }
 
     private double calculateTotalFinalScore(List<EuroHandicapSeasonStats> statsByTeam) {
-        int last3SeasonsEuroHandicapRateScore = calculateLast3SeasonsRateScore(statsByTeam);
-        int allSeasonsEuroHandicapRateScore = calculateAllSeasonsRateScore(statsByTeam);
+        int last3SeasonsGreensRateScore = calculateLast3SeasonsRateScore(statsByTeam);
+        int allSeasonsGreensRateScore = calculateAllSeasonsRateScore(statsByTeam);
         int last3SeasonsTotalWinsRateScore = calculateLast3SeasonsTotalWinsRateScore(statsByTeam);
         int allSeasonsTotalWinsRateScore = calculateAllSeasonsTotalWinsRateScore(statsByTeam);
-        int last3SeasonsmaxSeqWOEuroHandicapScore = calculateLast3SeasonsMaxSeqWOGreenScore(statsByTeam);
-        int allSeasonsmaxSeqWOEuroHandicapScore = calculateAllSeasonsMaxSeqWOGreenScore(statsByTeam);
+        int last3SeasonsmaxSeqWOGreensScore = calculateLast3SeasonsMaxSeqWOGreenScore(statsByTeam);
+        int allSeasonsmaxSeqWOGreensScore = calculateAllSeasonsMaxSeqWOGreenScore(statsByTeam);
         int last3SeasonsStdDevScore = calculateLast3SeasonsStdDevScore(statsByTeam);
         int allSeasonsStdDevScore = calculateAllSeasonsStdDevScore(statsByTeam);
+        int last3SeasonsCoefDevScore = calculateLast3SeasonsCoefDevScore(statsByTeam);
+        int allSeasonsCoefDevScore = calculateAllSeasonsCoefDevScore(statsByTeam);
         int totalMatchesScore = calculateLeagueMatchesScore(statsByTeam.get(0).getNumMatches());
 
-        return Utils.beautifyDoubleValue(0.13*last3SeasonsEuroHandicapRateScore + 0.07*allSeasonsEuroHandicapRateScore +
-            0.13*last3SeasonsTotalWinsRateScore + 0.07*allSeasonsTotalWinsRateScore +
-            0.12*last3SeasonsmaxSeqWOEuroHandicapScore + 0.06*allSeasonsmaxSeqWOEuroHandicapScore +
-            0.3*last3SeasonsStdDevScore + 0.1*allSeasonsStdDevScore + 0.02*totalMatchesScore);
+        return Utils.beautifyDoubleValue(0.1*last3SeasonsGreensRateScore + 0.05*allSeasonsGreensRateScore +
+            0.1*last3SeasonsTotalWinsRateScore + 0.05*allSeasonsTotalWinsRateScore +
+            0.14*last3SeasonsmaxSeqWOGreensScore + 0.05*allSeasonsmaxSeqWOGreensScore +
+            0.2*last3SeasonsCoefDevScore + 0.07*allSeasonsCoefDevScore +
+            0.15*last3SeasonsStdDevScore + 0.07*allSeasonsStdDevScore + 0.02*totalMatchesScore);
     }
 
     @Override
@@ -301,10 +304,14 @@ public class EuroHandicapStrategySeasonStatsService extends StrategyScoreCalcula
         if (isBetween(avgMarginWinsRate,80,100)) {
             return 100;
         } else if(isBetween(avgMarginWinsRate,70,80)) {
+            return 90;
+        } else if(isBetween(avgMarginWinsRate,60,70)) {
             return 80;
-        } else if(isBetween(avgMarginWinsRate,50,70)) {
+        } else if(isBetween(avgMarginWinsRate,50,60)) {
+            return 70;
+        } else if(isBetween(avgMarginWinsRate,40,50)) {
             return 60;
-        } else if(isBetween(avgMarginWinsRate,0,50)) {
+        } else if(isBetween(avgMarginWinsRate,0,40)) {
             return 30;
         }
         return 0;
@@ -322,10 +329,14 @@ public class EuroHandicapStrategySeasonStatsService extends StrategyScoreCalcula
         if (isBetween(avgMarginWinsRate,80,100)) {
             return 100;
         } else if(isBetween(avgMarginWinsRate,70,80)) {
+            return 90;
+        } else if(isBetween(avgMarginWinsRate,60,70)) {
             return 80;
-        } else if(isBetween(avgMarginWinsRate,50,70)) {
+        } else if(isBetween(avgMarginWinsRate,50,60)) {
+            return 70;
+        } else if(isBetween(avgMarginWinsRate,40,50)) {
             return 60;
-        } else if(isBetween(avgMarginWinsRate,0,50)) {
+        } else if(isBetween(avgMarginWinsRate,0,40)) {
             return 30;
         }
         return 0;
@@ -343,8 +354,10 @@ public class EuroHandicapStrategySeasonStatsService extends StrategyScoreCalcula
         if (isBetween(avgWinsRate,70,100)) {
             return 100;
         } else if(isBetween(avgWinsRate,60,70)) {
-            return 80;
-        } else if(isBetween(avgWinsRate,40,60)) {
+            return 90;
+        } else if(isBetween(avgWinsRate,50,60)) {
+            return 70;
+        } else if(isBetween(avgWinsRate,40,50)) {
             return 60;
         } else if(isBetween(avgWinsRate,0,40)) {
             return 30;
@@ -364,8 +377,10 @@ public class EuroHandicapStrategySeasonStatsService extends StrategyScoreCalcula
         if (isBetween(avgWinsRate,70,100)) {
             return 100;
         } else if(isBetween(avgWinsRate,60,70)) {
-            return 80;
-        } else if(isBetween(avgWinsRate,40,60)) {
+            return 90;
+        } else if(isBetween(avgWinsRate,50,60)) {
+            return 70;
+        } else if(isBetween(avgWinsRate,40,50)) {
             return 60;
         } else if(isBetween(avgWinsRate,0,40)) {
             return 30;

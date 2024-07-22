@@ -62,8 +62,7 @@ public class ReportController {
         //simulate score for desired season
         String scoreBySeason = strategySeasonStatsService.calculateScoreBySeason(teamByName, season, strategy.concat("SeasonStats"));
 
-        if (scoreBySeason.contains("INAPT") || scoreBySeason.equals(TeamScoreEnum.INSUFFICIENT_DATA.getValue()) ||
-                Double.parseDouble(scoreBySeason.substring(scoreBySeason.indexOf('(')+1, scoreBySeason.lastIndexOf(')'))) < 80 ) {
+        if (!scoreBySeason.contains("EXCE")) {
             return ResponseEntity.ok().body(null);
         }
 
@@ -88,8 +87,7 @@ public class ReportController {
                 //simulate score for desired season
                 String scoreBySeason = strategySeasonStatsService.calculateScoreBySeason(team, season, strategy.concat("SeasonStats"));
 
-                if (scoreBySeason.contains("INAPT") || scoreBySeason.equals(TeamScoreEnum.INSUFFICIENT_DATA.getValue()) ||
-                        Double.parseDouble(scoreBySeason.substring(scoreBySeason.indexOf('(')+1, scoreBySeason.lastIndexOf(')'))) < 80 ) {
+                if (!scoreBySeason.contains("EXCE")) {
                     continue;
                 }
 

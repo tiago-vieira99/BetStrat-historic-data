@@ -249,27 +249,30 @@ public class ScoreBothHalvesSeasonStatsService extends StrategyScoreCalculator<S
         Collections.reverse(statsByTeam);
 
         if (statsByTeam.size() < 3) {
-            teamByName.setWinsScore(TeamScoreEnum.INSUFFICIENT_DATA.getValue());
+            teamByName.setScoreBothHalvesScore(TeamScoreEnum.INSUFFICIENT_DATA.getValue());
         } else {
             double totalScore = calculateTotalFinalScore(statsByTeam);
-            teamByName.setNoWinsScore(calculateFinalRating(totalScore));
+            teamByName.setScoreBothHalvesScore(calculateFinalRating(totalScore));
         }
 
         return teamByName;
     }
 
     private double calculateTotalFinalScore(List<ScoreBothHalvesSeasonStats> statsByTeam) {
-        int last3SeasonsScoreBothHalvesRateScore = calculateLast3SeasonsRateScore(statsByTeam);
-        int allSeasonsScoreBothHalvesRateScore = calculateAllSeasonsRateScore(statsByTeam);
-        int last3SeasonsmaxSeqWOScoreBothHalvesScore = calculateLast3SeasonsMaxSeqWOGreenScore(statsByTeam);
-        int allSeasonsmaxSeqWOScoreBothHalvesScore = calculateAllSeasonsMaxSeqWOGreenScore(statsByTeam);
+        int last3SeasonsGreensRateScore = calculateLast3SeasonsRateScore(statsByTeam);
+        int allSeasonsGreensRateScore = calculateAllSeasonsRateScore(statsByTeam);
+        int last3SeasonsmaxSeqWOGreenScore = calculateLast3SeasonsMaxSeqWOGreenScore(statsByTeam);
+        int allSeasonsmaxSeqWOGreenScore = calculateAllSeasonsMaxSeqWOGreenScore(statsByTeam);
         int last3SeasonsStdDevScore = calculateLast3SeasonsStdDevScore(statsByTeam);
         int allSeasonsStdDevScore = calculateAllSeasonsStdDevScore(statsByTeam);
+        int last3SeasonsCoefDevScore = calculateLast3SeasonsCoefDevScore(statsByTeam);
+        int allSeasonsCoefDevScore = calculateAllSeasonsCoefDevScore(statsByTeam);
         int totalMatchesScore = calculateLeagueMatchesScore(statsByTeam.get(0).getNumMatches());
 
-        return Utils.beautifyDoubleValue(0.2*last3SeasonsScoreBothHalvesRateScore + 0.1*allSeasonsScoreBothHalvesRateScore +
-            0.18*last3SeasonsmaxSeqWOScoreBothHalvesScore + 0.1*allSeasonsmaxSeqWOScoreBothHalvesScore +
-            0.3*last3SeasonsStdDevScore + 0.1*allSeasonsStdDevScore + 0.02*totalMatchesScore);
+        return Utils.beautifyDoubleValue(0.15*last3SeasonsGreensRateScore + 0.05*allSeasonsGreensRateScore +
+            0.15*last3SeasonsmaxSeqWOGreenScore + 0.07*allSeasonsmaxSeqWOGreenScore +
+            0.2*last3SeasonsCoefDevScore + 0.11*allSeasonsCoefDevScore +
+            0.18*last3SeasonsStdDevScore + 0.07*allSeasonsStdDevScore + 0.02*totalMatchesScore);
     }
 
     @Override
@@ -333,51 +336,11 @@ public class ScoreBothHalvesSeasonStatsService extends StrategyScoreCalculator<S
 
     @Override
     public int calculateLast3SeasonsTotalWinsRateScore(List<ScoreBothHalvesSeasonStats> statsByTeam) {
-        double totalWinsRates = 0;
-        for (int i=0; i<3; i++) {
-            totalWinsRates += statsByTeam.get(i).getScoreBothHalvesRate();
-        }
-
-        double avgWinsRate = Utils.beautifyDoubleValue(totalWinsRates / 3);
-
-        if (super.isBetween(avgWinsRate,80,100)) {
-            return 100;
-        } else if(super.isBetween(avgWinsRate,70,80)) {
-            return 90;
-        } else if(super.isBetween(avgWinsRate,60,70)) {
-            return 80;
-        } else if(super.isBetween(avgWinsRate,50,60)) {
-            return 70;
-        } else if(super.isBetween(avgWinsRate,40,50)) {
-            return 60;
-        } else if(super.isBetween(avgWinsRate,0,40)) {
-            return 30;
-        }
         return 0;
     }
 
     @Override
     public int calculateAllSeasonsTotalWinsRateScore(List<ScoreBothHalvesSeasonStats> statsByTeam) {
-        double totalWinsRates = 0;
-        for (int i=0; i<statsByTeam.size(); i++) {
-            totalWinsRates += statsByTeam.get(i).getScoreBothHalvesRate();
-        }
-
-        double avgWinsRate = Utils.beautifyDoubleValue(totalWinsRates / statsByTeam.size());
-
-        if (super.isBetween(avgWinsRate,80,100)) {
-            return 100;
-        } else if(super.isBetween(avgWinsRate,70,80)) {
-            return 90;
-        } else if(super.isBetween(avgWinsRate,60,70)) {
-            return 80;
-        } else if(super.isBetween(avgWinsRate,50,60)) {
-            return 70;
-        } else if(super.isBetween(avgWinsRate,40,50)) {
-            return 60;
-        } else if(super.isBetween(avgWinsRate,0,40)) {
-            return 30;
-        }
         return 0;
     }
 

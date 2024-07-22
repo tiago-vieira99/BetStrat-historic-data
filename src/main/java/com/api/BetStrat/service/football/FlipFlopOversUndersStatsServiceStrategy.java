@@ -248,7 +248,7 @@ public class FlipFlopOversUndersStatsServiceStrategy extends StrategyScoreCalcul
         Collections.reverse(statsByTeam);
 
         if (statsByTeam.size() < 3) {
-            teamByName.setDrawsHunterScore(TeamScoreEnum.INSUFFICIENT_DATA.getValue());
+            teamByName.setFlipFlopScore(TeamScoreEnum.INSUFFICIENT_DATA.getValue());
         } else {
             double totalScore = calculateTotalFinalScore(statsByTeam);
             teamByName.setFlipFlopScore(calculateFinalRating(totalScore));

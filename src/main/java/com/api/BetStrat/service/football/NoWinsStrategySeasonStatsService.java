@@ -236,7 +236,7 @@ public class NoWinsStrategySeasonStatsService extends StrategyScoreCalculator<No
         Collections.reverse(statsByTeam);
 
         if (statsByTeam.size() < 3) {
-            teamByName.setWinsScore(TeamScoreEnum.INSUFFICIENT_DATA.getValue());
+            teamByName.setNoWinsScore(TeamScoreEnum.INSUFFICIENT_DATA.getValue());
         } else {
             double totalScore = calculateTotalFinalScore(statsByTeam);
             teamByName.setNoWinsScore(calculateFinalRating(totalScore));

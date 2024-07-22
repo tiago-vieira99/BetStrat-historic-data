@@ -233,7 +233,7 @@ public class NoBttsStrategySeasonStatsService extends StrategyScoreCalculator<No
         Collections.reverse(statsByTeam);
 
         if (statsByTeam.size() < 3 || statsByTeam.stream().filter(s -> s.getNumMatches() < 15).findAny().isPresent()) {
-            teamByName.setGoalsFestScore(TeamScoreEnum.INSUFFICIENT_DATA.getValue());
+            teamByName.setNoBttsScore(TeamScoreEnum.INSUFFICIENT_DATA.getValue());
         } else {
             double totalScore = calculateTotalFinalScore(statsByTeam);
             teamByName.setNoBttsScore(calculateFinalRating(totalScore));
@@ -243,17 +243,20 @@ public class NoBttsStrategySeasonStatsService extends StrategyScoreCalculator<No
     }
 
     private double calculateTotalFinalScore(List<NoBttsSeasonStats> statsByTeam) {
-        int last3SeasonsBttsRateScore = calculateLast3SeasonsRateScore(statsByTeam);
-        int allSeasonsBttsRateScore = calculateAllSeasonsRateScore(statsByTeam);
-        int last3SeasonsmaxSeqWOBttsScore = calculateLast3SeasonsMaxSeqWOGreenScore(statsByTeam);
-        int allSeasonsmaxSeqWOBttsScore = calculateAllSeasonsMaxSeqWOGreenScore(statsByTeam);
+        int last3SeasonsGreensRateScore = calculateLast3SeasonsRateScore(statsByTeam);
+        int allSeasonsGreensRateScore = calculateAllSeasonsRateScore(statsByTeam);
+        int last3SeasonsmaxSeqWOGreenScore = calculateLast3SeasonsMaxSeqWOGreenScore(statsByTeam);
+        int allSeasonsmaxSeqWOGreenScore = calculateAllSeasonsMaxSeqWOGreenScore(statsByTeam);
         int last3SeasonsStdDevScore = calculateLast3SeasonsStdDevScore(statsByTeam);
         int allSeasonsStdDevScore = calculateAllSeasonsStdDevScore(statsByTeam);
+        int last3SeasonsCoefDevScore = calculateLast3SeasonsCoefDevScore(statsByTeam);
+        int allSeasonsCoefDevScore = calculateAllSeasonsCoefDevScore(statsByTeam);
         int totalMatchesScore = calculateLeagueMatchesScore(statsByTeam.get(0).getNumMatches());
 
-        return Utils.beautifyDoubleValue(0.2*last3SeasonsBttsRateScore + 0.1*allSeasonsBttsRateScore +
-            0.18*last3SeasonsmaxSeqWOBttsScore + 0.1*allSeasonsmaxSeqWOBttsScore +
-            0.3*last3SeasonsStdDevScore + 0.1*allSeasonsStdDevScore + 0.02*totalMatchesScore);
+        return Utils.beautifyDoubleValue(0.15*last3SeasonsGreensRateScore + 0.05*allSeasonsGreensRateScore +
+            0.15*last3SeasonsmaxSeqWOGreenScore + 0.07*allSeasonsmaxSeqWOGreenScore +
+            0.2*last3SeasonsCoefDevScore + 0.11*allSeasonsCoefDevScore +
+            0.18*last3SeasonsStdDevScore + 0.07*allSeasonsStdDevScore + 0.02*totalMatchesScore);
     }
 
     @Override
@@ -280,19 +283,19 @@ public class NoBttsStrategySeasonStatsService extends StrategyScoreCalculator<No
             GoalsFestRates += statsByTeam.get(i).getNoBttsRate();
         }
 
-        double avgGoalsFestRate = Utils.beautifyDoubleValue(GoalsFestRates / 3);
+        double avgGreensRate = Utils.beautifyDoubleValue(GoalsFestRates / 3);
 
-        if (isBetween(avgGoalsFestRate,50,100)) {
+        if (isBetween(avgGreensRate,60,100)) {
             return 100;
-        } else if(isBetween(avgGoalsFestRate,40,50)) {
+        } else if(isBetween(avgGreensRate,50,60)) {
             return 90;
-        } else if(isBetween(avgGoalsFestRate,35,40)) {
+        } else if(isBetween(avgGreensRate,35,50)) {
             return 80;
-        } else if(isBetween(avgGoalsFestRate,30,35)) {
+        } else if(isBetween(avgGreensRate,30,35)) {
             return 60;
-        } else if(isBetween(avgGoalsFestRate,20,30)) {
+        } else if(isBetween(avgGreensRate,20,30)) {
             return 50;
-        } else if(isBetween(avgGoalsFestRate,0,20)) {
+        } else if(isBetween(avgGreensRate,0,20)) {
             return 30;
         }
         return 0;
