@@ -45,7 +45,6 @@ import java.util.stream.Collectors;
 
 import static com.api.BetStrat.constants.BetStratConstants.API_SPORTS_BASE_URL;
 import static com.api.BetStrat.constants.BetStratConstants.FBREF_BASE_URL;
-import static com.api.BetStrat.constants.BetStratConstants.FOOTBALL_STRATEGIES_LIST;
 import static com.api.BetStrat.constants.BetStratConstants.LONG_STREAKS_LEAGUES_LIST;
 import static com.api.BetStrat.constants.BetStratConstants.WORLDFOOTBALL_BASE_URL;
 import static com.api.BetStrat.constants.BetStratConstants.ZEROZERO_BASE_URL;
@@ -91,6 +90,21 @@ public class FootballDataStatsController {
     public ResponseEntity<List<Team>> getAllTeams() {
         List<Team> allTeams = teamRepository.findAll();
         return ResponseEntity.ok().body(allTeams);
+    }
+
+    @ApiOperation(value = "get a specific team")
+    @ApiResponses(value = {
+        @ApiResponse(code = 200, message = "OK", response = ArrayList.class),
+        @ApiResponse(code = 400, message = "Bad Request", response = StandardError.class),
+        @ApiResponse(code = 401, message = "Unauthorized", response = StandardError.class),
+        @ApiResponse(code = 403, message = "Forbidden", response = StandardError.class),
+        @ApiResponse(code = 404, message = "Not Found", response = StandardError.class),
+        @ApiResponse(code = 500, message = "Internal Server Error", response = StandardError.class),
+    })
+    @GetMapping("/team/{team}")
+    public ResponseEntity<Team> getOneTeam(@PathVariable("team") String teamName) {
+        Team team = teamRepository.getTeamByName(teamName);
+        return ResponseEntity.ok().body(team);
     }
 
     @ApiOperation(value = "get Team Stats by Strategy", notes = "Strategy values:\n\"Draw\",\"GoalsFest\",\"WinsMargin\",\"Btts\", \"CleanSheet\", \n" +

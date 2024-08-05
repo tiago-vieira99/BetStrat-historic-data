@@ -19,7 +19,7 @@ public class BetStratConstants {
     public static final String WORLDFOOTBALL_BASE_URL = "worldfootball.net";
     public static final String API_SPORTS_BASE_URL = "api-sports";
 
-    public static final String CURRENT_SEASON = "2023-24";
+    public static final String CURRENT_SEASON = "2024-25";
 
     public static final Integer DEFAULT_BAD_RUN_TO_NEW_SEQ = 5;
 
@@ -37,12 +37,6 @@ public class BetStratConstants {
     public static final List<String> HOCKEY_SEASONS_LIST = ImmutableList.of("2016-2017","2017-2018","2018-2019","2019-2020",
             "2020-2021","2021-2022","2021-2022");
 
-//    public static final List<String> FOOTBALL_STRATEGIES_LIST = ImmutableList.of("Draw","GoalsFest","WinsMargin","Btts", "CleanSheet",
-//            "ConcedeBothHalves", "EuroHandicap", "NoBtts", "NoGoalsFest", "NoWins", "ScoreBothHalves", "SecondHalfBigger",
-//            "WinAndGoals", "WinBothHalves", "Wins");
-
-    public static final List<String> FOOTBALL_STRATEGIES_LIST = ImmutableList.of("CleanSheet", "Btts");
-
     public static final Map<String, String> ZEROZERO_SEASON_CODES  = new HashMap<String, String>() {{
         put("2016", "2016");
         put("2016-17", "146");
@@ -58,6 +52,7 @@ public class BetStratConstants {
         put("2021-22", "151");
         put("2022", "2022");
         put("2022-23", "152");
+        put("2023", "2023");
         put("2023-24", "153");
     }};
 

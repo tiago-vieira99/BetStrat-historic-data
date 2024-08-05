@@ -72,40 +72,42 @@ public class ReportController {
         return ResponseEntity.ok().body(list);
     }
 
-    @ApiOperation(value = "insert and save reports of all teams for all strategies for Season")
-    @PostMapping("/{season}")
-    public ResponseEntity<Object> insertReportsBySeason (@PathVariable("season") String season) {
+    @ApiOperation(value = "insert and save reports of all teams for all strategies for Season", notes = "Strategy values:\n\"Draw\",\"GoalsFest\",\"WinsMargin\",\"Btts\", \"CleanSheet\", \n" +
+        "            \"ConcedeBothHalves\", \"EuroHandicap\", \"NoBtts\", \"NoGoalsFest\", \"NoWins\", \"ScoreBothHalves\", \n" +
+        "            \"SecondHalfBigger\", \"WinAndGoals\", \"WinBothHalves\", \"Wins\"")
+    @PostMapping("/{season}/{strategy}")
+    public ResponseEntity<Object> insertReportsBySeason (@PathVariable("season") String season, @PathVariable("strategy") String strat) {
         List<Team> allTeams = teamRepository.findAll().stream().filter(t -> t.getSport().equals("Football")).collect(Collectors.toList());
 
         HashMap<String, Map> reportMap = new HashMap<>();
 
-        for (String strategy : FOOTBALL_STRATEGIES_LIST) {
-            log.info("handling " + strategy);
-            reportMap.put(strategy, new HashMap<String, List>());
+        String strategy = strat.concat("SeasonStats");
+        log.info("handling " + strategy);
+        reportMap.put(strategy, new HashMap<String, List>());
 
-            for (Team team : allTeams) {
-                //simulate score for desired season
-                String scoreBySeason = strategySeasonStatsService.calculateScoreBySeason(team, season, strategy.concat("SeasonStats"));
+        for (Team team : allTeams) {
+            //simulate score for desired season
+            String scoreBySeason = strategySeasonStatsService.calculateScoreBySeason(team, season, strategy);
 
-                if (!scoreBySeason.contains("EXCE")) {
-                    continue;
-                }
-
-                HashMap<String, Object> simulatedInfoForSeasonMap = strategySeasonStatsService.getSimulatedMatchesByStrategyAndSeason(season, team, strategy.concat("SeasonStats"));
-                simulatedInfoForSeasonMap.put("scoreBySeason", scoreBySeason);
-                if (simulatedInfoForSeasonMap != null && !simulatedInfoForSeasonMap.isEmpty()) {
-                    HashMap<String, Map> teamReportMap = new HashMap<>();
-                    teamReportMap.put(team.getName(), simulatedInfoForSeasonMap);
-                    reportMap.get(strategy).putAll(teamReportMap);
-                }
+            if (scoreBySeason.contains("INAPT") || scoreBySeason.equals(TeamScoreEnum.INSUFFICIENT_DATA.getValue()) ||
+                Double.parseDouble(scoreBySeason.substring(scoreBySeason.indexOf('(')+1, scoreBySeason.lastIndexOf(')'))) < 80 ) {
+                continue;
             }
 
-            Report report = new Report();
-            report.setSeason(season);
-            report.setStrategy(strategy);
-            report.setReportMap(reportMap.get(strategy));
-            reportRepository.save(report);
+            HashMap<String, Object> simulatedInfoForSeasonMap = strategySeasonStatsService.getSimulatedMatchesByStrategyAndSeason(season, team, strategy);
+            simulatedInfoForSeasonMap.put("scoreBySeason", scoreBySeason);
+            if (simulatedInfoForSeasonMap != null && !simulatedInfoForSeasonMap.isEmpty()) {
+                HashMap<String, Map> teamReportMap = new HashMap<>();
+                teamReportMap.put(team.getName(), simulatedInfoForSeasonMap);
+                reportMap.get(strategy).putAll(teamReportMap);
+            }
         }
+
+        Report report = new Report();
+        report.setSeason(season);
+        report.setStrategy(strat);
+        report.setReportMap(reportMap.get(strategy));
+        reportRepository.save(report);
 
         return ResponseEntity.ok().body(reportMap);
     }

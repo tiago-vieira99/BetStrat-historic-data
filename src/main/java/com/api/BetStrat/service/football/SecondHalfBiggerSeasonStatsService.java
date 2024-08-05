@@ -232,7 +232,7 @@ public class SecondHalfBiggerSeasonStatsService extends StrategyScoreCalculator<
         int actualNegativeSequence = 0;
         for (int i = 0; i < teamMatchesBySeason.size(); i++) {
             HistoricMatch historicMatch = teamMatchesBySeason.get(i);
-            if ((actualNegativeSequence >= Math.max(DEFAULT_BAD_RUN_TO_NEW_SEQ, (maxNegativeSeqForSeason - statsByTeam.get(0).getMaxSeqScale() / 10) / 2))) {
+            if ((actualNegativeSequence >= Math.max(4, maxNegativeSeqForSeason - statsByTeam.get(0).getMaxSeqScale() / 10))) {
                 isActiveSequence = true;
             }
 
