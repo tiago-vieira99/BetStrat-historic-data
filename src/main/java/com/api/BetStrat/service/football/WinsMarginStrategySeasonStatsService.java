@@ -17,6 +17,7 @@ import com.api.BetStrat.entity.football.CleanSheetSeasonStats;
 import com.api.BetStrat.entity.football.WinsMarginSeasonStats;
 import com.api.BetStrat.enums.TeamScoreEnum;
 import com.api.BetStrat.repository.HistoricMatchRepository;
+import com.api.BetStrat.repository.TeamRepository;
 import com.api.BetStrat.repository.football.WinsMarginSeasonInfoRepository;
 import com.api.BetStrat.service.StrategyScoreCalculator;
 import com.api.BetStrat.service.StrategySeasonStatsInterface;
@@ -44,6 +45,9 @@ public class WinsMarginStrategySeasonStatsService extends StrategyScoreCalculato
 
     @Autowired
     private HistoricMatchRepository historicMatchRepository;
+
+    @Autowired
+    private TeamRepository teamRepository;
 
     @Override
     public WinsMarginSeasonStats insertStrategySeasonStats(WinsMarginSeasonStats strategySeasonStats) {
@@ -78,11 +82,11 @@ public class WinsMarginStrategySeasonStatsService extends StrategyScoreCalculato
         int avgNegativeSeqForSeason = (int) Math.round(calculateHistoricAvgNegativeSeq(statsByTeam));
         int maxNegativeSeqForSeason = calculateHistoricMaxNegativeSeq(statsByTeam);
 
-        boolean isActiveSequence = false; //when true it always bet on the first game
+        boolean isActiveSequence = true; //when true it always bet on the first game
         int actualNegativeSequence = 0;
         for (int i = 0; i < filteredMatches.size(); i++) {
             HistoricMatch historicMatch = filteredMatches.get(i);
-            if ((actualNegativeSequence >= Math.max(4, (maxNegativeSeqForSeason - statsByTeam.get(0).getMaxSeqScale() / 10)))) {
+            if ((actualNegativeSequence >= 4)) {
                 isActiveSequence = true;
             }
 
@@ -204,6 +208,9 @@ public class WinsMarginStrategySeasonStatsService extends StrategyScoreCalculato
                 insertStrategySeasonStats(winsMarginSeasonInfo);
             }
         }
+        team.setMarginWinsMaxRedRun(calculateHistoricMaxNegativeSeq(statsByTeam));
+        team.setMarginWinsAvgRedRun((int)Math.round(calculateHistoricAvgNegativeSeq(statsByTeam)));
+        teamRepository.save(team);
     }
 
     @Override

@@ -122,6 +122,7 @@ public class BttsStrategySeasonStatsService extends StrategyScoreCalculator<Btts
         }
         team.setBttsMaxRedRun(calculateHistoricMaxNegativeSeq(statsByTeam));
         team.setBttsAvgRedRun((int)Math.round(calculateHistoricAvgNegativeSeq(statsByTeam)));
+        teamRepository.save(team);
     }
 
     @Override

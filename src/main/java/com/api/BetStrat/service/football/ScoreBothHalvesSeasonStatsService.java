@@ -17,6 +17,7 @@ import com.api.BetStrat.entity.football.ConcedeBothHalvesSeasonStats;
 import com.api.BetStrat.entity.football.ScoreBothHalvesSeasonStats;
 import com.api.BetStrat.enums.TeamScoreEnum;
 import com.api.BetStrat.repository.HistoricMatchRepository;
+import com.api.BetStrat.repository.TeamRepository;
 import com.api.BetStrat.repository.football.ScoreBothHalvesSeasonInfoRepository;
 import com.api.BetStrat.service.StrategyScoreCalculator;
 import com.api.BetStrat.service.StrategySeasonStatsInterface;
@@ -44,6 +45,9 @@ public class ScoreBothHalvesSeasonStatsService extends StrategyScoreCalculator<S
 
     @Autowired
     private HistoricMatchRepository historicMatchRepository;
+
+    @Autowired
+    private TeamRepository teamRepository;
 
     @Override
     public ScoreBothHalvesSeasonStats insertStrategySeasonStats(ScoreBothHalvesSeasonStats strategySeasonStats) {
@@ -165,7 +169,6 @@ public class ScoreBothHalvesSeasonStatsService extends StrategyScoreCalculator<S
 
                 ArrayList<Integer> negativeSequence = new ArrayList<>();
                 int count = 0;
-                int totalWins= 0;
                 for (HistoricMatch historicMatch : filteredMatches) {
                     count++;
                     try {
@@ -194,7 +197,7 @@ public class ScoreBothHalvesSeasonStatsService extends StrategyScoreCalculator<S
                 scoreBothHalvesSeasonStats.setCompetition("all");
                 scoreBothHalvesSeasonStats.setNegativeSequence(negativeSequence.toString());
                 scoreBothHalvesSeasonStats.setNumMatches(filteredMatches.size());
-                scoreBothHalvesSeasonStats.setNumScoreBothHalves(totalWins);
+                scoreBothHalvesSeasonStats.setNumScoreBothHalves(totalScoreBothHalves);
 
                 double stdDev =  Utils.beautifyDoubleValue(calculateSD(negativeSequence));
                 scoreBothHalvesSeasonStats.setStdDeviation(stdDev);
@@ -205,6 +208,9 @@ public class ScoreBothHalvesSeasonStatsService extends StrategyScoreCalculator<S
                 insertStrategySeasonStats(scoreBothHalvesSeasonStats);
             }
         }
+        team.setScoreBothHalvesMaxRedRun(calculateHistoricMaxNegativeSeq(statsByTeam));
+        team.setScoreBothHalvesAvgRedRun((int)Math.round(calculateHistoricAvgNegativeSeq(statsByTeam)));
+        teamRepository.save(team);
     }
 
     @Override

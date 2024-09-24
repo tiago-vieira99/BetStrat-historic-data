@@ -17,6 +17,7 @@ import com.api.BetStrat.entity.football.ConcedeBothHalvesSeasonStats;
 import com.api.BetStrat.entity.football.WinBothHalvesSeasonStats;
 import com.api.BetStrat.enums.TeamScoreEnum;
 import com.api.BetStrat.repository.HistoricMatchRepository;
+import com.api.BetStrat.repository.TeamRepository;
 import com.api.BetStrat.repository.football.WinBothHalvesSeasonInfoRepository;
 import com.api.BetStrat.service.StrategyScoreCalculator;
 import com.api.BetStrat.service.StrategySeasonStatsInterface;
@@ -40,11 +41,13 @@ public class WinBothHalvesStrategySeasonStatsService extends StrategyScoreCalcul
     private static final Logger LOGGER = LoggerFactory.getLogger(WinBothHalvesStrategySeasonStatsService.class);
 
     @Autowired
-    private WinBothHalvesSeasonInfoRepository winBothHalvesSeasonInfoRepository
-            ;
+    private WinBothHalvesSeasonInfoRepository winBothHalvesSeasonInfoRepository;
 
     @Autowired
     private HistoricMatchRepository historicMatchRepository;
+
+    @Autowired
+    private TeamRepository teamRepository;
 
     @Override
     public WinBothHalvesSeasonStats insertStrategySeasonStats(WinBothHalvesSeasonStats strategySeasonStats) {
@@ -168,15 +171,22 @@ public class WinBothHalvesStrategySeasonStatsService extends StrategyScoreCalcul
 
                 ArrayList<Integer> negativeSequence = new ArrayList<>();
                 int count = 0;
+                int totalWins= 0;
                 for (HistoricMatch historicMatch : filteredMatches) {
                     count++;
-                    try {
-                        if (matchFollowStrategyRules(historicMatch, team.getName(), null)) {
-                            negativeSequence.add(count);
-                            count = 0;
+                    String res = historicMatch.getFtResult().split("\\(")[0];
+                    int homeResult = Integer.parseInt(res.split(":")[0]);
+                    int awayResult = Integer.parseInt(res.split(":")[1]);
+                    if ((historicMatch.getHomeTeam().equals(team.getName()) && homeResult>awayResult) || (historicMatch.getAwayTeam().equals(team.getName()) && homeResult<awayResult)) {
+                        totalWins++;
+                        try {
+                            if (matchFollowStrategyRules(historicMatch, team.getName(), null)) {
+                                negativeSequence.add(count);
+                                count = 0;
+                            }
+                        } catch (NumberFormatException e) {
+                            return;
                         }
-                    } catch (NumberFormatException e) {
-                        return;
                     }
                 }
 
@@ -188,15 +198,18 @@ public class WinBothHalvesStrategySeasonStatsService extends StrategyScoreCalcul
                     negativeSequence.add(-1);
                 }
 
-                if (totalWinBothHalves == 0) {
+                if (totalWins == 0) {
                     winBothHalvesSeasonStats.setWinBothHalvesRate(0);
+                    winBothHalvesSeasonStats.setWinsRate(0);
                 } else {
                     winBothHalvesSeasonStats.setWinBothHalvesRate(Utils.beautifyDoubleValue(100*totalWinBothHalves/filteredMatches.size()));
+                    winBothHalvesSeasonStats.setWinsRate(Utils.beautifyDoubleValue(100*totalWins/filteredMatches.size()));
                 }
                 winBothHalvesSeasonStats.setCompetition("all");
                 winBothHalvesSeasonStats.setNegativeSequence(negativeSequence.toString());
                 winBothHalvesSeasonStats.setNumMatches(filteredMatches.size());
                 winBothHalvesSeasonStats.setNumWinsBothHalves(totalWinBothHalves);
+                winBothHalvesSeasonStats.setNumWins(totalWins);
 
                 double stdDev =  Utils.beautifyDoubleValue(calculateSD(negativeSequence));
                 winBothHalvesSeasonStats.setStdDeviation(stdDev);
@@ -207,6 +220,9 @@ public class WinBothHalvesStrategySeasonStatsService extends StrategyScoreCalcul
                 insertStrategySeasonStats(winBothHalvesSeasonStats);
             }
         }
+        team.setWinBothHalvesMaxRedRun(calculateHistoricMaxNegativeSeq(statsByTeam));
+        team.setWinBothHalvesAvgRedRun((int)Math.round(calculateHistoricAvgNegativeSeq(statsByTeam)));
+        teamRepository.save(team);
     }
 
     @Override
@@ -263,18 +279,21 @@ public class WinBothHalvesStrategySeasonStatsService extends StrategyScoreCalcul
     private double calculateTotalFinalScore(List<WinBothHalvesSeasonStats> statsByTeam) {
         int last3SeasonsGreensRateScore = calculateLast3SeasonsRateScore(statsByTeam);
         int allSeasonsGreensRateScore = calculateAllSeasonsRateScore(statsByTeam);
-        int last3SeasonsmaxSeqWOGreenScore = calculateLast3SeasonsMaxSeqWOGreenScore(statsByTeam);
-        int allSeasonsmaxSeqWOGreenScore = calculateAllSeasonsMaxSeqWOGreenScore(statsByTeam);
+        int last3SeasonsTotalWinsRateScore = calculateLast3SeasonsTotalWinsRateScore(statsByTeam);
+        int allSeasonsTotalWinsRateScore = calculateAllSeasonsTotalWinsRateScore(statsByTeam);
+        int last3SeasonsmaxSeqWOGreensScore = calculateLast3SeasonsMaxSeqWOGreenScore(statsByTeam);
+        int allSeasonsmaxSeqWOGreensScore = calculateAllSeasonsMaxSeqWOGreenScore(statsByTeam);
         int last3SeasonsStdDevScore = calculateLast3SeasonsStdDevScore(statsByTeam);
         int allSeasonsStdDevScore = calculateAllSeasonsStdDevScore(statsByTeam);
         int last3SeasonsCoefDevScore = calculateLast3SeasonsCoefDevScore(statsByTeam);
         int allSeasonsCoefDevScore = calculateAllSeasonsCoefDevScore(statsByTeam);
         int totalMatchesScore = calculateLeagueMatchesScore(statsByTeam.get(0).getNumMatches());
 
-        return Utils.beautifyDoubleValue(0.15*last3SeasonsGreensRateScore + 0.05*allSeasonsGreensRateScore +
-            0.15*last3SeasonsmaxSeqWOGreenScore + 0.07*allSeasonsmaxSeqWOGreenScore +
-            0.2*last3SeasonsCoefDevScore + 0.11*allSeasonsCoefDevScore +
-            0.18*last3SeasonsStdDevScore + 0.07*allSeasonsStdDevScore + 0.02*totalMatchesScore);
+        return Utils.beautifyDoubleValue(0.1*last3SeasonsGreensRateScore + 0.05*allSeasonsGreensRateScore +
+            0.1*last3SeasonsTotalWinsRateScore + 0.05*allSeasonsTotalWinsRateScore +
+            0.14*last3SeasonsmaxSeqWOGreensScore + 0.05*allSeasonsmaxSeqWOGreensScore +
+            0.2*last3SeasonsCoefDevScore + 0.07*allSeasonsCoefDevScore +
+            0.15*last3SeasonsStdDevScore + 0.07*allSeasonsStdDevScore + 0.02*totalMatchesScore);
     }
 
     @Override

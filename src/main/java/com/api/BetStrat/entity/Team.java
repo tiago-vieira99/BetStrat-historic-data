@@ -202,6 +202,15 @@ public class Team implements Serializable {
     @Column(name = "win_both_halves_avg_red_run")
     private Integer winBothHalvesAvgRedRun;
 
+    @Column(name = "win_first_half_score")
+    private String winFirstHalfScore;
+
+    @Column(name = "win_first_half_max_red_run")
+    private Integer winFirstHalfMaxRedRun;
+
+    @Column(name = "win_first_half_avg_red_run")
+    private Integer winFirstHalfAvgRedRun;
+
     @Column(name = "win_and_goals_score")
     private String winAndGoalsScore;
 

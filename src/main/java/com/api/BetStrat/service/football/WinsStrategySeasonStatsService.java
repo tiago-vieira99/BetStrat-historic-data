@@ -17,6 +17,7 @@ import com.api.BetStrat.entity.football.CleanSheetSeasonStats;
 import com.api.BetStrat.entity.football.WinsSeasonStats;
 import com.api.BetStrat.enums.TeamScoreEnum;
 import com.api.BetStrat.repository.HistoricMatchRepository;
+import com.api.BetStrat.repository.TeamRepository;
 import com.api.BetStrat.repository.football.WinsSeasonInfoRepository;
 import com.api.BetStrat.service.StrategyScoreCalculator;
 import com.api.BetStrat.service.StrategySeasonStatsInterface;
@@ -44,6 +45,9 @@ public class WinsStrategySeasonStatsService extends StrategyScoreCalculator<Wins
 
     @Autowired
     private HistoricMatchRepository historicMatchRepository;
+
+    @Autowired
+    private TeamRepository teamRepository;
 
     @Override
     public WinsSeasonStats insertStrategySeasonStats(WinsSeasonStats strategySeasonStats) {
@@ -192,6 +196,9 @@ public class WinsStrategySeasonStatsService extends StrategyScoreCalculator<Wins
                 insertStrategySeasonStats(winsSeasonInfo);
             }
         }
+        team.setWinsMaxRedRun(calculateHistoricMaxNegativeSeq(statsByTeam));
+        team.setWinsAvgRedRun((int)Math.round(calculateHistoricAvgNegativeSeq(statsByTeam)));
+        teamRepository.save(team);
     }
 
     @Override

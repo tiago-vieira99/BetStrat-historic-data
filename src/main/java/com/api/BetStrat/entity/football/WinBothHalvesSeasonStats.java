@@ -25,6 +25,12 @@ public class WinBothHalvesSeasonStats extends StrategySeasonStats {
     @Column(name = "num_wins_both_halves")
     private int numWinsBothHalves;
 
+    @Column(name = "winsRate")
+    private double winsRate;
+
+    @Column(name = "num_wins")
+    private int numWins;
+
     public WinBothHalvesSeasonStats() {
         maxSeqScale();
     }

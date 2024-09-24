@@ -10,7 +10,7 @@ import java.util.Map;
 public class BetStratConstants {
 
     //Scrapping Service
-    public static final String SCRAPPER_SERVICE_URL = "http://localhost:8000/";
+    public static final String SCRAPPER_SERVICE_URL = "http://47.237.107.158:8000/";
 
     public static final String SOCCERSTATS_BASE_URL = "http://www.soccerstats.com/";
     public static final String FCSTATS_BASE_URL = "http://www.fcstats.com/";
@@ -62,7 +62,7 @@ public class BetStratConstants {
             "https://www.worldfootball.net/schedule/cro-1-hnl-2024-2025-spieltag/",
             "https://www.worldfootball.net/schedule/cyp-first-division-2024-2025-spieltag/",
             "https://www.worldfootball.net/schedule/cze-1-fotbalova-liga-2024-2025-spieltag/",
-            "https://www.worldfootball.net/schedule/den-superligaen-2024-2025-spieltag/",
+            "https://www.worldfootball.net/schedule/den-superliga-2024-2025-spieltag/",
             "https://www.worldfootball.net/schedule/eng-premier-league-2024-2025-spieltag/",
             "https://www.worldfootball.net/schedule/fra-ligue-1-2024-2025-spieltag/",
             "https://www.worldfootball.net/schedule/bundesliga-2024-2025-spieltag/",

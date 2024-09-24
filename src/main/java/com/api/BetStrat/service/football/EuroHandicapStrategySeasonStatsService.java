@@ -17,6 +17,7 @@ import com.api.BetStrat.entity.football.CleanSheetSeasonStats;
 import com.api.BetStrat.entity.football.EuroHandicapSeasonStats;
 import com.api.BetStrat.enums.TeamScoreEnum;
 import com.api.BetStrat.repository.HistoricMatchRepository;
+import com.api.BetStrat.repository.TeamRepository;
 import com.api.BetStrat.repository.football.EuroHandicapSeasonInfoRepository;
 import com.api.BetStrat.service.StrategyScoreCalculator;
 import com.api.BetStrat.service.StrategySeasonStatsInterface;
@@ -44,6 +45,9 @@ public class EuroHandicapStrategySeasonStatsService extends StrategyScoreCalcula
 
     @Autowired
     private HistoricMatchRepository historicMatchRepository;
+
+    @Autowired
+    private TeamRepository teamRepository;
 
     @Override
     public EuroHandicapSeasonStats insertStrategySeasonStats(EuroHandicapSeasonStats strategySeasonStats) {
@@ -202,6 +206,9 @@ public class EuroHandicapStrategySeasonStatsService extends StrategyScoreCalcula
                 insertStrategySeasonStats(euroHandicapSeasonInfo);
             }
         }
+        team.setEuroHandicapMaxRedRun(calculateHistoricMaxNegativeSeq(statsByTeam));
+        team.setEuroHandicapAvgRedRun((int)Math.round(calculateHistoricAvgNegativeSeq(statsByTeam)));
+        teamRepository.save(team);
     }
 
     @Override

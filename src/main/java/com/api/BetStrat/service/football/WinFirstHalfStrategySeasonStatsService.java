@@ -12,13 +12,11 @@ import com.api.BetStrat.dto.SimulatedMatchDto;
 import com.api.BetStrat.entity.HistoricMatch;
 import com.api.BetStrat.entity.StrategySeasonStats;
 import com.api.BetStrat.entity.Team;
-import com.api.BetStrat.entity.football.BttsSeasonStats;
-import com.api.BetStrat.entity.football.CleanSheetSeasonStats;
-import com.api.BetStrat.entity.football.NoGoalsFestSeasonStats;
+import com.api.BetStrat.entity.football.WinFirstHalfSeasonStats;
 import com.api.BetStrat.enums.TeamScoreEnum;
 import com.api.BetStrat.repository.HistoricMatchRepository;
 import com.api.BetStrat.repository.TeamRepository;
-import com.api.BetStrat.repository.football.NoGoalsFestSeasonInfoRepository;
+import com.api.BetStrat.repository.football.WinFisrtHalfSeasonInfoRepository;
 import com.api.BetStrat.service.StrategyScoreCalculator;
 import com.api.BetStrat.service.StrategySeasonStatsInterface;
 import com.api.BetStrat.util.Utils;
@@ -36,12 +34,12 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @Transactional
-public class NoGoalsFestStrategySeasonStatsService extends StrategyScoreCalculator<NoGoalsFestSeasonStats> implements StrategySeasonStatsInterface<NoGoalsFestSeasonStats> {
+public class WinFirstHalfStrategySeasonStatsService extends StrategyScoreCalculator<WinFirstHalfSeasonStats> implements StrategySeasonStatsInterface<WinFirstHalfSeasonStats> {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(NoGoalsFestStrategySeasonStatsService.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(WinFirstHalfStrategySeasonStatsService.class);
 
     @Autowired
-    private NoGoalsFestSeasonInfoRepository noGoalsFestSeasonInfoRepository;
+    private WinFisrtHalfSeasonInfoRepository winFisrtHalfSeasonInfoRepository;
 
     @Autowired
     private HistoricMatchRepository historicMatchRepository;
@@ -50,14 +48,14 @@ public class NoGoalsFestStrategySeasonStatsService extends StrategyScoreCalculat
     private TeamRepository teamRepository;
 
     @Override
-    public NoGoalsFestSeasonStats insertStrategySeasonStats(NoGoalsFestSeasonStats strategySeasonStats) {
+    public WinFirstHalfSeasonStats insertStrategySeasonStats(WinFirstHalfSeasonStats strategySeasonStats) {
         LOGGER.info("Inserted " + strategySeasonStats.getClass() + " for " + strategySeasonStats.getTeamId().getName() + " and season " + strategySeasonStats.getSeason());
-        return noGoalsFestSeasonInfoRepository.save(strategySeasonStats);
+        return winFisrtHalfSeasonInfoRepository.save(strategySeasonStats);
     }
 
     @Override
-    public List<NoGoalsFestSeasonStats> getStatsByStrategyAndTeam(Team team, String strategyName) {
-        return noGoalsFestSeasonInfoRepository.getNoGoalsFestStatsByTeam(team);
+    public List<WinFirstHalfSeasonStats> getStatsByStrategyAndTeam(Team team, String strategyName) {
+        return winFisrtHalfSeasonInfoRepository.getFootballWinFirstHalfStatsByTeam(team);
     }
 
     @Override
@@ -71,7 +69,7 @@ public class NoGoalsFestStrategySeasonStatsService extends StrategyScoreCalculat
             return simuMapForSeason;
         }
 
-        List<NoGoalsFestSeasonStats> statsByTeam = noGoalsFestSeasonInfoRepository.getNoGoalsFestStatsByTeam(team);
+        List<WinFirstHalfSeasonStats> statsByTeam = winFisrtHalfSeasonInfoRepository.getFootballWinFirstHalfStatsByTeam(team);
         Collections.sort(statsByTeam, StrategySeasonStats.strategySeasonSorter);
         Collections.reverse(statsByTeam);
 
@@ -84,8 +82,15 @@ public class NoGoalsFestStrategySeasonStatsService extends StrategyScoreCalculat
         int actualNegativeSequence = 0;
         for (int i = 0; i < teamMatchesBySeason.size(); i++) {
             HistoricMatch historicMatch = teamMatchesBySeason.get(i);
-            if ((actualNegativeSequence >= Math.max(DEFAULT_BAD_RUN_TO_NEW_SEQ, maxNegativeSeqForSeason - statsByTeam.get(0).getMaxSeqScale() / 10))) {
+            if ((actualNegativeSequence >= Math.max(DEFAULT_BAD_RUN_TO_NEW_SEQ, (maxNegativeSeqForSeason - statsByTeam.get(0).getMaxSeqScale() / 10) / 2))) {
                 isActiveSequence = true;
+            }
+
+            boolean isMatchGreen = false;
+            try {
+                isMatchGreen = matchFollowStrategyRules(historicMatch, team.getName(), null);
+            } catch (NumberFormatException e) {
+                return null;
             }
 
             if (isActiveSequence) {
@@ -98,7 +103,7 @@ public class NoGoalsFestStrategySeasonStatsService extends StrategyScoreCalculat
                 simulatedMatchDto.setFtResult(historicMatch.getFtResult());
                 simulatedMatchDto.setSeason(season);
                 simulatedMatchDto.setCompetition(historicMatch.getCompetition());
-                if (matchFollowStrategyRules(historicMatch, team.getName(), null)) {
+                if (isMatchGreen) {
                     simulatedMatchDto.setIsGreen(true);
                     actualNegativeSequence = 0;
                     isActiveSequence = false;
@@ -107,7 +112,7 @@ public class NoGoalsFestStrategySeasonStatsService extends StrategyScoreCalculat
                 }
                 matchesBetted.add(simulatedMatchDto);
             } else {
-                if (!matchFollowStrategyRules(historicMatch, team.getName(), null)) {
+                if (!isMatchGreen) {
                     actualNegativeSequence++;
                 } else {
                     actualNegativeSequence = 0;
@@ -123,9 +128,11 @@ public class NoGoalsFestStrategySeasonStatsService extends StrategyScoreCalculat
     @Override
     public boolean matchFollowStrategyRules(HistoricMatch historicMatch, String teamName, String strategyName) {
         String res = historicMatch.getFtResult().split("\\(")[0];
-        int homeResult = Integer.parseInt(res.split(":")[0]);
-        int awayResult = Integer.parseInt(res.split(":")[1]);
-        if (homeResult == 0 || awayResult == 0 || homeResult+awayResult <= 2) {
+        String htRes = historicMatch.getHtResult().split("\\(")[0];
+        int homeHTResult = Integer.parseInt(htRes.split(":")[0]);
+        int awayHTResult = Integer.parseInt(htRes.split(":")[1]);
+        if ( (historicMatch.getHomeTeam().equals(teamName) && homeHTResult > awayHTResult) ||
+                (historicMatch.getAwayTeam().equals(teamName) && awayHTResult > homeHTResult) ) {
             return true;
         } else {
             return false;
@@ -134,7 +141,7 @@ public class NoGoalsFestStrategySeasonStatsService extends StrategyScoreCalculat
 
     @Override
     public void updateStrategySeasonStats(Team team, String strategyName) {
-        List<NoGoalsFestSeasonStats> statsByTeam = noGoalsFestSeasonInfoRepository.getNoGoalsFestStatsByTeam(team);
+        List<WinFirstHalfSeasonStats> statsByTeam = winFisrtHalfSeasonInfoRepository.getFootballWinFirstHalfStatsByTeam(team);
         List<String> seasonsList = null;
 
         if (SUMMER_SEASONS_BEGIN_MONTH_LIST.contains(team.getBeginSeason())) {
@@ -144,62 +151,66 @@ public class NoGoalsFestStrategySeasonStatsService extends StrategyScoreCalculat
         }
 
         for (String season : seasonsList) {
-            if (!statsByTeam.stream().filter(s -> s.getSeason().equals(season)).findAny().isPresent()) {
+            if (!statsByTeam.stream().anyMatch(s -> s.getSeason().equals(season))) {
                 String newSeasonUrl = "";
 
-                List<HistoricMatch> teamMatchesBySeason = historicMatchRepository.getTeamMatchesBySeason(team, season);
-                teamMatchesBySeason.sort(HistoricMatch.matchDateComparator);
+                List<HistoricMatch> filteredMatches = historicMatchRepository.getTeamMatchesBySeason(team, season);
+                filteredMatches.sort(HistoricMatch.matchDateComparator);
 
-                if (teamMatchesBySeason.size() == 0) {
+                if (filteredMatches.isEmpty()) {
                     continue;
                 }
 
-                NoGoalsFestSeasonStats noGoalsFestSeasonStats = new NoGoalsFestSeasonStats();
+                WinFirstHalfSeasonStats winFirstHalfSeasonStats = new WinFirstHalfSeasonStats();
 
-                ArrayList<Integer> strategySequence = new ArrayList<>();
+                ArrayList<Integer> negativeSequence = new ArrayList<>();
                 int count = 0;
-                for (HistoricMatch historicMatch : teamMatchesBySeason) {
+                for (HistoricMatch historicMatch : filteredMatches) {
                     count++;
-                    if (matchFollowStrategyRules(historicMatch, team.getName(), null)) {
-                        strategySequence.add(count);
-                        count = 0;
+
+                    try {
+                        if (matchFollowStrategyRules(historicMatch, team.getName(), null)) {
+                            negativeSequence.add(count);
+                            count = 0;
+                        }
+                    } catch (NumberFormatException e) {
+                        System.out.println(e.getMessage());
+                        return;
                     }
+
                 }
 
-                int totalNoGoalsFest = strategySequence.size();
+                int totalWinsFirstHalf = negativeSequence.size();
 
-                strategySequence.add(count);
-                HistoricMatch lastMatch = teamMatchesBySeason.get(teamMatchesBySeason.size() - 1);
+                negativeSequence.add(count);
+                HistoricMatch lastMatch = filteredMatches.get(filteredMatches.size() - 1);
                 if (!matchFollowStrategyRules(lastMatch, team.getName(), null)) {
-                    strategySequence.add(-1);
+                    negativeSequence.add(-1);
                 }
 
-                if (totalNoGoalsFest == 0) {
-                    noGoalsFestSeasonStats.setNoGoalsFestRate(0);
-                } else {
-                    noGoalsFestSeasonStats.setNoGoalsFestRate(Utils.beautifyDoubleValue(100*totalNoGoalsFest/teamMatchesBySeason.size()));
-                }
-                noGoalsFestSeasonStats.setCompetition("all");
-                noGoalsFestSeasonStats.setNegativeSequence(strategySequence.toString());
-                noGoalsFestSeasonStats.setNumNoGoalsFest(totalNoGoalsFest);
-                noGoalsFestSeasonStats.setNumMatches(teamMatchesBySeason.size());
 
-                double stdDev =  Utils.beautifyDoubleValue(calculateSD(strategySequence));
-                noGoalsFestSeasonStats.setStdDeviation(stdDev);
-                noGoalsFestSeasonStats.setCoefDeviation(Utils.beautifyDoubleValue(calculateCoeffVariation(stdDev, strategySequence)));
-                noGoalsFestSeasonStats.setSeason(season);
-                noGoalsFestSeasonStats.setTeamId(team);
-                noGoalsFestSeasonStats.setUrl(newSeasonUrl);
-                insertStrategySeasonStats(noGoalsFestSeasonStats);
+                winFirstHalfSeasonStats.setWinFirstHalfRate(Utils.beautifyDoubleValue(100*totalWinsFirstHalf/filteredMatches.size()));
+                winFirstHalfSeasonStats.setCompetition("all");
+                winFirstHalfSeasonStats.setNegativeSequence(negativeSequence.toString());
+                winFirstHalfSeasonStats.setNumMatches(filteredMatches.size());
+                winFirstHalfSeasonStats.setNumWinsFirstHalf(totalWinsFirstHalf);
+
+                double stdDev =  Utils.beautifyDoubleValue(calculateSD(negativeSequence));
+                winFirstHalfSeasonStats.setStdDeviation(stdDev);
+                winFirstHalfSeasonStats.setCoefDeviation(Utils.beautifyDoubleValue(calculateCoeffVariation(stdDev, negativeSequence)));
+                winFirstHalfSeasonStats.setSeason(season);
+                winFirstHalfSeasonStats.setTeamId(team);
+                winFirstHalfSeasonStats.setUrl(newSeasonUrl);
+                insertStrategySeasonStats(winFirstHalfSeasonStats);
             }
         }
-        team.setNoGoalsFestMaxRedRun(calculateHistoricMaxNegativeSeq(statsByTeam));
-        team.setNoGoalsFestAvgRedRun((int)Math.round(calculateHistoricAvgNegativeSeq(statsByTeam)));
+        team.setWinFirstHalfMaxRedRun(calculateHistoricMaxNegativeSeq(statsByTeam));
+        team.setWinFirstHalfAvgRedRun((int)Math.round(calculateHistoricAvgNegativeSeq(statsByTeam)));
         teamRepository.save(team);
     }
 
     @Override
-    public int calculateHistoricMaxNegativeSeq(List<NoGoalsFestSeasonStats> statsByTeam) {
+    public int calculateHistoricMaxNegativeSeq(List<WinFirstHalfSeasonStats> statsByTeam) {
         int maxValue = 0;
         for (int i=0; i<statsByTeam.size(); i++) {
             int[] currSeqMaxValue = Arrays.stream(statsByTeam.get(i).getNegativeSequence().replaceAll("\\[","").replaceAll("\\]","")
@@ -219,7 +230,7 @@ public class NoGoalsFestStrategySeasonStatsService extends StrategyScoreCalculat
     }
 
     @Override
-    public double calculateHistoricAvgNegativeSeq(List<NoGoalsFestSeasonStats> statsByTeam) {
+    public double calculateHistoricAvgNegativeSeq(List<WinFirstHalfSeasonStats> statsByTeam) {
         int seqValues = 0;
         int count = 0;
         for (int i=0; i<statsByTeam.size(); i++) {
@@ -235,21 +246,21 @@ public class NoGoalsFestStrategySeasonStatsService extends StrategyScoreCalculat
 
     @Override
     public Team updateTeamScore(Team teamByName) {
-        List<NoGoalsFestSeasonStats> statsByTeam = noGoalsFestSeasonInfoRepository.getNoGoalsFestStatsByTeam(teamByName);
+        List<WinFirstHalfSeasonStats> statsByTeam = winFisrtHalfSeasonInfoRepository.getFootballWinFirstHalfStatsByTeam(teamByName);
         Collections.sort(statsByTeam, StrategySeasonStats.strategySeasonSorter);
         Collections.reverse(statsByTeam);
 
-        if (statsByTeam.size() < 3 || statsByTeam.stream().filter(s -> s.getNumMatches() < 15).findAny().isPresent()) {
-            teamByName.setNoGoalsFestScore(TeamScoreEnum.INSUFFICIENT_DATA.getValue());
+        if (statsByTeam.size() < 3) {
+            teamByName.setWinBothHalvesScore(TeamScoreEnum.INSUFFICIENT_DATA.getValue());
         } else {
             double totalScore = calculateTotalFinalScore(statsByTeam);
-            teamByName.setNoGoalsFestScore(calculateFinalRating(totalScore));
+            teamByName.setWinBothHalvesScore(calculateFinalRating(totalScore));
         }
 
         return teamByName;
     }
 
-    private double calculateTotalFinalScore(List<NoGoalsFestSeasonStats> statsByTeam) {
+    private double calculateTotalFinalScore(List<WinFirstHalfSeasonStats> statsByTeam) {
         int last3SeasonsGreensRateScore = calculateLast3SeasonsRateScore(statsByTeam);
         int allSeasonsGreensRateScore = calculateAllSeasonsRateScore(statsByTeam);
         int last3SeasonsmaxSeqWOGreenScore = calculateLast3SeasonsMaxSeqWOGreenScore(statsByTeam);
@@ -268,7 +279,7 @@ public class NoGoalsFestStrategySeasonStatsService extends StrategyScoreCalculat
 
     @Override
     public String calculateScoreBySeason(Team team, String season, String strategy) {
-        List<NoGoalsFestSeasonStats> statsByTeam = noGoalsFestSeasonInfoRepository.getNoGoalsFestStatsByTeam(team);
+        List<WinFirstHalfSeasonStats> statsByTeam = winFisrtHalfSeasonInfoRepository.getFootballWinFirstHalfStatsByTeam(team);
         Collections.sort(statsByTeam, StrategySeasonStats.strategySeasonSorter);
         Collections.reverse(statsByTeam);
 
@@ -284,61 +295,94 @@ public class NoGoalsFestStrategySeasonStatsService extends StrategyScoreCalculat
     }
 
     @Override
-    public int calculateLast3SeasonsRateScore(List<NoGoalsFestSeasonStats> statsByTeam) {
-        double GoalsFestRates = 0;
+    public int calculateLast3SeasonsRateScore(List<WinFirstHalfSeasonStats> statsByTeam) {
+        double winsRates = 0;
         for (int i=0; i<3; i++) {
-            GoalsFestRates += statsByTeam.get(i).getNoGoalsFestRate();
+            winsRates += statsByTeam.get(i).getWinFirstHalfRate();
         }
 
-        double avgGreensRate = Utils.beautifyDoubleValue(GoalsFestRates / 3);
+        double avgWinsRate = Utils.beautifyDoubleValue(winsRates / 3);
 
-        if (isBetween(avgGreensRate,60,100)) {
+        if (isBetween(avgWinsRate,80,100)) {
             return 100;
-        } else if(isBetween(avgGreensRate,50,60)) {
-            return 90;
-        } else if(isBetween(avgGreensRate,35,50)) {
+        } else if(isBetween(avgWinsRate,70,80)) {
             return 80;
-        } else if(isBetween(avgGreensRate,30,35)) {
+        } else if(isBetween(avgWinsRate,50,70)) {
             return 60;
-        } else if(isBetween(avgGreensRate,20,30)) {
-            return 50;
-        } else if(isBetween(avgGreensRate,0,20)) {
+        } else if(isBetween(avgWinsRate,0,50)) {
             return 30;
         }
         return 0;
     }
 
     @Override
-    public int calculateAllSeasonsRateScore(List<NoGoalsFestSeasonStats> statsByTeam) {
-        double GoalsFestRates = 0;
+    public int calculateAllSeasonsRateScore(List<WinFirstHalfSeasonStats> statsByTeam) {
+        double winsRates = 0;
         for (int i=0; i<statsByTeam.size(); i++) {
-            GoalsFestRates += statsByTeam.get(i).getNoGoalsFestRate();
+            winsRates += statsByTeam.get(i).getWinFirstHalfRate();
         }
 
-        double avgGreensRate = Utils.beautifyDoubleValue(GoalsFestRates / statsByTeam.size());
+        double avgWinsRate = Utils.beautifyDoubleValue(winsRates / statsByTeam.size());
 
-        if (isBetween(avgGreensRate,60,100)) {
+        if (isBetween(avgWinsRate,80,100)) {
             return 100;
-        } else if(isBetween(avgGreensRate,50,60)) {
-            return 90;
-        } else if(isBetween(avgGreensRate,35,50)) {
+        } else if(isBetween(avgWinsRate,70,80)) {
             return 80;
-        } else if(isBetween(avgGreensRate,30,35)) {
+        } else if(isBetween(avgWinsRate,50,70)) {
             return 60;
-        } else if(isBetween(avgGreensRate,20,30)) {
-            return 50;
-        } else if(isBetween(avgGreensRate,0,20)) {
+        } else if(isBetween(avgWinsRate,0,50)) {
             return 30;
         }
         return 0;
     }
+
     @Override
-    public int calculateLast3SeasonsTotalWinsRateScore(List<NoGoalsFestSeasonStats> statsByTeam) {
+    public int calculateLast3SeasonsTotalWinsRateScore(List<WinFirstHalfSeasonStats> statsByTeam) {
+        double totalWinsRates = 0;
+        for (int i=0; i<3; i++) {
+            totalWinsRates += statsByTeam.get(i).getWinFirstHalfRate();
+        }
+
+        double avgWinsRate = Utils.beautifyDoubleValue(totalWinsRates / 3);
+
+        if (isBetween(avgWinsRate,80,100)) {
+            return 100;
+        } else if(isBetween(avgWinsRate,70,80)) {
+            return 90;
+        } else if(isBetween(avgWinsRate,60,70)) {
+            return 80;
+        } else if(isBetween(avgWinsRate,50,60)) {
+            return 70;
+        } else if(isBetween(avgWinsRate,40,50)) {
+            return 60;
+        } else if(isBetween(avgWinsRate,0,40)) {
+            return 30;
+        }
         return 0;
     }
 
     @Override
-    public int calculateAllSeasonsTotalWinsRateScore(List<NoGoalsFestSeasonStats> statsByTeam) {
+    public int calculateAllSeasonsTotalWinsRateScore(List<WinFirstHalfSeasonStats> statsByTeam) {
+        double totalWinsRates = 0;
+        for (int i=0; i<statsByTeam.size(); i++) {
+            totalWinsRates += statsByTeam.get(i).getWinFirstHalfRate();
+        }
+
+        double avgWinsRate = Utils.beautifyDoubleValue(totalWinsRates / statsByTeam.size());
+
+        if (isBetween(avgWinsRate,80,100)) {
+            return 100;
+        } else if(isBetween(avgWinsRate,70,80)) {
+            return 90;
+        } else if(isBetween(avgWinsRate,60,70)) {
+            return 80;
+        } else if(isBetween(avgWinsRate,50,60)) {
+            return 70;
+        } else if(isBetween(avgWinsRate,40,50)) {
+            return 60;
+        } else if(isBetween(avgWinsRate,0,40)) {
+            return 30;
+        }
         return 0;
     }
 

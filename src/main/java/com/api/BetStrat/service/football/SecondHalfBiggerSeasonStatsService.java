@@ -17,6 +17,7 @@ import com.api.BetStrat.entity.football.ConcedeBothHalvesSeasonStats;
 import com.api.BetStrat.entity.football.SecondHalfBiggerSeasonStats;
 import com.api.BetStrat.enums.TeamScoreEnum;
 import com.api.BetStrat.repository.HistoricMatchRepository;
+import com.api.BetStrat.repository.TeamRepository;
 import com.api.BetStrat.repository.football.SecondHalfBiggerSeasonInfoRepository;
 import com.api.BetStrat.service.StrategyScoreCalculator;
 import com.api.BetStrat.service.StrategySeasonStatsInterface;
@@ -44,6 +45,9 @@ public class SecondHalfBiggerSeasonStatsService extends StrategyScoreCalculator<
 
     @Autowired
     private HistoricMatchRepository historicMatchRepository;
+
+    @Autowired
+    private TeamRepository teamRepository;
 
     @Override
     public SecondHalfBiggerSeasonStats insertStrategySeasonStats(SecondHalfBiggerSeasonStats strategySeasonStats) {
@@ -121,6 +125,9 @@ public class SecondHalfBiggerSeasonStatsService extends StrategyScoreCalculator<
                 insertStrategySeasonStats(SecondHalfBiggerSeasonStats);
             }
         }
+        team.setSecondHalfBiggerMaxRedRun(calculateHistoricMaxNegativeSeq(statsByTeam));
+        team.setSecondHalfBiggerAvgRedRun((int)Math.round(calculateHistoricAvgNegativeSeq(statsByTeam)));
+        teamRepository.save(team);
     }
 
     @Override

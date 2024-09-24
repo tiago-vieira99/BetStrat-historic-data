@@ -17,6 +17,7 @@ import com.api.BetStrat.entity.football.CleanSheetSeasonStats;
 import com.api.BetStrat.entity.football.DrawSeasonStats;
 import com.api.BetStrat.enums.TeamScoreEnum;
 import com.api.BetStrat.repository.HistoricMatchRepository;
+import com.api.BetStrat.repository.TeamRepository;
 import com.api.BetStrat.repository.football.DrawSeasonInfoRepository;
 import com.api.BetStrat.service.StrategyScoreCalculator;
 import com.api.BetStrat.service.StrategySeasonStatsInterface;
@@ -44,6 +45,9 @@ public class DrawStrategySeasonStatsService extends StrategyScoreCalculator<Draw
 
     @Autowired
     private HistoricMatchRepository historicMatchRepository;
+
+    @Autowired
+    private TeamRepository teamRepository;
 
     @Override
     public DrawSeasonStats insertStrategySeasonStats(DrawSeasonStats strategySeasonStats) {
@@ -191,6 +195,9 @@ public class DrawStrategySeasonStatsService extends StrategyScoreCalculator<Draw
                 insertStrategySeasonStats(drawSeasonInfo);
             }
         }
+        team.setDrawsHunterMaxRedRun(calculateHistoricMaxNegativeSeq(statsByTeam));
+        team.setDrawsHunterAvgRedRun((int)Math.round(calculateHistoricAvgNegativeSeq(statsByTeam)));
+        teamRepository.save(team);
     }
 
     @Override

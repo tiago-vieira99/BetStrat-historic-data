@@ -17,6 +17,7 @@ import com.api.BetStrat.entity.football.CleanSheetSeasonStats;
 import com.api.BetStrat.entity.football.FlipFlopOversUndersStats;
 import com.api.BetStrat.enums.TeamScoreEnum;
 import com.api.BetStrat.repository.HistoricMatchRepository;
+import com.api.BetStrat.repository.TeamRepository;
 import com.api.BetStrat.repository.football.FlipFlopOversUndersInfoRepository;
 import com.api.BetStrat.service.StrategyScoreCalculator;
 import com.api.BetStrat.service.StrategySeasonStatsInterface;
@@ -44,6 +45,9 @@ public class FlipFlopOversUndersStatsServiceStrategy extends StrategyScoreCalcul
 
     @Autowired
     private HistoricMatchRepository historicMatchRepository;
+
+    @Autowired
+    private TeamRepository teamRepository;
 
     @Override
     public FlipFlopOversUndersStats insertStrategySeasonStats(FlipFlopOversUndersStats strategySeasonStats) {
@@ -204,6 +208,9 @@ public class FlipFlopOversUndersStatsServiceStrategy extends StrategyScoreCalcul
                 insertStrategySeasonStats(flipFlopOversUndersInfo);
             }
         }
+        team.setFlipFlopMaxRedRun(calculateHistoricMaxNegativeSeq(statsByTeam));
+        team.setFlipFlopAvgRedRun((int)Math.round(calculateHistoricAvgNegativeSeq(statsByTeam)));
+        teamRepository.save(team);
     }
 
     @Override
