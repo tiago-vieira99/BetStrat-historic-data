@@ -109,7 +109,7 @@ public class FootballDataStatsController {
 
     @ApiOperation(value = "get Team Stats by Strategy", notes = "Strategy values:\n\"Draw\",\"GoalsFest\",\"WinsMargin\",\"Btts\", \"CleanSheet\", \n" +
             "            \"ConcedeBothHalves\", \"EuroHandicap\", \"NoBtts\", \"NoGoalsFest\", \"NoWins\", \"ScoreBothHalves\", \n" +
-            "            \"SecondHalfBigger\", \"WinAndGoals\", \"WinBothHalves\", \"WinFirstHalf\", \"Wins\"")
+            "            \"SecondHalfBigger\", \"WinAndGoals\", \"WinBothHalves\", \"WinFirstHalf\", \"NoWinFirstHalf\", \"Wins\"")
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "OK", response = ArrayList.class),
             @ApiResponse(code = 400, message = "Bad Request", response = StandardError.class),
@@ -127,7 +127,7 @@ public class FootballDataStatsController {
 
     @ApiOperation(value = "update Team score for Strategy", notes = "Strategy values:\n\"Draw\",\"GoalsFest\",\"WinsMargin\",\"Btts\", \"CleanSheet\", \n" +
             "            \"ConcedeBothHalves\", \"EuroHandicap\", \"NoBtts\", \"NoGoalsFest\", \"NoWins\", \"ScoreBothHalves\", \n" +
-            "            \"SecondHalfBigger\", \"WinAndGoals\", \"WinBothHalves\", \"WinFirstHalf\", \"Wins\"")
+            "            \"SecondHalfBigger\", \"WinAndGoals\", \"WinBothHalves\", \"WinFirstHalf\", \"NoWinFirstHalf\", \"Wins\"")
     @PostMapping("/score/{strategy}/{teamName}/update")
     public Team updateTeamScore (@PathVariable("teamName") String teamName, @PathVariable("strategy")  String strategy) {
         Team teamByName = teamRepository.getTeamByNameAndSport(teamName, "Football");
@@ -154,7 +154,7 @@ public class FootballDataStatsController {
 
     @ApiOperation(value = "update all Teams score for Strategy", notes = "Strategy values:\n\"Draw\",\"GoalsFest\",\"WinsMargin\",\"Btts\", \"CleanSheet\", \n" +
             "            \"ConcedeBothHalves\", \"EuroHandicap\", \"NoBtts\", \"NoGoalsFest\", \"NoWins\", \"ScoreBothHalves\", \n" +
-            "            \"SecondHalfBigger\", \"WinAndGoals\", \"WinBothHalves\", \"WinFirstHalf\", \"Wins\"")
+            "            \"SecondHalfBigger\", \"WinAndGoals\", \"WinBothHalves\", \"WinFirstHalf\", \"NoWinFirstHalf\", \"Wins\"")
     @PostMapping("/score-by-strategy/all-teams/update")
     public ResponseEntity<String> updateAllTeamsScoreByStrategy (@Valid @RequestParam  String strategy) {
         List<Team> allTeams = teamRepository.findAll().stream().filter(t -> t.getSport().equals("Football")).collect(Collectors.toList());
@@ -170,7 +170,7 @@ public class FootballDataStatsController {
 
     @ApiOperation(value = "update all Teams stats for Strategy", notes = "Strategy values:\n\"Draw\",\"GoalsFest\",\"WinsMargin\",\"Btts\", \"CleanSheet\", \n" +
             "            \"ConcedeBothHalves\", \"EuroHandicap\", \"NoBtts\", \"NoGoalsFest\", \"NoWins\", \"ScoreBothHalves\", \n" +
-            "            \"SecondHalfBigger\", \"WinAndGoals\", \"WinBothHalves\", \"WinFirstHalf\", \"Wins\"")
+            "            \"SecondHalfBigger\", \"WinAndGoals\", \"WinBothHalves\", \"WinFirstHalf\", \"NoWinFirstHalf\", \"Wins\"")
     @PostMapping("/stats-by-strategy/all-teams/update")
     public ResponseEntity<String> updateAllTeamsStatsByStrategy (@Valid @RequestParam  String strategy) {
         List<Team> allTeams = teamRepository.findAll().stream().filter(t -> t.getSport().equals("Football")).collect(Collectors.toList());
@@ -186,7 +186,7 @@ public class FootballDataStatsController {
 
     @ApiOperation(value = "update Team stats for Strategy", notes = "Strategy values:\n\"Draw\",\"GoalsFest\",\"WinsMargin\",\"Btts\", \"CleanSheet\", \n" +
             "            \"ConcedeBothHalves\", \"EuroHandicap\", \"NoBtts\", \"NoGoalsFest\", \"NoWins\", \"ScoreBothHalves\", \n" +
-            "            \"SecondHalfBigger\", \"WinAndGoals\", \"WinBothHalves\", \"WinFirstHalf\", \"Wins\"")
+            "            \"SecondHalfBigger\", \"WinAndGoals\", \"WinBothHalves\", \"WinFirstHalf\", \"NoWinFirstHalf\", \"Wins\"")
     @PostMapping("/stats-by-strategy/{team}/update")
     public ResponseEntity<String> updateTeamStatsByStrategy (@Valid @RequestParam  String strategy, @PathVariable("team")  String teamName) {
         Team teamByName = teamRepository.getTeamByNameAndSport(teamName, "Football");

@@ -45,6 +45,7 @@ public class StrategySeasonStatsService<T extends StrategySeasonStats> extends S
                                       ConcedeBothHalvesSeasonStatsService concedeBothHalvesSeasonStatsService,
                                       WinBothHalvesStrategySeasonStatsService winBothHalvesStrategySeasonStatsService,
                                       WinFirstHalfStrategySeasonStatsService winFirstHalfStrategySeasonStatsService,
+                                      NoWinFirstHalfStrategySeasonStatsService noWinFirstHalfStrategySeasonStatsService,
                                       WinAndGoalsStrategySeasonStatsService winAndGoalsStrategySeasonStatsService,
                                       SecondHalfBiggerSeasonStatsService secondHalfBiggerSeasonStatsService,
                                       HandballWinsMargin16StrategySeasonStatsService handballWinsMargin16StrategySeasonstatsService,
@@ -56,7 +57,8 @@ public class StrategySeasonStatsService<T extends StrategySeasonStats> extends S
         super(comebackStrategySeasonstatsService, longBasketWinsStrategySeasonstatsService, shortBasketWinsStrategySeasonstatsService, drawStrategySeasonstatsService, euroHandicapStrategySeasonstatsService,
                 flipFlopOversUndersInfoService, goalsFestStrategySeasonstatsService, noGoalsFestStrategySeasonstatsService, winsMarginStrategySeasonstatsService, winsStrategySeasonStatsService, noWinsStrategySeasonStatsService,
                 cleanSheetStrategySeasonStatsService, bttsStrategySeasonStatsService, noBttsStrategySeasonStatsService, scoreBothHalvesSeasonStatsService,
-                concedeBothHalvesSeasonStatsService, winBothHalvesStrategySeasonStatsService, winFirstHalfStrategySeasonStatsService, winAndGoalsStrategySeasonStatsService, secondHalfBiggerSeasonStatsService,
+                concedeBothHalvesSeasonStatsService, winBothHalvesStrategySeasonStatsService, winFirstHalfStrategySeasonStatsService, noWinFirstHalfStrategySeasonStatsService,
+                winAndGoalsStrategySeasonStatsService, secondHalfBiggerSeasonStatsService,
                 handballWinsMargin16StrategySeasonstatsService, handballWinsMargin49StrategySeasonstatsService, handballWinsMargin712StrategySeasonstatsService, hockeyDrawStrategySeasonstatsService, winsMargin3StrategySeasonstatsService,
                 winsMarginAny2StrategySeasonstatsService);
     }

@@ -12,11 +12,11 @@ import com.api.BetStrat.dto.SimulatedMatchDto;
 import com.api.BetStrat.entity.HistoricMatch;
 import com.api.BetStrat.entity.StrategySeasonStats;
 import com.api.BetStrat.entity.Team;
-import com.api.BetStrat.entity.football.WinFirstHalfSeasonStats;
+import com.api.BetStrat.entity.football.NoWinFirstHalfSeasonStats;
 import com.api.BetStrat.enums.TeamScoreEnum;
 import com.api.BetStrat.repository.HistoricMatchRepository;
 import com.api.BetStrat.repository.TeamRepository;
-import com.api.BetStrat.repository.football.WinFirstHalfSeasonInfoRepository;
+import com.api.BetStrat.repository.football.NoWinFirstHalfSeasonInfoRepository;
 import com.api.BetStrat.service.StrategyScoreCalculator;
 import com.api.BetStrat.service.StrategySeasonStatsInterface;
 import com.api.BetStrat.util.Utils;
@@ -34,12 +34,12 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @Transactional
-public class WinFirstHalfStrategySeasonStatsService extends StrategyScoreCalculator<WinFirstHalfSeasonStats> implements StrategySeasonStatsInterface<WinFirstHalfSeasonStats> {
+public class NoWinFirstHalfStrategySeasonStatsService extends StrategyScoreCalculator<NoWinFirstHalfSeasonStats> implements StrategySeasonStatsInterface<NoWinFirstHalfSeasonStats> {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(WinFirstHalfStrategySeasonStatsService.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(NoWinFirstHalfStrategySeasonStatsService.class);
 
     @Autowired
-    private WinFirstHalfSeasonInfoRepository winFirstHalfSeasonInfoRepository;
+    private NoWinFirstHalfSeasonInfoRepository noWinFirstHalfSeasonInfoRepository;
 
     @Autowired
     private HistoricMatchRepository historicMatchRepository;
@@ -48,14 +48,14 @@ public class WinFirstHalfStrategySeasonStatsService extends StrategyScoreCalcula
     private TeamRepository teamRepository;
 
     @Override
-    public WinFirstHalfSeasonStats insertStrategySeasonStats(WinFirstHalfSeasonStats strategySeasonStats) {
+    public NoWinFirstHalfSeasonStats insertStrategySeasonStats(NoWinFirstHalfSeasonStats strategySeasonStats) {
         LOGGER.info("Inserted " + strategySeasonStats.getClass() + " for " + strategySeasonStats.getTeamId().getName() + " and season " + strategySeasonStats.getSeason());
-        return winFirstHalfSeasonInfoRepository.save(strategySeasonStats);
+        return noWinFirstHalfSeasonInfoRepository.save(strategySeasonStats);
     }
 
     @Override
-    public List<WinFirstHalfSeasonStats> getStatsByStrategyAndTeam(Team team, String strategyName) {
-        return winFirstHalfSeasonInfoRepository.getFootballWinFirstHalfStatsByTeam(team);
+    public List<NoWinFirstHalfSeasonStats> getStatsByStrategyAndTeam(Team team, String strategyName) {
+        return noWinFirstHalfSeasonInfoRepository.getFootballNoWinFirstHalfStatsByTeam(team);
     }
 
     @Override
@@ -69,7 +69,7 @@ public class WinFirstHalfStrategySeasonStatsService extends StrategyScoreCalcula
             return simuMapForSeason;
         }
 
-        List<WinFirstHalfSeasonStats> statsByTeam = winFirstHalfSeasonInfoRepository.getFootballWinFirstHalfStatsByTeam(team);
+        List<NoWinFirstHalfSeasonStats> statsByTeam = noWinFirstHalfSeasonInfoRepository.getFootballNoWinFirstHalfStatsByTeam(team);
         Collections.sort(statsByTeam, StrategySeasonStats.strategySeasonSorter);
         Collections.reverse(statsByTeam);
 
@@ -127,12 +127,11 @@ public class WinFirstHalfStrategySeasonStatsService extends StrategyScoreCalcula
 
     @Override
     public boolean matchFollowStrategyRules(HistoricMatch historicMatch, String teamName, String strategyName) {
-        String res = historicMatch.getFtResult().split("\\(")[0];
         String htRes = historicMatch.getHtResult().split("\\(")[0];
         int homeHTResult = Integer.parseInt(htRes.split(":")[0]);
         int awayHTResult = Integer.parseInt(htRes.split(":")[1]);
-        if ( (historicMatch.getHomeTeam().equals(teamName) && homeHTResult > awayHTResult) ||
-                (historicMatch.getAwayTeam().equals(teamName) && awayHTResult > homeHTResult) ) {
+        if ( (historicMatch.getHomeTeam().equals(teamName) && homeHTResult <= awayHTResult) ||
+                (historicMatch.getAwayTeam().equals(teamName) && awayHTResult <= homeHTResult) ) {
             return true;
         } else {
             return false;
@@ -141,7 +140,7 @@ public class WinFirstHalfStrategySeasonStatsService extends StrategyScoreCalcula
 
     @Override
     public void updateStrategySeasonStats(Team team, String strategyName) {
-        List<WinFirstHalfSeasonStats> statsByTeam = winFirstHalfSeasonInfoRepository.getFootballWinFirstHalfStatsByTeam(team);
+        List<NoWinFirstHalfSeasonStats> statsByTeam = noWinFirstHalfSeasonInfoRepository.getFootballNoWinFirstHalfStatsByTeam(team);
         List<String> seasonsList = null;
 
         if (SUMMER_SEASONS_BEGIN_MONTH_LIST.contains(team.getBeginSeason())) {
@@ -161,7 +160,7 @@ public class WinFirstHalfStrategySeasonStatsService extends StrategyScoreCalcula
                     continue;
                 }
 
-                WinFirstHalfSeasonStats winFirstHalfSeasonStats = new WinFirstHalfSeasonStats();
+                NoWinFirstHalfSeasonStats noWinFirstHalfSeasonStats = new NoWinFirstHalfSeasonStats();
 
                 ArrayList<Integer> negativeSequence = new ArrayList<>();
                 int count = 0;
@@ -180,7 +179,7 @@ public class WinFirstHalfStrategySeasonStatsService extends StrategyScoreCalcula
 
                 }
 
-                int totalWinsFirstHalf = negativeSequence.size();
+                int totalNoWinsFirstHalf = negativeSequence.size();
 
                 negativeSequence.add(count);
                 HistoricMatch lastMatch = filteredMatches.get(filteredMatches.size() - 1);
@@ -189,28 +188,28 @@ public class WinFirstHalfStrategySeasonStatsService extends StrategyScoreCalcula
                 }
 
 
-                winFirstHalfSeasonStats.setWinFirstHalfRate(Utils.beautifyDoubleValue(100*totalWinsFirstHalf/filteredMatches.size()));
-                winFirstHalfSeasonStats.setCompetition("all");
-                winFirstHalfSeasonStats.setNegativeSequence(negativeSequence.toString());
-                winFirstHalfSeasonStats.setNumMatches(filteredMatches.size());
-                winFirstHalfSeasonStats.setNumWinsFirstHalf(totalWinsFirstHalf);
+                noWinFirstHalfSeasonStats.setNoWinFirstHalfRate(Utils.beautifyDoubleValue(100*totalNoWinsFirstHalf/filteredMatches.size()));
+                noWinFirstHalfSeasonStats.setCompetition("all");
+                noWinFirstHalfSeasonStats.setNegativeSequence(negativeSequence.toString());
+                noWinFirstHalfSeasonStats.setNumMatches(filteredMatches.size());
+                noWinFirstHalfSeasonStats.setNumNoWinsFirstHalf(totalNoWinsFirstHalf);
 
                 double stdDev =  Utils.beautifyDoubleValue(calculateSD(negativeSequence));
-                winFirstHalfSeasonStats.setStdDeviation(stdDev);
-                winFirstHalfSeasonStats.setCoefDeviation(Utils.beautifyDoubleValue(calculateCoeffVariation(stdDev, negativeSequence)));
-                winFirstHalfSeasonStats.setSeason(season);
-                winFirstHalfSeasonStats.setTeamId(team);
-                winFirstHalfSeasonStats.setUrl(newSeasonUrl);
-                insertStrategySeasonStats(winFirstHalfSeasonStats);
+                noWinFirstHalfSeasonStats.setStdDeviation(stdDev);
+                noWinFirstHalfSeasonStats.setCoefDeviation(Utils.beautifyDoubleValue(calculateCoeffVariation(stdDev, negativeSequence)));
+                noWinFirstHalfSeasonStats.setSeason(season);
+                noWinFirstHalfSeasonStats.setTeamId(team);
+                noWinFirstHalfSeasonStats.setUrl(newSeasonUrl);
+                insertStrategySeasonStats(noWinFirstHalfSeasonStats);
             }
         }
-        team.setWinFirstHalfMaxRedRun(calculateHistoricMaxNegativeSeq(statsByTeam));
-        team.setWinFirstHalfAvgRedRun((int)Math.round(calculateHistoricAvgNegativeSeq(statsByTeam)));
+        team.setNoWinFirstHalfMaxRedRun(calculateHistoricMaxNegativeSeq(statsByTeam));
+        team.setNoWinFirstHalfAvgRedRun((int)Math.round(calculateHistoricAvgNegativeSeq(statsByTeam)));
         teamRepository.save(team);
     }
 
     @Override
-    public int calculateHistoricMaxNegativeSeq(List<WinFirstHalfSeasonStats> statsByTeam) {
+    public int calculateHistoricMaxNegativeSeq(List<NoWinFirstHalfSeasonStats> statsByTeam) {
         int maxValue = 0;
         for (int i=0; i<statsByTeam.size(); i++) {
             int[] currSeqMaxValue = Arrays.stream(statsByTeam.get(i).getNegativeSequence().replaceAll("\\[","").replaceAll("\\]","")
@@ -230,7 +229,7 @@ public class WinFirstHalfStrategySeasonStatsService extends StrategyScoreCalcula
     }
 
     @Override
-    public double calculateHistoricAvgNegativeSeq(List<WinFirstHalfSeasonStats> statsByTeam) {
+    public double calculateHistoricAvgNegativeSeq(List<NoWinFirstHalfSeasonStats> statsByTeam) {
         int seqValues = 0;
         int count = 0;
         for (int i=0; i<statsByTeam.size(); i++) {
@@ -246,21 +245,21 @@ public class WinFirstHalfStrategySeasonStatsService extends StrategyScoreCalcula
 
     @Override
     public Team updateTeamScore(Team teamByName) {
-        List<WinFirstHalfSeasonStats> statsByTeam = winFirstHalfSeasonInfoRepository.getFootballWinFirstHalfStatsByTeam(teamByName);
+        List<NoWinFirstHalfSeasonStats> statsByTeam = noWinFirstHalfSeasonInfoRepository.getFootballNoWinFirstHalfStatsByTeam(teamByName);
         Collections.sort(statsByTeam, StrategySeasonStats.strategySeasonSorter);
         Collections.reverse(statsByTeam);
 
         if (statsByTeam.size() < 3) {
-            teamByName.setWinFirstHalfScore(TeamScoreEnum.INSUFFICIENT_DATA.getValue());
+            teamByName.setNoWinFirstHalfScore(TeamScoreEnum.INSUFFICIENT_DATA.getValue());
         } else {
             double totalScore = calculateTotalFinalScore(statsByTeam);
-            teamByName.setWinFirstHalfScore(calculateFinalRating(totalScore));
+            teamByName.setNoWinFirstHalfScore(calculateFinalRating(totalScore));
         }
 
         return teamByName;
     }
 
-    private double calculateTotalFinalScore(List<WinFirstHalfSeasonStats> statsByTeam) {
+    private double calculateTotalFinalScore(List<NoWinFirstHalfSeasonStats> statsByTeam) {
         int last3SeasonsGreensRateScore = calculateLast3SeasonsRateScore(statsByTeam);
         int allSeasonsGreensRateScore = calculateAllSeasonsRateScore(statsByTeam);
         int last3SeasonsmaxSeqWOGreenScore = calculateLast3SeasonsMaxSeqWOGreenScore(statsByTeam);
@@ -279,7 +278,7 @@ public class WinFirstHalfStrategySeasonStatsService extends StrategyScoreCalcula
 
     @Override
     public String calculateScoreBySeason(Team team, String season, String strategy) {
-        List<WinFirstHalfSeasonStats> statsByTeam = winFirstHalfSeasonInfoRepository.getFootballWinFirstHalfStatsByTeam(team);
+        List<NoWinFirstHalfSeasonStats> statsByTeam = noWinFirstHalfSeasonInfoRepository.getFootballNoWinFirstHalfStatsByTeam(team);
         Collections.sort(statsByTeam, StrategySeasonStats.strategySeasonSorter);
         Collections.reverse(statsByTeam);
 
@@ -295,10 +294,10 @@ public class WinFirstHalfStrategySeasonStatsService extends StrategyScoreCalcula
     }
 
     @Override
-    public int calculateLast3SeasonsRateScore(List<WinFirstHalfSeasonStats> statsByTeam) {
+    public int calculateLast3SeasonsRateScore(List<NoWinFirstHalfSeasonStats> statsByTeam) {
         double winsRates = 0;
         for (int i=0; i<3; i++) {
-            winsRates += statsByTeam.get(i).getWinFirstHalfRate();
+            winsRates += statsByTeam.get(i).getNoWinFirstHalfRate();
         }
 
         double avgWinsRate = Utils.beautifyDoubleValue(winsRates / 3);
@@ -316,10 +315,10 @@ public class WinFirstHalfStrategySeasonStatsService extends StrategyScoreCalcula
     }
 
     @Override
-    public int calculateAllSeasonsRateScore(List<WinFirstHalfSeasonStats> statsByTeam) {
+    public int calculateAllSeasonsRateScore(List<NoWinFirstHalfSeasonStats> statsByTeam) {
         double winsRates = 0;
         for (int i=0; i<statsByTeam.size(); i++) {
-            winsRates += statsByTeam.get(i).getWinFirstHalfRate();
+            winsRates += statsByTeam.get(i).getNoWinFirstHalfRate();
         }
 
         double avgWinsRate = Utils.beautifyDoubleValue(winsRates / statsByTeam.size());
@@ -337,10 +336,10 @@ public class WinFirstHalfStrategySeasonStatsService extends StrategyScoreCalcula
     }
 
     @Override
-    public int calculateLast3SeasonsTotalWinsRateScore(List<WinFirstHalfSeasonStats> statsByTeam) {
+    public int calculateLast3SeasonsTotalWinsRateScore(List<NoWinFirstHalfSeasonStats> statsByTeam) {
         double totalWinsRates = 0;
         for (int i=0; i<3; i++) {
-            totalWinsRates += statsByTeam.get(i).getWinFirstHalfRate();
+            totalWinsRates += statsByTeam.get(i).getNoWinFirstHalfRate();
         }
 
         double avgWinsRate = Utils.beautifyDoubleValue(totalWinsRates / 3);
@@ -362,10 +361,10 @@ public class WinFirstHalfStrategySeasonStatsService extends StrategyScoreCalcula
     }
 
     @Override
-    public int calculateAllSeasonsTotalWinsRateScore(List<WinFirstHalfSeasonStats> statsByTeam) {
+    public int calculateAllSeasonsTotalWinsRateScore(List<NoWinFirstHalfSeasonStats> statsByTeam) {
         double totalWinsRates = 0;
         for (int i=0; i<statsByTeam.size(); i++) {
-            totalWinsRates += statsByTeam.get(i).getWinFirstHalfRate();
+            totalWinsRates += statsByTeam.get(i).getNoWinFirstHalfRate();
         }
 
         double avgWinsRate = Utils.beautifyDoubleValue(totalWinsRates / statsByTeam.size());
