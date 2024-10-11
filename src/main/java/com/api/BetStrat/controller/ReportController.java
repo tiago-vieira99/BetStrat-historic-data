@@ -72,6 +72,28 @@ public class ReportController {
         return ResponseEntity.ok().body(list);
     }
 
+    @ApiOperation(value = "get simulation matches of All Teams by Strategy and Season")
+    @GetMapping("/simulate-all-teams-by-strategy/")
+    public ResponseEntity<HashMap> simulateAllTeamsStrategyBySeason (@Valid @RequestParam  String strategy, @Valid @RequestParam String season) {
+        List<Team> allTeams = teamRepository.findAll().stream().filter(t -> t.getSport().equals("Football")).collect(Collectors.toList());
+        HashMap<String, Map> returnMap = new HashMap<>();
+
+        for (Team team : allTeams) {
+            //simulate score for desired season
+            String scoreBySeason = strategySeasonStatsService.calculateScoreBySeason(team, season, strategy.concat("SeasonStats"));
+
+            if (!scoreBySeason.contains("EXCE")) {
+                continue;
+            }
+
+            HashMap list = strategySeasonStatsService.getSimulatedMatchesByStrategyAndSeason(season, team, strategy.concat("SeasonStats"));
+            list.put("scoreBySeason", scoreBySeason);
+            returnMap.put(team.getName(), list);
+        }
+
+        return ResponseEntity.ok().body(returnMap);
+    }
+
     @ApiOperation(value = "insert and save reports of all teams for all strategies for Season", notes = "Strategy values:\n\"Draw\",\"GoalsFest\",\"WinsMargin\",\"Btts\", \"CleanSheet\", \n" +
         "            \"ConcedeBothHalves\", \"EuroHandicap\", \"NoBtts\", \"NoGoalsFest\", \"NoWins\", \"ScoreBothHalves\", \n" +
         "            \"SecondHalfBigger\", \"WinAndGoals\", \"WinBothHalves\", \"Wins\"")

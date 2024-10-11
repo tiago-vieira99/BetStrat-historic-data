@@ -46,7 +46,7 @@ public class GetLastPlayedMatchTask {
     private HistoricMatchRepository historicMatchRepository;
 
     //@EventListener(ApplicationReadyEvent.class)
-    @Scheduled(cron = "0 0 4 1/2 * ?", zone="Europe/Lisbon") //every two days at 4am
+    @Scheduled(cron = "0 0 2 * * *", zone="Europe/Lisbon") //every two days at 2am
     public void execCronn() {
 
         List<String> teamsToGetLastMatch = new ArrayList<>();

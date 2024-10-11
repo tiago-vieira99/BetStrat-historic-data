@@ -211,7 +211,7 @@ public class TestController {
 
         try {
             // Replace "data.json" with the actual path to your JSON file
-            File jsonFile = new File("C:\\Users\\tiago.vieira\\Desktop\\august.json");
+            File jsonFile = new File("/Users/vie0002t/Desktop/belgium23-24.json");
 
             // Create a SimpleDateFormat to parse the date string
             SimpleDateFormat dateFormat = new SimpleDateFormat("dd.MM.yyyy - HH:mm");
@@ -262,7 +262,7 @@ public class TestController {
 
 //        Stack<LinkedHashMap<Double, JsonNode>> stack = new Stack<>();
         List<Stack<LinkedHashMap<Double, JsonNode>>> stakesToRecover = new ArrayList<>();
-        double targetProfit = 1;
+        double targetProfit = 2;
 
         double accumulatedBalance = 0.0;
         List<LinkedHashMap> allSimulatedData = new ArrayList<>();
@@ -289,6 +289,7 @@ public class TestController {
             for (JsonNode object : dateObjects) {
                 String currentDate = String.valueOf(object.get("01. date"));
                 double overOdd = Double.parseDouble(String.valueOf(object.get("20, overOdd")).replaceAll(",",".").replaceAll("\"",""));
+                overOdd = overOdd * 1.15;
                 double stakeToBet = 0;
 
                 // Filtering the 'stakesToRecover' list and adding the highest key element to the stack
@@ -331,6 +332,7 @@ public class TestController {
             for (JsonNode object : dateObjects) {
                 String result = String.valueOf(object.get("result")).replaceAll("\"","");
                 double overOdd = Double.parseDouble(String.valueOf(object.get("20, overOdd")).replaceAll(",",".").replaceAll("\"",""));
+                overOdd = overOdd * 1.15;
 
                 Stack<LinkedHashMap<Double, JsonNode>> stackByJsonNode = findStackByJsonNode(stakesToRecover, object);
                 double firstStake = (double) stackByJsonNode.peek().keySet().toArray()[0];
@@ -339,11 +341,11 @@ public class TestController {
                     stakesToRecover.remove(stackByJsonNode);
                 } else {
                     //penso que daqui para baixo se deva usar calculateSumOfKeys(stackByJsonNode) em vez de firstStake
-                    if (stackByJsonNode.size() > 2 || firstStake >= 10) {
-                        int numSplittedStakes = 2;
-                        if (firstStake >= 10) {
-                            numSplittedStakes = 3;
-                        }
+                    if (stackByJsonNode.size() > 4 || firstStake >= 20) {
+                        int numSplittedStakes = 3;
+//                        if (firstStake >= 10) {
+//                            numSplittedStakes = 3;
+//                        }
 //                        int numSplittedStakes = 5;
 
                         double splittedStake = Utils.beautifyDoubleValue(firstStake/numSplittedStakes);
@@ -361,7 +363,7 @@ public class TestController {
                 }
                 LinkedHashMap<String, Object> betInfoMap = new LinkedHashMap<>();
                 betInfoMap.put("date", object.get("01. date").toString().replaceAll("\"","").substring(0,11));
-                betInfoMap.put("odd", object.get("20, overOdd").toString().replaceAll("\"",""));
+                betInfoMap.put("odd", String.valueOf(overOdd).replaceAll("\\.", ","));
                 betInfoMap.put("stake", String.valueOf(firstStake).replaceAll("\\.",","));
                 betInfoMap.put("accuBalance", String.valueOf(accumulatedBalance).replaceAll("\\.",","));
                 betInfoMap.put("result", result);
