@@ -62,9 +62,6 @@ public class ReportController {
         //simulate score for desired season
         String scoreBySeason = strategySeasonStatsService.calculateScoreBySeason(teamByName, season, strategy.concat("SeasonStats"));
 
-        if (!scoreBySeason.contains("EXCE")) {
-            return ResponseEntity.ok().body(null);
-        }
 
         HashMap list = strategySeasonStatsService.getSimulatedMatchesByStrategyAndSeason(season, teamByName, strategy.concat("SeasonStats"));
         list.put("scoreBySeason", scoreBySeason);

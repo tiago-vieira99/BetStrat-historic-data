@@ -176,7 +176,13 @@ public class ScrappingUtil {
     public static JSONArray getLastNMatchesScrappingService(Team team, int numberLastMatches) {
         HttpPost request = new HttpPost(SCRAPPER_SERVICE_URL);
 
-        String newSeason = "20" + CURRENT_SEASON.split("-")[1];
+        String newSeason = "";
+
+        if (WINTER_SEASONS_BEGIN_MONTH_LIST.contains(team.getBeginSeason())) {
+            newSeason = "20" + CURRENT_WINTER_SEASON.split("-")[1];
+        } else {
+           newSeason = CURRENT_SUMMER_SEASON;
+        }
 
         String newUrl = "";
         if (team.getUrl().contains("world")) {

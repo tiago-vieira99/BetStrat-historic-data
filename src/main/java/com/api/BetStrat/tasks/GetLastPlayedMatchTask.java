@@ -17,8 +17,6 @@ import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.context.event.ApplicationReadyEvent;
-import org.springframework.context.event.EventListener;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -27,8 +25,10 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.api.BetStrat.constants.BetStratConstants.CURRENT_SEASON;
-import static com.api.BetStrat.constants.BetStratConstants.LONG_STREAKS_LEAGUES_LIST;
+import static com.api.BetStrat.constants.BetStratConstants.CURRENT_SUMMER_SEASON;
+import static com.api.BetStrat.constants.BetStratConstants.CURRENT_WINTER_SEASON;
+import static com.api.BetStrat.constants.BetStratConstants.LEAGUES_LIST;
+import static com.api.BetStrat.constants.BetStratConstants.WINTER_SEASONS_BEGIN_MONTH_LIST;
 
 @Slf4j
 @Service
@@ -51,7 +51,7 @@ public class GetLastPlayedMatchTask {
 
         List<String> teamsToGetLastMatch = new ArrayList<>();
 
-        for (String leagueUrl : LONG_STREAKS_LEAGUES_LIST) {
+        for (String leagueUrl : LEAGUES_LIST) {
             JSONObject leagueTeamsScrappingData = ScrappingUtil.getLeagueTeamsScrappingData(leagueUrl);
             List<String> analysedTeams = new ArrayList<>();
 
@@ -77,7 +77,7 @@ public class GetLastPlayedMatchTask {
             Team team = teamRepository.getTeamByNameAndSport(t, "Football");
 
             if (team != null) {
-                JSONArray scrappingData = ScrappingUtil.getLastNMatchesScrappingService(team, 2);
+                JSONArray scrappingData = ScrappingUtil.getLastNMatchesScrappingService(team, 10);
                 if (scrappingData != null) {
                     for (int i = 0; i < scrappingData.length(); i++) {
                         HistoricMatch historicMatch = new HistoricMatch();
@@ -91,7 +91,11 @@ public class GetLastPlayedMatchTask {
                             historicMatch.setHtResult(match.getString("htResult"));
                             historicMatch.setCompetition(match.getString("competition"));
                             historicMatch.setSport(team.getSport());
-                            historicMatch.setSeason(CURRENT_SEASON);
+                            if (WINTER_SEASONS_BEGIN_MONTH_LIST.contains(team.getBeginSeason())) {
+                                historicMatch.setSeason(CURRENT_WINTER_SEASON);
+                            } else {
+                                historicMatch.setSeason(CURRENT_SUMMER_SEASON);
+                            }
 
                             historicMatchRepository.save(historicMatch);
                             log.info("Inserted match:  " + historicMatch.toString());

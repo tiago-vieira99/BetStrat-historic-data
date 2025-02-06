@@ -22,9 +22,20 @@ public class Utils {
     }
 
     public static String findMainCompetition (List<HistoricMatch> historicMatches) {
-        return historicMatches.stream()
+        List<HistoricMatch> copyHistoricMatches = historicMatches;
+        return copyHistoricMatches.stream()
                 // filter non null competition matches
                 .filter(m -> Objects.nonNull(m.getCompetition()))
+                // consider all phases of the main league
+                .map(m -> {
+                    m.setCompetition(m.getCompetition().replaceAll("Promotion", "").replaceAll("Relegation", "")
+                        .replaceAll("Playoffs", "").replaceAll("Finals", "").replaceAll("Meistergruppe", "")
+                        .replaceAll("Qualifikationsgruppe", "").replaceAll("Playoff", "").replaceAll("Primeira Fase", "")
+                        .replaceAll("Segunda Fase", "").replaceAll("Apertura", "").replaceAll("Clausura", "")
+                        .replaceAll("Final", "").replaceAll("Intermedio", "").replaceAll("Primera Etapa", "")
+                        .replaceAll("Segunda Etapa", "").replaceAll("Play Off", ""));
+                    return m;
+                })
                 // summarize competitions
                 .collect(Collectors.groupingBy(HistoricMatch::getCompetition, Collectors.counting()))
                 // fetch the max entry

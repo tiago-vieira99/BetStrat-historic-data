@@ -85,6 +85,15 @@ public class Team implements Serializable {
     @Column(name = "margin_wins_avg_red_run")
     private Integer marginWinsAvgRedRun;
 
+    @Column(name = "margin_wins_home_score")
+    private String marginWinsHomeScore;
+
+    @Column(name = "margin_wins_home_max_red_run")
+    private Integer marginWinsHomeMaxRedRun;
+
+    @Column(name = "margin_wins_home_avg_red_run")
+    private Integer marginWinsHomeAvgRedRun;
+
     @Column(name = "flip_flop_score")
     private String flipFlopScore;
 

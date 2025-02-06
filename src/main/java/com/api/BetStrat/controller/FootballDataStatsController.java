@@ -1,10 +1,8 @@
 package com.api.BetStrat.controller;
 
-import com.api.BetStrat.dto.SimulatedMatchDto;
 import com.api.BetStrat.entity.HistoricMatch;
 import com.api.BetStrat.entity.StrategySeasonStats;
 import com.api.BetStrat.entity.Team;
-import com.api.BetStrat.enums.TeamScoreEnum;
 import com.api.BetStrat.exception.NotFoundException;
 import com.api.BetStrat.exception.StandardError;
 import com.api.BetStrat.repository.HistoricMatchRepository;
@@ -38,14 +36,16 @@ import org.springframework.web.bind.annotation.RestController;
 
 import javax.validation.Valid;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 import static com.api.BetStrat.constants.BetStratConstants.API_SPORTS_BASE_URL;
 import static com.api.BetStrat.constants.BetStratConstants.FBREF_BASE_URL;
-import static com.api.BetStrat.constants.BetStratConstants.LONG_STREAKS_LEAGUES_LIST;
+import static com.api.BetStrat.constants.BetStratConstants.LEAGUES_LIST;
+import static com.api.BetStrat.constants.BetStratConstants.SUMMER_SEASONS_BEGIN_MONTH_LIST;
+import static com.api.BetStrat.constants.BetStratConstants.SUMMER_SEASONS_LIST;
+import static com.api.BetStrat.constants.BetStratConstants.WINTER_SEASONS_BEGIN_MONTH_LIST;
+import static com.api.BetStrat.constants.BetStratConstants.WINTER_SEASONS_LIST;
 import static com.api.BetStrat.constants.BetStratConstants.WORLDFOOTBALL_BASE_URL;
 import static com.api.BetStrat.constants.BetStratConstants.ZEROZERO_BASE_URL;
 import static com.api.BetStrat.constants.BetStratConstants.ZEROZERO_SEASON_CODES;
@@ -103,11 +103,11 @@ public class FootballDataStatsController {
     })
     @GetMapping("/team/{team}")
     public ResponseEntity<Team> getOneTeam(@PathVariable("team") String teamName) {
-        Team team = teamRepository.getTeamByName(teamName);
+        Team team = teamRepository.getTeamByNameAndSport(teamName, "Football");
         return ResponseEntity.ok().body(team);
     }
 
-    @ApiOperation(value = "get Team Stats by Strategy", notes = "Strategy values:\n\"Draw\",\"GoalsFest\",\"WinsMargin\",\"Btts\", \"CleanSheet\", \n" +
+    @ApiOperation(value = "get Team Stats by Strategy", notes = "Strategy values:\n\"Draw\",\"GoalsFest\",\"WinsMargin\",\"WinsMarginHome\",\"Btts\", \"CleanSheet\", \n" +
             "            \"ConcedeBothHalves\", \"EuroHandicap\", \"NoBtts\", \"NoGoalsFest\", \"NoWins\", \"ScoreBothHalves\", \n" +
             "            \"SecondHalfBigger\", \"WinAndGoals\", \"WinBothHalves\", \"WinFirstHalf\", \"NoWinFirstHalf\", \"Wins\"")
     @ApiResponses(value = {
@@ -125,7 +125,7 @@ public class FootballDataStatsController {
         return ResponseEntity.ok().body(statsByStrategyAndTeam);
     }
 
-    @ApiOperation(value = "update Team score for Strategy", notes = "Strategy values:\n\"Draw\",\"GoalsFest\",\"WinsMargin\",\"Btts\", \"CleanSheet\", \n" +
+    @ApiOperation(value = "update Team score for Strategy", notes = "Strategy values:\n\"Draw\",\"GoalsFest\",\"WinsMargin\",\"WinsMarginHome\",\"Btts\", \"CleanSheet\", \n" +
             "            \"ConcedeBothHalves\", \"EuroHandicap\", \"NoBtts\", \"NoGoalsFest\", \"NoWins\", \"ScoreBothHalves\", \n" +
             "            \"SecondHalfBigger\", \"WinAndGoals\", \"WinBothHalves\", \"WinFirstHalf\", \"NoWinFirstHalf\", \"Wins\"")
     @PostMapping("/score/{strategy}/{teamName}/update")
@@ -152,7 +152,7 @@ public class FootballDataStatsController {
         return newTeam;
     }
 
-    @ApiOperation(value = "update all Teams score for Strategy", notes = "Strategy values:\n\"Draw\",\"GoalsFest\",\"WinsMargin\",\"Btts\", \"CleanSheet\", \n" +
+    @ApiOperation(value = "update all Teams score for Strategy", notes = "Strategy values:\n\"Draw\",\"GoalsFest\",\"WinsMargin\",\"WinsMarginHome\",\"Btts\", \"CleanSheet\", \n" +
             "            \"ConcedeBothHalves\", \"EuroHandicap\", \"NoBtts\", \"NoGoalsFest\", \"NoWins\", \"ScoreBothHalves\", \n" +
             "            \"SecondHalfBigger\", \"WinAndGoals\", \"WinBothHalves\", \"WinFirstHalf\", \"NoWinFirstHalf\", \"Wins\"")
     @PostMapping("/score-by-strategy/all-teams/update")
@@ -168,7 +168,7 @@ public class FootballDataStatsController {
         return ResponseEntity.ok().body("OK");
     }
 
-    @ApiOperation(value = "update all Teams stats for Strategy", notes = "Strategy values:\n\"Draw\",\"GoalsFest\",\"WinsMargin\",\"Btts\", \"CleanSheet\", \n" +
+    @ApiOperation(value = "update all Teams stats for Strategy", notes = "Strategy values:\n\"Draw\",\"GoalsFest\",\"WinsMargin\",\"WinsMarginHome\",\"Btts\", \"CleanSheet\", \n" +
             "            \"ConcedeBothHalves\", \"EuroHandicap\", \"NoBtts\", \"NoGoalsFest\", \"NoWins\", \"ScoreBothHalves\", \n" +
             "            \"SecondHalfBigger\", \"WinAndGoals\", \"WinBothHalves\", \"WinFirstHalf\", \"NoWinFirstHalf\", \"Wins\"")
     @PostMapping("/stats-by-strategy/all-teams/update")
@@ -184,7 +184,7 @@ public class FootballDataStatsController {
         return ResponseEntity.ok().body("OK");
     }
 
-    @ApiOperation(value = "update Team stats for Strategy", notes = "Strategy values:\n\"Draw\",\"GoalsFest\",\"WinsMargin\",\"Btts\", \"CleanSheet\", \n" +
+    @ApiOperation(value = "update Team stats for Strategy", notes = "Strategy values:\n\"Draw\",\"GoalsFest\",\"WinsMargin\",\"WinsMarginHome\",\"Btts\", \"CleanSheet\", \n" +
             "            \"ConcedeBothHalves\", \"EuroHandicap\", \"NoBtts\", \"NoGoalsFest\", \"NoWins\", \"ScoreBothHalves\", \n" +
             "            \"SecondHalfBigger\", \"WinAndGoals\", \"WinBothHalves\", \"WinFirstHalf\", \"NoWinFirstHalf\", \"Wins\"")
     @PostMapping("/stats-by-strategy/{team}/update")
@@ -213,6 +213,24 @@ public class FootballDataStatsController {
         }
 
         return historicMatchRepository.getTeamMatchesBySeason(team, season);
+    }
+
+    @PostMapping("/historic-matches/insert-by-season")
+    public void insertHistoricMatchesBySeason(@Valid @RequestParam  String season) {
+        List<Team> allTeams = new ArrayList<>();
+
+        if (WINTER_SEASONS_LIST.contains(season)) {
+            allTeams = teamRepository.findAll().stream().filter(t -> t.getSport().equals("Football") &&
+                WINTER_SEASONS_BEGIN_MONTH_LIST.contains(t.getBeginSeason())).collect(Collectors.toList());
+        } else if (SUMMER_SEASONS_LIST.contains(season)) {
+            allTeams = teamRepository.findAll().stream().filter(t -> t.getSport().equals("Football") &&
+                SUMMER_SEASONS_BEGIN_MONTH_LIST.contains(t.getBeginSeason())).collect(Collectors.toList());
+        }
+
+        for (Team team : allTeams) {
+            insertHistoricalMatches(team.getId(), season);
+        }
+
     }
 
     @ApiOperation(value = "get historic matches of Team and Season from scrapper-service and save them in db")
@@ -251,7 +269,7 @@ public class FootballDataStatsController {
             } else {
                 newSeason = season;
             }
-            newSeasonUrl = teamUrl + "/" + newSeason + "/3/";
+            newSeasonUrl = teamUrl + "/" + "2025" + "/3/";
             scrappingData = ScrappingUtil.getScrappingData(team.getName(), newSeason, newSeasonUrl, true);
         } else if (teamUrl.contains(API_SPORTS_BASE_URL)) {
             String newSeason = "";
@@ -278,7 +296,13 @@ public class FootballDataStatsController {
                 historicMatch.setSport(team.getSport());
                 historicMatch.setSeason(season);
                 try {
-                    historicMatchRepository.save(historicMatch);
+                    if (SUMMER_SEASONS_LIST.contains(season)) {
+                        if (historicMatch.getMatchDate().contains(season)) {
+                            historicMatchRepository.save(historicMatch); //just insert matches of the civil year from worldfootball
+                        }
+                    } else {
+                        historicMatchRepository.save(historicMatch);
+                    }
                 } catch (Exception e) {
                     log.info("match:  " + historicMatch.toString() + "\nerror:  " + e.toString());
                 }
@@ -300,7 +324,7 @@ public class FootballDataStatsController {
 
         List<String> teamsToGetLastMatch = new ArrayList<>();
 
-        for (String leagueUrl : LONG_STREAKS_LEAGUES_LIST) {
+        for (String leagueUrl : LEAGUES_LIST) {
             JSONObject leagueTeamsScrappingData = ScrappingUtil.getLeagueTeamsScrappingData(leagueUrl);
 
             List<String> analysedTeams = new ArrayList<>();
