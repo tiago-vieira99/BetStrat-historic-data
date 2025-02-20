@@ -50,6 +50,7 @@ public abstract class StrategyMappingPattern {
                                   NoWinsStrategySeasonStatsService noWinsStrategySeasonStatsService,
                                   CleanSheetStrategySeasonStatsService cleanSheetStrategySeasonStatsService,
                                   BttsStrategySeasonStatsService bttsStrategySeasonStatsService,
+                                  BttsOneHalfStrategySeasonStatsService bttsOneHalfStrategySeasonStatsService,
                                   NoBttsStrategySeasonStatsService noBttsStrategySeasonStatsService,
                                   ScoreBothHalvesSeasonStatsService scoreBothHalvesSeasonStatsService,
                                   ConcedeBothHalvesSeasonStatsService concedeBothHalvesSeasonStatsService,
@@ -82,6 +83,7 @@ public abstract class StrategyMappingPattern {
         serviceMap.put(CleanSheetSeasonStats.class, cleanSheetStrategySeasonStatsService);
         serviceMap.put(NoGoalsFestSeasonStats.class, noGoalsFestStrategySeasonstatsService);
         serviceMap.put(BttsSeasonStats.class, bttsStrategySeasonStatsService);
+        serviceMap.put(BttsOneHalfSeasonStats.class, bttsOneHalfStrategySeasonStatsService);
         serviceMap.put(NoBttsSeasonStats.class, noBttsStrategySeasonStatsService);
         serviceMap.put(ScoreBothHalvesSeasonStats.class, scoreBothHalvesSeasonStatsService);
         serviceMap.put(ConcedeBothHalvesSeasonStats.class, concedeBothHalvesSeasonStatsService);

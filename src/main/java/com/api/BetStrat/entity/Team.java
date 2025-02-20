@@ -166,6 +166,15 @@ public class Team implements Serializable {
     @Column(name = "btts_avg_red_run")
     private Integer bttsAvgRedRun;
 
+    @Column(name = "btts_one_half_score")
+    private String bttsOneHalfScore;
+
+    @Column(name = "btts_one_half_max_red_run")
+    private Integer bttsOneHalfMaxRedRun;
+
+    @Column(name = "btts_one_half_avg_red_run")
+    private Integer bttsOneHalfAvgRedRun;
+
     @Column(name = "no_btts_score")
     private String noBttsScore;
 

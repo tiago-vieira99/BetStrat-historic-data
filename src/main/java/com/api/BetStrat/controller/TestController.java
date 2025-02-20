@@ -15,7 +15,19 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.Reader;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.Random;
 import lombok.SneakyThrows;
+import org.apache.commons.csv.CSVFormat;
+import org.apache.commons.csv.CSVParser;
+import org.apache.commons.csv.CSVRecord;
 import org.json.simple.JSONArray;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -91,6 +103,117 @@ public class TestController {
         }
 
         return noMarginWinsSequence;
+    }
+
+    @ApiOperation(value = "test fractioned Kelly for GF")
+    @ApiResponses(value = {
+        @ApiResponse(code = 200, message = "OK", response = String.class),
+        @ApiResponse(code = 400, message = "Bad Request", response = StandardError.class),
+        @ApiResponse(code = 401, message = "Unauthorized", response = StandardError.class),
+        @ApiResponse(code = 403, message = "Forbidden", response = StandardError.class),
+        @ApiResponse(code = 404, message = "Not Found", response = StandardError.class),
+        @ApiResponse(code = 500, message = "Internal Server Error", response = StandardError.class),
+    })
+    @GetMapping("/test-kelly-for-gf/{season}")
+    public String testKellyForGoalsFest(@PathVariable("season") String season) {
+        String matches = new String();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm");
+        LocalDate currentDate = null;
+        double initialBankroll = 100;
+        double currentBankroll = initialBankroll;
+
+        try (InputStream inputStream = TestController.class.getClassLoader().getResourceAsStream(season + ".csv");
+            Reader reader = new InputStreamReader(inputStream);
+            CSVParser csvParser = new CSVParser(reader, CSVFormat.EXCEL.withFirstRecordAsHeader())) {
+
+            if (inputStream == null) {
+                throw new IllegalArgumentException("File not found: ");
+            }
+
+            for (CSVRecord record : csvParser) {
+                String date = record.get("datetime");
+                String competition = record.get("competition");
+                String match = record.get("match");
+                String ftResult = record.get("FT result");
+                Boolean toBet = Boolean.valueOf(record.get("to bet"));
+                Boolean goalsFest = Boolean.valueOf(record.get("goalsFest"));
+
+                LocalDateTime dateTime = LocalDateTime.parse(date, formatter);
+                LocalDate dateObj = dateTime.toLocalDate();
+                // Check if we have moved to a new date
+                if (currentDate == null || !currentDate.equals(dateObj)) {
+                    currentDate = dateObj;
+                    currentBankroll = initialBankroll;
+                }
+
+                if (toBet) {
+                    double odd = getRandomOdd() * 0.95;
+                    String betResult = goalsFest ? "GREEN" : "RED";
+                    double stakePercentage = calculateFinalFraction(odd);
+                    double stake = Utils.beautifyDoubleValue(stakePercentage * currentBankroll);
+
+                    if (goalsFest) {
+                        initialBankroll += stake * (odd - 1);
+                    } else {
+                        initialBankroll -= stake;
+                    }
+
+                    matches = matches.concat(String.format(date + ";" + competition + ";" + match + ";" + ftResult + ";" + String.valueOf(odd).replaceAll("\\.", ",") +
+                        ";" + String.valueOf(stake).replaceAll("\\.", ",") + ";" + String.valueOf(stakePercentage).replaceAll("\\.", ",") + ";" + betResult + ";" +
+                        String.valueOf(currentBankroll).replaceAll("\\.", ",") + "\n"));
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return matches;
+    }
+
+    private static double calculateFinalFraction(double odd) {
+        double p = 0.55;     // 55%  (estimated probability of winning)
+        int minStakePercentage = 5; // 5%
+        int maxStakePercentage = 10; // 10%
+        double kellyFraction = (p * (odd - 1) - (1 - p)) / (odd - 1);
+        double adjustedFraction = p * kellyFraction;
+        double finalFraction = Math.min(Math.max(adjustedFraction, minStakePercentage / 100.0), maxStakePercentage / 100.0);
+
+        return finalFraction;
+    }
+
+    public static double getRandomOdd() {
+        // Create a Random object
+        Random random = new Random();
+
+        // Generate a random number between 0 and 10000 (inclusive)
+        int rand = random.nextInt(10001); // 0 to 10000
+
+        // Map the random number to the corresponding value based on the distribution
+        if (rand < 1364) { // 0-1363 (13.64%)
+            return 1.75;
+        } else if (rand < 2273) { // 1364-2272 (9.09%)
+            return 1.90;
+        } else if (rand < 3182) { // 2273-3181 (9.09%)
+            return 2.00;
+        } else if (rand < 4091) { // 3182-4090 (9.09%)
+            return 2.20;
+        } else if (rand < 5000) { // 4091-4999 (9.09%)
+            return 2.40;
+        } else if (rand < 5909) { // 5000-5908 (9.09%)
+            return 1.70;
+        } else if (rand < 6364) { // 5909-6363 (4.55%)
+            return 1.55;
+        } else if (rand < 7728) { // 6364-7727 (13.64%)
+            return 1.85;
+        } else if (rand < 8183) { // 7728-8182 (4.55%)
+            return 1.80;
+        } else if (rand < 9092) { // 8183-9091 (9.09%)
+            return 2.10;
+        } else if (rand < 9547) { // 9092-9546 (4.55%)
+            return 1.72;
+        } else { // 9547-10000 (4.55%)
+            return 2.25;
+        }
     }
 
     @ApiOperation(value = "test-wins-margin-v2")

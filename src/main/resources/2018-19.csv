@@ -1,0 +1,335 @@
+datetime,competition,match,FT result,h2hmatches,h2hgoals,h2h goals/match,total goals,to bet,btts,goalsFest,,,,
+05-07-2018 00:00,USA >  Major League Soccer 2018,Minnesota United FC - Toronto FC,4:3 (2:1),4,21,"5,25","7,00",TRUE,TRUE,TRUE,,,10,"8,7"
+06-07-2018 12:00,FIFA >   Friendlies Clubs 2018 > Week,Odense BK - FC Roskilde,4:2 (2:1),4,20,"5,00","6,00",TRUE,TRUE,TRUE,,,10,"8,7"
+07-07-2018 14:00,FIFA >   Friendlies Clubs 2018 > Week,AFC Ajax - FC Nordsjælland,1:3 (0:0),2,8,"4,00","4,00",TRUE,TRUE,TRUE,,,10,"8,7"
+09-07-2018 17:00,FIFA >   Friendlies Clubs 2018 > Week,Vitesse - Shakhtar Donetsk,1:4 (0:1),1,5,"5,00","5,00",TRUE,TRUE,TRUE,,,10,"8,7"
+13-07-2018 16:30,FIFA >   Friendlies Clubs 2018 > Week,FK Dukla Praha - Hertha BSC,2:3,1,5,"5,00","5,00",TRUE,TRUE,TRUE,,"11,25%",10,"8,7"
+13-07-2018 18:00,FIFA >   Friendlies Clubs 2018 > Week,Austria Wien - Borussia Dortmund,0:1 (0:1),4,18,"4,50","1,00",TRUE,FALSE,FALSE,,,10,-10
+20-07-2018 16:00,FIFA >   Friendlies Clubs 2018 > Week,Beşiktaş - FK Krasnodar,3:1 (1:1),1,4,"4,00","4,00",TRUE,TRUE,TRUE,,,20,"17,4"
+21-07-2018 16:00,FIFA >   Friendlies Clubs 2018 > Week,1899 Hoffenheim - Queens Park Rangers,2:2 (1:0),2,7,"3,50","4,00",TRUE,TRUE,TRUE,,,10,"8,7"
+25-07-2018 18:00,FIFA >   Friendlies Clubs 2018 > Week,FC Utrecht - Kasımpaşa SK,1:4 (0:2),1,5,"5,00","5,00",TRUE,TRUE,TRUE,,,10,"8,7"
+27-07-2018 10:00,FIFA >   Friendlies Clubs 2018 > Week,Helmond Sport - Al Ettifaq,2:2 (2:2),1,4,"4,00","4,00",TRUE,TRUE,TRUE,,,10,"8,7"
+28-07-2018 16:00,FIFA >   Friendlies Clubs 2018 > Week,1899 Hoffenheim - sc Heerenveen,8:2 (5:0),1,10,"10,00","10,00",TRUE,TRUE,TRUE,,,10,"8,7"
+28-07-2018 17:30,FIFA >   Friendlies Clubs 2018 > Week,Stade Rennais - Everton FC,4:1 (2:1),1,5,"5,00","5,00",TRUE,TRUE,TRUE,,,10,"8,7"
+28-07-2018 19:00,Belgium >  Pro League 2018/2019,SV Zulte Waregem - Waasland-Beveren,2:2 (1:0),27,95,"3,52","4,00",TRUE,TRUE,TRUE,,,10,"8,7"
+29-07-2018 12:45,Denmark >  1. Division 2018/2019,Silkeborg IF - Thisted FC,0:0 (0:0),6,21,"3,50","0,00",TRUE,FALSE,FALSE,,,10,-10
+29-07-2018 20:00,Bolivia >  Liga Profesional 2018 Clausura,CD Guabirá - The Strongest,0:2 (0:1),39,139,"3,56","2,00",TRUE,FALSE,FALSE,,,20,-20
+01-08-2018 21:00,FIFA >   Friendlies Clubs 2018 > Week,SL Benfica - Olympique Lyonnais,2:3 (0:2),5,21,"4,20","5,00",TRUE,TRUE,TRUE,,,30,"26,1"
+03-08-2018 10:30,FIFA >   Friendlies Clubs 2018 > Week,Jong PSV - AZ Alkmaar (J),4:3 (3:2),15,56,"3,73","7,00",TRUE,TRUE,TRUE,,,20,"17,4"
+03-08-2018 19:30,Germany >  2. Bundesliga 2018/2019,Hamburger SV - Holstein Kiel,0:3 (0:0),46,187,"4,07","3,00",TRUE,FALSE,FALSE,,,10,-10
+04-08-2018 15:00,FIFA >   Friendlies Clubs 2018 > Week,Fulham FC - RC Celta,2:2 (2:2),1,4,"4,00","4,00",TRUE,TRUE,TRUE,,,20,"17,4"
+05-08-2018 21:00,Bolivia >  Liga Profesional 2018 Clausura,Bolívar - Sport Boys Warnes,3:3 (2:0),24,89,"3,71","6,00",TRUE,TRUE,TRUE,,,10,"8,7"
+06-08-2018 22:15,Bolivia >  Liga Profesional 2018 Clausura,Real Potosí - The Strongest,0:3 (0:1),51,180,"3,53","3,00",TRUE,FALSE,FALSE,,,10,-10
+07-08-2018 19:30,FIFA >   Friendlies Clubs 2018 > Week,Liverpool FC - Torino FC,3:1 (2:1),1,4,"4,00","4,00",TRUE,TRUE,TRUE,,,20,"17,4"
+09-08-2018 18:00,UEFA >   Europa League Qual. 2018/2019 > 3. Round,Sturm Graz - AEK Larnaca,0:2 (0:0),2,7,"3,50","2,00",TRUE,FALSE,FALSE,,,10,-10
+09-08-2018 18:45,UEFA >   Europa League Qual. 2018/2019 > 3. Round,FC Nordsjælland - Partizan,1:2 (0:1),4,14,"3,50","3,00",TRUE,TRUE,TRUE,,,20,"17,4"
+09-08-2018 19:00,UEFA >   Europa League Qual. 2018/2019 > 3. Round,Olympiakos Piraeus - FC Luzern,4:0 (3:0),2,8,"4,00","4,00",TRUE,FALSE,FALSE,,,10,-10
+10-08-2018 18:30,FIFA >   Friendlies Clubs 2018 > Week,FC Volendam - AZ Alkmaar (J),3:3 (3:1),13,48,"3,69","6,00",TRUE,TRUE,TRUE,,,20,"17,4"
+10-08-2018 19:00,England >  Premier League 2 Div. 2 2018/2019,Southampton FC U23 - Middlesbrough FC U23,2:0 (0:0),11,41,"3,73","2,00",TRUE,FALSE,FALSE,,,10,-10
+11-08-2018 11:00,FIFA >   Friendlies Clubs 2018 > Week,Jong Ajax - SC Cambuur,1:2 (0:1),15,53,"3,53","3,00",TRUE,TRUE,TRUE,,,20,"17,4"
+11-08-2018 13:00,England >  Premier League 2 Div. 2 2018/2019,Reading FC U23 - Wolverhampton Wanderers U23,2:2 (2:2),11,40,"3,64","4,00",TRUE,TRUE,TRUE,,,10,"8,7"
+12-08-2018 03:30,USA >  Major League Soccer 2018,Los Angeles Galaxy - Minnesota United FC,2:2 (1:0),17,68,"4,00","4,00",TRUE,TRUE,TRUE,,,10,"8,7"
+12-08-2018 13:30,Netherlands >  Eredivisie 2018/2019,De Graafschap - Feyenoord,2:0 (1:0),43,153,"3,56","2,00",TRUE,FALSE,FALSE,,,10,-10
+12-08-2018 15:00,Switzerland >  Super League 2018/2019,FC Luzern - BSC Young Boys,2:3 (0:1),175,615,"3,51","5,00",TRUE,TRUE,TRUE,,,20,"17,4"
+13-08-2018 14:00,England >  Premier League 2 Div. 2 2018/2019,West Bromwich Albion U23 - Newcastle United U23,1:1 (1:0),19,70,"3,68","2,00",TRUE,TRUE,FALSE,,,10,-10
+16-08-2018 16:30,UEFA >   Europa League Qual. 2018/2019 > 3. Round,AEK Larnaca - Sturm Graz,5:0 (1:0),2,7,"3,50","5,00",TRUE,FALSE,FALSE,,,20,-20
+16-08-2018 18:30,UEFA >   Europa League Qual. 2018/2019 > 3. Round,FC Luzern - Olympiakos Piraeus,1:3 (0:1),2,8,"4,00","4,00",TRUE,TRUE,TRUE,,,30,"26,1"
+16-08-2018 19:30,UEFA >   Europa League Qual. 2018/2019 > 3. Round,Partizan - FC Nordsjælland,3:2 (3:1),4,14,"3,50","5,00",TRUE,TRUE,TRUE,,,20,"17,4"
+17-08-2018 19:00,England >  Premier League 2 2018/2019,Liverpool FC U23 - Tottenham Hotspur U23,1:1 (1:1),22,90,"4,09","2,00",TRUE,TRUE,FALSE,,,10,-10
+17-08-2018 19:00,England >  Premier League 2 Div. 2 2018/2019,Manchester United U23 - Aston Villa U23,3:1 (1:1),6,21,"3,50","4,00",TRUE,TRUE,TRUE,,,20,"17,4"
+18-08-2018 19:00,Belgium >  Pro League 2018/2019,Cercle Brugge - SV Zulte Waregem,3:1 (1:0),38,136,"3,58","4,00",TRUE,TRUE,TRUE,,,10,"8,7"
+19-08-2018 13:30,Netherlands >  Eredivisie 2018/2019,Feyenoord - SBV Excelsior,3:0 (1:0),57,214,"3,75","3,00",TRUE,FALSE,FALSE,,,10,-10
+19-08-2018 13:30,Netherlands >  Eredivisie 2018/2019,FC Emmen - AZ Alkmaar,1:4 (1:3),13,46,"3,54","5,00",TRUE,TRUE,TRUE,,,20,"17,4"
+19-08-2018 13:45,Denmark >  1. Division 2018/2019,FC Roskilde - Silkeborg IF,0:1 (0:1),9,34,"3,78","1,00",TRUE,FALSE,FALSE,,,10,-10
+19-08-2018 16:00,Austria >  Bundesliga 2018/2019,Austria Wien - FC Admira Wacker,4:0 (2:0),280,1036,"3,70","4,00",TRUE,FALSE,FALSE,,,20,-20
+20-08-2018 14:00,England >  Premier League 2 Div. 2 2018/2019,Norwich City U23 - Reading FC U23,3:2 (1:2),18,64,"3,56","5,00",TRUE,TRUE,TRUE,,,30,"26,1"
+20-08-2018 19:00,England >  Premier League 2 2018/2019,Arsenal FC U23 - Brighton & Hove Albion U23,1:1 (0:0),16,58,"3,63","2,00",TRUE,TRUE,FALSE,,,20,-20
+20-08-2018 19:00,England >  Premier League 2 2018/2019,Swansea City U23 - Derby County U23,1:1 (1:0),6,27,"4,50","2,00",TRUE,TRUE,FALSE,,,30,-30
+20-08-2018 19:00,Netherlands >  Eerste Divisie 2018/2019,AZ Alkmaar (J) - Almere City FC,2:3 (0:3),14,53,"3,79","5,00",TRUE,TRUE,TRUE,,,40,"34,8"
+24-08-2018 19:00,Netherlands >  Eerste Divisie 2018/2019,Jong Ajax - FC Dordrecht,5:2 (2:1),23,84,"3,65","7,00",TRUE,TRUE,TRUE,,,30,"26,1"
+25-08-2018 17:30,Netherlands >  Eredivisie 2018/2019,AFC Ajax - FC Emmen,5:0 (2:0),7,36,"5,14","5,00",TRUE,FALSE,FALSE,,,20,-20
+26-08-2018 15:00,Denmark >  Superliga 2018/2019,Vendsyssel FF - Brøndby IF,1:2 (0:1),4,15,"3,75","3,00",TRUE,TRUE,TRUE,,,30,"26,1"
+27-08-2018 14:00,England >  Premier League 2 Div. 2 2018/2019,West Bromwich Albion U23 - Norwich City U23,0:4 (0:3),18,70,"3,89","4,00",TRUE,FALSE,FALSE,,,20,-20
+27-08-2018 19:45,Turkey >  SüperLig 2018/2019,Galatasaray - Alanyaspor,6:0 (1:0),22,77,"3,50","6,00",TRUE,FALSE,FALSE,,,30,-30
+28-08-2018 19:30,FIFA >   Friendlies Clubs 2018 > Week,Bayern München - Chicago Fire,4:0 (2:0),1,4,"4,00","4,00",TRUE,FALSE,FALSE,,,40,-40
+31-08-2018 18:10,Austria >  2. Liga 2018/2019,Kapfenberger SV 1919 - WSG Wattens,2:2 (2:0),11,40,"3,64","4,00",TRUE,TRUE,TRUE,,,50,"43,5"
+31-08-2018 19:00,England >  Premier League 2 Div. 2 2018/2019,Manchester United U23 - Stoke City U23,1:0 (1:0),9,34,"3,78","1,00",TRUE,FALSE,FALSE,,,40,-40
+31-08-2018 19:00,Netherlands >  Eerste Divisie 2018/2019,FC Volendam - AZ Alkmaar (J),1:1 (1:0),13,48,"3,69","2,00",TRUE,TRUE,FALSE,,,50,-50
+01-09-2018 00:00,Peru >  Primera División 2018 Clausura,Comerciantes Unidos - Ayacucho FC,0:3 dec.,12,45,"3,75","3,00",TRUE,FALSE,FALSE,,,60,-60
+01-09-2018 12:00,England >  Premier League 2 Div. 2 2018/2019,Newcastle United U23 - Reading FC U23,2:4 (2:4),17,70,"4,12","6,00",TRUE,TRUE,TRUE,,,70,"60,9"
+02-09-2018 13:30,Netherlands >  Eredivisie 2018/2019,Vitesse - AFC Ajax,0:4 (0:3),87,315,"3,62","4,00",TRUE,FALSE,FALSE,,,60,-60
+02-09-2018 14:30,Germany >  Bundesliga 2018/2019,RB Leipzig - Fortuna Düsseldorf,1:1 (0:0),8,28,"3,50","2,00",TRUE,TRUE,FALSE,,,70,-70
+10-09-2018 19:00,Netherlands >  Eerste Divisie 2018/2019,AZ Alkmaar (J) - Jong Ajax,0:1 (0:1),16,57,"3,56","1,00",TRUE,FALSE,FALSE,,,80,-80
+14-09-2018 19:00,England >  Premier League 2 Div. 2 2018/2019,Aston Villa U23 - Stoke City U23,0:3 (0:0),21,77,"3,67","3,00",TRUE,FALSE,FALSE,,,90,-90
+14-09-2018 19:00,England >  Premier League 2 Div. 2 2018/2019,Fulham FC U23 - Wolverhampton Wanderers U23,1:0 (1:0),18,66,"3,67","1,00",TRUE,FALSE,FALSE,,,100,-100
+14-09-2018 19:00,England >  Premier League 2 Div. 2 2018/2019,Newcastle United U23 - Southampton FC U23,0:1 (0:1),13,62,"4,77","1,00",TRUE,FALSE,FALSE,,,110,-110
+14-09-2018 19:00,Netherlands >  Eerste Divisie 2018/2019,NEC Nijmegen - Jong PSV,4:4 (2:2),9,32,"3,56","8,00",TRUE,TRUE,TRUE,,,120,"104,4"
+15-09-2018 01:00,Bolivia >  Liga Profesional 2018 Clausura,Sport Boys Warnes - The Strongest,2:2 (0:1),26,94,"3,62","4,00",TRUE,TRUE,TRUE,,,110,"95,7"
+15-09-2018 15:00,England >  Premier League 2018/2019,Manchester City - Fulham FC,3:0 (2:0),73,269,"3,68","3,00",TRUE,FALSE,FALSE,,,100,-100
+16-09-2018 13:30,Netherlands >  Eredivisie 2018/2019,FC Utrecht - FC Emmen,1:2 (1:0),9,33,"3,67","3,00",TRUE,TRUE,TRUE,,,110,"95,7"
+18-09-2018 15:00,UEFA >  Youth Youth League 2018/2019 > Group C,Liverpool FC - Paris Saint-Germain,5:2 (3:0),2,12,"6,00","7,00",TRUE,TRUE,TRUE,,,100,87
+19-09-2018 13:00,UEFA >  Youth Youth League 2018/2019 > Group E,SL Benfica - Bayern München,3:0 (2:0),5,19,"3,80","3,00",TRUE,FALSE,FALSE,,,90,-90
+19-09-2018 13:00,UEFA >  Youth Youth League 2018/2019 > Group F,Manchester City - Olympique Lyonnais,1:4 (0:2),2,7,"3,50","5,00",TRUE,TRUE,TRUE,,,100,87
+19-09-2018 17:55,UEFA >   Champions League 2018/2019 > Group F,Shakhtar Donetsk - 1899 Hoffenheim,2:2 (1:2),2,9,"4,50","4,00",TRUE,TRUE,TRUE,,,90,"78,3"
+19-09-2018 20:00,UEFA >   Champions League 2018/2019 > Group F,Manchester City - Olympique Lyonnais,1:2 (0:2),3,11,"3,67","3,00",TRUE,TRUE,TRUE,,,80,"69,6"
+20-09-2018 04:00,USA >  Major League Soccer 2018,San Jose Earthquakes - Atlanta United FC,3:4 (2:1),4,20,"5,00","7,00",TRUE,TRUE,TRUE,,,70,"60,9"
+20-09-2018 20:00,UEFA >   Europa League 2018/2019 > Group A,PFC Ludogorets Razgrad - Bayer Leverkusen,2:3 (2:1),2,7,"3,50","5,00",TRUE,TRUE,TRUE,,,60,"52,2"
+20-09-2018 20:00,Bolivia >  Liga Profesional 2018 Clausura,CD Guabirá - Bolívar,2:0 (0:0),39,141,"3,62","2,00",TRUE,FALSE,FALSE,,,50,-50
+21-09-2018 14:00,England >  Premier League 2 Div. 2 2018/2019,Norwich City U23 - Newcastle United U23,2:1 (1:1),16,65,"4,06","3,00",TRUE,TRUE,TRUE,,,60,"52,2"
+21-09-2018 19:00,England >  Premier League 2 Div. 2 2018/2019,Southampton FC U23 - Aston Villa U23,0:1 (0:0),13,48,"3,69","1,00",TRUE,FALSE,FALSE,,,50,-50
+21-09-2018 19:00,Netherlands >  Eerste Divisie 2018/2019,Go Ahead Eagles - Jong Ajax,2:1 (1:1),11,41,"3,73","3,00",TRUE,TRUE,TRUE,,,60,"52,2"
+22-09-2018 12:35,China >  Super League 2018,Shanghai SIPG - Changchun Yatai,3:1 (2:1),21,76,"3,62","4,00",TRUE,TRUE,TRUE,,,50,"43,5"
+23-09-2018 00:00,USA >  Major League Soccer 2018,Atlanta United FC - Real Salt Lake,2:0 (1:0),5,19,"3,80","2,00",TRUE,FALSE,FALSE,,,40,-40
+23-09-2018 12:30,Germany >  2. Bundesliga 2018/2019,Hamburger SV - Jahn Regensburg,0:5 (0:3),11,47,"4,27","5,00",TRUE,FALSE,FALSE,,,50,-50
+26-09-2018 18:00,France >  Ligue 1 2018/2019,Dijon FCO - Olympique Lyonnais,0:3 (0:3),11,45,"4,09","3,00",TRUE,FALSE,FALSE,,,60,-60
+28-09-2018 14:00,England >  Premier League 2 Div. 2 2018/2019,Norwich City U23 - Manchester United U23,0:1 (0:0),11,41,"3,73","1,00",TRUE,FALSE,FALSE,,,70,-70
+29-09-2018 12:00,England >  Premier League 2 2018/2019,Chelsea FC U23 - Liverpool FC U23,1:3 (0:2),22,84,"3,82","4,00",TRUE,TRUE,TRUE,,,80,"69,6"
+29-09-2018 13:00,England >  Premier League 2 Div. 2 2018/2019,Reading FC U23 - Southampton FC U23,2:0 (0:0),12,45,"3,75","2,00",TRUE,FALSE,FALSE,,,70,-70
+29-09-2018 19:45,Netherlands >  Eredivisie 2018/2019,Fortuna Sittard - AFC Ajax,0:2 (0:0),54,191,"3,54","2,00",TRUE,FALSE,FALSE,,,80,-80
+01-10-2018 19:00,England >  Premier League 2 Div. 2 2018/2019,West Bromwich Albion U23 - Stoke City U23,3:2 (1:0),19,67,"3,53","5,00",TRUE,TRUE,TRUE,,,90,"78,3"
+02-10-2018 13:00,UEFA >  Youth Youth League 2018/2019 > Group E,Bayern München - AFC Ajax,2:2 (0:1),2,7,"3,50","4,00",TRUE,TRUE,TRUE,,,80,"69,6"
+02-10-2018 13:00,UEFA >  Youth Youth League 2018/2019 > Group F,1899 Hoffenheim - Manchester City,5:2 (2:1),2,10,"5,00","7,00",TRUE,TRUE,TRUE,,,70,"60,9"
+02-10-2018 20:00,UEFA >   Champions League 2018/2019 > Group E,Bayern München - AFC Ajax,1:1 (1:1),11,43,"3,91","2,00",TRUE,TRUE,FALSE,,,60,-60
+03-10-2018 20:00,UEFA >   Champions League 2018/2019 > Group A,Borussia Dortmund - AS Monaco,3:0 (0:0),4,14,"3,50","3,00",TRUE,FALSE,FALSE,,,70,-70
+04-10-2018 17:55,UEFA >   Europa League 2018/2019 > Group A,Bayer Leverkusen - AEK Larnaca,4:2 (1:1),2,12,"6,00","6,00",TRUE,TRUE,TRUE,,,80,"69,6"
+05-10-2018 19:00,Netherlands >  Eerste Divisie 2018/2019,Roda JC Kerkrade - Jong PSV,2:3 (2:1),16,59,"3,69","5,00",TRUE,TRUE,TRUE,,,70,"60,9"
+06-10-2018 18:00,Switzerland >  Super League 2018/2019,BSC Young Boys - FC Luzern,2:3 (0:1),175,615,"3,51","5,00",TRUE,TRUE,TRUE,,,60,"52,2"
+07-10-2018 00:30,USA >  Major League Soccer 2018,Philadelphia Union - Minnesota United FC,5:1 (4:0),7,28,"4,00","6,00",TRUE,TRUE,TRUE,,,50,"43,5"
+19-10-2018 19:00,England >  Premier League 2 Div. 2 2018/2019,Middlesbrough FC U23 - Reading FC U23,2:3 (1:0),18,71,"3,94","5,00",TRUE,TRUE,TRUE,,,40,"34,8"
+19-10-2018 19:00,Netherlands >  Eerste Divisie 2018/2019,FC Eindhoven - FC Volendam,1:1 (1:0),48,173,"3,60","2,00",TRUE,TRUE,FALSE,,,30,-30
+19-10-2018 19:30,Belgium >  Pro League 2018/2019,Club Brugge KV - Waasland-Beveren,1:1 (0:0),18,63,"3,50","2,00",TRUE,TRUE,FALSE,,,40,-40
+20-10-2018 19:45,Netherlands >  Eredivisie 2018/2019,sc Heerenveen - AFC Ajax,0:4 (0:2),78,327,"4,19","4,00",TRUE,FALSE,FALSE,,,50,-50
+20-10-2018 22:15,Bolivia >  Liga Profesional 2018 Clausura,The Strongest - CD Guabirá,6:0 (4:0),39,139,"3,56","6,00",TRUE,FALSE,FALSE,,,60,-60
+21-10-2018 13:30,Scotland >  Premiership 2018/2019,Hamilton Academical - Rangers FC,1:4 (0:1),112,409,"3,65","5,00",TRUE,TRUE,TRUE,,,70,"60,9"
+21-10-2018 22:00,USA >  Major League Soccer 2018,Minnesota United FC - Los Angeles Galaxy,1:3 (0:1),17,68,"4,00","4,00",TRUE,TRUE,TRUE,,,60,"52,2"
+22-10-2018 19:00,England >  Premier League 2 Div. 2 2018/2019,Aston Villa U23 - Newcastle United U23,2:5 (2:4),22,80,"3,64","7,00",TRUE,TRUE,TRUE,,,50,"43,5"
+23-10-2018 10:00,UEFA >  Youth Youth League 2018/2019 > Group F,Shakhtar Donetsk - Manchester City,1:1 (0:0),6,23,"3,83","2,00",TRUE,TRUE,FALSE,,,40,-40
+23-10-2018 13:00,UEFA >  Youth Youth League 2018/2019 > Group E,AFC Ajax - SL Benfica,3:0 (1:0),3,12,"4,00","3,00",TRUE,FALSE,FALSE,,,50,-50
+23-10-2018 14:00,UEFA >  Youth Youth League 2018/2019 > Group F,1899 Hoffenheim - Olympique Lyonnais,3:1 (0:0),2,10,"5,00","4,00",TRUE,TRUE,TRUE,,,60,"52,2"
+23-10-2018 20:00,UEFA >   Champions League 2018/2019 > Group F,1899 Hoffenheim - Olympique Lyonnais,3:3 (1:1),3,14,"4,67","6,00",TRUE,TRUE,TRUE,,,50,"43,5"
+24-10-2018 13:00,UEFA >  Youth Youth League 2018/2019 > Group A,Club Brugge KV - AS Monaco,2:3 (1:1),2,9,"4,50","5,00",TRUE,TRUE,TRUE,,,40,"34,8"
+24-10-2018 17:55,UEFA >   Champions League 2018/2019 > Group A,Club Brugge KV - AS Monaco,1:1 (1:1),4,14,"3,50","2,00",TRUE,TRUE,FALSE,,,30,-30
+25-10-2018 17:55,UEFA >   Europa League 2018/2019 > Group A,FC Zürich - Bayer Leverkusen,3:2 (1:0),4,16,"4,00","5,00",TRUE,TRUE,TRUE,,,40,"34,8"
+26-10-2018 19:00,Netherlands >  Eerste Divisie 2018/2019,FC Volendam - Jong Ajax,3:1 (1:0),23,94,"4,09","4,00",TRUE,TRUE,TRUE,,,30,"26,1"
+26-10-2018 19:00,Netherlands >  Eerste Divisie 2018/2019,FC Twente - Almere City FC,1:0 (1:0),8,34,"4,25","1,00",TRUE,FALSE,FALSE,,,20,-20
+27-10-2018 12:00,England >  Premier League 2 2018/2019,Chelsea FC U23 - Brighton & Hove Albion U23,2:3 (0:2),11,41,"3,73","5,00",TRUE,TRUE,TRUE,,,30,"26,1"
+27-10-2018 14:30,Germany >  Bundesliga 2018/2019,1. FSV Mainz 05 - Bayern München,1:2 (0:1),40,165,"4,13","3,00",TRUE,TRUE,TRUE,,,20,"17,4"
+28-10-2018 13:30,Netherlands >  Eredivisie 2018/2019,AFC Ajax - Feyenoord,3:0 (2:0),159,562,"3,53","3,00",TRUE,FALSE,FALSE,,,10,-10
+28-10-2018 15:45,Netherlands >  Eredivisie 2018/2019,AZ Alkmaar - sc Heerenveen,2:3 (1:1),64,233,"3,64","5,00",TRUE,TRUE,TRUE,,,20,"17,4"
+29-10-2018 19:00,England >  Premier League 2 Div. 2 2018/2019,West Bromwich Albion U23 - Aston Villa U23,1:1 (1:0),19,69,"3,63","2,00",TRUE,TRUE,FALSE,,,10,-10
+31-10-2018 19:30,Belgium >  Pro League 2018/2019,KV Kortrijk - Waasland-Beveren,2:2 (2:0),26,95,"3,65","4,00",TRUE,TRUE,TRUE,,,20,"17,4"
+02-11-2018 12:00,England >  Premier League 2 2018/2019,Tottenham Hotspur U23 - Swansea City U23,1:4 (1:0),4,16,"4,00","5,00",TRUE,TRUE,TRUE,,,10,"8,7"
+02-11-2018 19:00,England >  Premier League 2 Div. 2 2018/2019,Manchester United U23 - Newcastle United U23,1:4 (1:1),9,34,"3,78","5,00",TRUE,TRUE,TRUE,,,10,"8,7"
+02-11-2018 19:00,Netherlands >  Eerste Divisie 2018/2019,SC Cambuur - Jong Ajax,2:1 (1:0),15,53,"3,53","3,00",TRUE,TRUE,TRUE,,,10,"8,7"
+03-11-2018 13:00,England >  Premier League 2 2018/2019,Arsenal FC U23 - Chelsea FC U23,4:5 (3:3),19,82,"4,32","9,00",TRUE,TRUE,TRUE,,,10,"8,7"
+03-11-2018 17:30,Germany >  Bundesliga 2018/2019,Hertha BSC - RB Leipzig,0:3 (0:1),14,63,"4,50","3,00",TRUE,FALSE,FALSE,,,10,-10
+03-11-2018 19:00,Bolivia >  Liga Profesional 2018 Clausura,The Strongest - Real Potosí,5:1 (2:0),51,180,"3,53","6,00",TRUE,TRUE,TRUE,,,20,"17,4"
+03-11-2018 19:45,Netherlands >  Eredivisie 2018/2019,AFC Ajax - Willem II,2:0 (2:0),98,380,"3,88","2,00",TRUE,FALSE,FALSE,,,10,-10
+03-11-2018 21:15,Bolivia >  Liga Profesional 2018 Clausura,Sport Boys Warnes - Bolívar,4:1 (0:0),24,89,"3,71","5,00",TRUE,TRUE,TRUE,,,20,"17,4"
+04-11-2018 13:00,England >  Premier League 2 Div. 2 2018/2019,Middlesbrough FC U23 - Norwich City U23,2:1 (1:0),18,71,"3,94","3,00",TRUE,TRUE,TRUE,,,10,"8,7"
+04-11-2018 13:00,England >  Premier League 2 Div. 2 2018/2019,Aston Villa U23 - Reading FC U23,4:5 (3:3),14,65,"4,64","9,00",TRUE,TRUE,TRUE,,,10,"8,7"
+04-11-2018 13:30,Netherlands >  Eerste Divisie 2018/2019,NEC Nijmegen - AZ Alkmaar (J),3:1 (0:1),7,29,"4,14","4,00",TRUE,TRUE,TRUE,,,10,"8,7"
+06-11-2018 13:00,UEFA >  Youth Youth League 2018/2019 > Group A,AS Monaco - Club Brugge KV,3:1 (3:0),2,9,"4,50","4,00",TRUE,TRUE,TRUE,,,10,"8,7"
+06-11-2018 17:55,UEFA >   Champions League 2018/2019 > Group A,AS Monaco - Club Brugge KV,0:4 (0:3),4,14,"3,50","4,00",TRUE,FALSE,FALSE,,,10,-10
+07-11-2018 13:00,UEFA >  Youth Youth League 2018/2019 > Group F,Olympique Lyonnais - 1899 Hoffenheim,3:3 (1:1),2,10,"5,00","6,00",TRUE,TRUE,TRUE,,,20,"17,4"
+07-11-2018 15:00,UEFA >  Youth Youth League 2018/2019 > Group E,SL Benfica - AFC Ajax,3:3 (1:1),3,12,"4,00","6,00",TRUE,TRUE,TRUE,,,10,"8,7"
+07-11-2018 15:00,UEFA >  Youth Youth League 2018/2019 > Group F,Manchester City - Shakhtar Donetsk,4:1 (0:1),6,23,"3,83","5,00",TRUE,TRUE,TRUE,,,10,"8,7"
+07-11-2018 20:00,UEFA >   Champions League 2018/2019 > Group F,Olympique Lyonnais - 1899 Hoffenheim,2:2 (2:0),3,14,"4,67","4,00",TRUE,TRUE,TRUE,,,10,"8,7"
+08-11-2018 20:00,UEFA >   Europa League 2018/2019 > Group A,Bayer Leverkusen - FC Zürich,1:0 (0:0),4,16,"4,00","1,00",TRUE,FALSE,FALSE,,,10,-10
+09-11-2018 19:00,Netherlands >  Eerste Divisie 2018/2019,Go Ahead Eagles - FC Dordrecht,2:1 (0:1),55,197,"3,58","3,00",TRUE,TRUE,TRUE,,,20,"17,4"
+11-11-2018 13:30,Netherlands >  Eredivisie 2018/2019,SBV Excelsior - AFC Ajax,1:7 (0:2),49,185,"3,78","8,00",TRUE,TRUE,TRUE,,,10,"8,7"
+11-11-2018 15:00,Turkey >  SüperLig 2018/2019,Fenerbahçe - Alanyaspor,2:0 (2:0),20,75,"3,75","2,00",TRUE,FALSE,FALSE,,,10,-10
+11-11-2018 15:45,Netherlands >  Eredivisie 2018/2019,Heracles Almelo - Feyenoord,0:2 (0:0),51,195,"3,82","2,00",TRUE,FALSE,FALSE,,,20,-20
+11-11-2018 19:45,Spain >  Primera División 2018/2019,RC Celta - Real Madrid,2:4 (0:1),126,448,"3,56","6,00",TRUE,TRUE,TRUE,,,30,"26,1"
+16-11-2018 00:00,Bolivia >  Liga Profesional 2018 Clausura,Bolívar - CD Guabirá,3:0 (2:0),39,141,"3,62","3,00",TRUE,FALSE,FALSE,,,20,-20
+17-11-2018 14:30,FIFA >   Friendlies Clubs 2018 > Week,1. FC Nürnberg - FK Ústí nad Labem,4:2 (3:0),1,6,"6,00","6,00",TRUE,TRUE,TRUE,,,30,"26,1"
+17-11-2018 17:30,Netherlands >  Eerste Divisie 2018/2019,Jong PSV - AZ Alkmaar (J),3:1 (1:0),15,56,"3,73","4,00",TRUE,TRUE,TRUE,,,20,"17,4"
+23-11-2018 19:00,England >  Premier League 2 2018/2019,Chelsea FC U23 - Tottenham Hotspur U23,1:1 (0:1),22,82,"3,73","2,00",TRUE,TRUE,FALSE,,,10,-10
+23-11-2018 19:00,England >  Premier League 2 Div. 2 2018/2019,Norwich City U23 - Southampton FC U23,0:0 (0:0),15,57,"3,80","0,00",TRUE,FALSE,FALSE,,,20,-20
+23-11-2018 19:00,England >  Premier League 2 Div. 2 2018/2019,Reading FC U23 - Fulham FC U23,3:0 (1:0),12,53,"4,42","3,00",TRUE,FALSE,FALSE,,,30,-30
+24-11-2018 14:30,Germany >  Bundesliga 2018/2019,Bayern München - Fortuna Düsseldorf,3:3 (2:1),55,194,"3,53","6,00",TRUE,TRUE,TRUE,,,40,"34,8"
+24-11-2018 16:00,Austria >  Bundesliga 2018/2019,FC Admira Wacker - Austria Wien,1:2 (0:1),280,1036,"3,70","3,00",TRUE,TRUE,TRUE,,,30,"26,1"
+25-11-2018 12:45,Denmark >  1. Division 2018/2019,Thisted FC - Silkeborg IF,1:4 (0:3),6,21,"3,50","5,00",TRUE,TRUE,TRUE,,,20,"17,4"
+26-11-2018 19:00,England >  Premier League 2 2018/2019,Derby County U23 - Arsenal FC U23,5:0 (1:0),16,66,"4,13","5,00",TRUE,FALSE,FALSE,,,10,-10
+26-11-2018 19:00,England >  Premier League 2 Div. 2 2018/2019,Newcastle United U23 - Stoke City U23,3:2 (1:1),23,91,"3,96","5,00",TRUE,TRUE,TRUE,,,20,"17,4"
+27-11-2018 14:00,UEFA >  Youth Youth League 2018/2019 > Group F,Olympique Lyonnais - Manchester City,2:0 (1:0),2,7,"3,50","2,00",TRUE,FALSE,FALSE,,,10,-10
+27-11-2018 15:00,UEFA >  Youth Youth League 2018/2019 > Group E,Bayern München - SL Benfica,2:2 (0:1),5,19,"3,80","4,00",TRUE,TRUE,TRUE,,,20,"17,4"
+27-11-2018 20:00,UEFA >   Champions League 2018/2019 > Group F,Olympique Lyonnais - Manchester City,2:2 (0:0),3,11,"3,67","4,00",TRUE,TRUE,TRUE,,,10,"8,7"
+27-11-2018 20:00,UEFA >   Champions League 2018/2019 > Group F,1899 Hoffenheim - Shakhtar Donetsk,2:3 (2:2),2,9,"4,50","5,00",TRUE,TRUE,TRUE,,,10,"8,7"
+28-11-2018 15:00,UEFA >  Youth Youth League 2018/2019 > Group C,Paris Saint-Germain - Liverpool FC,3:2 (1:1),2,12,"6,00","5,00",TRUE,TRUE,TRUE,,,10,"8,7"
+29-11-2018 17:55,UEFA >   Europa League 2018/2019 > Group A,Bayer Leverkusen - PFC Ludogorets Razgrad,1:1 (0:0),2,7,"3,50","2,00",TRUE,TRUE,FALSE,,,10,-10
+30-11-2018 19:00,Netherlands >  Eredivisie 2018/2019,SBV Excelsior - FC Utrecht,3:3 (3:0),53,193,"3,64","6,00",TRUE,TRUE,TRUE,,,20,"17,4"
+30-11-2018 19:00,Netherlands >  Eerste Divisie 2018/2019,FC Twente - Jong Ajax,2:5 (1:3),6,25,"4,17","7,00",TRUE,TRUE,TRUE,,,10,"8,7"
+01-12-2018 17:30,Netherlands >  Eredivisie 2018/2019,Vitesse - FC Emmen,1:1 (1:0),9,32,"3,56","2,00",TRUE,TRUE,FALSE,,,10,-10
+01-12-2018 18:45,Netherlands >  Eredivisie 2018/2019,De Graafschap - PEC Zwolle,0:2 (0:1),25,95,"3,80","2,00",TRUE,FALSE,FALSE,,,20,-20
+07-12-2018 19:00,England >  Premier League 2 Div. 2 2018/2019,Aston Villa U23 - Southampton FC U23,2:1 (0:0),13,48,"3,69","3,00",TRUE,TRUE,TRUE,,,30,"26,1"
+07-12-2018 19:30,Belgium >  Pro League 2018/2019,Waasland-Beveren - Club Brugge KV,2:1 (0:0),18,63,"3,50","3,00",TRUE,TRUE,TRUE,,,20,"17,4"
+08-12-2018 17:30,Netherlands >  Eredivisie 2018/2019,Willem II - sc Heerenveen,1:5 (1:2),60,228,"3,80","6,00",TRUE,TRUE,TRUE,,,10,"8,7"
+08-12-2018 18:45,Netherlands >  Eredivisie 2018/2019,PEC Zwolle - AFC Ajax,1:4 (1:2),54,190,"3,52","5,00",TRUE,TRUE,TRUE,,,10,"8,7"
+08-12-2018 19:00,Bolivia >  Liga Profesional 2018 Clausura,The Strongest - Sport Boys Warnes,6:0 (1:0),26,94,"3,62","6,00",TRUE,FALSE,FALSE,,,10,-10
+08-12-2018 19:00,France >  Ligue 1 2018/2019,Stade Rennais - Dijon FCO,2:0 (0:0),12,44,"3,67","2,00",TRUE,FALSE,FALSE,,,20,-20
+08-12-2018 19:45,England >  Premier League 2018/2019,Leicester City - Tottenham Hotspur,0:2 (0:1),121,441,"3,64","2,00",TRUE,FALSE,FALSE,,,30,-30
+09-12-2018 13:30,Netherlands >  Eredivisie 2018/2019,FC Emmen - Feyenoord,1:4 (0:0),10,42,"4,20","5,00",TRUE,TRUE,TRUE,,,40,"34,8"
+10-12-2018 19:00,England >  Premier League 2 Div. 2 2018/2019,Newcastle United U23 - Norwich City U23,2:1 (2:1),16,65,"4,06","3,00",TRUE,TRUE,TRUE,,,30,"26,1"
+11-12-2018 20:00,UEFA >   Champions League 2018/2019 > Group A,AS Monaco - Borussia Dortmund,0:2 (0:1),4,14,"3,50","2,00",TRUE,FALSE,FALSE,,,20,-20
+12-12-2018 15:00,UEFA >  Youth Youth League 2018/2019 > Group E,AFC Ajax - Bayern München,1:2 (0:1),2,7,"3,50","3,00",TRUE,TRUE,TRUE,,,30,"26,1"
+12-12-2018 15:00,UEFA >  Youth Youth League 2018/2019 > Group F,Manchester City - 1899 Hoffenheim,2:1 (2:0),2,10,"5,00","3,00",TRUE,TRUE,TRUE,,,20,"17,4"
+12-12-2018 20:00,UEFA >   Champions League 2018/2019 > Group E,AFC Ajax - Bayern München,3:3 (0:1),11,43,"3,91","6,00",TRUE,TRUE,TRUE,,,10,"8,7"
+13-12-2018 20:00,UEFA >   Europa League 2018/2019 > Group A,AEK Larnaca - Bayer Leverkusen,1:5 (1:2),2,12,"6,00","6,00",TRUE,TRUE,TRUE,,,10,"8,7"
+14-12-2018 17:30,Germany >  2. Bundesliga 2018/2019,Holstein Kiel - Arminia Bielefeld,1:2 (0:1),15,53,"3,53","3,00",TRUE,TRUE,TRUE,,,10,"8,7"
+14-12-2018 19:00,England >  Premier League 2 Div. 2 2018/2019,Southampton FC U23 - Newcastle United U23,2:1 (0:0),13,62,"4,77","3,00",TRUE,TRUE,TRUE,,,10,"8,7"
+14-12-2018 19:00,Netherlands >  Eerste Divisie 2018/2019,Almere City FC - Jong Ajax,2:3 (1:2),20,81,"4,05","5,00",TRUE,TRUE,TRUE,,,10,"8,7"
+16-12-2018 13:30,Netherlands >  Eredivisie 2018/2019,AFC Ajax - De Graafschap,8:0 (3:0),44,157,"3,57","8,00",TRUE,FALSE,FALSE,,,10,-10
+16-12-2018 14:30,Germany >  Bundesliga 2018/2019,RB Leipzig - 1. FSV Mainz 05,4:1 (2:1),17,64,"3,76","5,00",TRUE,TRUE,TRUE,,,20,"17,4"
+16-12-2018 15:00,Scotland >  Premiership 2018/2019,Rangers FC - Hamilton Academical,1:0 (1:0),112,409,"3,65","1,00",TRUE,FALSE,FALSE,,,10,-10
+16-12-2018 17:00,Denmark >  Superliga 2018/2019,Brøndby IF - Vendsyssel FF,2:3 (1:0),4,15,"3,75","5,00",TRUE,TRUE,TRUE,,,20,"17,4"
+17-12-2018 19:00,England >  Premier League 2 Div. 2 2018/2019,Stoke City U23 - Aston Villa U23,3:2 (2:0),21,77,"3,67","5,00",TRUE,TRUE,TRUE,,,10,"8,7"
+18-12-2018 19:30,Germany >  Bundesliga 2018/2019,Fortuna Düsseldorf - Borussia Dortmund,2:1 (1:0),77,287,"3,73","3,00",TRUE,TRUE,TRUE,,,10,"8,7"
+21-12-2018 19:00,Netherlands >  Eerste Divisie 2018/2019,Jong PSV - Almere City FC,5:2 (3:0),20,80,"4,00","7,00",TRUE,TRUE,TRUE,,,10,"8,7"
+21-12-2018 19:30,Germany >  Bundesliga 2018/2019,Borussia Dortmund - Bor. Mönchengladbach,2:1 (1:1),132,472,"3,58","3,00",TRUE,TRUE,TRUE,,,10,"8,7"
+22-12-2018 19:45,Netherlands >  Eredivisie 2018/2019,SBV Excelsior - Heracles Almelo,0:3 (0:2),50,181,"3,62","3,00",TRUE,FALSE,FALSE,,,10,-10
+23-12-2018 12:30,Germany >  2. Bundesliga 2018/2019,Holstein Kiel - Hamburger SV,3:1 (2:0),46,187,"4,07","4,00",TRUE,TRUE,TRUE,,,20,"17,4"
+23-12-2018 15:45,Netherlands >  Eredivisie 2018/2019,FC Emmen - Willem II,0:2 (0:1),13,47,"3,62","2,00",TRUE,FALSE,FALSE,,,10,-10
+07-01-2019 13:00,England >  Premier League 2 Div. 2 2018/2019,Reading FC U23 - Norwich City U23,4:3 (1:1),18,64,"3,56","7,00",TRUE,TRUE,TRUE,,,20,"17,4"
+07-01-2019 15:00,FIFA >   Friendlies Clubs 2019 > Week,Borussia Dortmund - Fortuna Düsseldorf,3:2 (2:1),77,287,"3,73","5,00",TRUE,TRUE,TRUE,,,10,"8,7"
+07-01-2019 19:00,England >  Premier League 2 2018/2019,Brighton & Hove Albion U23 - Arsenal FC U23,2:2 (0:1),16,58,"3,63","4,00",TRUE,TRUE,TRUE,,,10,"8,7"
+07-01-2019 19:00,England >  Premier League 2 2018/2019,Derby County U23 - Swansea City U23,1:5 (1:2),6,27,"4,50","6,00",TRUE,TRUE,TRUE,,,10,"8,7"
+07-01-2019 19:00,England >  Premier League 2 2018/2019,Tottenham Hotspur U23 - Liverpool FC U23,1:1 (0:0),22,90,"4,09","2,00",TRUE,TRUE,FALSE,,,10,-10
+07-01-2019 19:00,England >  Premier League 2 Div. 2 2018/2019,Aston Villa U23 - Manchester United U23,5:1 (1:1),6,21,"3,50","6,00",TRUE,TRUE,TRUE,,,20,"17,4"
+08-01-2019 14:00,FIFA >   Friendlies Clubs 2019 > Week,Trabzonspor - ADO Den Haag,3:1 (1:1),1,4,"4,00","4,00",TRUE,TRUE,TRUE,,,10,"8,7"
+11-01-2019 11:00,FIFA >   Friendlies Clubs 2019 > Week,Borussia Dortmund - Willem II,3:2 (1:1),1,5,"5,00","5,00",TRUE,TRUE,TRUE,,,10,"8,7"
+11-01-2019 13:00,FIFA >   Friendlies Clubs 2019 > Week,Bayer Leverkusen - PEC Zwolle,3:1 (2:0),1,4,"4,00","4,00",TRUE,TRUE,TRUE,,,10,"8,7"
+11-01-2019 14:00,FIFA >   Friendlies Clubs 2019 > Week,İstanbul Başakşehir - ADO Den Haag,3:1 (2:0),2,8,"4,00","4,00",TRUE,TRUE,TRUE,,,10,"8,7"
+11-01-2019 16:00,FIFA >   Friendlies Clubs 2019 > Week,Borussia Dortmund - Feyenoord,2:1 (0:0),6,22,"3,67","3,00",TRUE,TRUE,TRUE,,,10,"8,7"
+11-01-2019 19:00,England >  Premier League 2 Div. 2 2018/2019,Wolverhampton Wanderers U23 - Reading FC U23,1:2 (1:1),11,40,"3,64","3,00",TRUE,TRUE,TRUE,,,10,"8,7"
+12-01-2019 14:00,FIFA >   Friendlies Clubs 2019 > Week,RB Leipzig - Galatasaray,1:1 (1:0),2,7,"3,50","2,00",TRUE,TRUE,FALSE,,,10,-10
+13-01-2019 12:00,FIFA >   Friendlies Clubs 2019 > Week,Fortuna Düsseldorf - Bayern München,"7:8 (0:0, 0:0) pso",55,194,"3,53","15,00",TRUE,TRUE,TRUE,,,20,"17,4"
+13-01-2019 13:00,England >  Premier League 2 Div. 2 2018/2019,Middlesbrough FC U23 - Southampton FC U23,1:2 (1:0),11,41,"3,73","3,00",TRUE,TRUE,TRUE,,,10,"8,7"
+14-01-2019 19:00,England >  Premier League 2 Div. 2 2018/2019,Newcastle United U23 - West Bromwich Albion U23,4:2 (2:1),19,70,"3,68","6,00",TRUE,TRUE,TRUE,,,10,"8,7"
+15-01-2019 13:00,FIFA >   Friendlies Clubs 2019 > Week,Dynamo Dresden - FC Zürich,2:1 (0:1),3,11,"3,67","3,00",TRUE,TRUE,TRUE,,,10,"8,7"
+16-01-2019 15:30,FIFA >   Friendlies Clubs 2019 > Week,Portimonense SC - MSV Duisburg,1:1 (0:0),2,7,"3,50","2,00",TRUE,TRUE,FALSE,,,10,-10
+18-01-2019 19:00,Netherlands >  Eerste Divisie 2018/2019,FC Volendam - FC Eindhoven,1:3 (1:0),48,173,"3,60","4,00",TRUE,TRUE,TRUE,,,20,"17,4"
+20-01-2019 15:45,Netherlands >  Eredivisie 2018/2019,AFC Ajax - sc Heerenveen,4:4 (3:1),78,327,"4,19","8,00",TRUE,TRUE,TRUE,,,10,"8,7"
+23-01-2019 13:00,FIFA >   Friendlies Clubs 2019 > Week,Hamburger SV - FC Midtjylland,"5:3 (2:1, 4:2)",3,16,"5,33","8,00",TRUE,TRUE,TRUE,,,10,"8,7"
+25-01-2019 14:00,England >  Premier League 2 Div. 2 2018/2019,Wolverhampton Wanderers U23 - Fulham FC U23,1:0 (0:0),18,66,"3,67","1,00",TRUE,FALSE,FALSE,,,10,-10
+26-01-2019 18:45,Netherlands >  Eerste Divisie 2018/2019,Almere City FC - FC Twente,1:3 (0:2),8,34,"4,25","4,00",TRUE,TRUE,TRUE,,,20,"17,4"
+27-01-2019 13:30,Netherlands >  Eredivisie 2018/2019,Feyenoord - AFC Ajax,6:2 (3:2),159,562,"3,53","8,00",TRUE,TRUE,TRUE,,,10,"8,7"
+27-01-2019 15:45,Netherlands >  Eredivisie 2018/2019,sc Heerenveen - AZ Alkmaar,0:2 (0:0),64,233,"3,64","2,00",TRUE,FALSE,FALSE,,,10,-10
+27-01-2019 17:00,Germany >  Bundesliga 2018/2019,Fortuna Düsseldorf - RB Leipzig,0:4 (0:3),8,28,"3,50","4,00",TRUE,FALSE,FALSE,,,20,-20
+28-01-2019 19:00,Netherlands >  Eerste Divisie 2018/2019,Jong Ajax - FC Volendam,1:3 (1:1),23,94,"4,09","4,00",TRUE,TRUE,TRUE,,,30,"26,1"
+30-01-2019 22:45,Bolivia >  Liga Profesional 2019 Apertura,The Strongest - Real Potosí,4:1 (2:0),51,180,"3,53","5,00",TRUE,TRUE,TRUE,,,20,"17,4"
+01-02-2019 19:00,England >  Premier League 2 Div. 2 2018/2019,Norwich City U23 - West Bromwich Albion U23,2:6 (0:3),18,70,"3,89","8,00",TRUE,TRUE,TRUE,,,10,"8,7"
+01-02-2019 19:00,Netherlands >  Eerste Divisie 2018/2019,FC Dordrecht - Jong Ajax,3:3 (1:3),23,84,"3,65","6,00",TRUE,TRUE,TRUE,,,10,"8,7"
+02-02-2019 16:00,Turkey >  SüperLig 2018/2019,Alanyaspor - Galatasaray,1:1 (1:0),22,77,"3,50","2,00",TRUE,TRUE,FALSE,,,10,-10
+02-02-2019 19:00,Belgium >  Pro League 2018/2019,SV Zulte Waregem - Cercle Brugge,3:2 (2:1),38,136,"3,58","5,00",TRUE,TRUE,TRUE,,,20,"17,4"
+02-02-2019 19:45,Netherlands >  Eredivisie 2018/2019,AZ Alkmaar - FC Emmen,5:0 (3:0),13,46,"3,54","5,00",TRUE,FALSE,FALSE,,,10,-10
+03-02-2019 11:15,Netherlands >  Eredivisie 2018/2019,SBV Excelsior - Feyenoord,2:1 (0:0),57,214,"3,75","3,00",TRUE,TRUE,TRUE,,,20,"17,4"
+08-02-2019 14:00,FIFA >   Friendlies Clubs 2019 > Week,Austria Wien - AS Trenčín,2:2 (1:2),1,4,"4,00","4,00",TRUE,TRUE,TRUE,,,10,"8,7"
+08-02-2019 19:00,Netherlands >  Eerste Divisie 2018/2019,Almere City FC - AZ Alkmaar (J),2:0 (1:0),14,53,"3,79","2,00",TRUE,FALSE,FALSE,,,10,-10
+09-02-2019 19:00,Bolivia >  Liga Profesional 2019 Apertura,CD Guabirá - Bolívar,0:1 (0:0),39,141,"3,62","1,00",TRUE,FALSE,FALSE,,,20,-20
+09-02-2019 19:45,Netherlands >  Eredivisie 2018/2019,Feyenoord - De Graafschap,4:0 (1:0),43,153,"3,56","4,00",TRUE,FALSE,FALSE,,,30,-30
+10-02-2019 00:30,Bolivia >  Liga Profesional 2019 Apertura,The Strongest - Sport Boys Warnes,5:0 (3:0),26,94,"3,62","5,00",TRUE,FALSE,FALSE,,,40,-40
+10-02-2019 13:30,England >  Premier League 2018/2019,Tottenham Hotspur - Leicester City,3:1 (1:0),121,441,"3,64","4,00",TRUE,TRUE,TRUE,,,50,"43,5"
+15-02-2019 19:00,England >  Premier League 2 Div. 2 2018/2019,Reading FC U23 - Newcastle United U23,0:2 (0:1),17,70,"4,12","2,00",TRUE,FALSE,FALSE,,,40,-40
+18-02-2019 19:00,England >  Premier League 2 Div. 2 2018/2019,Stoke City U23 - Manchester United U23,3:1 (2:0),9,34,"3,78","4,00",TRUE,TRUE,TRUE,,,50,"43,5"
+19-02-2019 20:00,UEFA >   Champions League 2018/2019 > Round of 16,Olympique Lyonnais - FC Barcelona,0:0 (0:0),8,29,"3,63","0,00",TRUE,FALSE,FALSE,,,40,-40
+22-02-2019 19:00,Netherlands >  Eerste Divisie 2018/2019,Jong PSV - Roda JC Kerkrade,2:2 (0:1),16,59,"3,69","4,00",TRUE,TRUE,TRUE,,,50,"43,5"
+23-02-2019 17:30,Netherlands >  Eredivisie 2018/2019,FC Utrecht - SBV Excelsior,0:0 (0:0),53,193,"3,64","0,00",TRUE,FALSE,FALSE,,,40,-40
+23-02-2019 18:45,Netherlands >  Eredivisie 2018/2019,PEC Zwolle - De Graafschap,0:3 (0:1),25,95,"3,80","3,00",TRUE,FALSE,FALSE,,,50,-50
+23-02-2019 19:00,Belgium >  Pro League 2018/2019,Waasland-Beveren - KV Kortrijk,2:6 (0:2),26,95,"3,65","8,00",TRUE,TRUE,TRUE,,,60,"52,2"
+24-02-2019 12:15,Scotland >  Premiership 2018/2019,Hamilton Academical - Rangers FC,0:5 (0:4),112,409,"3,65","5,00",TRUE,FALSE,FALSE,,,50,-50
+24-02-2019 12:30,Germany >  2. Bundesliga 2018/2019,Jahn Regensburg - Hamburger SV,2:1 (0:1),11,47,"4,27","3,00",TRUE,TRUE,TRUE,,,60,"52,2"
+24-02-2019 13:30,Netherlands >  Eredivisie 2018/2019,FC Emmen - Vitesse,0:3 (0:1),9,32,"3,56","3,00",TRUE,FALSE,FALSE,,,50,-50
+01-03-2019 19:00,England >  Premier League 2 2018/2019,Tottenham Hotspur U23 - Chelsea FC U23,1:1 (1:1),22,82,"3,73","2,00",TRUE,TRUE,FALSE,,,60,-60
+01-03-2019 19:00,England >  Premier League 2 Div. 2 2018/2019,Manchester United U23 - Norwich City U23,1:2 (1:0),11,41,"3,73","3,00",TRUE,TRUE,TRUE,,,70,"60,9"
+01-03-2019 19:00,England >  Premier League 2 Div. 2 2018/2019,Southampton FC U23 - Reading FC U23,1:2 (0:0),12,45,"3,75","3,00",TRUE,TRUE,TRUE,,,60,"52,2"
+03-03-2019 12:45,Denmark >  1. Division 2018/2019,Silkeborg IF - FC Roskilde,3:1 (1:1),9,34,"3,78","4,00",TRUE,TRUE,TRUE,,,50,"43,5"
+03-03-2019 13:30,Netherlands >  Eredivisie 2018/2019,sc Heerenveen - Willem II,4:2 (3:0),60,228,"3,80","6,00",TRUE,TRUE,TRUE,,,40,"34,8"
+03-03-2019 15:45,Netherlands >  Eredivisie 2018/2019,Feyenoord - FC Emmen,4:0 (1:0),10,42,"4,20","4,00",TRUE,FALSE,FALSE,,,30,-30
+04-03-2019 19:00,England >  Premier League 2 Div. 2 2018/2019,Stoke City U23 - West Bromwich Albion U23,4:1 (3:0),19,67,"3,53","5,00",TRUE,TRUE,TRUE,,,40,"34,8"
+04-03-2019 19:00,Netherlands >  Eerste Divisie 2018/2019,AZ Alkmaar (J) - FC Volendam,1:1 (0:0),13,48,"3,69","2,00",TRUE,TRUE,FALSE,,,30,-30
+05-03-2019 08:30,AFC >   AFC Champions League Elite 2019 > Group F,Melbourne Victory - Daegu FC,1:3 (1:1),2,8,"4,00","4,00",TRUE,TRUE,TRUE,,,40,"34,8"
+07-03-2019 00:30,Bolivia >  Liga Profesional 2019 Apertura,The Strongest - CD Guabirá,5:0 (3:0),39,139,"3,56","5,00",TRUE,FALSE,FALSE,,,30,-30
+07-03-2019 17:55,UEFA >   Europa League 2018/2019 > Round of 16,Stade Rennais - Arsenal FC,3:1 (1:1),2,7,"3,50","4,00",TRUE,TRUE,TRUE,,,40,"34,8"
+09-03-2019 13:00,England >  Premier League 2 Div. 2 2018/2019,Reading FC U23 - Middlesbrough FC U23,2:2 (0:1),18,71,"3,94","4,00",TRUE,TRUE,TRUE,,,30,"26,1"
+10-03-2019 15:45,Netherlands >  Eredivisie 2018/2019,AFC Ajax - Fortuna Sittard,4:0 (2:0),54,191,"3,54","4,00",TRUE,FALSE,FALSE,,,20,-20
+10-03-2019 17:00,Belgium >  Pro League 2018/2019,Waasland-Beveren - SV Zulte Waregem,1:1 (0:0),27,95,"3,52","2,00",TRUE,TRUE,FALSE,,,30,-30
+11-03-2019 19:00,England >  Premier League 2 Div. 2 2018/2019,Newcastle United U23 - Aston Villa U23,0:3 (0:2),22,80,"3,64","3,00",TRUE,FALSE,FALSE,,,40,-40
+11-03-2019 19:00,Netherlands >  Eerste Divisie 2018/2019,Jong Ajax - AZ Alkmaar (J),1:1 (0:0),16,57,"3,56","2,00",TRUE,TRUE,FALSE,,,50,-50
+12-03-2019 18:00,France >  Ligue 1 2018/2019,Dijon FCO - Paris Saint-Germain,0:4 (0:2),16,62,"3,88","4,00",TRUE,FALSE,FALSE,,,60,-60
+13-03-2019 17:30,Netherlands >  Eredivisie 2018/2019,AFC Ajax - PEC Zwolle,2:1 (1:0),54,190,"3,52","3,00",TRUE,TRUE,TRUE,,,70,"60,9"
+13-03-2019 20:00,UEFA >   Champions League 2018/2019 > Round of 16,FC Barcelona - Olympique Lyonnais,5:1 (2:0),8,29,"3,63","6,00",TRUE,TRUE,TRUE,,,60,"52,2"
+14-03-2019 20:00,UEFA >   Europa League 2018/2019 > Round of 16,Arsenal FC - Stade Rennais,3:0 (2:0),2,7,"3,50","3,00",TRUE,FALSE,FALSE,,,50,-50
+16-03-2019 15:15,Spain >  Primera División 2018/2019,Real Madrid - RC Celta,2:0 (0:0),126,448,"3,56","2,00",TRUE,FALSE,FALSE,,,60,-60
+17-03-2019 02:30,USA >  Major League Soccer 2019,Los Angeles Galaxy - Minnesota United FC,3:2 (2:0),17,68,"4,00","5,00",TRUE,TRUE,TRUE,,,70,"60,9"
+17-03-2019 17:00,Germany >  Bundesliga 2018/2019,Bayern München - 1. FSV Mainz 05,6:0 (3:0),40,165,"4,13","6,00",TRUE,FALSE,FALSE,,,60,-60
+17-03-2019 20:00,Bolivia >  Liga Profesional 2019 Apertura,Bolívar - Sport Boys Warnes,4:1 (2:1),24,89,"3,71","5,00",TRUE,TRUE,TRUE,,,70,"60,9"
+21-03-2019 12:00,FIFA >   Friendlies Clubs 2019 > Week,Hertha BSC - Holstein Kiel,1:3 (1:2),13,64,"4,92","4,00",TRUE,TRUE,TRUE,,,60,"52,2"
+25-03-2019 19:00,Netherlands >  Eerste Divisie 2018/2019,AZ Alkmaar (J) - Jong PSV,0:0 (0:0),15,56,"3,73","0,00",TRUE,FALSE,FALSE,,,50,-50
+29-03-2019 19:00,Netherlands >  Eerste Divisie 2018/2019,FC Dordrecht - Go Ahead Eagles,1:3 (1:2),55,197,"3,58","4,00",TRUE,TRUE,TRUE,,,60,"52,2"
+30-03-2019 12:30,England >  Premier League 2018/2019,Fulham FC - Manchester City,0:2 (0:2),73,269,"3,68","2,00",TRUE,FALSE,FALSE,,,50,-50
+30-03-2019 17:30,Germany >  Bundesliga 2018/2019,RB Leipzig - Hertha BSC,5:0 (2:0),14,63,"4,50","5,00",TRUE,FALSE,FALSE,,,60,-60
+01-04-2019 02:00,USA >  Major League Soccer 2019,Los Angeles Galaxy - Portland Timbers,2:1 (1:1),38,135,"3,55","3,00",TRUE,TRUE,TRUE,,,70,"60,9"
+01-04-2019 19:00,Netherlands >  Eerste Divisie 2018/2019,Jong Ajax - SC Cambuur,0:6 (0:5),15,53,"3,53","6,00",TRUE,FALSE,FALSE,,,60,-60
+01-04-2019 19:00,Netherlands >  Eerste Divisie 2018/2019,AZ Alkmaar (J) - NEC Nijmegen,4:0 (2:0),7,29,"4,14","4,00",TRUE,FALSE,FALSE,,,70,-70
+02-04-2019 17:00,UEFA >  Youth Youth League 2018/2019 > Quarter-finals,FC Barcelona - Olympique Lyonnais,3:2 (0:1),1,5,"5,00","5,00",TRUE,TRUE,TRUE,,,80,"69,6"
+03-04-2019 17:00,UEFA >  Youth Youth League 2018/2019 > Quarter-finals,1899 Hoffenheim - Real Madrid,4:2 (2:1),1,6,"6,00","6,00",TRUE,TRUE,TRUE,,,70,"60,9"
+03-04-2019 19:45,Netherlands >  Eredivisie 2018/2019,FC Emmen - AFC Ajax,2:5 (0:2),7,36,"5,14","7,00",TRUE,TRUE,TRUE,,,60,"52,2"
+05-04-2019 18:10,Austria >  2. Liga 2018/2019,WSG Wattens - Kapfenberger SV 1919,2:1 (1:1),11,40,"3,64","3,00",TRUE,TRUE,TRUE,,,50,"43,5"
+05-04-2019 19:00,England >  Premier League 2 Div. 2 2018/2019,Fulham FC U23 - Reading FC U23,0:3 (0:2),12,53,"4,42","3,00",TRUE,FALSE,FALSE,,,40,-40
+05-04-2019 19:00,England >  Premier League 2 Div. 2 2018/2019,Southampton FC U23 - Norwich City U23,4:1 (2:0),15,57,"3,80","5,00",TRUE,TRUE,TRUE,,,50,"43,5"
+06-04-2019 15:00,England >  Premier League 2 2018/2019,Liverpool FC U23 - Chelsea FC U23,3:2 (1:2),22,84,"3,82","5,00",TRUE,TRUE,TRUE,,,40,"34,8"
+06-04-2019 16:00,France >  Ligue 1 2018/2019,Olympique Lyonnais - Dijon FCO,1:3 (1:2),11,45,"4,09","4,00",TRUE,TRUE,TRUE,,,30,"26,1"
+06-04-2019 17:30,Netherlands >  Eredivisie 2018/2019,Willem II - AFC Ajax,1:4 (1:2),98,380,"3,88","5,00",TRUE,TRUE,TRUE,,,20,"17,4"
+07-04-2019 12:45,Denmark >  1. Division 2018/2019,FC Roskilde - Silkeborg IF,1:2 (0:0),9,34,"3,78","3,00",TRUE,TRUE,TRUE,,,10,"8,7"
+07-04-2019 20:00,Bolivia >  Liga Profesional 2019 Apertura,Real Potosí - The Strongest,0:2 (0:0),51,180,"3,53","2,00",TRUE,FALSE,FALSE,,,10,-10
+08-04-2019 19:00,England >  Premier League 2 2018/2019,Arsenal FC U23 - Derby County U23,5:0 (3:0),16,66,"4,13","5,00",TRUE,FALSE,FALSE,,,20,-20
+08-04-2019 19:00,England >  Premier League 2 Div. 2 2018/2019,Stoke City U23 - Newcastle United U23,2:3 (2:0),23,91,"3,96","5,00",TRUE,TRUE,TRUE,,,30,"26,1"
+08-04-2019 19:00,Netherlands >  Eerste Divisie 2018/2019,Jong PSV - NEC Nijmegen,1:2 (0:2),9,32,"3,56","3,00",TRUE,TRUE,TRUE,,,20,"17,4"
+10-04-2019 10:30,AFC >   AFC Champions League Elite 2019 > Group H,Sydney FC - Shanghai SIPG,3:3 (2:2),4,17,"4,25","6,00",TRUE,TRUE,TRUE,,,10,"8,7"
+10-04-2019 13:00,AFC >   AFC Champions League Elite 2019 > Group F,Guangzhou Evergrande - Melbourne Victory,4:0 (3:0),4,14,"3,50","4,00",TRUE,FALSE,FALSE,,,10,-10
+10-04-2019 17:45,Switzerland >  Super League 2018/2019,FC Luzern - BSC Young Boys,1:3 (0:0),175,615,"3,51","4,00",TRUE,TRUE,TRUE,,,20,"17,4"
+12-04-2019 19:00,England >  Premier League 2 Div. 2 2018/2019,Norwich City U23 - Middlesbrough FC U23,2:3 (0:2),18,71,"3,94","5,00",TRUE,TRUE,TRUE,,,10,"8,7"
+12-04-2019 19:00,England >  Premier League 2 Div. 2 2018/2019,Reading FC U23 - Aston Villa U23,3:2 (0:0),14,65,"4,64","5,00",TRUE,TRUE,TRUE,,,10,"8,7"
+13-04-2019 17:30,Netherlands >  Eredivisie 2018/2019,AFC Ajax - SBV Excelsior,6:2 (3:1),49,185,"3,78","8,00",TRUE,TRUE,TRUE,,,10,"8,7"
+13-04-2019 19:45,Netherlands >  Eredivisie 2018/2019,Feyenoord - Heracles Almelo,2:1 (1:0),51,195,"3,82","3,00",TRUE,TRUE,TRUE,,,10,"8,7"
+14-04-2019 14:30,Germany >  Bundesliga 2018/2019,Fortuna Düsseldorf - Bayern München,1:4 (0:2),55,194,"3,53","5,00",TRUE,TRUE,TRUE,,,10,"8,7"
+15-04-2019 19:00,England >  Premier League 2 2018/2019,Chelsea FC U23 - Arsenal FC U23,1:3 (0:3),19,82,"4,32","4,00",TRUE,TRUE,TRUE,,,10,"8,7"
+15-04-2019 19:00,England >  Premier League 2 2018/2019,Swansea City U23 - Tottenham Hotspur U23,1:2 (1:1),4,16,"4,00","3,00",TRUE,TRUE,TRUE,,,10,"8,7"
+15-04-2019 19:00,England >  Premier League 2 Div. 2 2018/2019,Newcastle United U23 - Manchester United U23,0:5 (0:3),9,34,"3,78","5,00",TRUE,FALSE,FALSE,,,10,-10
+15-04-2019 19:00,Netherlands >  Eerste Divisie 2018/2019,Jong Ajax - Go Ahead Eagles,5:2 (2:1),11,41,"3,73","7,00",TRUE,TRUE,TRUE,,,20,"17,4"
+17-04-2019 20:00,Bolivia >  Liga Profesional 2019 Apertura,CD Guabirá - The Strongest,1:2 (0:1),39,139,"3,56","3,00",TRUE,TRUE,TRUE,,,10,"8,7"
+19-04-2019 18:00,France >  Ligue 1 2018/2019,Dijon FCO - Stade Rennais,3:2 (1:0),12,44,"3,67","5,00",TRUE,TRUE,TRUE,,,10,"8,7"
+20-04-2019 01:00,USA >  Major League Soccer 2019,Toronto FC - Minnesota United FC,4:3 (2:1),4,21,"5,25","7,00",TRUE,TRUE,TRUE,,,10,"8,7"
+20-04-2019 17:30,Netherlands >  Eredivisie 2018/2019,FC Emmen - FC Utrecht,2:0 (2:0),9,33,"3,67","2,00",TRUE,FALSE,FALSE,,,10,-10
+20-04-2019 20:00,Bolivia >  Liga Profesional 2019 Apertura,Sport Boys Warnes - The Strongest,0:0 (0:0),26,94,"3,62","0,00",TRUE,FALSE,FALSE,,,20,-20
+21-04-2019 17:00,Turkey >  SüperLig 2018/2019,Alanyaspor - Fenerbahçe,1:0 (0:0),20,75,"3,75","1,00",TRUE,FALSE,FALSE,,,30,-30
+21-04-2019 21:00,Bolivia >  Liga Profesional 2019 Apertura,Bolívar - CD Guabirá,3:0 (0:0),39,141,"3,62","3,00",TRUE,FALSE,FALSE,,,40,-40
+23-04-2019 10:30,AFC >   AFC Champions League Elite 2019 > Group F,Melbourne Victory - Guangzhou Evergrande,1:1 (1:1),4,14,"3,50","2,00",TRUE,TRUE,FALSE,,,50,-50
+23-04-2019 12:30,AFC >   AFC Champions League Elite 2019 > Group H,Shanghai SIPG - Sydney FC,2:2 (0:1),4,17,"4,25","4,00",TRUE,TRUE,TRUE,,,60,"52,2"
+23-04-2019 19:45,Netherlands >  Eredivisie 2018/2019,AFC Ajax - Vitesse,4:2 (1:0),87,315,"3,62","6,00",TRUE,TRUE,TRUE,,,50,"43,5"
+25-04-2019 01:00,USA >  Major League Soccer 2019,Minnesota United FC - Los Angeles Galaxy,0:0 (0:0),17,68,"4,00","0,00",TRUE,FALSE,FALSE,,,40,-40
+26-04-2019 19:00,Netherlands >  Eerste Divisie 2018/2019,Almere City FC - Jong PSV,2:1 (1:0),20,80,"4,00","3,00",TRUE,TRUE,TRUE,,,50,"43,5"
+29-04-2019 19:00,England >  Premier League 2 Div. 2 2018/2019,Aston Villa U23 - West Bromwich Albion U23,0:0 (0:0),19,69,"3,63","0,00",TRUE,FALSE,FALSE,,,40,-40
+29-04-2019 19:00,Netherlands >  Eerste Divisie 2018/2019,Jong Ajax - FC Twente,2:5 (2:2),6,25,"4,17","7,00",TRUE,TRUE,TRUE,,,50,"43,5"
+03-05-2019 19:00,England >  Premier League 2 2018/2019,Brighton & Hove Albion U23 - Chelsea FC U23,1:2 (1:2),11,41,"3,73","3,00",TRUE,TRUE,TRUE,,,40,"34,8"
+03-05-2019 19:00,England >  Premier League 2 Div. 2 2018/2019 Playoffs > Semi-finals,Southampton FC U23 - Aston Villa U23,2:0 (1:0),13,48,"3,69","2,00",TRUE,FALSE,FALSE,,,30,-30
+03-05-2019 19:00,England >  Premier League 2 Div. 2 2018/2019 Playoffs > Semi-finals,Reading FC U23 - Newcastle United U23,"2:3 (0:0, 1:1, 2:2) pso",17,70,"4,12","5,00",TRUE,TRUE,TRUE,,,40,"34,8"
+03-05-2019 19:00,Netherlands >  Eerste Divisie 2018/2019,Jong Ajax - Almere City FC,8:0 (4:0),20,81,"4,05","8,00",TRUE,FALSE,FALSE,,,30,-30
+03-05-2019 19:30,Germany >  Bundesliga 2018/2019,1. FSV Mainz 05 - RB Leipzig,3:3 (1:2),17,64,"3,76","6,00",TRUE,TRUE,TRUE,,,40,"34,8"
+08-05-2019 11:00,AFC >   AFC Champions League Elite 2019 > Group F,Daegu FC - Melbourne Victory,4:0 (1:0),2,8,"4,00","4,00",TRUE,FALSE,FALSE,,,30,-30
+08-05-2019 17:30,Denmark >  1. Division 2018/2019,Silkeborg IF - Thisted FC,5:0 (1:0),6,21,"3,50","5,00",TRUE,FALSE,FALSE,,,40,-40
+11-05-2019 14:30,Germany >  Bundesliga 2018/2019,Borussia Dortmund - Fortuna Düsseldorf,3:2 (1:0),77,287,"3,73","5,00",TRUE,TRUE,TRUE,,,50,"43,5"
+12-05-2019 13:30,Netherlands >  Eredivisie 2018/2019,Willem II - FC Emmen,2:3 (2:1),13,47,"3,62","5,00",TRUE,TRUE,TRUE,,,40,"34,8"
+12-05-2019 13:30,Netherlands >  Eredivisie 2018/2019,Heracles Almelo - SBV Excelsior,4:5 (1:2),50,181,"3,62","9,00",TRUE,TRUE,TRUE,,,30,"26,1"
+13-05-2019 19:00,England >  Premier League 2 Div. 2 2018/2019 Playoffs > Final,Southampton FC U23 - Newcastle United U23,2:1 (1:0),13,62,"4,77","3,00",TRUE,TRUE,TRUE,,,20,"17,4"
+15-05-2019 18:30,Netherlands >  Eredivisie 2018/2019,De Graafschap - AFC Ajax,1:4 (1:2),44,157,"3,57","5,00",TRUE,TRUE,TRUE,,,10,"8,7"
+18-05-2019 14:30,Germany >  Bundesliga 2018/2019,Bor. Mönchengladbach - Borussia Dortmund,0:2 (0:1),132,472,"3,58","2,00",TRUE,FALSE,FALSE,,,10,-10
+18-05-2019 20:00,France >  Ligue 1 2018/2019,Paris Saint-Germain - Dijon FCO,4:0 (3:0),16,62,"3,88","4,00",TRUE,FALSE,FALSE,,,20,-20
+19-05-2019 14:30,Germany >  2. Bundesliga 2018/2019,Arminia Bielefeld - Holstein Kiel,1:0 (0:0),15,53,"3,53","1,00",TRUE,FALSE,FALSE,,,30,-30
+22-05-2019 13:00,FIFA >   Friendlies Clubs 2019 > Week,Guangzhou R&F - Bor. Mönchengladbach,0:4 (0:3),1,4,"4,00","4,00",TRUE,FALSE,FALSE,,,40,-40
+23-05-2019 20:00,Bolivia >  Liga Profesional 2019 Apertura,Sport Boys Warnes - Bolívar,1:2 (1:0),24,89,"3,71","3,00",TRUE,TRUE,TRUE,,,50,"43,5"
+25-05-2019 02:00,USA >  Major League Soccer 2019,Real Salt Lake - Atlanta United FC,2:1 (1:0),5,19,"3,80","3,00",TRUE,TRUE,TRUE,,,40,"34,8"
+25-05-2019 18:00,Switzerland >  Super League 2018/2019,BSC Young Boys - FC Luzern,4:0 (1:0),175,615,"3,51","4,00",TRUE,FALSE,FALSE,,,30,-30
+26-05-2019 12:30,China >  League One 2019,Qingdao Huanghai - Changchun Yatai,2:3 (1:1),2,7,"3,50","5,00",TRUE,TRUE,TRUE,,,40,"34,8"
+02-06-2019 21:00,USA >  Major League Soccer 2019,Minnesota United FC - Philadelphia Union,2:3 (1:2),7,28,"4,00","5,00",TRUE,TRUE,TRUE,,,30,"26,1"

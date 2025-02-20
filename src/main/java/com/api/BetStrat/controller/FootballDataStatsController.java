@@ -168,7 +168,7 @@ public class FootballDataStatsController {
         return ResponseEntity.ok().body("OK");
     }
 
-    @ApiOperation(value = "update all Teams stats for Strategy", notes = "Strategy values:\n\"Draw\",\"GoalsFest\",\"WinsMargin\",\"WinsMarginHome\",\"Btts\", \"CleanSheet\", \n" +
+    @ApiOperation(value = "update all Teams stats for Strategy", notes = "Strategy values:\n\"Draw\",\"GoalsFest\",\"WinsMargin\",\"WinsMarginHome\",\"Btts\", \"BttsOneHalf\", \"CleanSheet\", \n" +
             "            \"ConcedeBothHalves\", \"EuroHandicap\", \"NoBtts\", \"NoGoalsFest\", \"NoWins\", \"ScoreBothHalves\", \n" +
             "            \"SecondHalfBigger\", \"WinAndGoals\", \"WinBothHalves\", \"WinFirstHalf\", \"NoWinFirstHalf\", \"Wins\"")
     @PostMapping("/stats-by-strategy/all-teams/update")

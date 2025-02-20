@@ -51,6 +51,22 @@ public class ReportController {
     private ReportRepository reportRepository;
 
 
+    @ApiOperation(value = "get simulation scores by Strategy and Season")
+    @GetMapping("/simulate-by-strategy/score-by-season")
+    public ResponseEntity<HashMap> simulateScoreStrategyBySeason (@Valid @RequestParam  String strategy, @Valid @RequestParam String season) {
+        List<Team> allTeams = teamRepository.findAll().stream().filter(t -> t.getSport().equals("Football")).collect(Collectors.toList());
+        HashMap<String, String> returnMap = new HashMap<>();
+
+        for (Team team : allTeams) {
+            //simulate score for desired season
+            String scoreBySeason = strategySeasonStatsService.calculateScoreBySeason(team, season, strategy.concat("SeasonStats"));
+
+            returnMap.put(team.getName(), scoreBySeason);
+        }
+
+        return ResponseEntity.ok().body(returnMap);
+    }
+
     @ApiOperation(value = "get simulation Team by Strategy and Season")
     @GetMapping("/simulate-by-strategy/")
     public ResponseEntity<HashMap> simulateStrategyBySeason (@Valid @RequestParam  String strategy, @Valid @RequestParam  String teamName, @Valid @RequestParam String season) {
