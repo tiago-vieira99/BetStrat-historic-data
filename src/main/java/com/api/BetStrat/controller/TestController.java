@@ -173,9 +173,9 @@ public class TestController {
     private static double calculateFinalFraction(double odd) {
         double p = 0.55;     // 55%  (estimated probability of winning)
         int minStakePercentage = 5; // 5%
-        int maxStakePercentage = 10; // 10%
+        int maxStakePercentage = 12; // 10%
         double kellyFraction = (p * (odd - 1) - (1 - p)) / (odd - 1);
-        double adjustedFraction = p * kellyFraction;
+        double adjustedFraction = 0.5 * kellyFraction;     //fração fixa do valor do Kelly calculado para retirar algum 'otimismo' que o metodo de Kelly tem
         double finalFraction = Math.min(Math.max(adjustedFraction, minStakePercentage / 100.0), maxStakePercentage / 100.0);
 
         return finalFraction;

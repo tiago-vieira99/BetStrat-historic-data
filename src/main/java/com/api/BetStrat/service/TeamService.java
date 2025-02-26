@@ -62,6 +62,7 @@ public class TeamService<T extends StrategySeasonStats> extends StrategyMappingP
                                   NoWinFirstHalfStrategySeasonStatsService noWinFirstHalfStrategySeasonStatsService,
                                   WinAndGoalsStrategySeasonStatsService winAndGoalsStrategySeasonStatsService,
                                   SecondHalfBiggerSeasonStatsService secondHalfBiggerSeasonStatsService,
+                                  FirstHalfBiggerSeasonStatsService firstHalfBiggerSeasonStatsService,
                                   HandballWinsMargin16StrategySeasonStatsService handballWinsMargin16StrategySeasonstatsService,
                                   HandballWinsMargin49StrategySeasonStatsService handballWinsMargin49StrategySeasonstatsService,
                                   HandballWinsMargin712StrategySeasonStatsService handballWinsMargin712StrategySeasonstatsService,
@@ -72,6 +73,7 @@ public class TeamService<T extends StrategySeasonStats> extends StrategyMappingP
                 flipFlopOversUndersInfoService, goalsFestStrategySeasonstatsService, noGoalsFestStrategySeasonstatsService, winsMarginStrategySeasonstatsService, winsMarginHomeStrategySeasonStatsService,
                 winsStrategySeasonStatsService, noWinsStrategySeasonStatsService, cleanSheetStrategySeasonStatsService, bttsStrategySeasonStatsService, bttsOneHalfStrategySeasonStatsService, noBttsStrategySeasonStatsService, scoreBothHalvesSeasonStatsService,
                 concedeBothHalvesSeasonStatsService, winBothHalvesStrategySeasonStatsService, winFirstHalfStrategySeasonStatsService, noWinFirstHalfStrategySeasonStatsService, winAndGoalsStrategySeasonStatsService, secondHalfBiggerSeasonStatsService,
+                firstHalfBiggerSeasonStatsService,
                 handballWinsMargin16StrategySeasonstatsService, handballWinsMargin49StrategySeasonstatsService, handballWinsMargin712StrategySeasonstatsService, hockeyDrawStrategySeasonstatsService, winsMargin3StrategySeasonstatsService,
                 winsMarginAny2StrategySeasonstatsService);
     }

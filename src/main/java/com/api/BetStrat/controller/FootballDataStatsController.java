@@ -269,7 +269,7 @@ public class FootballDataStatsController {
             } else {
                 newSeason = season;
             }
-            newSeasonUrl = teamUrl + "/" + "2025" + "/3/";
+            newSeasonUrl = teamUrl + "/" + newSeason + "/3/";
             scrappingData = ScrappingUtil.getScrappingData(team.getName(), newSeason, newSeasonUrl, true);
         } else if (teamUrl.contains(API_SPORTS_BASE_URL)) {
             String newSeason = "";

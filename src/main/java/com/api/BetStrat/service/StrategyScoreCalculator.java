@@ -206,15 +206,15 @@ public abstract class StrategyScoreCalculator<T extends StrategySeasonStats> {
 
         double avgStdDev = Utils.beautifyDoubleValue(sumStdDev/3);
 
-        if (isBetween(avgStdDev,0,1.7)) {
+        if (isBetween(avgStdDev,0,1.9)) {
             return 100;
-        } else if(isBetween(avgStdDev,1.7,2.0)) {
+        } else if(isBetween(avgStdDev,1.9,2.2)) {
             return 80;
-        } else if(isBetween(avgStdDev,2.0,2.2)) {
-            return 70;
         } else if(isBetween(avgStdDev,2.2,2.4)) {
+            return 70;
+        } else if(isBetween(avgStdDev,2.4,2.8)) {
             return 50;
-        } else if(isBetween(avgStdDev,2.4,25)) {
+        } else if(isBetween(avgStdDev,2.8,25)) {
             return 30;
         }
         return 0;
@@ -228,15 +228,15 @@ public abstract class StrategyScoreCalculator<T extends StrategySeasonStats> {
 
         double avgStdDev = Utils.beautifyDoubleValue(sumStdDev/statsByTeam.size());
 
-        if (isBetween(avgStdDev,0,1.7)) {
+        if (isBetween(avgStdDev,0,1.9)) {
             return 100;
-        } else if(isBetween(avgStdDev,1.7,2.0)) {
+        } else if(isBetween(avgStdDev,1.9,2.2)) {
             return 80;
-        } else if(isBetween(avgStdDev,2.0,2.2)) {
-            return 70;
         } else if(isBetween(avgStdDev,2.2,2.4)) {
+            return 70;
+        } else if(isBetween(avgStdDev,2.4,2.8)) {
             return 50;
-        } else if(isBetween(avgStdDev,2.4,25)) {
+        } else if(isBetween(avgStdDev,2.8,25)) {
             return 30;
         }
         return 0;

@@ -125,7 +125,7 @@ public class ReportController {
             String scoreBySeason = strategySeasonStatsService.calculateScoreBySeason(team, season, strategy);
 
             if (scoreBySeason.contains("INAPT") || scoreBySeason.equals(TeamScoreEnum.INSUFFICIENT_DATA.getValue()) ||
-                Double.parseDouble(scoreBySeason.substring(scoreBySeason.indexOf('(')+1, scoreBySeason.lastIndexOf(')'))) < 80 ) {
+                Double.parseDouble(scoreBySeason.substring(scoreBySeason.indexOf('(')+1, scoreBySeason.lastIndexOf(')'))) < 70 ) {
                 continue;
             }
 
