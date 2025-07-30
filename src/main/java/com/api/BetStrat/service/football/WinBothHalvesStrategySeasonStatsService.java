@@ -131,6 +131,9 @@ public class WinBothHalvesStrategySeasonStatsService extends StrategyScoreCalcul
     public boolean matchFollowStrategyRules(HistoricMatch historicMatch, String teamName, String strategyName) {
         String res = historicMatch.getFtResult().split("\\(")[0];
         String htRes = historicMatch.getHtResult().split("\\(")[0];
+        if (htRes.equals("None:None")) {
+            return false;
+        }
         int homeResult = Integer.parseInt(res.split(":")[0]);
         int awayResult = Integer.parseInt(res.split(":")[1]);
         int homeHTResult = Integer.parseInt(htRes.split(":")[0]);

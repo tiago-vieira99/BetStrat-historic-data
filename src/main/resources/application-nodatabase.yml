@@ -1,0 +1,40 @@
+# application-nodatabase.yml
+
+spring:
+  datasource:
+    url: jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+    driver-class-name: org.h2.Driver
+    username: sa
+    password:
+  jpa:
+    database-platform: org.hibernate.dialect.H2Dialect
+    hibernate:
+      ddl-auto: create-drop  # Very important for H2 in-memory
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+  h2:
+    console:
+      enabled: true # Enable h2 console
+      path: /h2
+      settings:
+        web-allow-others: true
+  cache:
+    type: redis # keep redis cache
+    redis:
+      cache-null-values: true
+      time-to-live: 24h
+
+# Disable the PostgreSQL-specific settings
+#spring.datasource.initialization-mode=never  # Prevent schema initialization
+#spring.datasource.platform=none
+
+# Keep other settings that are not database related
+server:
+  port: 8090
+
+redis:
+  host: localhost
+  port: 32768
+  password: redis

@@ -41,8 +41,7 @@ public class InteractiveTestController {
         Team team = teamRepository.getTeamByNameAndSport(teamName, "Football");
         List<HistoricMatch> teamMatchesBySeason = historicMatchRepository.getTeamMatchesBySeason(team, season);
         String mainCompetition = Utils.findMainCompetition(teamMatchesBySeason);
-        List<HistoricMatch> filteredMatches = teamMatchesBySeason.stream().filter(m -> m.getCompetition().equals(mainCompetition) && m.getHomeTeam().equals(teamName))
-            .collect(Collectors.toList());
+        List<HistoricMatch> filteredMatches = teamMatchesBySeason.stream().filter(m -> m.getCompetition().equals(mainCompetition)).collect(Collectors.toList());
         filteredMatches.sort(HistoricMatch.matchDateComparator);
 
         double targetProfit = 2.0;
@@ -92,7 +91,7 @@ public class InteractiveTestController {
             System.out.printf("\nNext Match %d/%d :", i+1, filteredMatches.size());
             System.out.println("\nCurrent Balance: " + Utils.beautifyDoubleValue(currentBalance));
             System.out.println(match.getMatchDate() + " | " + match.getHomeTeam() + " - " + match.getAwayTeam() + " | seq_level: " + jsonMatch.getInt("seq_level") + " | stake: " + jsonMatch.getString("stake"));
-            System.out.print("\nWhats your decision (0 - 'exit' ; 1 - 'bet' ; 2 - 'change stake') ?? : ");
+            System.out.print("\nWhats your decision (0 - 'exit' ; 1 - 'bet' ; 2 - 'change stake'; other - 'continue') ?? : ");
             int userOption = scanner.nextInt();
             if (userOption == 0) {
                 return ResponseEntity.ok().body(matchesPlayed.toString());
@@ -101,8 +100,8 @@ public class InteractiveTestController {
                 String res = match.getFtResult().split("\\(")[0];
                 int homeResult = Integer.parseInt(res.split(":")[0]);
                 int awayResult = Integer.parseInt(res.split(":")[1]);
-                if (((match.getHomeTeam().equals(teamName) && homeResult>awayResult))
-                    && (Math.abs(homeResult - awayResult) == 1 || Math.abs(homeResult - awayResult) == 2)) {
+                if ((((match.getHomeTeam().equals(teamName) && homeResult>awayResult) || ((match.getAwayTeam().equals(teamName) && homeResult<awayResult)))
+                    && (Math.abs(homeResult - awayResult) == 1 || Math.abs(homeResult - awayResult) == 2))) {
                     jsonMatch.put("profit", Utils.beautifyDoubleValue(jsonMatch.getDouble("stake") * ref_odds - jsonMatch.getDouble("stake")));
                 } else {
                     jsonMatch.put("profit", -jsonMatch.getDouble("stake"));
@@ -134,6 +133,7 @@ public class InteractiveTestController {
                 tableString += (String.format("| %-12s | %-45s | %-10s | %-10s | %-10s | %-10s |\n",
                     jsonMatch.getString("date"), jsonMatch.getString("match"), jsonMatch.getString("seq_level"), newStake, jsonMatch.getString("ft_result"), jsonMatch.getString("profit")));
             } else {
+                i++;
                 continue;
             }
 

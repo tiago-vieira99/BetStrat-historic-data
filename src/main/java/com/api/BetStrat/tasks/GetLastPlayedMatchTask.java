@@ -8,6 +8,12 @@ import com.api.BetStrat.repository.HistoricMatchRepository;
 import com.api.BetStrat.repository.TeamRepository;
 import com.api.BetStrat.util.ScrappingUtil;
 import com.api.BetStrat.util.TelegramBotNotifications;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.http.impl.client.CloseableHttpClient;
@@ -17,6 +23,8 @@ import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.context.event.ApplicationReadyEvent;
+import org.springframework.context.event.EventListener;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -45,24 +53,20 @@ public class GetLastPlayedMatchTask {
     @Autowired
     private HistoricMatchRepository historicMatchRepository;
 
-    //@EventListener(ApplicationReadyEvent.class)
-    @Scheduled(cron = "0 0 2 * * *", zone="Europe/Lisbon") //every two days at 2am
+    @EventListener(ApplicationReadyEvent.class)
+    @Scheduled(cron = "0 0 5 * * *", zone="Europe/Lisbon") //every two days at 5am
     public void execCronn() {
 
         List<String> teamsToGetLastMatch = new ArrayList<>();
 
-        for (String leagueUrl : LEAGUES_LIST) {
-            JSONObject leagueTeamsScrappingData = ScrappingUtil.getLeagueTeamsScrappingData(leagueUrl);
-            List<String> analysedTeams = new ArrayList<>();
+//        JSONObject leagueTeamsScrappingData = ScrappingUtil.getLeagueTeamsScrappingData(LEAGUES_LIST);
+//
+//        while (leagueTeamsScrappingData.keys().hasNext()) {
+//            String team = leagueTeamsScrappingData.keys().next().toString();
+//            teamsToGetLastMatch.add(team);
+//            leagueTeamsScrappingData.remove(team);
+//        }
 
-            while (leagueTeamsScrappingData.keys().hasNext()) {
-                String team = leagueTeamsScrappingData.keys().next().toString();
-                analysedTeams.add(team);
-                leagueTeamsScrappingData.remove(team);
-            }
-
-            teamsToGetLastMatch.addAll(analysedTeams);
-        }
         run(teamRepository, historicMatchRepository, teamsToGetLastMatch);
     }
 
@@ -73,54 +77,88 @@ public class GetLastPlayedMatchTask {
         int numNewMatches = 0;
         String failedTeams = "";
 
-        for (String t : teams) {
-            Team team = teamRepository.getTeamByNameAndSport(t, "Football");
+        Map<String, Map> teamsUrls = new HashMap<>();
 
+        List<Team> teams2 = teamRepository.findAll().stream().filter(t -> t.getSport().equals("Football")).collect(Collectors.toList());
+
+        // build teamsUrls list
+        for (Team team : teams2) {
             if (team != null) {
-                JSONArray scrappingData = ScrappingUtil.getLastNMatchesScrappingService(team, 3);
-                if (scrappingData != null) {
-                    for (int i = 0; i < scrappingData.length(); i++) {
-                        HistoricMatch historicMatch = new HistoricMatch();
-                        try {
-                            JSONObject match = (JSONObject) scrappingData.get(i);
-                            historicMatch.setTeamId(team);
-                            historicMatch.setMatchDate(match.getString("date"));
-                            historicMatch.setHomeTeam(match.getString("homeTeam"));
-                            historicMatch.setAwayTeam(match.getString("awayTeam"));
-                            historicMatch.setFtResult(match.getString("ftResult"));
-                            historicMatch.setHtResult(match.getString("htResult"));
-                            historicMatch.setCompetition(match.getString("competition"));
-                            historicMatch.setSport(team.getSport());
-                            if (WINTER_SEASONS_BEGIN_MONTH_LIST.contains(team.getBeginSeason())) {
-                                historicMatch.setSeason(CURRENT_WINTER_SEASON);
-                            } else {
-                                historicMatch.setSeason(CURRENT_SUMMER_SEASON);
-                            }
+                String newSeason = "";
 
-                            historicMatchRepository.save(historicMatch);
-                            log.info("Inserted match:  " + historicMatch.toString());
-                            numNewMatches++;
-                        } catch (DataIntegrityViolationException cerr) {
-                            log.debug("match:  " + historicMatch.toString() + " already exists!");
-                        } catch (Exception e) {
-                            log.error("match:  " + historicMatch.toString() + "\nerror:  " + e.toString());
-                            failedTeams += t + " | ";
-                        }
-                    }
+                if (WINTER_SEASONS_BEGIN_MONTH_LIST.contains(team.getBeginSeason())) {
+                    newSeason = "20" + CURRENT_WINTER_SEASON.split("-")[1];
                 } else {
-                    failedTeams += t + " | ";
+                    newSeason = CURRENT_SUMMER_SEASON;
+                }
+
+                String newUrl = "";
+                if (team.getUrl().contains("world")) {
+                    newUrl = team.getUrl() + "/" + newSeason + "/3/";
+                } else {
+                    newUrl = team.getUrl();
+                }
+                HashMap<String, String> teamInfoMap = new HashMap<>();
+                teamInfoMap.put("url", newUrl);
+                teamInfoMap.put("season", newSeason);
+                teamsUrls.put(team.getName(), teamInfoMap);
+            }
+        }
+
+        JSONObject scrappingData = ScrappingUtil.getLastNMatchesScrappingService(teamsUrls, 3);
+
+        // 1. Extract Keys from JSONObject
+        Set<String> scrappingDataKeys = new HashSet<>();
+        Iterator<String> keys = scrappingData.keys();
+        while (keys.hasNext()) {
+            scrappingDataKeys.add(keys.next());
+        }
+
+        // 2. Iterate and Compare
+        for (Team team : teams2) {
+            if (!scrappingDataKeys.contains(team.getName())) {
+                failedTeams += team.getName() + ",";
+            }
+        }
+
+        for (Iterator it = scrappingData.sortedKeys(); it.hasNext(); ) {
+            String key = it.next().toString();
+            Team team = teams2.stream().filter(t -> t.getName().equals(key)).findFirst().get();
+            JSONArray lastMatches = (JSONArray) ((JSONObject) scrappingData.get(key)).get("lastMatches");
+
+            for (int i = 0; i < lastMatches.length(); i++) {
+                HistoricMatch historicMatch = new HistoricMatch();
+                try {
+                    JSONObject match = (JSONObject) lastMatches.get(i);
+                    historicMatch.setTeamId(team);
+                    historicMatch.setMatchDate(match.getString("date"));
+                    historicMatch.setHomeTeam(match.getString("homeTeam"));
+                    historicMatch.setAwayTeam(match.getString("awayTeam"));
+                    historicMatch.setFtResult(match.getString("ftResult"));
+                    historicMatch.setHtResult(match.getString("htResult"));
+                    historicMatch.setCompetition(match.getString("competition"));
+                    historicMatch.setSport(team.getSport());
+                    if (WINTER_SEASONS_BEGIN_MONTH_LIST.contains(team.getBeginSeason())) {
+                        historicMatch.setSeason(CURRENT_WINTER_SEASON);
+                    } else {
+                        historicMatch.setSeason(CURRENT_SUMMER_SEASON);
+                    }
+
+                    historicMatchRepository.save(historicMatch);
+                    log.info("Inserted match:  " + historicMatch.toString());
+                    numNewMatches++;
+                } catch (DataIntegrityViolationException cerr) {
+                    log.debug("match:  " + historicMatch.toString() + " already exists!");
+                } catch (Exception e) {
+                    log.error("match:  " + historicMatch.toString() + "\nerror:  " + e.toString());
+                    failedTeams += team.getName() + " | ";
                 }
             }
         }
 
-        String telegramMessage = String.format("ℹ number of new matches added: " + numNewMatches + "\nfailed: " + failedTeams);
+        String telegramMessage = String.format("\u2139\uFE0F number of new matches added: " + numNewMatches + "\nfailed: " + failedTeams);
         Thread.sleep(1000);
         TelegramBotNotifications.sendToTelegram(telegramMessage);
     }
-
-    //TODO cases to recommend a new sequence:
-    // 1 - when the actual sequence is higher than the default_max_bad_seq
-    // 2 - when the actual sequence is Max(3, -2(?) games to reach the historic avg_bad_seq)
-    // 3 - when the actual sequence is Max(3, -4(?) games to reach the historic max_bad_seq)
 
 }

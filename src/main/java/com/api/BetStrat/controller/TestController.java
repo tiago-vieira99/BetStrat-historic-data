@@ -114,10 +114,93 @@ public class TestController {
         @ApiResponse(code = 404, message = "Not Found", response = StandardError.class),
         @ApiResponse(code = 500, message = "Internal Server Error", response = StandardError.class),
     })
+    @GetMapping("/test-kelly-for-gf-v2/{season}")
+    public String testKellyForGoalsFestv2(@PathVariable("season") String season, @Valid @RequestParam Double initial) {
+        String matches = new String();
+        ObjectMapper objectMapper = new ObjectMapper();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm");
+        LocalDate currentDate = null;
+        double initialBankroll = 100 + initial;
+        double currentBankroll = initialBankroll;
+
+        try {
+            // Replace "data.json" with the actual path to your JSON file
+            File jsonFile = new File("/Users/vie0002t/Desktop/over25backtest/" + season + ".json");
+
+            // Read JSON from the file and parse it as a JsonNode
+            JsonNode data = objectMapper.readTree(jsonFile);
+
+            // Iterate over the JSON array
+            for (JsonNode match : data) {
+                String date = String.valueOf(match.get("datetime")).replaceAll("\"", "");
+                String competition = String.valueOf(match.get("competition")).replaceAll("\"", "");
+                //                String match = record.get("match");
+                //                String ftResult = record.get("FT result");
+                Boolean toBet = Boolean.valueOf(String.valueOf(match.get("filter by comp")));
+                Boolean isBetGreen = Boolean.valueOf(String.valueOf(match.get("over 25")).replaceAll("\"","").toLowerCase());//betOutcomeForBttsOneHalf(match);//Boolean.valueOf(record.get("goalsFest"));
+
+                LocalDateTime dateTime = LocalDateTime.parse(date, formatter);
+                LocalDate dateObj = dateTime.toLocalDate();
+                // Check if we have moved to a new date
+                if (currentDate == null || !currentDate.equals(dateObj)) {
+//                        if (currentDate != null && dateObj.getMonthValue() != currentDate.getMonthValue()) {
+//                            // Reset bankroll at the beginning of each month
+//                            initialBankroll = 100;
+//                        }
+                    currentDate = dateObj;
+                    currentBankroll = initialBankroll;
+                }
+
+                if (toBet) {
+                    double odd = Double.parseDouble(String.valueOf(match.get("over25_odd")).replaceAll("\"","").replaceAll(",","."));//1.97;//getRandomOdd() * 0.95;
+                    //                    if (odd < 1.8) {
+                    //                        continue;
+                    //                    }
+                    String betResult = isBetGreen ? "GREEN" : "RED";
+                    double stakePercentage = calculateFinalFraction(odd);
+                    double stake = Utils.beautifyDoubleValue(stakePercentage * currentBankroll);
+
+                    if (isBetGreen) {
+                        initialBankroll += stake * (odd - 1);
+                    } else {
+                        initialBankroll -= stake;
+                    }
+
+                    matches = matches.concat(String.format(date.toString().substring(0,11) + ";" + competition + ";" + match.get("match") + ";Over/Under Goals;" + String.valueOf(odd).replaceAll("\\.", ",") +
+                        ";" + String.valueOf(stake).replaceAll("\\.", ",") + ";" + String.valueOf(stakePercentage).replaceAll("\\.", ",") + ";" + betResult + "\n"));
+//                        matches = matches.concat(String.format(
+//                            date + ";" + String.valueOf(odd).replaceAll("\\.", ",") + ";" + String.valueOf(stake).replaceAll("\\.", ",") + ";" + String.valueOf(stakePercentage)
+//                                .replaceAll("\\.", ",") + ";" + betResult + ";" + String.valueOf(currentBankroll).replaceAll("\\.", ",") + "\n"));
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        System.out.println(currentBankroll);
+        return matches;
+    }
+
+    private boolean betOutcomeForBttsOneHalf(JsonNode match) {
+        if (String.valueOf(match.get("outcome")).replace("\"","").equals("GREEN")) {
+            return true;
+        }
+        return false;
+    }
+
+    @ApiOperation(value = "test fractioned Kelly for GF")
+    @ApiResponses(value = {
+        @ApiResponse(code = 200, message = "OK", response = String.class),
+        @ApiResponse(code = 400, message = "Bad Request", response = StandardError.class),
+        @ApiResponse(code = 401, message = "Unauthorized", response = StandardError.class),
+        @ApiResponse(code = 403, message = "Forbidden", response = StandardError.class),
+        @ApiResponse(code = 404, message = "Not Found", response = StandardError.class),
+        @ApiResponse(code = 500, message = "Internal Server Error", response = StandardError.class),
+    })
     @GetMapping("/test-kelly-for-gf/{season}")
     public String testKellyForGoalsFest(@PathVariable("season") String season) {
         String matches = new String();
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm");
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");// DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm");
         LocalDate currentDate = null;
         double initialBankroll = 100;
         double currentBankroll = initialBankroll;
@@ -131,12 +214,12 @@ public class TestController {
             }
 
             for (CSVRecord record : csvParser) {
-                String date = record.get("datetime");
-                String competition = record.get("competition");
-                String match = record.get("match");
-                String ftResult = record.get("FT result");
-                Boolean toBet = Boolean.valueOf(record.get("to bet"));
-                Boolean goalsFest = Boolean.valueOf(record.get("goalsFest"));
+                String date = record.get("date").substring(0, 19);
+//                String competition = record.get("competition");
+//                String match = record.get("match");
+//                String ftResult = record.get("FT result");
+                Boolean toBet = true;//Boolean.valueOf(record.get("to bet"));
+                Boolean goalsFest = record.get("outcome").equals("GREEN") ? true : false;//Boolean.valueOf(record.get("goalsFest"));
 
                 LocalDateTime dateTime = LocalDateTime.parse(date, formatter);
                 LocalDate dateObj = dateTime.toLocalDate();
@@ -147,7 +230,10 @@ public class TestController {
                 }
 
                 if (toBet) {
-                    double odd = getRandomOdd() * 0.95;
+                    double odd = Double.parseDouble(record.get("odd"));//getRandomOdd() * 0.95;
+//                    if (odd < 1.8) {
+//                        continue;
+//                    }
                     String betResult = goalsFest ? "GREEN" : "RED";
                     double stakePercentage = calculateFinalFraction(odd);
                     double stake = Utils.beautifyDoubleValue(stakePercentage * currentBankroll);
@@ -158,7 +244,10 @@ public class TestController {
                         initialBankroll -= stake;
                     }
 
-                    matches = matches.concat(String.format(date + ";" + competition + ";" + match + ";" + ftResult + ";" + String.valueOf(odd).replaceAll("\\.", ",") +
+//                    matches = matches.concat(String.format(date + ";" + competition + ";" + match + ";" + ftResult + ";" + String.valueOf(odd).replaceAll("\\.", ",") +
+//                        ";" + String.valueOf(stake).replaceAll("\\.", ",") + ";" + String.valueOf(stakePercentage).replaceAll("\\.", ",") + ";" + betResult + ";" +
+//                        String.valueOf(currentBankroll).replaceAll("\\.", ",") + "\n"));
+                    matches = matches.concat(String.format(date + ";" + String.valueOf(odd).replaceAll("\\.", ",") +
                         ";" + String.valueOf(stake).replaceAll("\\.", ",") + ";" + String.valueOf(stakePercentage).replaceAll("\\.", ",") + ";" + betResult + ";" +
                         String.valueOf(currentBankroll).replaceAll("\\.", ",") + "\n"));
                 }
@@ -171,9 +260,9 @@ public class TestController {
     }
 
     private static double calculateFinalFraction(double odd) {
-        double p = 0.55;     // 55%  (estimated probability of winning)
-        int minStakePercentage = 5; // 5%
-        int maxStakePercentage = 12; // 10%
+        double p = 0.53;     // 55%  (estimated probability of winning)
+        int minStakePercentage = 3; // 5%
+        int maxStakePercentage = 8; // 10%
         double kellyFraction = (p * (odd - 1) - (1 - p)) / (odd - 1);
         double adjustedFraction = 0.5 * kellyFraction;     //fração fixa do valor do Kelly calculado para retirar algum 'otimismo' que o metodo de Kelly tem
         double finalFraction = Math.min(Math.max(adjustedFraction, minStakePercentage / 100.0), maxStakePercentage / 100.0);

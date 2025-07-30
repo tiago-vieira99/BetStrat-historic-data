@@ -45,6 +45,9 @@ public class Utils {
     }
 
     public static double calculateSD(ArrayList<Integer> sequence) {
+        if (sequence.size() <= 1) {
+            return 0;
+        }
         List<Integer> sequence2 = new ArrayList<>(sequence.subList(0, sequence.size()-1));
         if (sequence.get(sequence.size()-1) == 0) {
             sequence2.add(1);
@@ -73,6 +76,9 @@ public class Utils {
     }
 
     public static double calculateCoeffVariation(double stdDev, ArrayList<Integer> sequence) {
+        if (sequence.size() <= 1) {
+            return 0;
+        }
         List<Integer> sequence2 = new ArrayList<>(sequence.subList(0, sequence.size()-1));
         if (sequence.get(sequence.size()-1) == 0) {
             sequence2.add(1);

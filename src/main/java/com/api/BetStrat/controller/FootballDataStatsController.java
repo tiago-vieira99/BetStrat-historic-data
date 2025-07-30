@@ -324,18 +324,14 @@ public class FootballDataStatsController {
 
         List<String> teamsToGetLastMatch = new ArrayList<>();
 
-        for (String leagueUrl : LEAGUES_LIST) {
-            JSONObject leagueTeamsScrappingData = ScrappingUtil.getLeagueTeamsScrappingData(leagueUrl);
+        JSONObject leagueTeamsScrappingData = ScrappingUtil.getLeagueTeamsScrappingData(LEAGUES_LIST);
 
-            List<String> analysedTeams = new ArrayList<>();
-            while (leagueTeamsScrappingData.keys().hasNext()) {
-                String team = leagueTeamsScrappingData.keys().next().toString();
-                analysedTeams.add(team);
-                leagueTeamsScrappingData.remove(team);
-            }
-
-            teamsToGetLastMatch.addAll(analysedTeams);
+        while (leagueTeamsScrappingData.keys().hasNext()) {
+            String team = leagueTeamsScrappingData.keys().next().toString();
+            teamsToGetLastMatch.add(team);
+            leagueTeamsScrappingData.remove(team);
         }
+
         GetLastPlayedMatchTask.run(teamRepository, historicMatchRepository, teamsToGetLastMatch);
 
         return ResponseEntity.ok().body("triggered GetLastPlayedMatchTask");

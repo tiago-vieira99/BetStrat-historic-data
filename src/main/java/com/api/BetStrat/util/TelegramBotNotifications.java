@@ -1,5 +1,7 @@
 package com.api.BetStrat.util;
 
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import org.apache.http.HttpEntity;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
@@ -37,6 +39,8 @@ public class TelegramBotNotifications {
         params.add(new BasicNameValuePair("chat_id", "-1001789104446"));
         params.add(new BasicNameValuePair("text", message));
         httppost.setEntity(new UrlEncodedFormEntity(params, "UTF-8"));
+
+        message = URLEncoder.encode(message, StandardCharsets.UTF_8.toString());
 
         LOGGER.info("Sending message to Telegram: \n\r" + message);
         //Execute and get the response.

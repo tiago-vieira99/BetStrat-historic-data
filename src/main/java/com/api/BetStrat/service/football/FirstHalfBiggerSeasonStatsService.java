@@ -131,7 +131,7 @@ public class FirstHalfBiggerSeasonStatsService extends StrategyScoreCalculator<F
     @Override
     public int calculateHistoricMaxNegativeSeq(List<FirstHalfBiggerSeasonStats> statsByTeam) {
         int maxValue = 0;
-        for (int i=0; i<3; i++) {
+        for (int i=0; i<statsByTeam.size(); i++) {
             int[] currSeqMaxValue = Arrays.stream(statsByTeam.get(i).getNegativeSequence().replaceAll("\\[","").replaceAll("\\]","")
                 .replaceAll(" ","").split(",")).mapToInt(Integer::parseInt).toArray();
             if (currSeqMaxValue.length > 2) {

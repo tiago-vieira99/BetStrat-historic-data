@@ -1,6 +1,7 @@
 package com.api.BetStrat.util;
 
 import com.api.BetStrat.entity.Team;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.http.HttpEntity;
@@ -137,14 +138,14 @@ public class ScrappingUtil {
     }
 
     @SneakyThrows
-    public static JSONObject getLeagueTeamsScrappingData(String url) {
+    public static JSONObject getLeagueTeamsScrappingData(List<String> url) {
         HttpPost request = new HttpPost(SCRAPPER_SERVICE_URL);
         JSONObject teamStatsDataObj = null;
 
         request.setURI(new URI(SCRAPPER_SERVICE_URL + "league-teams"));
 
         // Set the request body
-        String requestBody = url;
+        String requestBody = String.join(System.lineSeparator(), url);
         StringEntity requestEntity = new StringEntity(requestBody);
         request.setEntity(requestEntity);
 
@@ -173,29 +174,25 @@ public class ScrappingUtil {
     }
 
     @SneakyThrows
-    public static JSONArray getLastNMatchesScrappingService(Team team, int numberLastMatches) {
+    public static JSONObject getLastNMatchesScrappingService(Map<String, Map> teamsUrls, int numberLastMatches) {
         HttpPost request = new HttpPost(SCRAPPER_SERVICE_URL);
 
-        String newSeason = "";
-
-        if (WINTER_SEASONS_BEGIN_MONTH_LIST.contains(team.getBeginSeason())) {
-            newSeason = "20" + CURRENT_WINTER_SEASON.split("-")[1];
-        } else {
-           newSeason = CURRENT_SUMMER_SEASON;
+        // 1. Convert the Map to a JSON String
+        ObjectMapper mapper = new ObjectMapper(); // Jackson library for JSON conversion
+        String jsonString;
+        try {
+            jsonString = mapper.writeValueAsString(teamsUrls);
+        } catch (Exception e) {
+            System.err.println("Error converting Map to JSON: " + e.getMessage());
+            throw e; // Re-throw the exception to signal failure
         }
 
-        String newUrl = "";
-        if (team.getUrl().contains("world")) {
-            newUrl = team.getUrl() + "/" + newSeason + "/3/";
-        } else {
-            newUrl = team.getUrl();
-        }
+        // 2. Create an HttpEntity from the JSON String
+        HttpEntity reqEntity = new StringEntity(jsonString, ContentType.APPLICATION_JSON);
 
-        String queryParams = "team=" + URLEncoder.encode(team.getName(), "UTF-8") + "&season=" + newSeason + "&allleagues=true";
-
-        request.setURI(new URI(SCRAPPER_SERVICE_URL + "last-matches/" + numberLastMatches + "?" + queryParams));
-        request.setEntity(new StringEntity(newUrl, ContentType.TEXT_PLAIN));
-        JSONArray lastNMatches = null;
+        request.setURI(new URI(SCRAPPER_SERVICE_URL + "last-matches/" + numberLastMatches));
+        request.setEntity(reqEntity);
+        JSONObject lastNMatches = null;
 
         try (CloseableHttpResponse response = httpClient.execute(request)) {
             HttpEntity entity = response.getEntity();
@@ -205,7 +202,7 @@ public class ScrappingUtil {
             if (entity != null) {
                 // return it as a String
                 String result = EntityUtils.toString(entity);
-                lastNMatches = new JSONArray(result);
+                lastNMatches = new JSONObject(result);
             }
         } catch (IOException e) {
             e.printStackTrace();
