@@ -9,7 +9,7 @@ import java.util.Map;
 public class BetStratConstants {
 
     //Scrapping Service
-    public static final String SCRAPPER_SERVICE_URL = "http://scrapper:8000/";
+    public static final String SCRAPPER_SERVICE_URL = "http://localhost:8000/";
 
     public static final String SOCCERSTATS_BASE_URL = "http://www.soccerstats.com/";
     public static final String FCSTATS_BASE_URL = "http://www.fcstats.com/";
@@ -19,7 +19,7 @@ public class BetStratConstants {
     public static final String API_SPORTS_BASE_URL = "api-sports";
 
     public static final String CURRENT_WINTER_SEASON = "2025-26";
-    public static final String CURRENT_SUMMER_SEASON = "2026";
+    public static final String CURRENT_SUMMER_SEASON = "2025";
 
     public static final Integer DEFAULT_BAD_RUN_TO_NEW_SEQ = 5;
 
