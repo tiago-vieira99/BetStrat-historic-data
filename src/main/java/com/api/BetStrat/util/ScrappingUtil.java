@@ -174,7 +174,8 @@ public class ScrappingUtil {
     }
 
     @SneakyThrows
-    public static JSONObject getLastNMatchesScrappingService(Map<String, Map> teamsUrls, int numberLastMatches) {
+    public static JSONObject
+    getLastNMatchesScrappingService(Map<String, Map> teamsUrls, int numberLastMatches) {
         HttpPost request = new HttpPost(SCRAPPER_SERVICE_URL);
 
         // 1. Convert the Map to a JSON String

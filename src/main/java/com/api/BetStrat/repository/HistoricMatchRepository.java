@@ -17,11 +17,11 @@ import java.util.List;
 @RepositoryDefinition(domainClass = HistoricMatch.class, idClass = Long.class)
 public interface HistoricMatchRepository extends JpaRepository<HistoricMatch, Long>, JpaSpecificationExecutor<HistoricMatch> {
 
-    @Cacheable(value="List<HistoricMatch>", key="{#root.methodName}")
+    //@Cacheable(value="List<HistoricMatch>", key="{#root.methodName}")
     @Override
     List<HistoricMatch> findAll();
 
-    @Cacheable(value="List<HistoricMatch>", key="{#root.methodName, #team.name, #season}")
+    //@Cacheable(value="List<HistoricMatch>", key="{#root.methodName, #team.name, #season}")
     @Query(value = "SELECT t FROM HistoricMatch t WHERE t.teamId = ?1 AND t.season = ?2")
     List<HistoricMatch> getTeamMatchesBySeason(Team team, String season);
 

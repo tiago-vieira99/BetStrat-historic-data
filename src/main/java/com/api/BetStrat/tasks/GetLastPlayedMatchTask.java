@@ -36,6 +36,7 @@ import java.util.List;
 import static com.api.BetStrat.constants.BetStratConstants.CURRENT_SUMMER_SEASON;
 import static com.api.BetStrat.constants.BetStratConstants.CURRENT_WINTER_SEASON;
 import static com.api.BetStrat.constants.BetStratConstants.LEAGUES_LIST;
+import static com.api.BetStrat.constants.BetStratConstants.SUMMER_SEASONS_BEGIN_MONTH_LIST;
 import static com.api.BetStrat.constants.BetStratConstants.WINTER_SEASONS_BEGIN_MONTH_LIST;
 
 @Slf4j
@@ -53,8 +54,8 @@ public class GetLastPlayedMatchTask {
     @Autowired
     private HistoricMatchRepository historicMatchRepository;
 
-    //@EventListener(ApplicationReadyEvent.class)
-    @Scheduled(cron = "0 0 2 * * *", zone="Europe/Lisbon") //every two days at 5am
+    @EventListener(ApplicationReadyEvent.class)
+    @Scheduled(cron = "0 0 2 * * *", zone="Europe/Lisbon") //every two days at 2am
     public void execCronn() {
 
         List<String> teamsToGetLastMatch = new ArrayList<>();
@@ -76,19 +77,13 @@ public class GetLastPlayedMatchTask {
                 String newSeason = "";
 
                 if (WINTER_SEASONS_BEGIN_MONTH_LIST.contains(team.getBeginSeason())) {
-                    newSeason = "20" + CURRENT_WINTER_SEASON.split("-")[1];
+                    newSeason = CURRENT_WINTER_SEASON;
                 } else {
                     newSeason = CURRENT_SUMMER_SEASON;
                 }
 
-                String newUrl = "";
-                if (team.getUrl().contains("world")) {
-                    newUrl = team.getUrl() + "/2026/3/";
-                } else {
-                    newUrl = team.getUrl();
-                }
                 HashMap<String, String> teamInfoMap = new HashMap<>();
-                teamInfoMap.put("url", newUrl);
+                teamInfoMap.put("url", team.getUrl());
                 teamInfoMap.put("season", newSeason);
                 teamsUrls.put(team.getName(), teamInfoMap);
             }

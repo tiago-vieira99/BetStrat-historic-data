@@ -88,7 +88,7 @@ public class FootballDataStatsController {
     })
     @GetMapping("/teams")
     public ResponseEntity<List<Team>> getAllTeams() {
-        List<Team> allTeams = teamRepository.findAll();
+        List<Team> allTeams = teamRepository.findAll().stream().filter(t -> t.getSport().equals("Football")).collect(Collectors.toList());
         return ResponseEntity.ok().body(allTeams);
     }
 
