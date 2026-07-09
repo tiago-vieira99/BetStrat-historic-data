@@ -18,17 +18,17 @@ public class BetStratConstants {
     public static final String WORLDFOOTBALL_BASE_URL = "worldfootball.net";
     public static final String API_SPORTS_BASE_URL = "api-sports";
 
-    public static final String CURRENT_WINTER_SEASON = "2025-2026";
+    public static final String CURRENT_WINTER_SEASON = "2026-2027";
     public static final String CURRENT_SUMMER_SEASON = "2026";
 
     public static final Integer DEFAULT_BAD_RUN_TO_NEW_SEQ = 5;
 
     public static final List<String> SEASONS_LIST = ImmutableList.of("2016","2016-17","2017","2017-18","2018","2018-19","2019","2019-20",
-            "2020","2020-21","2021","2021-22","2022","2022-23","2023-24","2024-25");
+            "2020","2020-21","2021","2021-22","2022","2022-23","2023-24","2024-25", "2025-26");
 
-    public static final List<String> SUMMER_SEASONS_LIST = ImmutableList.of("2016","2017","2018","2019","2020","2021","2022","2023","2024");
+    public static final List<String> SUMMER_SEASONS_LIST = ImmutableList.of("2016","2017","2018","2019","2020","2021","2022","2023","2024","2025");
 
-    public static final List<String> WINTER_SEASONS_LIST = ImmutableList.of("2016-17","2017-18","2018-19","2019-20","2020-21","2021-22","2022-23","2023-24","2024-25");
+    public static final List<String> WINTER_SEASONS_LIST = ImmutableList.of("2016-17","2017-18","2018-19","2019-20","2020-21","2021-22","2022-23","2023-24","2024-25","2025-26");
 
     public static final List<String> SUMMER_SEASONS_BEGIN_MONTH_LIST = ImmutableList.of("January","February","March","April","May");
 
@@ -56,48 +56,63 @@ public class BetStratConstants {
         put("2023-24", "153");
     }};
 
-    public static final List<String> LEAGUES_LIST = ImmutableList.of("https://www.worldfootball.net/schedule/chi-primera-division-2025-spieltag/",
-        "https://www.worldfootball.net/schedule/per-primera-division-2025-clausura-spieltag/",
-        "https://www.worldfootball.net/schedule/ecu-serie-a-2025-spieltag/",
-        "https://www.worldfootball.net/schedule/est-meistriliiga-2025-spieltag/",
-        "https://www.worldfootball.net/schedule/jpn-j1-league-2025-spieltag/",
-        "https://www.worldfootball.net/schedule/par-primera-division-2025-apertura-spieltag/",
-        "https://www.worldfootball.net/schedule/kor-k-league-1-2025-spieltag/",
-        "https://www.worldfootball.net/schedule/ven-primera-division-2025-apertura-spieltag/",
-        "https://www.worldfootball.net/schedule/uru-primera-division-2025-apertura-spieltag/",
-        "https://www.worldfootball.net/schedule/arg-copa-de-la-liga-profesional-2025-1-semestre-spieltag/",
-        "https://www.worldfootball.net/schedule/col-primera-a-2025-apertura-spieltag/",
-        "https://www.worldfootball.net/schedule/bol-division-profesional-2025-spieltag",
-        "https://www.worldfootball.net/schedule/bra-serie-a-2025-spieltag/",
-        "https://www.worldfootball.net/schedule/nor-eliteserien-2025-spieltag/",
-        "https://www.worldfootball.net/schedule/swe-allsvenskan-2025-spieltag/",
-        "https://www.worldfootball.net/schedule/aut-bundesliga-2025-2026-spieltag/",
-        "https://www.worldfootball.net/schedule/bel-pro-league-2025-2026-spieltag/",
-        "https://www.worldfootball.net/schedule/bul-parva-liga-2025-2026-spieltag/",
-        "https://www.worldfootball.net/schedule/cro-1-hnl-2025-2026-spieltag/",
-        "https://www.worldfootball.net/schedule/cyp-first-division-2025-2026-spieltag/",
-        "https://www.worldfootball.net/schedule/cze-1-fotbalova-liga-2025-2026-spieltag/",
-        "https://www.worldfootball.net/schedule/den-superliga-2025-2026-spieltag/",
-        "https://www.worldfootball.net/schedule/eng-premier-league-2025-2026-spieltag/",
-        "https://www.worldfootball.net/schedule/fra-ligue-1-2025-2026-spieltag/",
-        "https://www.worldfootball.net/schedule/bundesliga-2025-2026-spieltag/",
-        "https://www.worldfootball.net/schedule/gre-super-league-2025-2026-spieltag/",
-        "https://www.worldfootball.net/schedule/hun-nb-i-2025-2026-spieltag/",
-        "https://www.worldfootball.net/schedule/isr-ligat-haal-2025-2026-spieltag/",
-        "https://www.worldfootball.net/schedule/ita-serie-a-2025-2025-spieltag/",
-        "https://www.worldfootball.net/schedule/ned-eredivisie-2025-2026-spieltag/",
-        "https://www.worldfootball.net/schedule/pol-ekstraklasa-2026-2026-spieltag/",
-        "https://www.worldfootball.net/schedule/por-primeira-liga-2025-2026-spieltag/",
-        "https://www.worldfootball.net/schedule/rou-liga-1-2025-2026-spieltag/",
-        "https://www.worldfootball.net/schedule/rus-premier-liga-2025-2026-spieltag/",
-        "https://www.worldfootball.net/schedule/sco-premiership-2025-2026-spieltag/",
-        "https://www.worldfootball.net/schedule/srb-super-liga-2025-2026-spieltag/",
-        "https://www.worldfootball.net/schedule/svk-super-liga-2025-2026-spieltag/",
-        "https://www.worldfootball.net/schedule/svn-prvaliga-2025-2026-spieltag/",
-        "https://www.worldfootball.net/schedule/esp-primera-division-2025-2026-spieltag/",
-        "https://www.worldfootball.net/schedule/sui-super-league-2025-2026-spieltag/",
-        "https://www.worldfootball.net/schedule/tur-sueperlig-2025-2026-spieltag/",
-        "https://www.worldfootball.net/schedule/ukr-premyer-liga-2025-2026-spieltag/"
-        );
+    public static final String GEMINI_PROMPT_GF = """
+            {
+              "contents": [
+                {
+                  "parts": [
+                    {
+                      "text": "Atua como um analista de estatísticas de futebol de elite com 50 anos de experiência, especializado exclusivamente na correlação entre Ambas Marcam (BTTS - Sim) e Total de Golos (Over 2.5). O teu objetivo é encontrar o 'Sweet Spot' onde as duas equipas têm uma propensão matemática esmagadora para marcar e sofrer simultaneamente num jogo de alta voltagem.
+        
+                              1. O PROTOCOLO DE CONVERGÊNCIA (GOLOS & BTTS)
+                              Para emitires um insight, deves validar os dados através deste funil determinístico:
 
+                              Janela A (Obrigatória): Ambas as equipas marcaram em pelo menos 75%% dos últimos 10 jogos (BTTS - Sim).
+
+                              Janela B (Obrigatória): Ocorreram 3 ou mais golos (Over 2.5) em pelo menos 80%% dos últimos 10 jogos de cada equipa.
+
+                              Janela C (Ponto de Rutura): Analisa se houve algum 'Clean Sheet' (baliza a zero) recente. Se uma equipa de pendor ofensivo não sofre há 2 jogos, isso é um 'indicador de saturação' – a probabilidade de sofrer no próximo jogo é máxima (reversão à média).
+
+                              2. FILTROS DE EXCLUSÃO (RISCO DE VIDA)
+                              Imagina que a tua vida depende deste palpite. Cancela o insight se:
+
+                              Houver um 0-0 ou 1-0 nos últimos 3 jogos de qualquer uma das equipas (sinal de quebra de ritmo ofensivo).
+
+                              Uma das equipas apresentar uma média de golos marcados fora de casa inferior a 1.2 por jogo.
+
+                              3. ENGENHARIA DE VALOR (+EV)
+                              Não procures o óbvio. Procura onde a estatística ignora o cansaço ou a reputação:
+
+                              Alvo Principal: O mercado combinado 'Ambas Marcam e Over 2.5'.
+
+                              Alternativa de Segurança: Se o valor for extremo mas o risco de um 1-2/2-1 for real, foca no Over 2.5 ou Over 1.0 Golos HT (se a tendência de golos for precoce).
+
+                              Odd Alvo: O insight deve apontar para mercados com odds estimadas entre 1.75 e 2.40.
+
+                              4. FORMATO DA RESPOSTA (ALGORÍTMICO)
+                              Se não houver um cenário perfeito, responde: 'Sem insights de alta confiança e valor para este jogo.'
+                              Se houver, estrutura assim:
+
+                              Aposta de Elite: [Mercado Escolhido]
+                              
+                              Nivel de confiança: [o teu nível de confiança para este insight lembrando que a tua vida depende da tua taxa de acerto]
+
+                              Probabilidade de Ocorrência: [X%% baseado no histórico combinado]
+
+                              A Prova do Ataque: [Média de golos marcados/sofridos das duas equipas nos últimos 8 jogos].
+
+                              Ponto de Rutura: [Explica por que razão a defesa de A não vai aguentar o ataque de B e vice-versa hoje].
+                           
+                           
+                           jogo: %s - %s
+                           
+                           %s
+                           
+                           %s "
+                    }
+                  ]
+                }
+              ]
+            }
+            """;
 }

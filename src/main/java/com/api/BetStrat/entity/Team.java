@@ -42,6 +42,9 @@ public class Team implements Serializable {
     @Column(name = "created_date")
     private Date created_date;
 
+    @Column(name = "admin")
+    private Boolean admin;
+
     @ApiModelProperty(example = "dd-MM-yyyy hh:mm:ss")
     @JsonFormat(pattern = "dd-MM-yyyy hh:mm:ss")
     @Temporal(TemporalType.DATE)

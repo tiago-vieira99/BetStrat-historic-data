@@ -3,6 +3,7 @@ package com.api.BetStrat.entity;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.annotations.ApiModelProperty;
+import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -31,7 +32,7 @@ import java.util.Comparator;
 import java.util.Date;
 
 @ToString
-@Getter
+@Getter(AccessLevel.PUBLIC)
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
@@ -72,8 +73,13 @@ public class HistoricMatch implements Serializable {
     @Column(name = "season")
     private String season;
 
+    @Getter(AccessLevel.PUBLIC)
     @Column(name = "matchDate")
     private String matchDate;
+
+    public String getMatchDate() {  // Add this manually
+        return matchDate;
+    }
 
     @Column(name = "ftResult")
     private String ftResult;
@@ -86,6 +92,9 @@ public class HistoricMatch implements Serializable {
 
     @Column(name = "sport")
     private String sport;
+
+    @Column(name = "url")
+    private String url;
 
     public static Comparator<HistoricMatch> matchDateComparator = new Comparator<HistoricMatch>() {
         private SimpleDateFormat[] dateFormats = {

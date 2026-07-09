@@ -1,10 +1,12 @@
 package com.api.BetStrat.controller;
 
+import com.api.BetStrat.entity.AIInsight;
 import com.api.BetStrat.entity.HistoricMatch;
 import com.api.BetStrat.entity.StrategySeasonStats;
 import com.api.BetStrat.entity.Team;
 import com.api.BetStrat.exception.NotFoundException;
 import com.api.BetStrat.exception.StandardError;
+import com.api.BetStrat.repository.AIInsightRepository;
 import com.api.BetStrat.repository.HistoricMatchRepository;
 import com.api.BetStrat.repository.TeamRepository;
 import com.api.BetStrat.service.StrategySeasonStatsService;
@@ -15,10 +17,24 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
-import lombok.SneakyThrows;
-import lombok.extern.slf4j.Slf4j;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URI;
+import java.nio.charset.StandardCharsets;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import org.apache.http.HttpEntity;
+import org.apache.http.client.config.RequestConfig;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
+import java.util.HashSet;
+import java.util.Optional;
+import java.util.Set;
+import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.modelmapper.ModelMapper;
@@ -41,7 +57,7 @@ import java.util.stream.Collectors;
 
 import static com.api.BetStrat.constants.BetStratConstants.API_SPORTS_BASE_URL;
 import static com.api.BetStrat.constants.BetStratConstants.FBREF_BASE_URL;
-import static com.api.BetStrat.constants.BetStratConstants.LEAGUES_LIST;
+import static com.api.BetStrat.constants.BetStratConstants.GEMINI_PROMPT_GF;
 import static com.api.BetStrat.constants.BetStratConstants.SUMMER_SEASONS_BEGIN_MONTH_LIST;
 import static com.api.BetStrat.constants.BetStratConstants.SUMMER_SEASONS_LIST;
 import static com.api.BetStrat.constants.BetStratConstants.WINTER_SEASONS_BEGIN_MONTH_LIST;
@@ -74,8 +90,11 @@ public class FootballDataStatsController {
     @Autowired
     private HistoricMatchRepository historicMatchRepository;
 
+    @Autowired
+    private AIInsightRepository aiInsightRepository;
+
     // one instance, reuse
-    private final CloseableHttpClient httpClient = HttpClients.createDefault();
+    private static final CloseableHttpClient httpClient = HttpClients.createDefault();
 
     @ApiOperation(value = "get All Teams")
     @ApiResponses(value = {
@@ -147,6 +166,7 @@ public class FootballDataStatsController {
         team.setEndSeason(endSeason);
         team.setCountry(country);
         team.setSport("Football");
+        team.setAdmin(true);
         Team newTeam = teamService.insertTeam(team);
 
         return newTeam;
@@ -213,6 +233,52 @@ public class FootballDataStatsController {
         }
 
         return historicMatchRepository.getTeamMatchesBySeason(team, season);
+    }
+
+    @GetMapping("/league-baseline")
+    public List<HistoricMatch> getHistoricMatchesByLeague(@Valid @RequestParam String competition,
+                                                          @Valid @RequestParam String country,
+                                                          @Valid @RequestParam String season,
+                                                          @Valid @RequestParam String date) {
+
+        List<HistoricMatch> finalMatchesByCompetitionandDate;
+
+        if (!competition.contains("Champions League") && !competition.contains("Europa League") && !competition.contains("Conference League") && !competition.contains("Club World Cup")) {
+            finalMatchesByCompetitionandDate = new ArrayList<>();
+            Set<Long> teamsByCountry = teamRepository.getTeamsByCountry(country, "Football").stream().map(team -> team.getId()).collect(Collectors.toSet());
+            List<HistoricMatch> matchesByCompetitionandDate = historicMatchRepository.getMatchesByCompetitionandDate(competition, season, date);
+
+            matchesByCompetitionandDate.forEach(match -> {
+               if (teamsByCountry.contains(match.getTeamId().getId())) {
+                   finalMatchesByCompetitionandDate.add(match);
+               }
+            });
+        } else {
+            finalMatchesByCompetitionandDate = historicMatchRepository.getMatchesByCompetitionandDate(competition, season, date);
+        }
+
+        return finalMatchesByCompetitionandDate;
+    }
+
+    @GetMapping("/matches-by-date")
+    public List<HistoricMatch> getHistoricMatchesByDate(@Valid @RequestParam String date) {
+
+        return historicMatchRepository.getMatchesByDate(date);
+    }
+
+    @GetMapping("/last-10-matches")
+    public List<HistoricMatch> getLast10Matches(@Valid @RequestParam(value = "teamId", required = false) Long teamId,
+                                                @Valid @RequestParam  String season,
+                                                @Valid @RequestParam(value = "teamName", required = false) String teamName) {
+
+        Team team = null;
+        if (teamId != null) {
+            team = teamRepository.getOne(teamId);
+        } else {
+            team = teamRepository.getTeamByNameAndSport(teamName, "Football");
+        }
+
+        return historicMatchRepository.getLast10Matches(team, season);
     }
 
     @PostMapping("/historic-matches/insert-by-season")
@@ -322,18 +388,251 @@ public class FootballDataStatsController {
     @PostMapping("/update-last-played-match")
     public ResponseEntity<String> triggerGetLastPlayedMatchTask() {
 
-        List<String> teamsToGetLastMatch = new ArrayList<>();
+//        List<String> teamsToGetLastMatch = new ArrayList<>();
+//
+//        JSONObject leagueTeamsScrappingData = ScrappingUtil.getLeagueTeamsScrappingData(LEAGUES_LIST);
+//
+//        while (leagueTeamsScrappingData.keys().hasNext()) {
+//            String team = leagueTeamsScrappingData.keys().next().toString();
+//            teamsToGetLastMatch.add(team);
+//            leagueTeamsScrappingData.remove(team);
+//        }
 
-        JSONObject leagueTeamsScrappingData = ScrappingUtil.getLeagueTeamsScrappingData(LEAGUES_LIST);
-
-        while (leagueTeamsScrappingData.keys().hasNext()) {
-            String team = leagueTeamsScrappingData.keys().next().toString();
-            teamsToGetLastMatch.add(team);
-            leagueTeamsScrappingData.remove(team);
-        }
-
-        GetLastPlayedMatchTask.run(teamRepository, historicMatchRepository, teamsToGetLastMatch);
+        GetLastPlayedMatchTask.run(teamRepository, historicMatchRepository, null);
 
         return ResponseEntity.ok().body("triggered GetLastPlayedMatchTask");
     }
+
+    @ApiOperation(value = "Trigger ForceLastPlayedMatchTask")
+    @ApiResponses(value = {
+        @ApiResponse(code = 200, message = "OK", response = String.class),
+        @ApiResponse(code = 400, message = "Bad Request", response = StandardError.class),
+        @ApiResponse(code = 401, message = "Unauthorized", response = StandardError.class),
+        @ApiResponse(code = 403, message = "Forbidden", response = StandardError.class),
+        @ApiResponse(code = 404, message = "Not Found", response = StandardError.class),
+        @ApiResponse(code = 500, message = "Internal Server Error", response = StandardError.class),
+    })
+    @PostMapping("/force-update-last-played-match")
+    public ResponseEntity<String> triggerForceLastPlayedMatchTask() {
+
+        GetLastPlayedMatchTask.forceUpdateLastResults(historicMatchRepository);
+
+        return ResponseEntity.ok().body("triggered ForceLastPlayedMatchTask");
+    }
+
+    @ApiOperation(value = "getUpcomingMatches")
+    @ApiResponses(value = {
+        @ApiResponse(code = 200, message = "OK", response = String.class),
+        @ApiResponse(code = 400, message = "Bad Request", response = StandardError.class),
+        @ApiResponse(code = 401, message = "Unauthorized", response = StandardError.class),
+        @ApiResponse(code = 403, message = "Forbidden", response = StandardError.class),
+        @ApiResponse(code = 404, message = "Not Found", response = StandardError.class),
+        @ApiResponse(code = 500, message = "Internal Server Error", response = StandardError.class),
+    })
+    @GetMapping("/upcomming-matches")
+    public List<HistoricMatch> getUpcomingMatches() {
+        List<HistoricMatch> upcomingMatches = historicMatchRepository.getUpcomingMatches();
+        Set<String> seenTeams = new HashSet<>();
+
+        upcomingMatches = upcomingMatches.stream()
+            .peek(m -> m.setTeamId(null))
+            .distinct() // Remove exact duplicates first
+            .filter(m -> {
+                if (seenTeams.contains(m.getHomeTeam()) || seenTeams.contains(m.getAwayTeam())) {
+                    return false;
+                }
+                seenTeams.add(m.getHomeTeam());
+                seenTeams.add(m.getAwayTeam());
+                return true;
+            })
+            .collect(Collectors.toList());
+
+        return upcomingMatches;
+    }
+
+//    @SneakyThrows
+//    @ApiOperation(value = "ask AI for insights")
+//    @ApiResponses(value = {
+//        @ApiResponse(code = 200, message = "OK", response = String.class),
+//        @ApiResponse(code = 400, message = "Bad Request", response = StandardError.class),
+//        @ApiResponse(code = 401, message = "Unauthorized", response = StandardError.class),
+//        @ApiResponse(code = 403, message = "Forbidden", response = StandardError.class),
+//        @ApiResponse(code = 404, message = "Not Found", response = StandardError.class),
+//        @ApiResponse(code = 500, message = "Internal Server Error", response = StandardError.class),
+//    })
+//    @PostMapping("/aiinsights")
+//    public List<AIInsight> askAIForMatchesInsights() {
+//
+//        List<HistoricMatch> matchesByDate = historicMatchRepository.getMatchesByDate("08/03/2026");
+//
+//        LocalDate cutoffDate = LocalDate.parse("08/03/2026", DateTimeFormatter.ofPattern("dd/MM/yyyy"));
+//
+//        for (HistoricMatch match : matchesByDate) {
+//            LOGGER.info(String.format("Getting info for match: %s: %s - %s", match.getMatchDate(), match.getHomeTeam(), match.getAwayTeam()));
+//            Team homeTeam = teamRepository.getTeamByNameAndSport(match.getHomeTeam(), "Football");
+//            Team awayTeam = teamRepository.getTeamByNameAndSport(match.getAwayTeam(), "Football");
+//            if (homeTeam != null && awayTeam != null) {
+//                List<HistoricMatch> homeTeamMatches = historicMatchRepository.getTeamMatchesBySeason(homeTeam, "2025-2026").stream().filter(m -> {
+//                    LocalDate matchDate = LocalDate.parse(m.getMatchDate(), DateTimeFormatter.ofPattern("dd/MM/yyyy"));
+//                    return matchDate.isBefore(cutoffDate);
+//                }).map(m -> {
+//                    HistoricMatch detachedMatch = new HistoricMatch();
+//                    detachedMatch.setMatchDate(m.getMatchDate());
+//                    detachedMatch.setHomeTeam(m.getHomeTeam());
+//                    detachedMatch.setAwayTeam(m.getAwayTeam());
+//                    detachedMatch.setCompetition(m.getCompetition());
+//                    detachedMatch.setHtResult(m.getHtResult());
+//                    detachedMatch.setFtResult(m.getFtResult());
+//                    return detachedMatch;
+//                }).collect(Collectors.toList());
+//
+//                List<HistoricMatch> awayTeamMatches = historicMatchRepository.getTeamMatchesBySeason(awayTeam, "2025-2026").stream().filter(m -> {
+//                    LocalDate matchDate = LocalDate.parse(m.getMatchDate(), DateTimeFormatter.ofPattern("dd/MM/yyyy"));
+//                    return matchDate.isBefore(cutoffDate);
+//                }).map(m -> {
+//                    HistoricMatch detachedMatch = new HistoricMatch();
+//                    detachedMatch.setMatchDate(m.getMatchDate());
+//                    detachedMatch.setHomeTeam(m.getHomeTeam());
+//                    detachedMatch.setAwayTeam(m.getAwayTeam());
+//                    detachedMatch.setCompetition(m.getCompetition());
+//                    detachedMatch.setHtResult(m.getHtResult());
+//                    detachedMatch.setFtResult(m.getFtResult());
+//                    return detachedMatch;
+//                }).collect(Collectors.toList());
+//
+//                if (homeTeamMatches.size() > 0 && awayTeamMatches.size() > 0 && aiInsightRepository.getInsightByMatchId(match) == null) {
+//                    String insight = sendPrompt(homeTeam.getName(), awayTeam.getName(), homeTeamMatches.toString(), awayTeamMatches.toString());
+//                    if (insight != null) {
+//                        AIInsight aiInsight = new AIInsight();
+//                        aiInsight.setMatch(match);
+//                        aiInsight.setInsight(insight);
+//                        aiInsightRepository.save(aiInsight);
+//                        LOGGER.info("Added insight!");
+//                    }
+//                } else {
+//                    LOGGER.info("No data for this match!");
+//                }
+//            }
+//        }
+//
+//        return null;
+//    }
+
+
+//    // Default Gemini Pro model endpoint for text generation
+//    private static final String DEFAULT_API_ENDPOINT = "https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent";
+//
+//    /**
+//     * Makes an HTTP POST request to the Gemini API with the given prompt and API key.
+//     * This method handles the request building and sending.
+//     *
+//     * @param apiKey Your Google Gemini API Key. Must not be null or empty.
+//     * @param userPrompt The prompt string to send to the Gemini model.
+//     * @return The raw JSON response body from the Gemini API.
+//     * @throws IOException If an I/O error occurs when sending or receiving.
+//     * @throws InterruptedException If the operation is interrupted.
+//     * @throws Exception If the API returns a non-200 status code.
+//     */
+//    public static String sendPrompt(String homeTeam, String awayTeam, String homeMatches, String awayMatches)
+//        throws IOException, Exception {
+//
+//        String fullUrl = DEFAULT_API_ENDPOINT + "?key=" + "hfjhjfjhv4";
+//
+//        //String escapedPrompt = userPrompt.replace("\"", "\\\"");
+//
+//        // Using a text block for cleaner multi-line string in Java 15+
+//        String jsonPayload = String.format(GEMINI_PROMPT_GF, homeTeam, awayTeam, homeMatches, awayMatches);
+//
+//        RequestConfig requestConfig = RequestConfig.custom()
+//            .setConnectTimeout(60000)
+//            .setSocketTimeout(90000)
+//            .setConnectionRequestTimeout(60000)
+//            .build();
+//
+//        HttpPost httppost = new HttpPost(URI.create(fullUrl));
+//        httppost.setConfig(requestConfig);
+//        httppost.setHeader("Content-Type", "application/json");
+//
+//        //jsonPayload = URLEncoder.encode(jsonPayload, StandardCharsets.UTF_8.toString());
+//        StringEntity reqEntity = new StringEntity(jsonPayload, StandardCharsets.UTF_8);
+//        httppost.setEntity(reqEntity);
+//
+//        //Execute and get the response.
+//        try {
+//            LOGGER.info("Sending request to Gemini...");
+//            CloseableHttpResponse response = httpClient.execute(httppost);
+//            HttpEntity entity = response.getEntity();
+//            LOGGER.info("Received response from Gemini :)");
+//
+//            int statusCode = response.getStatusLine().getStatusCode();
+//
+//            if (entity != null) {
+//                try (InputStream instream = entity.getContent()) {
+//                    String result = new String(instream.readAllBytes(), StandardCharsets.UTF_8);
+//
+//                    if (statusCode != 200) {
+//                        LOGGER.error("API Error! Status: " + statusCode + " Body: " + result);
+//                        return null;
+//                    }
+//
+//                    return extractGeneratedContent(result).get();
+//                }
+//            }
+//            response.close();
+//        } catch (Exception e) {
+//            LOGGER.error("Gemini API request failed: " + e.getMessage());
+//            e.printStackTrace();
+//        }
+//
+//        return null;
+//    }
+//
+//    /**
+//     * Extracts the generated text content from the raw JSON response body of the Gemini API.
+//     * This method handles parsing the successful response.
+//     *
+//     * @param rawJsonResponse The raw JSON string received from the Gemini API.
+//     * @return An Optional containing the extracted generated text, or empty if not found.
+//     *         In a real application, you'd use a JSON parsing library (e.g., Jackson, Gson).
+//     */
+//    public static Optional<String> extractGeneratedContent(String rawJsonResponse) {
+//        if (rawJsonResponse == null || rawJsonResponse.isEmpty()) {
+//            return Optional.empty();
+//        }
+//
+//        try {
+//            // Find the start of the "text" field
+//            int textStartIndex = rawJsonResponse.indexOf("\"text\": \"");
+//            if (textStartIndex == -1) {
+//                return Optional.empty();
+//            }
+//            textStartIndex += "\"text\": \"".length();
+//
+//            // Find the end of the text field (the next unescaped double quote)
+//            int textEndIndex = textStartIndex;
+//            while (textEndIndex < rawJsonResponse.length()) {
+//                if (rawJsonResponse.charAt(textEndIndex) == '"' &&
+//                    (textEndIndex == 0 || rawJsonResponse.charAt(textEndIndex - 1) != '\\')) {
+//                    break;
+//                }
+//                textEndIndex++;
+//            }
+//
+//            if (textEndIndex == rawJsonResponse.length()) {
+//                return Optional.empty(); // Could not find end quote
+//            }
+//
+//            String extractedText = rawJsonResponse.substring(textStartIndex, textEndIndex);
+//            // Replace common escaped characters with their actual values
+//            return Optional.of(extractedText.replace("\\\"", "\"")
+//                .replace("\\n", "\n")
+//                .replace("\\t", "\t")
+//                .replace("\\r", "\r"));
+//
+//        } catch (Exception e) {
+//            // Log the error in a real application
+//            System.err.println("Error parsing JSON response: " + e.getMessage());
+//            return Optional.empty();
+//        }
+//    }
 }

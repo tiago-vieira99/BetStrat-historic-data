@@ -5,7 +5,6 @@ import com.api.BetStrat.entity.Team;
 import com.api.BetStrat.exception.StandardError;
 import com.api.BetStrat.repository.HistoricMatchRepository;
 import com.api.BetStrat.repository.TeamRepository;
-import com.api.BetStrat.service.football.WinsMarginStrategySeasonStatsService;
 import com.api.BetStrat.util.ScrappingUtil;
 import com.api.BetStrat.util.TeamDrawFiboStatsByLeague;
 import com.api.BetStrat.util.Utils;
@@ -15,14 +14,13 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
-import java.io.BufferedReader;
-import java.io.FileReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Map.Entry;
 import java.util.Random;
 import lombok.SneakyThrows;
 import org.apache.commons.csv.CSVFormat;
@@ -334,6 +332,96 @@ public class TestController {
                 System.out.println(e.toString());
             }
         }
+
+        return dataMap;
+    }
+
+    //test if simple bets work, or what are the best teams for this system
+    @ApiOperation(value = "test-wins-margin-v3")
+    @ApiResponses(value = {
+        @ApiResponse(code = 200, message = "OK", response = String.class),
+        @ApiResponse(code = 400, message = "Bad Request", response = StandardError.class),
+        @ApiResponse(code = 401, message = "Unauthorized", response = StandardError.class),
+        @ApiResponse(code = 403, message = "Forbidden", response = StandardError.class),
+        @ApiResponse(code = 404, message = "Not Found", response = StandardError.class),
+        @ApiResponse(code = 500, message = "Internal Server Error", response = StandardError.class),
+    })
+    @GetMapping("/test-wins-margin-v3")
+    public HashMap<String, Map<String, Object>> testWinsMargin30() {
+        HashMap<String, Map<String, Object>> dataMap = new HashMap<>();
+
+        List<Team> footballTeams = teamRepository.findAll().stream().filter(t -> t.getSport().equals("Football")).collect(Collectors.toList());
+
+        List<Integer> teamIds = Arrays.asList(189,275,215,262,194,230,278,267,220,257,206,195,236,237,221,199,684,208,265,163,235,211,222,268,201,164,190,255,224,240,239,234,67,274,225,209,198,196,263,192);
+
+        List<String> seasons = Arrays.asList("2020-21","2021-22","2022-23","2023-24", "2024-25");
+
+        for (String season : seasons) {
+            for (Team team : footballTeams) {
+                try {
+                    dataMap.computeIfAbsent(team.getName(), k -> new HashMap<>()).put(season, testStrategySeasonStatsV3(team, season));
+                } catch (Exception e) {
+                    System.out.println(e.toString());
+                }
+            }
+        }
+
+        StringBuilder csv = new StringBuilder();
+        csv.append("team,season,greens_rate,num_matches,num_greens\n");
+
+        for (Entry<String, Map<String, Object>> teamEntry : dataMap.entrySet()) {
+            String team = teamEntry.getKey();
+            for (Entry<String, Object> seasonEntry : teamEntry.getValue().entrySet()) {
+                String season = seasonEntry.getKey();
+                Map<String, Object> stats = (Map<String, Object>) seasonEntry.getValue();
+
+                csv.append(team).append(",")
+                    .append(season).append(",")
+                    .append(stats.get("greens rate")).append(",")
+                    .append(stats.get("num matches")).append(",")
+                    .append(stats.get("num greens")).append("\n");
+            }
+        }
+
+        System.out.println(csv.toString());
+
+        return dataMap;
+    }
+
+
+    public HashMap<String, Object> testStrategySeasonStatsV3(Team team, String season) {
+        HashMap<String, Object> dataMap = new HashMap<>();
+
+        List<HistoricMatch> teamMatchesBySeason = historicMatchRepository.getTeamMatchesBySeason(team, season);
+        String mainCompetition = Utils.findMainCompetition(teamMatchesBySeason);
+        List<HistoricMatch> filteredMatches = teamMatchesBySeason.stream().filter(t -> t.getCompetition().equals(mainCompetition) && t.getHomeTeam().equals(t.getTeamId().getName())).collect(Collectors.toList());
+        filteredMatches.sort(HistoricMatch.matchDateComparator);
+
+
+        ArrayList<Integer> noMarginWinsSequence = new ArrayList<>();
+        int count = 0;
+        for (HistoricMatch historicMatch : filteredMatches) {
+            String res = historicMatch.getFtResult().split("\\(")[0];
+            count++;
+            int homeResult = Integer.parseInt(res.split(":")[0]);
+            int awayResult = Integer.parseInt(res.split(":")[1]);
+            if ((historicMatch.getHomeTeam().equals(team.getName()) && homeResult>awayResult)) {
+                if (matchFollowStrategyRules(historicMatch, team.getName(), null)) {
+                    noMarginWinsSequence.add(count);
+                    count = 0;
+                }
+            }
+        }
+
+//        noMarginWinsSequence.add(count);
+//        HistoricMatch lastMatch = filteredMatches.get(filteredMatches.size() - 1);
+//        if (!matchFollowStrategyRules(lastMatch, team.getName(), null)) {
+//            noMarginWinsSequence.add(-1);
+//        }
+
+        dataMap.put("num greens", noMarginWinsSequence.size());
+        dataMap.put("num matches", filteredMatches.size());
+        dataMap.put("greens rate", Utils.beautifyDoubleValue(noMarginWinsSequence.size() / (double) filteredMatches.size()));
 
         return dataMap;
     }

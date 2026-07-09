@@ -174,8 +174,7 @@ public class ScrappingUtil {
     }
 
     @SneakyThrows
-    public static JSONObject
-    getLastNMatchesScrappingService(Map<String, Map> teamsUrls, int numberLastMatches) {
+    public static JSONObject getLastNMatchesScrappingService(Map<String, Map> teamsUrls, int numberLastMatches) {
         HttpPost request = new HttpPost(SCRAPPER_SERVICE_URL);
 
         // 1. Convert the Map to a JSON String
@@ -192,6 +191,46 @@ public class ScrappingUtil {
         HttpEntity reqEntity = new StringEntity(jsonString, ContentType.APPLICATION_JSON);
 
         request.setURI(new URI(SCRAPPER_SERVICE_URL + "last-matches/" + numberLastMatches));
+        request.setEntity(reqEntity);
+        JSONObject lastNMatches = null;
+
+        try (CloseableHttpResponse response = httpClient.execute(request)) {
+            HttpEntity entity = response.getEntity();
+
+            LOGGER.info("Response from ScrappingService: " + response.getStatusLine().toString());
+
+            if (entity != null) {
+                // return it as a String
+                String result = EntityUtils.toString(entity);
+                lastNMatches = new JSONObject(result);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        return lastNMatches;
+    }
+
+    @SneakyThrows
+    public static JSONObject getSpecificNMatchesScrappingService(Map<String, Map> teamsUrls) {
+        HttpPost request = new HttpPost(SCRAPPER_SERVICE_URL);
+
+        // 1. Convert the Map to a JSON String
+        ObjectMapper mapper = new ObjectMapper(); // Jackson library for JSON conversion
+        String jsonString;
+        try {
+            jsonString = mapper.writeValueAsString(teamsUrls);
+        } catch (Exception e) {
+            System.err.println("Error converting Map to JSON: " + e.getMessage());
+            throw e; // Re-throw the exception to signal failure
+        }
+
+        // 2. Create an HttpEntity from the JSON String
+        HttpEntity reqEntity = new StringEntity(jsonString, ContentType.APPLICATION_JSON);
+
+        request.setURI(new URI(SCRAPPER_SERVICE_URL + "specific-matches"));
         request.setEntity(reqEntity);
         JSONObject lastNMatches = null;
 

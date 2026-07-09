@@ -28,4 +28,7 @@ public interface TeamRepository extends JpaRepository<Team, Long>, JpaSpecificat
     @Query(value = "SELECT t FROM Team t WHERE t.name = ?1 AND t.sport = ?2")
     Team getTeamByNameAndSport(String name, String sport);
 
+    @Query(value = "SELECT t FROM Team t WHERE t.country = ?1 AND t.sport = ?2")
+    List<Team> getTeamsByCountry(String country, String sport);
+
 }

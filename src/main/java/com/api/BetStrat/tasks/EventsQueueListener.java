@@ -8,6 +8,9 @@ import com.api.BetStrat.entity.HistoricMatch;
 import com.api.BetStrat.entity.Team;
 import com.api.BetStrat.repository.HistoricMatchRepository;
 import com.api.BetStrat.repository.TeamRepository;
+import com.api.BetStrat.util.TelegramBotNotifications;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import lombok.SneakyThrows;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -52,14 +55,26 @@ public class EventsQueueListener {
                 historicMatch.setHtResult(match.getString("htResult"));
                 historicMatch.setCompetition(match.getString("competition"));
                 historicMatch.setSport(teamObj.getSport());
+                historicMatch.setUrl(match.getString("url"));
                 if (WINTER_SEASONS_BEGIN_MONTH_LIST.contains(teamObj.getBeginSeason())) {
                     historicMatch.setSeason(CURRENT_WINTER_SEASON);
                 } else {
                     historicMatch.setSeason(CURRENT_SUMMER_SEASON);
                 }
 
-                historicMatchRepository.save(historicMatch);
-                LOGGER.info("Inserted match:  " + historicMatch.toString());
+                HistoricMatch specificMatch = historicMatchRepository.getMatchByUrl(historicMatch.getUrl(), teamObj);
+
+                if (specificMatch == null) {
+                    historicMatchRepository.save(historicMatch);
+                    LOGGER.info("Inserted match:  " + historicMatch.toString());
+                } else {
+                    if (specificMatch.getFtResult().equals("null") && !historicMatch.getFtResult().equals("null")) {
+                        historicMatchRepository.updateSpecificMatch(teamObj, historicMatch.getSeason(), historicMatch.getHomeTeam(), historicMatch.getAwayTeam(),
+                            historicMatch.getMatchDate(), historicMatch.getHtResult(), historicMatch.getFtResult());
+                        LOGGER.info("Updated match:  " + historicMatch.toString());
+                    }
+                }
+
             } catch (DataIntegrityViolationException cerr) {
                 LOGGER.debug("match:  " + historicMatch.toString() + " already exists!");
             } catch (Exception e) {
@@ -68,6 +83,40 @@ public class EventsQueueListener {
             }
         }
 
+    }
+
+    @SneakyThrows
+    @RabbitListener(queues = "specific_matches")
+    public void consumeSpecificMatches(String message) {
+        LOGGER.info(" [x] Received from specific_matches queue: " + message);
+
+        JSONObject jsonObject = new JSONObject(message);
+        String teamName = (String) jsonObject.keys().next();
+        JSONObject specificMatchFromRabbit = (JSONObject) ((JSONObject) jsonObject.get(teamName)).get("specificMatch");
+
+        Team teamObj = teamRepository.getTeamByNameAndSport(teamName, "Football");
+
+        try {
+            HistoricMatch specificMatchFromDB = historicMatchRepository.getMatchByUrl(specificMatchFromRabbit.getString("url"), teamObj);
+
+            if (specificMatchFromDB != null && specificMatchFromDB.getFtResult().equals("null") && !specificMatchFromRabbit.getString("ft_result").equals("null")) {
+                specificMatchFromDB.setFtResult(specificMatchFromRabbit.getString("ft_result"));
+                specificMatchFromDB.setHtResult(specificMatchFromRabbit.getString("ht_result"));
+                specificMatchFromDB.setMatchDate(specificMatchFromRabbit.getString("date"));
+                historicMatchRepository.save(specificMatchFromDB);
+                LOGGER.info("Updated match:  " + specificMatchFromDB.toString());
+            } else {
+                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+                LocalDate fiveDaysAgoDate = LocalDate.now().minusDays(5);
+
+                if (LocalDate.parse(specificMatchFromDB.getMatchDate(), formatter).isBefore(fiveDaysAgoDate)) {
+                    TelegramBotNotifications.sendToTelegram("ALERT\nMatch need manual update: " + specificMatchFromDB.getId());
+                }
+            }
+
+        } catch (Exception e) {
+            LOGGER.error("match:  " + specificMatchFromRabbit.toString() + "\nerror:  " + e.toString());
+        }
     }
 
 }
